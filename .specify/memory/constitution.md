@@ -2,28 +2,36 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: N/A → 1.0.0 (Initial Constitution)
-Date: 2025-12-07
+Version Change: 1.0.0 → 1.1.0 (Minor Amendment - Vector Database Deployment Clarification)
+Date: 2025-12-08
 
-MODIFIED PRINCIPLES: None (Initial version)
+MODIFIED PRINCIPLES:
+  - Principle VII (Fixed Technology Stack): Clarified Vector Database deployment modes
+    OLD: "Vector Database: Qdrant only"
+    NEW: "Vector Database: Qdrant Vector Database (self-hosted) + Qdrant Cloud (managed service)"
+    
+REASON FOR CHANGE:
+  - Clarify deployment flexibility for different environments
+  - Specify free-tier cloud option for production deployment
+  - Enable cost-free development while maintaining production-grade deployment option
+  - Better alignment with portfolio demonstration requirements
+
 ADDED SECTIONS:
-  - Core Principles (9 principles)
-  - Technology Stack Constraints
-  - Security & Data Management
-  - Development Workflow & Quality Gates
-  - Governance
+  - Deployment mode specifications under Technology Stack Constraints
+  - Environment-specific Vector Database configuration guidance
 
 REMOVED SECTIONS: None
 
 TEMPLATES REQUIRING UPDATES:
-  ✅ plan-template.md - Verified constitution check alignment
-  ✅ spec-template.md - Verified testability and priority requirements
-  ✅ tasks-template.md - Verified unit test and incremental execution requirements
+  ✅ plan-template.md - No changes needed (deployment details handled in implementation)
+  ✅ spec-template.md - No changes needed (requirements remain technology-agnostic)
+  ✅ tasks-template.md - No changes needed (tasks will reference updated stack constraints)
 
 FOLLOW-UP TODOs:
-  - Ratification date set to project initialization (2025-12-07) - update if formal ratification occurs later
-  - GitHub Actions workflow files need to be created to enforce unit test validation
-  - .gitignore file needs to be created/updated to ensure .env and API keys are excluded
+  - Implementation plan should specify environment configuration for Qdrant client
+  - .env.example should include both local and cloud Qdrant configuration templates
+  - Docker Compose should include Qdrant service for local testing
+  - Deployment guide should document Qdrant Cloud setup process
 -->
 
 ## Core Principles
@@ -63,9 +71,11 @@ FOLLOW-UP TODOs:
 - **AI/LLM**: Gemini API only
 - **Backend**: FastAPI only
 - **Frontend**: React only
-- **Vector Database**: Qdrant only
+- **Vector Database**: Qdrant Vector Database (self-hosted) + Qdrant Cloud (managed service)
+  - Development/Testing: Qdrant Vector Database (Docker or embedded mode)
+  - Production/Demo: Qdrant Cloud (Free Tier: 1GB)
 
-**Rationale**: Maintains consistency, reduces integration complexity, leverages team expertise, and prevents scope creep through technology exploration.
+**Rationale**: Maintains consistency, reduces integration complexity, leverages team expertise, and prevents scope creep through technology exploration. Qdrant deployment flexibility allows cost-free development while enabling professional cloud deployment for portfolio demonstration.
 
 ### VIII. API Contract Stability
 **NON-NEGOTIABLE**: Once defined, API contracts MUST NOT be changed without following a formal deprecation process. Breaking changes require major version increments and migration paths.
@@ -84,7 +94,10 @@ The following technologies are mandated for this project:
 - **Programming Language**: Python 3.x (backend), JavaScript/TypeScript (frontend)
 - **AI/LLM API**: Google Gemini API
 - **Web Framework**: FastAPI (backend), React (frontend)
-- **Vector Database**: Qdrant
+- **Vector Database**: Qdrant Vector Database + Qdrant Cloud
+  - Local Development: Qdrant Vector Database (embedded mode via qdrant-client)
+  - Integration Testing: Qdrant Vector Database (Docker deployment)
+  - Cloud Deployment: Qdrant Cloud (Free Tier: 1GB storage)
 - **Testing Framework**: pytest (backend), Jest/React Testing Library (frontend)
 - **Version Control**: Git with GitHub
 - **CI/CD**: GitHub Actions
@@ -165,7 +178,7 @@ This constitution supersedes all other development practices, guidelines, and ad
 - **MINOR**: New principles added, materially expanded guidance
 - **PATCH**: Clarifications, wording fixes, non-semantic refinements
 
-### Runtime Development Guidance
+**Version**: 1.1.0 | **Ratified**: 2025-12-07 | **Last Amended**: 2025-12-08
 For day-to-day development guidance and implementation details, refer to the files in `.github/prompts/` which provide mode-specific instructions that operate within the boundaries established by this constitution.
 
 **Version**: 1.0.0 | **Ratified**: 2025-12-07 | **Last Amended**: 2025-12-07
