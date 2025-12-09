@@ -1,0 +1,125 @@
+{
+  "app": {
+    "title": "RAG 演示聊天機器人",
+    "subtitle": "AI 工程師作品集專案"
+  },
+  "buttons": {
+    "uploadPdf": "上傳 PDF",
+    "uploadText": "上傳文字",
+    "uploadUrl": "輸入網址",
+    "send": "發送",
+    "leave": "離開會話",
+    "restart": "重新開始",
+    "close": "關閉",
+    "cancel": "取消",
+    "confirm": "確認"
+  },
+  "labels": {
+    "session": "會話",
+    "sessionId": "會話 ID",
+    "language": "語言",
+    "expires": "到期時間",
+    "documents": "文件",
+    "chunks": "區塊",
+    "metrics": "指標",
+    "tokenUsage": "Token 使用量",
+    "contextUsage": "上下文使用量",
+    "vectors": "向量",
+    "chatHistory": "對話紀錄",
+    "typeMessage": "輸入您的問題...",
+    "processing": "處理中...",
+    "uploadStatus": "上傳狀態"
+  },
+  "messages": {
+    "sessionCreated": "會話建立成功",
+    "sessionExpired": "會話已過期",
+    "uploadSuccess": "文件上傳成功",
+    "uploadFailed": "上傳失敗",
+    "processingDocument": "文件處理中...",
+    "moderationBlocked": "內容審查已封鎖此文件",
+    "readyToChat": "準備就緒!請提出您的問題。",
+    "cannotAnswer": "根據已上傳的文件,我無法回答此問題。",
+    "networkError": "網路錯誤。請檢查您的連線。",
+    "serverError": "伺服器錯誤。請稍後再試。",
+    "invalidFile": "無效的檔案格式",
+    "invalidUrl": "無效的網址格式",
+    "noDocuments": "尚未上傳任何文件",
+    "confirmLeave": "您確定要離開此會話嗎?"
+  },
+  "states": {
+    "INITIALIZING": "初始化中...",
+    "READY_FOR_UPLOAD": "準備上傳",
+    "PROCESSING": "處理中...",
+    "ERROR": "錯誤",
+    "READY_FOR_CHAT": "準備對話",
+    "CHATTING": "對話中"
+  },
+  "errors": {
+    "required": "此欄位為必填",
+    "minLength": "最小長度為 {{min}} 個字元",
+    "maxLength": "最大長度為 {{max}} 個字元",
+    "invalidFormat": "格式無效"
+  },
+  "upload": {
+    "title": "上傳文件",
+    "subtitle": "上傳 PDF、文字檔或提供 URL 來開始",
+    "mode": {
+      "file": "檔案上傳",
+      "url": "網址"
+    },
+    "dropzone": {
+      "dragOrClick": "拖放檔案到此處，或點擊瀏覽",
+      "drop": "放開檔案",
+      "hint": "支援格式：PDF、TXT（最大 {{maxSize}}）"
+    },
+    "url": {
+      "placeholder": "輸入網址（http:// 或 https://）",
+      "submit": "抓取",
+      "hint": "我們將從網址中提取文字內容"
+    },
+    "error": {
+      "invalidFileType": "僅支援 PDF 和 TXT 檔案",
+      "fileTooLarge": "檔案大小超過 {{maxSize}}",
+      "emptyFile": "檔案為空",
+      "invalidUrl": "無效的網址格式。必須是 http:// 或 https://"
+    }
+  },
+  "processing": {
+    "title": "處理文件中",
+    "sourceType": {
+      "PDF": "PDF 文件",
+      "TEXT": "文字檔",
+      "URL": "網頁"
+    },
+    "stage": {
+      "extracting": "萃取文字中...",
+      "moderating": "檢查內容安全性...",
+      "chunking": "分塊文字中...",
+      "embedding": "嵌入與儲存中...",
+      "complete": "處理完成",
+      "failed": "處理失敗",
+      "blocked": "內容被封鎖"
+    },
+    "pleaseWait": "請稍候，這可能需要一些時間...",
+    "complete": {
+      "message": "文件處理成功！",
+      "chunks": "已建立 {{count}} 個文字塊",
+      "preview": "預覽"
+    },
+    "error": {
+      "moderationBlocked": "內容被安全檢查封鎖",
+      "processingFailed": "處理失敗",
+      "code": "錯誤代碼",
+      "blockedCategories": "封鎖類別"
+    },
+    "steps": {
+      "extract": "萃取",
+      "moderate": "審核",
+      "chunk": "分塊",
+      "embed": "嵌入"
+    },
+    "debug": {
+      "title": "除錯資訊"
+    }
+  }
+}

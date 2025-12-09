@@ -1,0 +1,125 @@
+{
+  "app": {
+    "title": "Chatbot Demo RAG",
+    "subtitle": "Proyecto de Portafolio de Ingeniero de IA"
+  },
+  "buttons": {
+    "uploadPdf": "Subir PDF",
+    "uploadText": "Subir Texto",
+    "uploadUrl": "Ingresar URL",
+    "send": "Enviar",
+    "leave": "Salir de la Sesión",
+    "restart": "Reiniciar",
+    "close": "Cerrar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar"
+  },
+  "labels": {
+    "session": "Sesión",
+    "sessionId": "ID de Sesión",
+    "language": "Idioma",
+    "expires": "Expira",
+    "documents": "Documentos",
+    "chunks": "Fragmentos",
+    "metrics": "Métricas",
+    "tokenUsage": "Uso de Tokens",
+    "contextUsage": "Uso de Contexto",
+    "vectors": "Vectores",
+    "chatHistory": "Historial de Chat",
+    "typeMessage": "Escribe tu pregunta...",
+    "processing": "Procesando...",
+    "uploadStatus": "Estado de Carga"
+  },
+  "messages": {
+    "sessionCreated": "Sesión creada exitosamente",
+    "sessionExpired": "La sesión ha expirado",
+    "uploadSuccess": "Documento subido exitosamente",
+    "uploadFailed": "Error al subir",
+    "processingDocument": "Procesando documento...",
+    "moderationBlocked": "La moderación de contenido bloqueó este documento",
+    "readyToChat": "¡Listo para chatear! Haz tu pregunta.",
+    "cannotAnswer": "No puedo responder esta pregunta basándome en los documentos cargados.",
+    "networkError": "Error de red. Verifica tu conexión.",
+    "serverError": "Error del servidor. Inténtalo más tarde.",
+    "invalidFile": "Formato de archivo inválido",
+    "invalidUrl": "Formato de URL inválido",
+    "noDocuments": "Aún no se han subido documentos",
+    "confirmLeave": "¿Estás seguro de que quieres salir de esta sesión?"
+  },
+  "states": {
+    "INITIALIZING": "Inicializando...",
+    "READY_FOR_UPLOAD": "Listo para Cargar",
+    "PROCESSING": "Procesando...",
+    "ERROR": "Error",
+    "READY_FOR_CHAT": "Listo para Chatear",
+    "CHATTING": "Chateando"
+  },
+  "errors": {
+    "required": "Este campo es obligatorio",
+    "minLength": "La longitud mínima es {{min}} caracteres",
+    "maxLength": "La longitud máxima es {{max}} caracteres",
+    "invalidFormat": "Formato inválido"
+  },
+  "upload": {
+    "title": "Subir Documento",
+    "subtitle": "Sube un PDF, archivo de texto o proporciona una URL para comenzar",
+    "mode": {
+      "file": "Subir Archivo",
+      "url": "URL"
+    },
+    "dropzone": {
+      "dragOrClick": "Arrastra y suelta un archivo aquí, o haz clic para explorar",
+      "drop": "Suelta el archivo aquí",
+      "hint": "Formatos compatibles: PDF, TXT (máx {{maxSize}})"
+    },
+    "url": {
+      "placeholder": "Ingresa URL (http:// o https://)",
+      "submit": "Obtener",
+      "hint": "Extraeremos el contenido de texto de la URL"
+    },
+    "error": {
+      "invalidFileType": "Solo se admiten archivos PDF y TXT",
+      "fileTooLarge": "El tamaño del archivo excede {{maxSize}}",
+      "emptyFile": "El archivo está vacío",
+      "invalidUrl": "Formato de URL inválido. Debe ser http:// o https://"
+    }
+  },
+  "processing": {
+    "title": "Procesando Documento",
+    "sourceType": {
+      "PDF": "Documento PDF",
+      "TEXT": "Archivo de Texto",
+      "URL": "Página Web"
+    },
+    "stage": {
+      "extracting": "Extrayendo Texto...",
+      "moderating": "Verificando Seguridad del Contenido...",
+      "chunking": "Fragmentando Texto...",
+      "embedding": "Incrustando y Almacenando...",
+      "complete": "Procesamiento Completo",
+      "failed": "Procesamiento Fallido",
+      "blocked": "Contenido Bloqueado"
+    },
+    "pleaseWait": "Por favor espera, esto puede tomar unos momentos...",
+    "complete": {
+      "message": "¡Documento procesado exitosamente!",
+      "chunks": "{{count}} fragmentos de texto creados",
+      "preview": "Vista Previa"
+    },
+    "error": {
+      "moderationBlocked": "Contenido Bloqueado por Verificación de Seguridad",
+      "processingFailed": "Procesamiento Fallido",
+      "code": "Código de Error",
+      "blockedCategories": "Categorías Bloqueadas"
+    },
+    "steps": {
+      "extract": "Extraer",
+      "moderate": "Moderar",
+      "chunk": "Fragmentar",
+      "embed": "Incrustar"
+    },
+    "debug": {
+      "title": "Información de Depuración"
+    }
+  }
+}

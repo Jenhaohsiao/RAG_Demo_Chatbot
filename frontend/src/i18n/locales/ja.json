@@ -1,0 +1,125 @@
+{
+  "app": {
+    "title": "RAGデモチャットボット",
+    "subtitle": "AIエンジニアポートフォリオプロジェクト"
+  },
+  "buttons": {
+    "uploadPdf": "PDFをアップロード",
+    "uploadText": "テキストをアップロード",
+    "uploadUrl": "URLを入力",
+    "send": "送信",
+    "leave": "セッションを終了",
+    "restart": "再起動",
+    "close": "閉じる",
+    "cancel": "キャンセル",
+    "confirm": "確認"
+  },
+  "labels": {
+    "session": "セッション",
+    "sessionId": "セッションID",
+    "language": "言語",
+    "expires": "有効期限",
+    "documents": "ドキュメント",
+    "chunks": "チャンク",
+    "metrics": "メトリクス",
+    "tokenUsage": "トークン使用量",
+    "contextUsage": "コンテキスト使用量",
+    "vectors": "ベクトル",
+    "chatHistory": "チャット履歴",
+    "typeMessage": "質問を入力してください...",
+    "processing": "処理中...",
+    "uploadStatus": "アップロード状態"
+  },
+  "messages": {
+    "sessionCreated": "セッションが正常に作成されました",
+    "sessionExpired": "セッションの有効期限が切れました",
+    "uploadSuccess": "ドキュメントが正常にアップロードされました",
+    "uploadFailed": "アップロードに失敗しました",
+    "processingDocument": "ドキュメントを処理中...",
+    "moderationBlocked": "コンテンツモデレーションによりこのドキュメントがブロックされました",
+    "readyToChat": "準備完了!質問してください。",
+    "cannotAnswer": "アップロードされたドキュメントに基づいて、この質問には答えられません。",
+    "networkError": "ネットワークエラー。接続を確認してください。",
+    "serverError": "サーバーエラー。後でもう一度お試しください。",
+    "invalidFile": "無効なファイル形式",
+    "invalidUrl": "無効なURL形式",
+    "noDocuments": "まだドキュメントがアップロードされていません",
+    "confirmLeave": "このセッションを終了してもよろしいですか?"
+  },
+  "states": {
+    "INITIALIZING": "初期化中...",
+    "READY_FOR_UPLOAD": "アップロード準備完了",
+    "PROCESSING": "処理中...",
+    "ERROR": "エラー",
+    "READY_FOR_CHAT": "チャット準備完了",
+    "CHATTING": "チャット中"
+  },
+  "errors": {
+    "required": "このフィールドは必須です",
+    "minLength": "最小長は{{min}}文字です",
+    "maxLength": "最大長は{{max}}文字です",
+    "invalidFormat": "無効な形式"
+  },
+  "upload": {
+    "title": "ドキュメントをアップロード",
+    "subtitle": "PDF、テキストファイルをアップロードするか、URLを入力して開始",
+    "mode": {
+      "file": "ファイルアップロード",
+      "url": "URL"
+    },
+    "dropzone": {
+      "dragOrClick": "ファイルをドラッグ＆ドロップするか、クリックして選択",
+      "drop": "ファイルをここにドロップ",
+      "hint": "サポート形式：PDF、TXT（最大{{maxSize}}）"
+    },
+    "url": {
+      "placeholder": "URLを入力（http://またはhttps://）",
+      "submit": "取得",
+      "hint": "URLからテキストコンテンツを抽出します"
+    },
+    "error": {
+      "invalidFileType": "PDFとTXTファイルのみサポートされています",
+      "fileTooLarge": "ファイルサイズが{{maxSize}}を超えています",
+      "emptyFile": "ファイルが空です",
+      "invalidUrl": "無効なURL形式。http://またはhttps://である必要があります"
+    }
+  },
+  "processing": {
+    "title": "ドキュメント処理中",
+    "sourceType": {
+      "PDF": "PDFドキュメント",
+      "TEXT": "テキストファイル",
+      "URL": "ウェブページ"
+    },
+    "stage": {
+      "extracting": "テキスト抽出中...",
+      "moderating": "コンテンツ安全性確認中...",
+      "chunking": "テキスト分割中...",
+      "embedding": "埋め込みと保存中...",
+      "complete": "処理完了",
+      "failed": "処理失敗",
+      "blocked": "コンテンツブロック済み"
+    },
+    "pleaseWait": "しばらくお待ちください。数分かかる場合があります...",
+    "complete": {
+      "message": "ドキュメントの処理が成功しました！",
+      "chunks": "{{count}}個のテキストチャンクが作成されました",
+      "preview": "プレビュー"
+    },
+    "error": {
+      "moderationBlocked": "安全確認によりコンテンツがブロックされました",
+      "processingFailed": "処理失敗",
+      "code": "エラーコード",
+      "blockedCategories": "ブロックされたカテゴリ"
+    },
+    "steps": {
+      "extract": "抽出",
+      "moderate": "モデレート",
+      "chunk": "分割",
+      "embed": "埋め込み"
+    },
+    "debug": {
+      "title": "デバッグ情報"
+    }
+  }
+}

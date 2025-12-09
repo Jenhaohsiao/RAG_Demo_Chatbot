@@ -1,0 +1,223 @@
+"""
+Session API Routes
+Handles session lifecycle endpoints
+"""
+from fastapi import APIRouter, HTTPException, status
+from uuid import UUID
+import logging
+
+from src.core.session_manager import session_manager
+from src.services.vector_store import vector_store
+from src.models.session import (
+    Session, SessionState, SessionResponse, 
+    SessionWithMetrics, LanguageUpdateRequest
+)
+from src.models.metrics import Metrics
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter()
+
+
+@router.post("/create", response_model=SessionResponse, status_code=status.HTTP_201_CREATED)
+async def create_session(language: str = "en"):
+    """
+    Create a new session with unique ID and Qdrant collection
+    
+    Args:
+        language: Initial UI language (default: en)
+        
+    Returns:
+        SessionResponse: Session details
+    """
+    try:
+        # Create session
+        session = session_manager.create_session(language=language)
+        
+        # Create Qdrant collection
+        collection_created = vector_store.create_collection(
+            collection_name=session.qdrant_collection_name
+        )
+        
+        if not collection_created:
+            logger.error(f"Failed to create Qdrant collection for session {session.session_id}")
+            # Continue anyway - collection creation can be retried
+        
+        # Update state to READY_FOR_UPLOAD
+        session_manager.update_state(session.session_id, SessionState.READY_FOR_UPLOAD)
+        
+        logger.info(f"Session {session.session_id} created and ready")
+        return session_manager.to_response(session)
+        
+    except Exception as e:
+        logger.error(f"Failed to create session: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create session"
+        )
+
+
+@router.get("/{session_id}", response_model=SessionResponse)
+async def get_session(session_id: UUID):
+    """
+    Get session details by ID
+    
+    Args:
+        session_id: UUID of the session
+        
+    Returns:
+        SessionResponse: Session details
+    """
+    session = session_manager.get_session(session_id)
+    
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Session {session_id} not found or expired"
+        )
+    
+    return session_manager.to_response(session)
+
+
+@router.get("/{session_id}/metrics", response_model=SessionWithMetrics)
+async def get_session_with_metrics(session_id: UUID):
+    """
+    Get session details including resource metrics
+    
+    Args:
+        session_id: UUID of the session
+        
+    Returns:
+        SessionWithMetrics: Session with metrics
+    """
+    session = session_manager.get_session(session_id)
+    
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Session {session_id} not found or expired"
+        )
+    
+    # Get vector count from Qdrant
+    vector_count = vector_store.get_vector_count(session.qdrant_collection_name)
+    session_manager.update_vector_count(session_id, vector_count)
+    
+    # Create metrics (placeholder values for now, will be updated during chat)
+    metrics = Metrics(
+        token_input=0,
+        token_output=0,
+        context_tokens=0,
+        vector_count=vector_count
+    )
+    
+    response = session_manager.to_response(session)
+    
+    return SessionWithMetrics(
+        **response.model_dump(),
+        metrics=metrics.model_dump()
+    )
+
+
+@router.post("/{session_id}/heartbeat", response_model=SessionResponse)
+async def session_heartbeat(session_id: UUID):
+    """
+    Update session activity and extend TTL
+    
+    Args:
+        session_id: UUID of the session
+        
+    Returns:
+        SessionResponse: Updated session details
+    """
+    success = session_manager.update_activity(session_id)
+    
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Session {session_id} not found or expired"
+        )
+    
+    session = session_manager.get_session(session_id)
+    return session_manager.to_response(session)
+
+
+@router.post("/{session_id}/close", status_code=status.HTTP_204_NO_CONTENT)
+async def close_session(session_id: UUID):
+    """
+    Close session and delete associated data
+    
+    Args:
+        session_id: UUID of the session
+    """
+    session = session_manager.get_session(session_id)
+    
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Session {session_id} not found"
+        )
+    
+    # Delete Qdrant collection
+    collection_deleted = vector_store.delete_collection(session.qdrant_collection_name)
+    if not collection_deleted:
+        logger.warning(f"Failed to delete Qdrant collection: {session.qdrant_collection_name}")
+    
+    # Remove session
+    session_manager.close_session(session_id)
+    
+    logger.info(f"Session {session_id} closed successfully")
+
+
+@router.post("/{session_id}/restart", response_model=SessionResponse, status_code=status.HTTP_201_CREATED)
+async def restart_session(session_id: UUID):
+    """
+    Close current session and create a new one
+    
+    Args:
+        session_id: UUID of the current session
+        
+    Returns:
+        SessionResponse: New session details
+    """
+    old_session = session_manager.get_session(session_id)
+    
+    # Get language from old session (or default to 'en')
+    language = old_session.language if old_session else "en"
+    
+    # Close old session if exists
+    if old_session:
+        vector_store.delete_collection(old_session.qdrant_collection_name)
+        session_manager.close_session(session_id)
+        logger.info(f"Old session {session_id} closed during restart")
+    
+    # Create new session (reuse create_session logic)
+    new_session = session_manager.create_session(language=language)
+    vector_store.create_collection(new_session.qdrant_collection_name)
+    session_manager.update_state(new_session.session_id, SessionState.READY_FOR_UPLOAD)
+    
+    logger.info(f"New session {new_session.session_id} created after restart")
+    return session_manager.to_response(new_session)
+
+
+@router.put("/{session_id}/language", response_model=SessionResponse)
+async def update_language(session_id: UUID, request: LanguageUpdateRequest):
+    """
+    Update session language preference
+    
+    Args:
+        session_id: UUID of the session
+        request: Language update request
+        
+    Returns:
+        SessionResponse: Updated session details
+    """
+    success = session_manager.update_language(session_id, request.language)
+    
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Session {session_id} not found or invalid language"
+        )
+    
+    session = session_manager.get_session(session_id)
+    return session_manager.to_response(session)

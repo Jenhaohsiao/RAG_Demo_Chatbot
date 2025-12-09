@@ -1,0 +1,125 @@
+{
+  "app": {
+    "title": "روبوت دردشة RAG التجريبي",
+    "subtitle": "مشروع محفظة مهندس الذكاء الاصطناعي"
+  },
+  "buttons": {
+    "uploadPdf": "تحميل PDF",
+    "uploadText": "تحميل نص",
+    "uploadUrl": "إدخال عنوان URL",
+    "send": "إرسال",
+    "leave": "مغادرة الجلسة",
+    "restart": "إعادة التشغيل",
+    "close": "إغلاق",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد"
+  },
+  "labels": {
+    "session": "الجلسة",
+    "sessionId": "معرف الجلسة",
+    "language": "اللغة",
+    "expires": "تنتهي",
+    "documents": "المستندات",
+    "chunks": "الأجزاء",
+    "metrics": "المقاييس",
+    "tokenUsage": "استخدام الرموز",
+    "contextUsage": "استخدام السياق",
+    "vectors": "المتجهات",
+    "chatHistory": "سجل الدردشة",
+    "typeMessage": "اكتب سؤالك...",
+    "processing": "جارٍ المعالجة...",
+    "uploadStatus": "حالة التحميل"
+  },
+  "messages": {
+    "sessionCreated": "تم إنشاء الجلسة بنجاح",
+    "sessionExpired": "انتهت صلاحية الجلسة",
+    "uploadSuccess": "تم تحميل المستند بنجاح",
+    "uploadFailed": "فشل التحميل",
+    "processingDocument": "جارٍ معالجة المستند...",
+    "moderationBlocked": "حظرت الإشراف على المحتوى هذا المستند",
+    "readyToChat": "جاهز للدردشة! اطرح سؤالك.",
+    "cannotAnswer": "لا يمكنني الإجابة على هذا السؤال بناءً على المستندات المحملة.",
+    "networkError": "خطأ في الشبكة. يرجى التحقق من اتصالك.",
+    "serverError": "خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً.",
+    "invalidFile": "تنسيق ملف غير صالح",
+    "invalidUrl": "تنسيق عنوان URL غير صالح",
+    "noDocuments": "لم يتم تحميل أي مستندات بعد",
+    "confirmLeave": "هل أنت متأكد من رغبتك في مغادرة هذه الجلسة؟"
+  },
+  "states": {
+    "INITIALIZING": "جارٍ التهيئة...",
+    "READY_FOR_UPLOAD": "جاهز للتحميل",
+    "PROCESSING": "جارٍ المعالجة...",
+    "ERROR": "خطأ",
+    "READY_FOR_CHAT": "جاهز للدردشة",
+    "CHATTING": "دردشة"
+  },
+  "errors": {
+    "required": "هذا الحقل مطلوب",
+    "minLength": "الحد الأدنى للطول هو {{min}} حرفًا",
+    "maxLength": "الحد الأقصى للطول هو {{max}} حرفًا",
+    "invalidFormat": "تنسيق غير صالح"
+  },
+  "upload": {
+    "title": "رفع مستند",
+    "subtitle": "قم بتحميل ملف PDF أو نصي أو قدم عنوان URL للبدء",
+    "mode": {
+      "file": "رفع ملف",
+      "url": "عنوان URL"
+    },
+    "dropzone": {
+      "dragOrClick": "اسحب وأفلت ملف هنا، أو انقر للتصفح",
+      "drop": "أفلت الملف هنا",
+      "hint": "التنسيقات المدعومة: PDF، TXT (الحد الأقصى {{maxSize}})"
+    },
+    "url": {
+      "placeholder": "أدخل عنوان URL (http:// أو https://)",
+      "submit": "جلب",
+      "hint": "سنقوم باستخراج محتوى النص من عنوان URL"
+    },
+    "error": {
+      "invalidFileType": "يتم دعم ملفات PDF و TXT فقط",
+      "fileTooLarge": "حجم الملف يتجاوز {{maxSize}}",
+      "emptyFile": "الملف فارغ",
+      "invalidUrl": "تنسيق URL غير صالح. يجب أن يكون http:// أو https://"
+    }
+  },
+  "processing": {
+    "title": "معالجة المستند",
+    "sourceType": {
+      "PDF": "مستند PDF",
+      "TEXT": "ملف نصي",
+      "URL": "صفحة ويب"
+    },
+    "stage": {
+      "extracting": "استخراج النص...",
+      "moderating": "فحص سلامة المحتوى...",
+      "chunking": "تقسيم النص...",
+      "embedding": "التضمين والتخزين...",
+      "complete": "اكتملت المعالجة",
+      "failed": "فشلت المعالجة",
+      "blocked": "المحتوى محظور"
+    },
+    "pleaseWait": "يرجى الانتظار، قد يستغرق هذا بضع لحظات...",
+    "complete": {
+      "message": "تمت معالجة المستند بنجاح!",
+      "chunks": "تم إنشاء {{count}} قطعة نصية",
+      "preview": "معاينة"
+    },
+    "error": {
+      "moderationBlocked": "تم حظر المحتوى بواسطة فحص السلامة",
+      "processingFailed": "فشلت المعالجة",
+      "code": "رمز الخطأ",
+      "blockedCategories": "الفئات المحظورة"
+    },
+    "steps": {
+      "extract": "استخراج",
+      "moderate": "إشراف",
+      "chunk": "تقسيم",
+      "embed": "تضمين"
+    },
+    "debug": {
+      "title": "معلومات التصحيح"
+    }
+  }
+}

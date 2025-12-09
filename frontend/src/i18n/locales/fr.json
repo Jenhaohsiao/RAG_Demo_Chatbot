@@ -1,0 +1,125 @@
+{
+  "app": {
+    "title": "Chatbot de Démonstration RAG",
+    "subtitle": "Projet de Portfolio d'Ingénieur IA"
+  },
+  "buttons": {
+    "uploadPdf": "Télécharger PDF",
+    "uploadText": "Télécharger Texte",
+    "uploadUrl": "Entrer URL",
+    "send": "Envoyer",
+    "leave": "Quitter la Session",
+    "restart": "Redémarrer",
+    "close": "Fermer",
+    "cancel": "Annuler",
+    "confirm": "Confirmer"
+  },
+  "labels": {
+    "session": "Session",
+    "sessionId": "ID de Session",
+    "language": "Langue",
+    "expires": "Expire",
+    "documents": "Documents",
+    "chunks": "Fragments",
+    "metrics": "Métriques",
+    "tokenUsage": "Utilisation de Tokens",
+    "contextUsage": "Utilisation du Contexte",
+    "vectors": "Vecteurs",
+    "chatHistory": "Historique de Chat",
+    "typeMessage": "Tapez votre question...",
+    "processing": "Traitement...",
+    "uploadStatus": "État du Téléchargement"
+  },
+  "messages": {
+    "sessionCreated": "Session créée avec succès",
+    "sessionExpired": "La session a expiré",
+    "uploadSuccess": "Document téléchargé avec succès",
+    "uploadFailed": "Échec du téléchargement",
+    "processingDocument": "Traitement du document...",
+    "moderationBlocked": "La modération du contenu a bloqué ce document",
+    "readyToChat": "Prêt à discuter ! Posez votre question.",
+    "cannotAnswer": "Je ne peux pas répondre à cette question en fonction des documents téléchargés.",
+    "networkError": "Erreur réseau. Vérifiez votre connexion.",
+    "serverError": "Erreur serveur. Réessayez plus tard.",
+    "invalidFile": "Format de fichier invalide",
+    "invalidUrl": "Format d'URL invalide",
+    "noDocuments": "Aucun document téléchargé pour le moment",
+    "confirmLeave": "Êtes-vous sûr de vouloir quitter cette session ?"
+  },
+  "states": {
+    "INITIALIZING": "Initialisation...",
+    "READY_FOR_UPLOAD": "Prêt pour le Téléchargement",
+    "PROCESSING": "Traitement...",
+    "ERROR": "Erreur",
+    "READY_FOR_CHAT": "Prêt pour le Chat",
+    "CHATTING": "Discussion"
+  },
+  "errors": {
+    "required": "Ce champ est obligatoire",
+    "minLength": "La longueur minimale est de {{min}} caractères",
+    "maxLength": "La longueur maximale est de {{max}} caractères",
+    "invalidFormat": "Format invalide"
+  },
+  "upload": {
+    "title": "Télécharger un Document",
+    "subtitle": "Téléchargez un PDF, un fichier texte ou fournissez une URL pour commencer",
+    "mode": {
+      "file": "Télécharger un Fichier",
+      "url": "URL"
+    },
+    "dropzone": {
+      "dragOrClick": "Glissez-déposez un fichier ici, ou cliquez pour parcourir",
+      "drop": "Déposez le fichier ici",
+      "hint": "Formats supportés : PDF, TXT (max {{maxSize}})"
+    },
+    "url": {
+      "placeholder": "Entrez l'URL (http:// ou https://)",
+      "submit": "Récupérer",
+      "hint": "Nous extrairons le contenu textuel de l'URL"
+    },
+    "error": {
+      "invalidFileType": "Seuls les fichiers PDF et TXT sont supportés",
+      "fileTooLarge": "La taille du fichier dépasse {{maxSize}}",
+      "emptyFile": "Le fichier est vide",
+      "invalidUrl": "Format d'URL invalide. Doit être http:// ou https://"
+    }
+  },
+  "processing": {
+    "title": "Traitement du Document",
+    "sourceType": {
+      "PDF": "Document PDF",
+      "TEXT": "Fichier Texte",
+      "URL": "Page Web"
+    },
+    "stage": {
+      "extracting": "Extraction du Texte...",
+      "moderating": "Vérification de la Sécurité du Contenu...",
+      "chunking": "Découpage du Texte...",
+      "embedding": "Intégration et Stockage...",
+      "complete": "Traitement Terminé",
+      "failed": "Traitement Échoué",
+      "blocked": "Contenu Bloqué"
+    },
+    "pleaseWait": "Veuillez patienter, cela peut prendre quelques instants...",
+    "complete": {
+      "message": "Document traité avec succès !",
+      "chunks": "{{count}} fragments de texte créés",
+      "preview": "Aperçu"
+    },
+    "error": {
+      "moderationBlocked": "Contenu Bloqué par Vérification de Sécurité",
+      "processingFailed": "Traitement Échoué",
+      "code": "Code d'Erreur",
+      "blockedCategories": "Catégories Bloquées"
+    },
+    "steps": {
+      "extract": "Extraire",
+      "moderate": "Modérer",
+      "chunk": "Découper",
+      "embed": "Intégrer"
+    },
+    "debug": {
+      "title": "Informations de Débogage"
+    }
+  }
+}

@@ -41,6 +41,7 @@ Build a production-ready multilingual RAG-powered chatbot for AI Engineer portfo
 - Concurrent sessions: 10+ without degradation
 
 **Constraints**:
+- **Gemini API Key Management**: Developer provides API key via .env file OR user inputs key in UI if missing/invalid
 - Session TTL: Fixed 30 minutes (constitutional requirement)
 - Similarity threshold: ≥0.7 for RAG context inclusion
 - Context window management via summary memory
