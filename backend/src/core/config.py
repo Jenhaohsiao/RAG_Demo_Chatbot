@@ -51,7 +51,9 @@ class Settings(BaseSettings):
         return v
     
     class Config:
-        env_file = ".env"
+        # Load both .env (defaults) and .env.local (secrets)
+        # .env.local takes precedence over .env
+        env_file = (".env", ".env.local")
         case_sensitive = False
 
 
