@@ -1,6 +1,6 @@
 """
 RAG Engine Service
-RAG 查詢引擎：向量搜尋、Prompt 建構、LLM 生成
+RAG 查詢引擎：向量搜尋、Prompt 建構、LLM 生成、Metrics 追蹤
 
 Constitutional Compliance:
 - Principle V (Strict RAG): 僅基於檢索內容回答，相似度閾值 ≥0.7
@@ -8,9 +8,10 @@ Constitutional Compliance:
 """
 
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Optional
 from uuid import UUID
+from collections import deque
 
 import google.generativeai as genai
 
@@ -33,6 +34,19 @@ class RetrievedChunk:
 
 
 @dataclass
+class SessionMetrics:
+    """Session 指標"""
+    total_queries: int = 0
+    total_tokens: int = 0
+    total_input_tokens: int = 0
+    total_output_tokens: int = 0
+    avg_tokens_per_query: float = 0.0
+    total_documents: int = 0
+    avg_chunks_retrieved: float = 0.0
+    unanswered_ratio: float = 0.0
+
+
+@dataclass
 class RAGResponse:
     """RAG 回應結果"""
     llm_response: str
@@ -42,6 +56,7 @@ class RAGResponse:
     token_input: int
     token_output: int
     token_total: int
+    metrics: Optional[SessionMetrics] = None
 
 
 class RAGEngine:
@@ -54,6 +69,7 @@ class RAGEngine:
     3. Prompt 建構
     4. LLM 生成 (Gemini gemini-1.5-flash, temperature=0.1)
     5. "無法回答" 判斷
+    6. Metrics 計算與 Memory 管理
     """
     
     def __init__(
@@ -62,7 +78,9 @@ class RAGEngine:
         embedder: Optional[Embedder] = None,
         similarity_threshold: float = 0.7,
         max_chunks: int = 5,
-        temperature: float = 0.1
+        temperature: float = 0.1,
+        memory_limit: int = 100,  # 最多保留 100 個查詢
+        token_threshold: int = 10000  # 10000 token 時發出警告
     ):
         """
         初始化 RAG Engine
@@ -73,12 +91,22 @@ class RAGEngine:
             similarity_threshold: 相似度閾值（憲法 Principle V: ≥0.7）
             max_chunks: 最大檢索塊數
             temperature: LLM 溫度（research.md 建議 0.1）
+            memory_limit: 滑動視窗記憶體限制（查詢數）
+            token_threshold: Token 警告閾值
         """
         self.vector_store = vector_store or VectorStore()
         self.embedder = embedder or Embedder()
         self.similarity_threshold = similarity_threshold
         self.max_chunks = max_chunks
         self.temperature = temperature
+        self.memory_limit = memory_limit
+        self.token_threshold = token_threshold
+        
+        # Session 指標追蹤
+        self._session_metrics: dict[UUID, SessionMetrics] = {}
+        
+        # Session 記憶體管理（滑動視窗）
+        self._session_memory: dict[UUID, deque] = {}
         
         # 配置 Gemini API
         genai.configure(api_key=settings.gemini_api_key)
@@ -86,7 +114,8 @@ class RAGEngine:
         
         logger.info(
             f"RAG Engine initialized: threshold={similarity_threshold}, "
-            f"max_chunks={max_chunks}, temperature={temperature}"
+            f"max_chunks={max_chunks}, temperature={temperature}, "
+            f"memory_limit={memory_limit}, token_threshold={token_threshold}"
         )
     
     def query(
@@ -155,6 +184,14 @@ class RAGEngine:
             # Step 3: 判斷是否有足夠內容回答
             if not retrieved_chunks:
                 logger.warning(f"[{session_id}] No chunks found above threshold")
+                
+                # 更新 metrics（無法回答）
+                metrics = self._calculate_metrics(
+                    session_id, 0, 0, 0, 
+                    response_type="CANNOT_ANSWER"
+                )
+                self._update_memory(session_id, user_query, "CANNOT_ANSWER", 0)
+                
                 return RAGResponse(
                     llm_response=self._get_cannot_answer_message(),
                     response_type="CANNOT_ANSWER",
@@ -162,7 +199,8 @@ class RAGEngine:
                     similarity_scores=[],
                     token_input=0,
                     token_output=0,
-                    token_total=0
+                    token_total=0,
+                    metrics=metrics
                 )
             
             # Step 4: 建構 Prompt
@@ -190,6 +228,13 @@ class RAGEngine:
                 f"(tokens: {token_input} + {token_output} = {token_total})"
             )
             
+            # 更新記憶體和 metrics
+            self._update_memory(session_id, user_query, "ANSWERED", token_total)
+            metrics = self._calculate_metrics(
+                session_id, token_input, token_output, 
+                len(retrieved_chunks), response_type="ANSWERED"
+            )
+            
             return RAGResponse(
                 llm_response=llm_response,
                 response_type="ANSWERED",
@@ -197,7 +242,8 @@ class RAGEngine:
                 similarity_scores=similarity_scores,
                 token_input=token_input,
                 token_output=token_output,
-                token_total=token_total
+                token_total=token_total,
+                metrics=metrics
             )
         
         except Exception as e:
@@ -260,6 +306,132 @@ class RAGEngine:
             str: 標準「無法回答」訊息
         """
         return "I cannot answer this question based on the uploaded documents."
+    
+    def _calculate_metrics(
+        self,
+        session_id: UUID,
+        token_input: int,
+        token_output: int,
+        chunks_retrieved: int,
+        response_type: str = "ANSWERED"
+    ) -> SessionMetrics:
+        """
+        計算並更新 Session 指標
+        
+        Args:
+            session_id: Session ID
+            token_input: 輸入 token 數
+            token_output: 輸出 token 數
+            chunks_retrieved: 檢索到的塊數
+            response_type: 回應類型（ANSWERED 或 CANNOT_ANSWER）
+        
+        Returns:
+            SessionMetrics: 更新後的 Session 指標
+        """
+        token_total = token_input + token_output
+        
+        # 初始化或獲取 metrics
+        if session_id not in self._session_metrics:
+            self._session_metrics[session_id] = SessionMetrics()
+        
+        metrics = self._session_metrics[session_id]
+        
+        # 更新指標
+        metrics.total_queries += 1
+        metrics.total_tokens += token_total
+        metrics.total_input_tokens += token_input
+        metrics.total_output_tokens += token_output
+        metrics.avg_tokens_per_query = metrics.total_tokens / metrics.total_queries
+        metrics.avg_chunks_retrieved = (
+            (metrics.avg_chunks_retrieved * (metrics.total_queries - 1) + chunks_retrieved) 
+            / metrics.total_queries
+        )
+        
+        # 記錄「無法回答」比率
+        if response_type == "CANNOT_ANSWER":
+            unanswered_count = sum(
+                1 for q in self._session_memory.get(session_id, [])
+                if q.get('type') == 'CANNOT_ANSWER'
+            ) + 1
+            metrics.unanswered_ratio = unanswered_count / metrics.total_queries
+        
+        logger.info(
+            f"[{session_id}] Metrics updated: "
+            f"queries={metrics.total_queries}, "
+            f"tokens={metrics.total_tokens}, "
+            f"avg_per_query={metrics.avg_tokens_per_query:.1f}, "
+            f"unanswered={metrics.unanswered_ratio:.1%}"
+        )
+        
+        # 檢查 token 使用是否超過閾值
+        if metrics.total_tokens >= self.token_threshold:
+            logger.warning(
+                f"[{session_id}] Token usage WARNING: "
+                f"{metrics.total_tokens} >= {self.token_threshold}"
+            )
+        
+        return metrics
+    
+    def _update_memory(
+        self,
+        session_id: UUID,
+        user_query: str,
+        response_type: str,
+        token_total: int
+    ) -> None:
+        """
+        更新 Session 記憶體（滑動視窗）
+        
+        Args:
+            session_id: Session ID
+            user_query: 使用者查詢
+            response_type: 回應類型
+            token_total: 總 token 數
+        """
+        # 初始化或獲取記憶體
+        if session_id not in self._session_memory:
+            self._session_memory[session_id] = deque(maxlen=self.memory_limit)
+        
+        memory = self._session_memory[session_id]
+        
+        # 新增查詢記錄
+        memory.append({
+            'query': user_query[:100],  # 只保留前 100 字元
+            'type': response_type,
+            'tokens': token_total
+        })
+        
+        logger.debug(
+            f"[{session_id}] Memory updated: "
+            f"{len(memory)}/{self.memory_limit} queries in window"
+        )
+    
+    def get_session_metrics(self, session_id: UUID) -> Optional[SessionMetrics]:
+        """
+        取得 Session 指標
+        
+        Args:
+            session_id: Session ID
+        
+        Returns:
+            SessionMetrics: Session 指標，若無則回傳 None
+        """
+        return self._session_metrics.get(session_id)
+    
+    def clear_session(self, session_id: UUID) -> None:
+        """
+        清除 Session 的指標和記憶體
+        
+        Args:
+            session_id: Session ID
+        """
+        if session_id in self._session_metrics:
+            del self._session_metrics[session_id]
+        
+        if session_id in self._session_memory:
+            del self._session_memory[session_id]
+        
+        logger.info(f"[{session_id}] Session metrics and memory cleared")
 
 
 class RAGError(Exception):

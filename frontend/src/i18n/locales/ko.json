@@ -131,5 +131,35 @@
     "debug": {
       "title": "디버그 정보"
     }
+  },
+  "chat": {
+    "title": "채팅",
+    "subtitle": "문서에 대해 질문하세요",
+    "empty": {
+      "message": "아직 메시지가 없습니다",
+      "hint": "업로드된 문서에 대한 질문을 입력하여 시작하세요"
+    },
+    "input": {
+      "placeholder": "문서에 대한 질문을 입력하세요...",
+      "submit": "보내기",
+      "hint": "Enter를 눌러 보내기, Shift+Enter로 줄바꿈",
+      "maxLength": "{{count}} / 2000"
+    },
+    "loading": "생각 중...",
+    "error": {
+      "sendFailed": "메시지 전송 실패",
+      "loadFailed": "채팅 기록 로드 실패",
+      "networkError": "네트워크 오류 발생"
+    },
+    "messages": {
+      "cannotAnswer": "업로드된 문서를 근거로 이 질문에 답할 수 없습니다.",
+      "you": "당신",
+      "assistant": "어시스턴트"
+    },
+    "retrieved": {
+      "title": "검색된 소스",
+      "chunks": "{{count}}개의 관련 청크를 찾았습니다",
+      "similarity": "유사도"
+    }
   }
 }

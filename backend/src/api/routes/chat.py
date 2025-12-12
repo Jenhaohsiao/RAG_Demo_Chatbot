@@ -157,6 +157,12 @@ async def query(
             for chunk in rag_response.retrieved_chunks
         ]
         
+        # 記錄 metrics（若有警告）
+        if rag_response.metrics and rag_response.metrics.unanswered_ratio >= 0.8:
+            logger.warning(
+                f"[{session_id}] HIGH UNANSWERED RATIO: {rag_response.metrics.unanswered_ratio:.1%}"
+            )
+        
         logger.info(
             f"[{session_id}] Query completed: {rag_response.response_type}, "
             f"tokens={rag_response.token_total}"

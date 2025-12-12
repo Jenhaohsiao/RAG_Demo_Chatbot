@@ -162,6 +162,16 @@ async def close_session(session_id: UUID):
     if not collection_deleted:
         logger.warning(f"Failed to delete Qdrant collection: {session.qdrant_collection_name}")
     
+    # Clear RAG Engine metrics and memory
+    from ...services.rag_engine import get_rag_engine
+    rag_engine = get_rag_engine()
+    rag_engine.clear_session(session_id)
+    
+    # Clear chat history
+    from .chat import _chat_history
+    if session_id in _chat_history:
+        del _chat_history[session_id]
+    
     # Remove session
     session_manager.close_session(session_id)
     

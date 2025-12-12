@@ -131,5 +131,35 @@
     "debug": {
       "title": "Debug Info"
     }
+  },
+  "chat": {
+    "title": "Chat",
+    "subtitle": "Ask questions about your documents",
+    "empty": {
+      "message": "No messages yet",
+      "hint": "Start by typing a question about the uploaded document"
+    },
+    "input": {
+      "placeholder": "Ask a question about the document...",
+      "submit": "Send",
+      "hint": "Press Enter to send, Shift+Enter for new line",
+      "maxLength": "{{count}} / 2000"
+    },
+    "loading": "Thinking...",
+    "error": {
+      "sendFailed": "Failed to send message",
+      "loadFailed": "Failed to load chat history",
+      "networkError": "Network error occurred"
+    },
+    "messages": {
+      "cannotAnswer": "I cannot answer this question based on the uploaded documents.",
+      "you": "You",
+      "assistant": "Assistant"
+    },
+    "retrieved": {
+      "title": "Retrieved Sources",
+      "chunks": "{{count}} relevant chunks found",
+      "similarity": "Similarity"
+    }
   }
 }

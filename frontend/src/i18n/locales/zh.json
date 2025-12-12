@@ -131,5 +131,35 @@
     "debug": {
       "title": "除錯資訊"
     }
+  },
+  "chat": {
+    "title": "聊天",
+    "subtitle": "提出關於您的文件的問題",
+    "empty": {
+      "message": "還沒有訊息",
+      "hint": "開始輸入關於已上傳文件的問題"
+    },
+    "input": {
+      "placeholder": "提出關於文件的問題...",
+      "submit": "發送",
+      "hint": "按 Enter 發送，Shift+Enter 換行",
+      "maxLength": "{{count}} / 2000"
+    },
+    "loading": "思考中...",
+    "error": {
+      "sendFailed": "發送訊息失敗",
+      "loadFailed": "載入聊天記錄失敗",
+      "networkError": "發生網路錯誤"
+    },
+    "messages": {
+      "cannotAnswer": "無法根據已上傳的文件回答此問題。",
+      "you": "您",
+      "assistant": "助理"
+    },
+    "retrieved": {
+      "title": "檢索到的來源",
+      "chunks": "找到 {{count}} 個相關段落",
+      "similarity": "相似度"
+    }
   }
 }

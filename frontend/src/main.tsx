@@ -12,6 +12,7 @@ import ProcessingModal from './components/ProcessingModal';
 import ChatScreen from './components/ChatScreen';
 import { useSession } from './hooks/useSession';
 import { useUpload } from './hooks/useUpload';
+import { submitQuery } from './services/chatService';
 import type { SupportedLanguage } from './hooks/useLanguage';
 import type { ChatResponse } from './types/chat';
 
@@ -211,21 +212,8 @@ const App: React.FC = () => {
                 sourceReference={statusResponse.source_reference}
                 sourceType={uploadResponse.source_type}
                 chunkCount={statusResponse.chunk_count}
-                onSendQuery={async () => {
-                  // TODO: Implement chat API call
-                  // 臨時回傳一個有效的 ChatResponse
-                  return {
-                    message_id: `msg-${Date.now()}`,
-                    session_id: sessionId,
-                    llm_response: 'Testing response',
-                    response_type: 'ANSWER' as const,
-                    retrieved_chunks: [],
-                    similarity_scores: [],
-                    token_input: 0,
-                    token_output: 0,
-                    token_total: 0,
-                    timestamp: new Date().toISOString(),
-                  };
+                onSendQuery={async (query: string): Promise<ChatResponse> => {
+                  return await submitQuery(sessionId, query);
                 }}
               />
             )}

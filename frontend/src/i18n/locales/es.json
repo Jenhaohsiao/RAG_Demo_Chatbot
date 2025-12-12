@@ -129,7 +129,37 @@
       "embed": "Incrustar"
     },
     "debug": {
-      "title": "Información de Depuración"
+      "title": "Información de depuración"
+    }
+  },
+  "chat": {
+    "title": "Chat",
+    "subtitle": "Haga preguntas sobre sus documentos",
+    "empty": {
+      "message": "Sin mensajes aún",
+      "hint": "Comience escribiendo una pregunta sobre el documento cargado"
+    },
+    "input": {
+      "placeholder": "Haga una pregunta sobre el documento...",
+      "submit": "Enviar",
+      "hint": "Presione Enter para enviar, Shift+Enter para nueva línea",
+      "maxLength": "{{count}} / 2000"
+    },
+    "loading": "Pensando...",
+    "error": {
+      "sendFailed": "Error al enviar el mensaje",
+      "loadFailed": "Error al cargar el historial de chat",
+      "networkError": "Error de red"
+    },
+    "messages": {
+      "cannotAnswer": "No puedo responder esta pregunta basándome en los documentos cargados.",
+      "you": "Usted",
+      "assistant": "Asistente"
+    },
+    "retrieved": {
+      "title": "Fuentes recuperadas",
+      "chunks": "{{count}} fragmentos relevantes encontrados",
+      "similarity": "Similitud"
     }
   }
 }

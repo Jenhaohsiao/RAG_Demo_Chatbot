@@ -131,5 +131,35 @@
     "debug": {
       "title": "デバッグ情報"
     }
+  },
+  "chat": {
+    "title": "チャット",
+    "subtitle": "ドキュメントについて質問します",
+    "empty": {
+      "message": "メッセージはまだあります",
+      "hint": "アップロードされたドキュメントについて質問を入力して開始します"
+    },
+    "input": {
+      "placeholder": "ドキュメントについて質問を入力してください...",
+      "submit": "送信",
+      "hint": "Enterキーで送信、Shift+Enterで改行",
+      "maxLength": "{{count}} / 2000"
+    },
+    "loading": "考え中...",
+    "error": {
+      "sendFailed": "メッセージの送信に失敗しました",
+      "loadFailed": "チャット履歴の読み込みに失敗しました",
+      "networkError": "ネットワークエラーが発生しました"
+    },
+    "messages": {
+      "cannotAnswer": "アップロードされたドキュメントに基づいてこの質問に答えることはできません。",
+      "you": "あなた",
+      "assistant": "アシスタント"
+    },
+    "retrieved": {
+      "title": "取得したソース",
+      "chunks": "{{count}} 個の関連チャンクが見つかりました",
+      "similarity": "類似度"
+    }
   }
 }

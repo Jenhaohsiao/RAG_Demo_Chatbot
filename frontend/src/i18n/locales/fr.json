@@ -129,7 +129,37 @@
       "embed": "Intégrer"
     },
     "debug": {
-      "title": "Informations de Débogage"
+      "title": "Informations de débogage"
+    }
+  },
+  "chat": {
+    "title": "Discuter",
+    "subtitle": "Posez des questions sur vos documents",
+    "empty": {
+      "message": "Pas de messages pour l'instant",
+      "hint": "Commencez par taper une question sur le document chargé"
+    },
+    "input": {
+      "placeholder": "Posez une question sur le document...",
+      "submit": "Envoyer",
+      "hint": "Appuyez sur Entrée pour envoyer, Maj+Entrée pour une nouvelle ligne",
+      "maxLength": "{{count}} / 2000"
+    },
+    "loading": "Réflexion en cours...",
+    "error": {
+      "sendFailed": "Échec de l'envoi du message",
+      "loadFailed": "Impossible de charger l'historique de chat",
+      "networkError": "Erreur réseau"
+    },
+    "messages": {
+      "cannotAnswer": "Je ne peux pas répondre à cette question en me basant sur les documents chargés.",
+      "you": "Vous",
+      "assistant": "Assistante"
+    },
+    "retrieved": {
+      "title": "Sources récupérées",
+      "chunks": "{{count}} fragments pertinents trouvés",
+      "similarity": "Similarité"
     }
   }
 }
