@@ -4,7 +4,7 @@ RAG 查詢引擎：向量搜尋、Prompt 建構、LLM 生成、Metrics 追蹤
 
 Constitutional Compliance:
 - Principle V (Strict RAG): 僅基於檢索內容回答，相似度閾值 ≥0.7
-- Principle III (Gemini-Only): 使用 Gemini gemini-1.5-flash (per research.md)
+- Principle III (Gemini-Only): 使用 Gemini 模型 (gemini-1.5-pro - cost-efficient)
 """
 
 import logging
@@ -110,10 +110,10 @@ class RAGEngine:
         
         # 配置 Gemini API
         genai.configure(api_key=settings.gemini_api_key)
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
+        self.model = genai.GenerativeModel(settings.gemini_model)
         
         logger.info(
-            f"RAG Engine initialized: threshold={similarity_threshold}, "
+            f"RAG Engine initialized: model={settings.gemini_model}, threshold={similarity_threshold}, "
             f"max_chunks={max_chunks}, temperature={temperature}, "
             f"memory_limit={memory_limit}, token_threshold={token_threshold}"
         )

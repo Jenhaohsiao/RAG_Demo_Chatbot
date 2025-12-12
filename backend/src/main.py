@@ -10,8 +10,8 @@ from fastapi.exceptions import RequestValidationError
 import google.generativeai as genai
 import logging
 
-from src.core.config import settings
-from src.core.scheduler import scheduler
+from .core.config import settings
+from .core.scheduler import scheduler
 
 # Configure logging
 logging.basicConfig(
@@ -120,7 +120,7 @@ async def general_exception_handler(request: Request, exc: Exception):
 
 
 # Include API routers FIRST (before defining other routes)
-from src.api import router as api_router
+from .api import router as api_router
 app.include_router(api_router, prefix=settings.api_prefix)
 
 
