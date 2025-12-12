@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     
     # Gemini API Configuration (Optional - can be provided via UI if missing)
     gemini_api_key: str | None = None  # Optional: fallback to UI input
-    gemini_model: str = "gemini-1.5-pro"  # Cost-efficient model with full capabilities
+    gemini_model: str = "gemini-2.0-flash-exp"  # Latest stable experimental model
     gemini_embedding_model: str = "text-embedding-004"
     gemini_temperature: float = 0.1
     
