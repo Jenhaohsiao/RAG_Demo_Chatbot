@@ -21,7 +21,7 @@ from ...models.document import (
 )
 from ...models.session import SessionState
 from ...models.errors import ErrorCode, get_error_response, get_http_status_code
-from ...core.session_manager import SessionManager
+from ...core.session_manager import session_manager
 from ...core.config import settings
 from ...services.extractor import extract_content, PDFExtractionError, URLFetchError, TextExtractionError
 from ...services.moderation import ModerationService, ModerationStatus as ModStatus
@@ -31,10 +31,10 @@ from ...services.vector_store import VectorStore
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/upload", tags=["upload"])
+# Create upload router (prefix handled by parent router in api/__init__.py)
+router = APIRouter()
 
 # 全域服務實例（將來可改為依賴注入）
-session_manager = SessionManager()
 moderator = ModerationService(api_key=settings.gemini_api_key)
 chunker = TextChunker()
 embedder = Embedder()
@@ -83,7 +83,7 @@ class UploadStatusResponse(BaseModel):
 _documents: dict[UUID, Document] = {}
 
 
-async def process_document(document: Document):
+def process_document(document: Document):
     """
     背景任務：處理文件上傳流程
     Extract → Moderate → Chunk → Embed → Store
@@ -91,16 +91,27 @@ async def process_document(document: Document):
     Constitutional Alignment:
     - Principle VI: Moderation First - 審核在分塊之前
     - Principle V: Strict RAG - 僅儲存通過審核的內容
+    
+    NOTE: 這必須是同步函數，因為 FastAPI BackgroundTasks 不支持 async 函數
     """
     try:
         # Step 1: Extract 文字萃取
         logger.info(f"[{document.document_id}] Starting extraction ({document.source_type})")
         document.extraction_status = ExtractionStatus.EXTRACTING
         
+        # 從檔案路徑讀取內容
+        if document.source_type == SourceType.PDF:
+            with open(document.source_reference, 'rb') as f:
+                content = f.read()
+        else:  # TEXT
+            with open(document.source_reference, 'r', encoding='utf-8') as f:
+                content = f.read()
+        
         # 使用統一的 extract_content 函數
         extracted_text = extract_content(
-            source=document.source_reference,
-            source_type=document.source_type.value
+            content=content,
+            source_type=document.source_type.value,
+            source_reference=document.source_reference
         )
         
         document.raw_content = extracted_text
@@ -108,27 +119,33 @@ async def process_document(document: Document):
         logger.info(f"[{document.document_id}] Extraction complete: {len(extracted_text)} chars")
         
         # Step 2: Moderate 內容審核（憲法 Principle VI）
-        logger.info(f"[{document.document_id}] Starting moderation")
-        document.moderation_status = ModerationStatus.CHECKING
-        
-        mod_result = moderator.check_content_safety(
-            text=document.raw_content,
-            source_reference=document.source_reference
-        )
-        if mod_result.status == ModStatus.BLOCKED:
-            document.moderation_status = ModerationStatus.BLOCKED
-            document.moderation_categories = mod_result.blocked_categories
-            document.error_code = ErrorCode.MODERATION_BLOCKED
-            document.error_message = mod_result.reason
-            logger.warning(
-                f"[{document.document_id}] Moderation BLOCKED: {mod_result.reason}"
+        if settings.enable_content_moderation:
+            logger.info(f"[{document.document_id}] Starting moderation")
+            document.moderation_status = ModerationStatus.CHECKING
+            
+            mod_result = moderator.check_content_safety(
+                text=document.raw_content,
+                source_reference=document.source_reference
             )
-            # 更新 session 狀態為 ERROR
-            session_manager.update_state(document.session_id, SessionState.ERROR)
-            return
-        
-        document.moderation_status = ModerationStatus.APPROVED
-        logger.info(f"[{document.document_id}] Moderation APPROVED")
+            if mod_result.status == ModStatus.BLOCKED:
+                document.moderation_status = ModerationStatus.BLOCKED
+                document.moderation_categories = mod_result.blocked_categories
+                document.error_code = ErrorCode.MODERATION_BLOCKED
+                document.error_message = mod_result.reason
+                logger.warning(
+                    f"[{document.document_id}] Moderation BLOCKED: {mod_result.reason}"
+                )
+                # 更新 session 狀態為 ERROR
+                session_manager.update_state(document.session_id, SessionState.ERROR)
+                return
+            
+            document.moderation_status = ModerationStatus.APPROVED
+            logger.info(f"[{document.document_id}] Moderation APPROVED")
+        else:
+            # 跳過審核（測試模式）
+            document.moderation_status = ModerationStatus.APPROVED
+            logger.warning(f"[{document.document_id}] Moderation SKIPPED (testing mode)")
+
         
         # Step 3: Chunk 文字分塊
         logger.info(f"[{document.document_id}] Starting chunking")
@@ -151,13 +168,18 @@ async def process_document(document: Document):
         
         # Step 5: Store 儲存到 Qdrant
         logger.info(f"[{document.document_id}] Starting vector storage")
-        collection_name = f"session_{document.session_id}"
+        # Remove hyphens from session_id for valid Qdrant collection name
+        clean_session_id = str(document.session_id).replace("-", "")
+        collection_name = f"session_{clean_session_id}"
         
         # 準備 points 資料
+        # NOTE: Qdrant 只接受 UUID 或整數作為 point ID，不接受字串
+        # 我們為每個 chunk 生成唯一的 UUID，但在 payload 中保留 document_id 用於查詢
+        import uuid
         points = []
         for idx, (chunk, emb_result) in enumerate(zip(chunks, embedding_results)):
             point_data = {
-                "id": str(document.document_id) + f"_chunk_{idx}",
+                "id": uuid.uuid4().hex,  # Qdrant-compatible ID (32-char hex string = valid UUID format)
                 "vector": emb_result.vector,
                 "payload": {
                     "document_id": str(document.document_id),

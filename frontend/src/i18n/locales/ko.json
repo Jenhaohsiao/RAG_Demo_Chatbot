@@ -1,7 +1,14 @@
 {
   "app": {
     "title": "RAG 데모 챗봇",
-    "subtitle": "AI 엔지니어 포트폴리오 프로젝트"
+    "subtitle": "AI 엔지니어 포트폴리오 프로젝트",
+    "description": "문서나 웹 콘텐츠를 업로드한 후 AI 기반 의미 검색을 사용하여 관련 질문을 하세요.",
+    "features": {
+      "pdfSupport": "📄 PDF & 텍스트 지원",
+      "urlExtraction": "🔗 URL 추출",
+      "aiQa": "🤖 AI 질문&답변",
+      "multilingual": "🌐 다국어 지원"
+    }
   },
   "buttons": {
     "uploadPdf": "PDF 업로드",
@@ -28,7 +35,8 @@
     "chatHistory": "채팅 기록",
     "typeMessage": "질문을 입력하세요...",
     "processing": "처리 중...",
-    "uploadStatus": "업로드 상태"
+    "uploadStatus": "업로드 상태",
+    "sessionExpiresIn": "세션이 약 30분 후 만료됩니다"
   },
   "messages": {
     "sessionCreated": "세션이 성공적으로 생성되었습니다",
@@ -72,7 +80,9 @@
       "drop": "여기에 파일 놓기",
       "hint": "지원 형식: PDF, TXT (최대 {{maxSize}})"
     },
+    "divider": "또는",
     "url": {
+      "label": "URL 제공",
       "placeholder": "URL 입력 (http:// 또는 https://)",
       "submit": "가져오기",
       "hint": "URL에서 텍스트 콘텐츠를 추출합니다"

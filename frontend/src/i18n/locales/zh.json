@@ -1,7 +1,14 @@
 {
   "app": {
     "title": "RAG 演示聊天機器人",
-    "subtitle": "AI 工程師作品集專案"
+    "subtitle": "AI 工程師作品集專案",
+    "description": "上傳文件或網路內容，然後使用 AI 驅動的語義搜索提出問題。",
+    "features": {
+      "pdfSupport": "📄 PDF & 文本支援",
+      "urlExtraction": "🔗 URL 擷取",
+      "aiQa": "🤖 AI 問答",
+      "multilingual": "🌐 多語言"
+    }
   },
   "buttons": {
     "uploadPdf": "上傳 PDF",
@@ -28,7 +35,8 @@
     "chatHistory": "對話紀錄",
     "typeMessage": "輸入您的問題...",
     "processing": "處理中...",
-    "uploadStatus": "上傳狀態"
+    "uploadStatus": "上傳狀態",
+    "sessionExpiresIn": "會話將在 ~30 分鐘後過期"
   },
   "messages": {
     "sessionCreated": "會話建立成功",
@@ -72,7 +80,9 @@
       "drop": "放開檔案",
       "hint": "支援格式：PDF、TXT（最大 {{maxSize}}）"
     },
+    "divider": "或",
     "url": {
+      "label": "提供網址",
       "placeholder": "輸入網址（http:// 或 https://）",
       "submit": "抓取",
       "hint": "我們將從網址中提取文字內容"

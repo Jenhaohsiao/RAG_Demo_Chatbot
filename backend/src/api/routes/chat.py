@@ -16,15 +16,15 @@ from pydantic import BaseModel, Field
 from ...models.chat import ChatMessage, ChatRole
 from ...models.session import SessionState
 from ...models.errors import ErrorCode, get_error_response, get_http_status_code
-from ...core.session_manager import SessionManager
+from ...core.session_manager import session_manager
 from ...services.rag_engine import get_rag_engine, RAGError
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/chat", tags=["chat"])
+# Create chat router (prefix handled by parent router in api/__init__.py)
+router = APIRouter()
 
 # 全域服務實例
-session_manager = SessionManager()
 rag_engine = get_rag_engine()
 
 

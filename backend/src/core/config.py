@@ -2,7 +2,7 @@
 Configuration module for RAG Demo Chatbot
 Loads environment variables and provides settings throughout the application
 """
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import field_validator
 from typing import Literal
 
@@ -10,16 +10,27 @@ from typing import Literal
 class Settings(BaseSettings):
     """Application settings loaded from environment variables"""
     
+    model_config = SettingsConfigDict(
+        env_file=(".env", ".env.local"),
+        env_file_encoding='utf-8',
+        case_sensitive=False,
+        extra='ignore',
+        env_prefix=""  # No prefix for environment variables
+    )
+    
     # Gemini API Configuration (Optional - can be provided via UI if missing)
     gemini_api_key: str | None = None  # Optional: fallback to UI input
-    gemini_model: str = "gemini-1.5-flash"  # Cheapest model for RAG Q&A
+    gemini_model: str = "gemini-2.0-flash"  # Latest stable model
     gemini_embedding_model: str = "text-embedding-004"
     gemini_temperature: float = 0.1
     
-    # Qdrant Configuration
+    # Content Moderation Configuration
+    enable_content_moderation: bool = True  # Set to False to skip moderation during testing
+    
+    # Qdrant Configuration (IMPORTANT: Default to docker mode, NOT embedded)
     qdrant_host: str = "localhost"
     qdrant_port: int = 6333
-    qdrant_mode: Literal["embedded", "docker", "cloud"] = "docker"
+    qdrant_mode: Literal["embedded", "docker", "cloud"] = "docker"  # CRITICAL: Docker is default
     qdrant_api_key: str | None = None  # For cloud mode
     qdrant_url: str | None = None  # For cloud mode
     
@@ -41,21 +52,18 @@ class Settings(BaseSettings):
     api_prefix: str = "/api/v1"
     
     # CORS Configuration
-    cors_origins: list[str] = ["http://localhost:5173", "http://localhost:3000"]
+    cors_origins: str = "http://localhost:5173,http://localhost:3000"
     
-    @field_validator('cors_origins', mode='before')
-    @classmethod
-    def parse_cors_origins(cls, v):
-        if isinstance(v, str):
-            return [origin.strip() for origin in v.split(',')]
-        return v
-    
-    class Config:
-        # Load both .env (defaults) and .env.local (secrets)
-        # .env.local takes precedence over .env
-        env_file = (".env", ".env.local")
-        case_sensitive = False
+    @property
+    def get_cors_origins(self) -> list[str]:
+        """Parse CORS origins from string"""
+        return [origin.strip() for origin in self.cors_origins.split(',')]
 
 
-# Global settings instance
+# Create settings instance
 settings = Settings()
+
+# DEBUG: Print configuration to verify Docker mode is active
+import logging
+logger = logging.getLogger(__name__)
+logger.info(f"Configuration loaded: QDRANT_MODE={settings.qdrant_mode}, ENABLE_CONTENT_MODERATION={settings.enable_content_moderation}")

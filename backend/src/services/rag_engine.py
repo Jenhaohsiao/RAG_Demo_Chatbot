@@ -14,7 +14,7 @@ from uuid import UUID
 
 import google.generativeai as genai
 
-from ..core.config import config
+from ..core.config import settings
 from ..services.vector_store import VectorStore
 from ..services.embedder import Embedder
 
@@ -81,7 +81,7 @@ class RAGEngine:
         self.temperature = temperature
         
         # 配置 Gemini API
-        genai.configure(api_key=config.GEMINI_API_KEY)
+        genai.configure(api_key=settings.gemini_api_key)
         self.model = genai.GenerativeModel('gemini-1.5-flash')
         
         logger.info(
@@ -120,7 +120,9 @@ class RAGEngine:
             
             # Step 2: 向量搜尋
             logger.debug(f"[{session_id}] Searching similar chunks...")
-            collection_name = f"session_{session_id}"
+            # Remove hyphens from session_id for valid Qdrant collection name
+            clean_session_id = str(session_id).replace("-", "")
+            collection_name = f"session_{clean_session_id}"
             
             search_results = self.vector_store.search_similar(
                 collection_name=collection_name,

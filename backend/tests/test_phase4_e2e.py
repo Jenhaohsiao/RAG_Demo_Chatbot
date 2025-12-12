@@ -21,12 +21,12 @@ def test_phase4_upload_flow():
     # Step 1: 建立 Session
     print("1. 建立 Session...")
     response = requests.post(f"{BASE_URL}/session/create")
-    assert response.status_code == 200, f"Session 建立失敗: {response.status_code}"
+    assert response.status_code == 201, f"Session 建立失敗: {response.status_code}"
     session_data = response.json()
     session_id = session_data["session_id"]
     print(f"   ✓ Session ID: {session_id}")
     print(f"   ✓ State: {session_data['state']}")
-    print(f"   ✓ Collection: {session_data['qdrant_collection']}\n")
+    print(f"   ✓ Collection: {session_data['qdrant_collection_name']}\n")
     
     # Step 2: 建立測試檔案
     print("2. 準備測試檔案...")
@@ -108,15 +108,15 @@ def test_phase4_upload_flow():
     assert response.status_code == 200, f"Session 查詢失敗: {response.status_code}"
     
     session_data = response.json()
-    print(f"   ✓ Session State: {session_data['state']}")
-    print(f"   ✓ Collection Name: {session_data['qdrant_collection']}")
+    print(f"   Session State: {session_data['state']}")
+    print(f"   Collection Name: {session_data['qdrant_collection_name']}")
     print()
     
     # 清理
     print("7. 清理測試資料...")
     test_file_path.unlink()
     response = requests.post(f"{BASE_URL}/session/{session_id}/close")
-    assert response.status_code == 200, f"Session 關閉失敗: {response.status_code}"
+    assert response.status_code == 204, f"Session 關閉失敗: {response.status_code}"
     print("   ✓ 測試檔案已刪除")
     print("   ✓ Session 已關閉\n")
     

@@ -110,13 +110,17 @@ const ProcessingScreen: React.FC<ProcessingScreenProps> = ({
    * 格式化來源引用
    */
   const formatSourceReference = (): string => {
+    if (!sourceReference) {
+      return 'Unknown Source';
+    }
+
     if (sourceType === SourceType.URL) {
       return sourceReference;
     }
 
     // 僅顯示檔名
     const parts = sourceReference.split(/[/\\]/);
-    return parts[parts.length - 1];
+    return parts[parts.length - 1] || sourceReference;
   };
 
   return (

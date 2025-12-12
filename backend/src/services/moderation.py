@@ -86,9 +86,9 @@ class ModerationService:
                 HarmCategory.DANGEROUS_CONTENT: "BLOCK_MEDIUM_AND_ABOVE",
             }
             
-            # 使用 Gemini Flash 模型進行審核（成本最低）
+            # 使用 Gemini 2.0 Flash 模型進行審核（最新穩定版本）
             self.model = genai.GenerativeModel(
-                model_name='gemini-1.5-flash',
+                model_name='gemini-2.0-flash',
                 safety_settings=self.safety_settings
             )
             

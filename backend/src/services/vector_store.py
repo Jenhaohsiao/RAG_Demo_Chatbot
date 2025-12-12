@@ -5,6 +5,7 @@ Wrapper for Qdrant client operations
 from typing import List, Optional, Dict, Any
 from uuid import UUID
 import logging
+import os
 
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
@@ -27,12 +28,32 @@ class VectorStore:
         self._initialize_client()
     
     def _initialize_client(self):
-        """Initialize Qdrant client based on mode (embedded/docker/cloud)"""
+        """Initialize Qdrant client based on mode (embedded/docker/cloud)
+        
+        IMPORTANT: Embedded mode on Windows may experience file locking issues.
+        For development and production, use Docker mode instead.
+        """
         try:
             if settings.qdrant_mode == "embedded":
                 # Embedded mode - file-based storage
-                self.client = QdrantClient(path="./qdrant_data")
-                logger.info("Qdrant client initialized in embedded mode")
+                # WARNING: On Windows, file locking can prevent restarting the server
+                # Use Docker mode for reliable operation
+                import platform
+                if platform.system() == "Windows":
+                    logger.warning(
+                        "Embedded mode on Windows may have file locking issues. "
+                        "Consider using QDRANT_MODE=docker for better reliability."
+                    )
+                    # Use temporary directory to avoid lock conflicts
+                    import tempfile
+                    import uuid
+                    qdrant_path = os.path.join(tempfile.gettempdir(), f"qdrant_{uuid.uuid4().hex[:8]}")
+                    logger.warning(f"Using temporary path (data will not persist): {qdrant_path}")
+                else:
+                    qdrant_path = "./qdrant_data"
+                
+                self.client = QdrantClient(path=qdrant_path)
+                logger.info(f"Qdrant client initialized in embedded mode: {qdrant_path}")
                 
             elif settings.qdrant_mode == "docker":
                 # Docker mode - connect to local Qdrant container

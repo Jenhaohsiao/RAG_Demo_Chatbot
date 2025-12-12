@@ -1,7 +1,14 @@
 {
   "app": {
     "title": "Chatbot Demo RAG",
-    "subtitle": "Proyecto de Portafolio de Ingeniero de IA"
+    "subtitle": "Proyecto de Portafolio de Ingeniero de IA",
+    "description": "Carga documentos o contenido web, luego haz preguntas sobre ellos usando búsqueda semántica impulsada por IA.",
+    "features": {
+      "pdfSupport": "📄 Soporte PDF y Texto",
+      "urlExtraction": "🔗 Extracción de URL",
+      "aiQa": "🤖 Preguntas y Respuestas IA",
+      "multilingual": "🌐 Multilingüe"
+    }
   },
   "buttons": {
     "uploadPdf": "Subir PDF",
@@ -28,7 +35,8 @@
     "chatHistory": "Historial de Chat",
     "typeMessage": "Escribe tu pregunta...",
     "processing": "Procesando...",
-    "uploadStatus": "Estado de Carga"
+    "uploadStatus": "Estado de Carga",
+    "sessionExpiresIn": "La sesión expirará en ~30 minutos"
   },
   "messages": {
     "sessionCreated": "Sesión creada exitosamente",
@@ -72,7 +80,9 @@
       "drop": "Suelta el archivo aquí",
       "hint": "Formatos compatibles: PDF, TXT (máx {{maxSize}})"
     },
+    "divider": "O",
     "url": {
+      "label": "Proporcionar una URL",
       "placeholder": "Ingresa URL (http:// o https://)",
       "submit": "Obtener",
       "hint": "Extraeremos el contenido de texto de la URL"

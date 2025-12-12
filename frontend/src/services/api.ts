@@ -5,8 +5,10 @@
 
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 
-// Base URL from environment variable or default to /api
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+// Base URL from environment variable or default to /api/v1
+// Note: Vite dev server proxies /api/* to http://localhost:8000
+// Backend serves API at /api/v1 prefix
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
 
 // Create axios instance with default config
 const apiClient: AxiosInstance = axios.create({

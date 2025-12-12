@@ -11,10 +11,21 @@ import { ChatRole, ResponseType, type ChatMessage as ChatMessageType, type ChatR
 
 interface ChatScreenProps {
   sessionId: string;
+  documentSummary?: string;
+  sourceReference?: string;
+  sourceType?: string;
+  chunkCount?: number;
   onSendQuery: (query: string) => Promise<ChatResponse>;
 }
 
-export const ChatScreen: React.FC<ChatScreenProps> = ({ sessionId, onSendQuery }) => {
+export const ChatScreen: React.FC<ChatScreenProps> = ({
+  sessionId,
+  documentSummary,
+  sourceReference,
+  sourceType,
+  chunkCount,
+  onSendQuery,
+}) => {
   const { t } = useTranslation();
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -82,6 +93,31 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({ sessionId, onSendQuery }
         <p className="chat-subtitle">{t('chat.subtitle')}</p>
       </div>
 
+      {/* 文件內容說明區域 */}
+      {documentSummary && (
+        <div className="document-summary-container">
+          <div className="document-info">
+            <div className="document-header mb-3">
+              <p className="document-filename">
+                {sourceType === 'PDF' && '📄'}
+                {sourceType === 'TEXT' && '📝'}
+                {sourceType === 'URL' && '🌐'} {sourceReference}
+              </p>
+              {chunkCount && (
+                <small className="text-muted">
+                  <i className="bi bi-file-text me-1"></i>
+                  {chunkCount} chunks
+                </small>
+              )}
+            </div>
+
+            <div className="document-description bg-light p-3 rounded">
+              <p className="mb-0">{documentSummary}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="messages-container">
         {messages.length === 0 ? (
           <div className="empty-state">
@@ -145,6 +181,38 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({ sessionId, onSendQuery }
           opacity: 0.9;
         }
 
+        .document-summary-container {
+          padding: 20px;
+          background: #f9fafb;
+          border-bottom: 1px solid #e1e8ed;
+          max-height: 300px;
+          overflow-y: auto;
+        }
+
+        .document-info {
+          margin: 0;
+        }
+
+        .document-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .document-filename {
+          margin: 0;
+          font-weight: 600;
+          font-size: 15px;
+          color: #2d3748;
+          word-break: break-word;
+        }
+
+        .document-description {
+          line-height: 1.6;
+          font-size: 14px;
+          color: #4a5568;
+        }
+
         .messages-container {
           flex: 1;
           overflow-y: auto;
@@ -202,3 +270,5 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({ sessionId, onSendQuery }
     </div>
   );
 };
+
+export default ChatScreen;

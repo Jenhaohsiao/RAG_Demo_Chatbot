@@ -31,7 +31,6 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
 }) => {
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
-  const [uploadMode, setUploadMode] = useState<'file' | 'url'>('file');
   const [urlInput, setUrlInput] = useState('');
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -144,29 +143,251 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
 
   return (
     <div className="upload-screen">
+      <style>{`
+        .upload-screen {
+          max-width: 600px;
+          margin: 0 auto;
+          padding: 40px 20px;
+        }
+
+        .upload-header {
+          text-align: center;
+          margin-bottom: 40px;
+        }
+
+        .upload-header h2 {
+          font-size: 28px;
+          font-weight: 600;
+          margin-bottom: 12px;
+          color: #333;
+        }
+
+        .upload-header p {
+          font-size: 16px;
+          color: #666;
+          margin: 0;
+        }
+
+        .upload-container {
+          border: 2px dashed #ddd;
+          border-radius: 12px;
+          background-color: #fafafa;
+          padding: 40px 24px;
+          transition: all 0.3s ease;
+          margin-bottom: 24px;
+        }
+
+        .upload-container.dragging {
+          border-color: #4285f4;
+          background-color: #f0f7ff;
+        }
+
+        .upload-dropzone {
+          cursor: pointer;
+          border: none;
+          background: transparent;
+          padding: 0;
+          text-align: center;
+        }
+
+        .upload-dropzone.disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .dropzone-content {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 16px;
+        }
+
+        .dropzone-icon {
+          font-size: 48px;
+          line-height: 1;
+        }
+
+        .dropzone-text {
+          font-size: 16px;
+          font-weight: 500;
+          color: #333;
+          margin: 0;
+        }
+
+        .dropzone-hint {
+          font-size: 13px;
+          color: #999;
+          margin: 0;
+        }
+
+        .upload-divider {
+          text-align: center;
+          margin: 32px 0;
+          position: relative;
+        }
+
+        .upload-divider::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background-color: #ddd;
+        }
+
+        .upload-divider-text {
+          position: relative;
+          display: inline-block;
+          padding: 0 16px;
+          background-color: white;
+          color: #999;
+          font-size: 13px;
+          font-weight: 500;
+        }
+
+        .url-section {
+          margin-top: 24px;
+        }
+
+        .url-section-title {
+          font-size: 14px;
+          font-weight: 600;
+          color: #666;
+          margin-bottom: 12px;
+          display: block;
+        }
+
+        .upload-url-form {
+          margin: 0;
+        }
+
+        .url-input-group {
+          display: flex;
+          gap: 8px;
+          margin-bottom: 12px;
+        }
+
+        .url-input {
+          flex: 1;
+          padding: 10px 14px;
+          border: 1px solid #ddd;
+          border-radius: 6px;
+          font-size: 14px;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          transition: border-color 0.2s;
+        }
+
+        .url-input:focus {
+          outline: none;
+          border-color: #34a853;
+          box-shadow: 0 0 0 3px rgba(52, 168, 83, 0.1);
+        }
+
+        .url-input:disabled {
+          background-color: #f5f5f5;
+          color: #999;
+          cursor: not-allowed;
+        }
+
+        .url-submit-button {
+          padding: 10px 24px;
+          background-color: #34a853;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: background-color 0.2s;
+          white-space: nowrap;
+        }
+
+        .url-submit-button:hover:not(:disabled) {
+          background-color: #2d8659;
+        }
+
+        .url-submit-button:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .url-hint {
+          font-size: 12px;
+          color: #999;
+          margin: 0;
+        }
+
+        .upload-error {
+          background-color: #ffebee;
+          border: 1px solid #ffcdd2;
+          border-radius: 6px;
+          padding: 12px 14px;
+          margin-bottom: 24px;
+          font-size: 14px;
+          color: #c62828;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .upload-debug {
+          text-align: center;
+          margin-top: 32px;
+          padding-top: 32px;
+          border-top: 1px solid #eee;
+          font-size: 11px;
+          color: #ccc;
+        }
+
+        @media (max-width: 600px) {
+          .upload-screen {
+            padding: 24px 16px;
+          }
+
+          .upload-header h2 {
+            font-size: 22px;
+          }
+
+          .upload-features {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 32px;
+          }
+
+          .feature-badge {
+            padding: 8px 12px;
+            font-size: 12px;
+          }
+
+          .upload-container {
+            padding: 32px 20px;
+            margin-bottom: 20px;
+          }
+
+          .dropzone-icon {
+            font-size: 40px;
+          }
+
+          .dropzone-text {
+            font-size: 14px;
+          }
+
+          .url-input-group {
+            flex-direction: column;
+          }
+
+          .url-submit-button {
+            width: 100%;
+          }
+        }
+      `}</style>
+
       <div className="upload-header">
         <h2>{t('upload.title', 'Upload Document')}</h2>
         <p className="upload-subtitle">
           {t('upload.subtitle', 'Upload a PDF, text file, or provide a URL to get started')}
         </p>
-      </div>
-
-      {/* 模式切換 */}
-      <div className="upload-mode-selector">
-        <button
-          className={`mode-button ${uploadMode === 'file' ? 'active' : ''}`}
-          onClick={() => setUploadMode('file')}
-          disabled={disabled}
-        >
-          {t('upload.mode.file', 'File Upload')}
-        </button>
-        <button
-          className={`mode-button ${uploadMode === 'url' ? 'active' : ''}`}
-          onClick={() => setUploadMode('url')}
-          disabled={disabled}
-        >
-          {t('upload.mode.url', 'URL')}
-        </button>
       </div>
 
       {/* 錯誤訊息 */}
@@ -176,12 +397,10 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
         </div>
       )}
 
-      {/* 檔案上傳模式 */}
-      {uploadMode === 'file' && (
+      {/* 主要上傳區域 - 檔案拖放 */}
+      <div className={`upload-container ${isDragging ? 'dragging' : ''}`}>
         <div
-          className={`upload-dropzone ${isDragging ? 'dragging' : ''} ${
-            disabled ? 'disabled' : ''
-          }`}
+          className={`upload-dropzone ${disabled ? 'disabled' : ''}`}
           onDragEnter={handleDragEnter}
           onDragLeave={handleDragLeave}
           onDragOver={handleDragOver}
@@ -211,10 +430,16 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
             </p>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* URL 上傳模式 */}
-      {uploadMode === 'url' && (
+      {/* 分隔線 */}
+      <div className="upload-divider">
+        <span className="upload-divider-text">{t('upload.divider', 'Or')}</span>
+      </div>
+
+      {/* 次要選項 - URL 輸入 */}
+      <div className="url-section">
+        <label className="url-section-title">🌐 {t('upload.url.label', 'Provide a URL')}</label>
         <form className="upload-url-form" onSubmit={handleUrlSubmit}>
           <div className="url-input-group">
             <input
@@ -237,7 +462,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
             {t('upload.url.hint', 'We will extract text content from the URL')}
           </p>
         </form>
-      )}
+      </div>
 
       {/* Session ID 顯示（開發用） */}
       {process.env.NODE_ENV === 'development' && (

@@ -1,7 +1,14 @@
 {
   "app": {
     "title": "RAG Demo Chatbot",
-    "subtitle": "AI Engineer Portfolio Project"
+    "subtitle": "AI Engineer Portfolio Project",
+    "description": "Upload documents or web content, then ask questions about them using AI-powered semantic search.",
+    "features": {
+      "pdfSupport": "📄 PDF & Text Support",
+      "urlExtraction": "🔗 URL Extraction",
+      "aiQa": "🤖 AI Q&A",
+      "multilingual": "🌐 Multilingual"
+    }
   },
   "buttons": {
     "uploadPdf": "Upload PDF",
@@ -28,7 +35,8 @@
     "chatHistory": "Chat History",
     "typeMessage": "Type your question...",
     "processing": "Processing...",
-    "uploadStatus": "Upload Status"
+    "uploadStatus": "Upload Status",
+    "sessionExpiresIn": "Session expires in ~30 minutes"
   },
   "messages": {
     "sessionCreated": "Session created successfully",
@@ -72,7 +80,9 @@
       "drop": "Drop file here",
       "hint": "Supported formats: PDF, TXT (max {{maxSize}})"
     },
+    "divider": "Or",
     "url": {
+      "label": "Provide a URL",
       "placeholder": "Enter URL (http:// or https://)",
       "submit": "Fetch",
       "hint": "We will extract text content from the URL"

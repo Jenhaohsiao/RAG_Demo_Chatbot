@@ -2,32 +2,34 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: 1.5.0 → 1.6.0 (MINOR - Dependency Verification Principle)
-Date: 2025-12-09
+Version Change: 1.6.0 → 1.7.0 (MINOR - Terminal Session Management Principle)
+Date: 2025-12-10
 
 MODIFIED PRINCIPLES:
-  - Principle XIII (Dependency Verification): NEW PRINCIPLE ADDED
-    Requirement: All dependencies MUST be verified against speckit/plan before installation
+  - Principle XIV (Terminal Session Management): NEW PRINCIPLE ADDED
+    Requirement: AI MUST reuse existing terminals instead of creating new ones repeatedly
 
 REASON FOR CHANGE:
-  - Prevent unauthorized dependencies from being added to the project
-  - Maintain technology stack integrity and avoid scope creep
-  - Ensure all tools are explicitly approved and documented in speckit/plan
-  - User explicitly requested: "安裝任何工具前必須先核對/speckit.plan"
-  - Recent incident: LangChain dependency was added without approval, violating MVP-First principle
+  - Prevent terminal proliferation and workspace clutter
+  - Avoid port conflicts from multiple server instances
+  - Maintain clear tracking of running processes
+  - Reduce resource consumption and confusion
+  - User explicitly requested: "你又重複開新的 terminal 了, 可以保持同一個視窗嗎?"
+  - Observed issue: AI repeatedly created new terminals causing backend duplication
 
 ADDED SECTIONS:
-  - Principle XIII: Dependency Verification (Mandatory Pre-Installation Check)
+  - Principle XIV: Terminal Session Management (Reuse Over Create)
 
 REMOVED SECTIONS: None
 
 TEMPLATES REQUIRING UPDATES:
-  ✅ Installation workflows must include dependency verification step
-  ✅ requirements.txt/package.json updates require speckit/plan verification
+  ✅ AI agent workflows must prioritize terminal reuse
+  ✅ Process management guidelines updated
   
 FOLLOW-UP TODOs: 
-  - Ensure specs/*/plan.md documents all approved dependencies in Technology Stack section
-  - Update onboarding documentation with dependency approval process
+  - AI assistants should track active terminal sessions
+  - Document proper terminal lifecycle management
+  - Update development mode instructions to emphasize terminal reuse
 -->
 
 ## Project Identity
@@ -172,6 +174,30 @@ FOLLOW-UP TODOs:
 
 **Enforcement**: Any code commit that adds dependencies without updating `specs/*/plan.md` MUST be rejected. Dependencies added without user approval MUST be removed immediately.
 
+### XIV. Terminal Session Management (Reuse Over Create)
+**NON-NEGOTIABLE**: When executing commands in terminals, AI assistants MUST reuse existing terminal sessions instead of creating new ones. New terminals should only be created when:
+- Running multiple concurrent processes that must remain separate (e.g., backend + frontend)
+- Existing terminals have different working directories that would require navigation
+- Explicit user request to create a new terminal
+
+**Requirements**:
+- **Before creating a new terminal**: Check if an appropriate existing terminal can be reused
+- **For long-running processes** (servers, watchers): Use a dedicated terminal and keep it running
+- **For sequential commands**: Reuse the same terminal for multiple related operations
+- **Track terminal purpose**: Name terminals clearly (e.g., "powershell backend", "powershell tests")
+- **Avoid port conflicts**: Never start duplicate server instances on the same port
+- **Clean shutdown**: Stop processes properly before restarting them
+
+**Common Violations to Avoid**:
+- Starting backend server in a new terminal when one is already running
+- Creating new terminal for every test run instead of reusing test terminal
+- Spinning up multiple instances of the same service
+- Abandoning terminals with running processes
+
+**Rationale**: Prevents terminal proliferation, reduces resource consumption, avoids port conflicts, maintains clear process tracking, and keeps the development environment organized. Multiple instances of the same server create confusion about which one is actually serving requests and waste system resources. This principle is especially critical for AI-assisted development where the AI may not have perfect memory of previous terminal creations.
+
+**Enforcement**: Before invoking `run_in_terminal` with `isBackground=true`, AI MUST verify no existing terminal is running the same or similar process. Repeated violations of this principle indicate need for workflow adjustment.
+
 ## Technology Stack Constraints
 
 The following technologies are mandated for this project:
@@ -290,12 +316,13 @@ This constitution supersedes all other development practices, guidelines, and ad
 
 ### Compliance Verification
 Each development phase conclusion MUST include constitutional compliance review:
-- All 13 principles adhered to
+- All 14 principles adhered to
 - Quality gates passed
 - Tests documented and passing
 - Progress tracking completed
 - Chinese communication maintained
 - Dependency verification completed (no unauthorized tools)
+- Terminal management followed (no unnecessary proliferation)
 
 ### Versioning Policy
 - **MAJOR**: Backward-incompatible governance changes, principle removals or redefinitions
@@ -304,8 +331,8 @@ Each development phase conclusion MUST include constitutional compliance review:
 
 ---
 
-**Version**: 1.6.0  
+**Version**: 1.7.0  
 **Ratified**: 2025-12-07  
-**Last Amended**: 2025-12-09
+**Last Amended**: 2025-12-10
 
 For day-to-day development guidance and implementation details, refer to the files in `.specify/templates/` and `.github/prompts/` which provide mode-specific instructions that operate within the boundaries established by this constitution.

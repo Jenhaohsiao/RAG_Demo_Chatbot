@@ -1,7 +1,14 @@
 {
   "app": {
     "title": "RAGデモチャットボット",
-    "subtitle": "AIエンジニアポートフォリオプロジェクト"
+    "subtitle": "AIエンジニアポートフォリオプロジェクト",
+    "description": "ドキュメントやウェブコンテンツをアップロードし、AI駆動のセマンティック検索を使用して質問します。",
+    "features": {
+      "pdfSupport": "📄 PDFとテキストサポート",
+      "urlExtraction": "🔗 URL抽出",
+      "aiQa": "🤖 AI Q&A",
+      "multilingual": "🌐 多言語対応"
+    }
   },
   "buttons": {
     "uploadPdf": "PDFをアップロード",
@@ -28,7 +35,8 @@
     "chatHistory": "チャット履歴",
     "typeMessage": "質問を入力してください...",
     "processing": "処理中...",
-    "uploadStatus": "アップロード状態"
+    "uploadStatus": "アップロードステータス",
+    "sessionExpiresIn": "セッションは約30分後に期限切れになります"
   },
   "messages": {
     "sessionCreated": "セッションが正常に作成されました",
@@ -72,7 +80,9 @@
       "drop": "ファイルをここにドロップ",
       "hint": "サポート形式：PDF、TXT（最大{{maxSize}}）"
     },
+    "divider": "または",
     "url": {
+      "label": "URLを提供",
       "placeholder": "URLを入力（http://またはhttps://）",
       "submit": "取得",
       "hint": "URLからテキストコンテンツを抽出します"

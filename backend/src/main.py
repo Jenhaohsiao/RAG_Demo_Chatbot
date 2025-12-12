@@ -68,7 +68,7 @@ app = FastAPI(
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins,
+    allow_origins=settings.get_cors_origins,
     allow_credentials=False,  # Stateless API, no cookies
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
     allow_headers=["*"],
@@ -119,6 +119,25 @@ async def general_exception_handler(request: Request, exc: Exception):
     )
 
 
+# Include API routers FIRST (before defining other routes)
+from src.api import router as api_router
+app.include_router(api_router, prefix=settings.api_prefix)
+
+
+# Root endpoint
+@app.get("/", tags=["Root"])
+async def root():
+    """Root endpoint with API info"""
+    from datetime import datetime
+    return {
+        "message": "RAG Demo Chatbot API",
+        "version": "1.0.0",
+        "docs": "/api/docs",
+        "server_time": datetime.now().isoformat(),
+        "reload_test": "2025-12-10-20:40"  # Change this to verify reload works
+    }
+
+
 # Health check endpoint
 @app.get("/health", tags=["Health"])
 async def health_check():
@@ -131,19 +150,4 @@ async def health_check():
         "gemini_model": settings.gemini_model,
         "qdrant_mode": settings.qdrant_mode,
         "session_ttl_minutes": settings.session_ttl_minutes
-    }
-
-
-# Include API routers
-from src.api import router as api_router
-app.include_router(api_router, prefix=settings.api_prefix)
-
-# Placeholder message for root endpoint
-@app.get("/", tags=["Root"])
-async def root():
-    """Root endpoint with API info"""
-    return {
-        "message": "RAG Demo Chatbot API",
-        "version": "1.0.0",
-        "docs": "/api/docs"
     }

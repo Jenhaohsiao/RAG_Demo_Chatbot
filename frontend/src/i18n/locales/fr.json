@@ -1,7 +1,14 @@
 {
   "app": {
     "title": "Chatbot de Démonstration RAG",
-    "subtitle": "Projet de Portfolio d'Ingénieur IA"
+    "subtitle": "Projet de Portfolio d'Ingénieur IA",
+    "description": "Téléchargez des documents ou du contenu web, puis posez des questions à leur sujet en utilisant la recherche sémantique alimentée par l'IA.",
+    "features": {
+      "pdfSupport": "📄 Support PDF et Texte",
+      "urlExtraction": "🔗 Extraction d'URL",
+      "aiQa": "🤖 Questions et Réponses IA",
+      "multilingual": "🌐 Multilingue"
+    }
   },
   "buttons": {
     "uploadPdf": "Télécharger PDF",
@@ -28,7 +35,8 @@
     "chatHistory": "Historique de Chat",
     "typeMessage": "Tapez votre question...",
     "processing": "Traitement...",
-    "uploadStatus": "État du Téléchargement"
+    "uploadStatus": "État du Chargement",
+    "sessionExpiresIn": "La session expirera dans ~30 minutes"
   },
   "messages": {
     "sessionCreated": "Session créée avec succès",
@@ -72,7 +80,9 @@
       "drop": "Déposez le fichier ici",
       "hint": "Formats supportés : PDF, TXT (max {{maxSize}})"
     },
+    "divider": "Ou",
     "url": {
+      "label": "Fournir une URL",
       "placeholder": "Entrez l'URL (http:// ou https://)",
       "submit": "Récupérer",
       "hint": "Nous extrairons le contenu textuel de l'URL"
