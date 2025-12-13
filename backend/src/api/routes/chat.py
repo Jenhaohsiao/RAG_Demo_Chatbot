@@ -90,11 +90,11 @@ async def query(
             detail=error.dict()
         )
     
-    # 驗證 session 狀態
-    if session.state != SessionState.READY_FOR_CHAT:
+    # 驗證 session 狀態 (允許 READY_FOR_CHAT 或 CHATTING)
+    if session.state not in (SessionState.READY_FOR_CHAT, SessionState.CHATTING):
         error = get_error_response(
             ErrorCode.SESSION_INVALID_STATE,
-            details={"current_state": session.state.value, "required_state": "READY_FOR_CHAT"}
+            details={"current_state": session.state.value, "required_state": "READY_FOR_CHAT or CHATTING"}
         )
         raise HTTPException(
             status_code=get_http_status_code(ErrorCode.SESSION_INVALID_STATE),
