@@ -2,7 +2,7 @@
 
 **專案名稱**: Multilingual RAG-Powered Chatbot  
 **功能分支**: `001-multilingual-rag-chatbot`  
-**最後更新**: 2025-12-12 21:45  
+**最後更新**: 2025-12-12 22:05  
 **總任務數**: 106
 
 ---
@@ -15,14 +15,14 @@
 | Phase 2 | Foundational (基礎架構) | ✅ Complete | 20/20 | 20 | N/A | N/A |
 | Phase 3 | US1 - Session Management | ✅ Complete | 17/17 | 17 | ✅ Pass (9/9) | ✅ Pass |
 | Phase 4 | US2 - Document Upload | ✅ Complete | 16/16 | 16 | ✅ Pass (E2E) | ✅ Pass |
-| Phase 5 | US3 - RAG Query | ✅ Complete | 12/12 impl | 12 | ✅ Pass (13/15) | ✅ Pass |
+| Phase 5 | US3 - RAG Query | ✅ Complete | 12/12 impl | 12 | ✅ Pass (15/15) | ✅ Pass |
 | Phase 6 | US4 - Multilingual UI | ⏳ Not Started | 0/5 | 5 | ⏳ Pending | ⏳ Pending |
 | Phase 7 | US5 - Metrics Display | ⏳ Not Started | 0/6 | 6 | ⏳ Pending | ⏳ Pending |
 | Phase 8 | US6 - Session Controls | ⏳ Not Started | 0/5 | 5 | ⏳ Pending | ⏳ Pending |
 | Phase 9 | Polish & Testing | ⏳ Not Started | 0/15 | 15 | ⏳ Pending | ⏳ Pending |
 
 **Total Progress**: 89/106 tasks (83.9%) ✅  
-**Test Coverage**: Phase 3 ✅ (9/9 automated) | Phase 4 ✅ (E2E automated) | Phase 5 ✅ (13/15 automated - 86.7% PASS - COMPLETE)
+**Test Coverage**: Phase 3 ✅ (9/9 automated) | Phase 4 ✅ (E2E automated) | Phase 5 ✅ (15/15 automated - 100% PASS - COMPLETE)
 **Qdrant Setup**: Docker Mode configured and working (see `docs/qdrant-setup-guide.md`)
 
 ## 🎯 前後端整合狀態
@@ -461,22 +461,23 @@
 **完成日期**: 2025-12-12  
 **優先順序**: P3 (MVP 核心功能)
 **Implementation Status**: ✅ **FULLY IMPLEMENTED AND INTEGRATED**
-**Test Status**: ✅ **SUCCESSFULLY TESTED - 13/15 PASS (86.7%)**
+**Test Status**: ✅ **SUCCESSFULLY TESTED - 15/15 PASS (100%)**
 - Setup Phase (4/4 PASS) ✅: Health, Session, Upload, Processing
-- RAG Query Phase (3/4 PASS) ✅: Basic Query, Cannot Answer, Chat History
-- Chat API Phase (3/3 PASS) ✅: History Pagination, Invalid Query, Session Memory
+- RAG Query Phase (4/4 PASS) ✅: Basic Query, Multiple Queries, Cannot Answer, Query Metrics
+- Chat API Phase (3/3 PASS) ✅: History Pagination, Invalid Query, Chat History
 - Concurrency Phase (2/2 PASS) ✅: Concurrent Queries, Session Cleanup  
-- Chat History Phase (1/1 PASS) ✅: Clear History, Close Session
-- **Improvement**: Fixed session state validation bug in chat.py (allow CHATTING state for multi-turn conversations)
-- **Infrastructure**: ✅ Threading scheduler stable (61.9s execution, no crashes, proper cleanup)
+- Chat History Phase (2/2 PASS) ✅: Clear History, Close Session
+- **Infrastructure**: ✅ Threading scheduler stable (60.9s execution, no crashes, proper cleanup)
 
-**Detailed Results**:
+**Detailed Results** (All 15/15 Passing):
 - ✅ Health Check - Backend responsive
 - ✅ Create Session - Session creation with READY_FOR_UPLOAD state
 - ✅ Upload Document - File upload accepted (1 chunk processed)
 - ✅ Wait Processing - Document processing complete with Qdrant storage
 - ✅ Basic RAG Query - "What is machine learning?" → ANSWERED (similarity: 0.725, 484 tokens)
+- ✅ Multiple Queries - 4 sequential queries properly handled (responses: ANSWERED or CANNOT_ANSWER)
 - ✅ Cannot Answer Queries - 3/3 out-of-scope queries properly returned CANNOT_ANSWER
+- ✅ Query Metrics - Metrics returned correctly (response type, token counts)
 - ✅ Chat History - 20 messages created (10 user + 10 assistant)
 - ✅ History Pagination - Limit/offset working correctly (retrieved 5/20 with limit=5)
 - ✅ Invalid Query Handling - Empty string and 2000+ char queries properly rejected
@@ -484,8 +485,6 @@
 - ✅ Concurrent Queries - 3 queries processed sequentially (all successful)
 - ✅ Clear Chat History - History successfully cleared
 - ✅ Close Session - Session closed, Qdrant collection deleted
-- ❌ Multiple Queries - Test counting issue (queries executed but not counted)
-- ❌ Query Metrics - Returns 422 (unclear if test data or endpoint issue)
 
 ---
 
