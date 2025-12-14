@@ -267,6 +267,43 @@ Any deviation from this stack requires a constitutional amendment.
 3. Implement the minimum code to make tests pass (Green phase)
 4. Refactor while keeping tests green (Refactor phase)
 
+### XV. Testing Framework Standardization (Unified, No Mixed Styles)
+**NON-NEGOTIABLE**: All test files in the project MUST use the same testing framework. Mixed testing styles (pytest + custom frameworks in the same project) waste development time and create confusion during test execution and debugging.
+
+**Framework Choice**: `pytest` for Python backend, `Jest/Vitest` for TypeScript frontend
+
+**Requirements**:
+- **Backend**: ALL test files MUST follow pytest conventions
+  - Test files named `test_*.py` or `*_test.py`
+  - Test functions named `def test_*(...)`
+  - Use pytest fixtures, parametrization, and assertions
+  - Custom test runners or classes (without `def test_` functions) are **PROHIBITED**
+  - If a custom testing module is needed, wrap it with pytest rather than creating separate test runners
+- **Frontend**: ALL test files MUST follow Jest conventions
+  - Test files named `*.test.ts`, `*.test.tsx`, `*.spec.ts`, `*.spec.tsx`
+  - Test functions using `describe()` and `it()` blocks
+  - No custom testing frameworks mixed with Jest
+
+**Common Violation to Avoid**:
+- ❌ `test_phase2.py`: Print statements, manual test execution (no `def test_` functions)
+- ❌ `test_phase5_rag_query.py`: Class with `if __name__ == "__main__"` block (custom runner)
+- ✅ Convert ALL such tests to proper pytest format IMMEDIATELY
+
+**Enforcement**:
+- Code review MUST reject any test files that don't follow the chosen framework
+- Before implementing tests, declare the testing framework choice
+- If switching frameworks mid-project, update ALL existing tests (not just new ones)
+- This principle applies retroactively: all existing Phase 1-5 tests MUST be converted to pytest format by next amendment
+
+**Rationale**: 
+- Consistent testing framework allows AI agents to execute tests predictably
+- Eliminates confusion about test execution patterns
+- Reduces debugging time when tests fail
+- Enables automation of test runs in CI/CD pipelines
+- Prevents "forgetting" to run certain tests because they use a different framework
+
+---
+
 ### Incremental Execution (Staged Delivery)
 **GATE**: Each development phase MUST be completed and verified before proceeding to the next.
 
@@ -279,6 +316,44 @@ Any deviation from this stack requires a constitutional amendment.
 **GATE**: Unit tests MUST be added at the completion of each stage.
 
 - All new code MUST have corresponding unit tests
+
+### Phase Completion Testing Requirements (Mandatory Gate)
+**NON-NEGOTIABLE**: Each development phase MUST NOT be marked as complete until BOTH the following conditions are met:
+
+**Condition 1: Automated Testing in GitHub Actions**
+- Unit tests MUST be implemented for all new code
+- Unit tests MUST pass 100% locally before pushing
+- GitHub Actions CI/CD MUST run automated test suite on pull request
+- GitHub Actions test results MUST show all tests passing (0 failures)
+- Code coverage report MUST be generated and reviewed
+- Coverage for critical paths MUST exceed 90%
+- All GitHub Actions checks MUST be passing before merge is allowed
+- Test results MUST be documented in PROGRESS.md with date and execution time
+
+**Condition 2: Manual User Testing**
+- Automated tests alone do NOT satisfy phase completion
+- Manual user testing scenarios MUST be planned and documented
+- Each phase MUST have test checklist (checkboxes in PROGRESS.md)
+- Tester (AI or human) MUST verify all manual test scenarios pass
+- Manual test results MUST be documented with verification date
+- Any failed manual tests MUST be fixed before proceeding to next phase
+
+**Progress Tracking Requirement**:
+- PROGRESS.md MUST show BOTH columns satisfied:
+  - `Automated Testing`: ✅ PASS (X/Y tests) - dated verification
+  - `User Testing`: ✅ PASS - dated verification
+- Phase status MUST be marked ✅ COMPLETE only when both columns show ✅ PASS
+- If either column shows ⏳ Pending or ❌ FAIL, phase is NOT complete
+- Phase cannot advance to next phase until both testing conditions pass
+
+**Specific Phase Gating**:
+```
+Phase X Completion = (Automated Tests: 100% Pass) + (Manual Tests: 100% Pass)
+Status := COMPLETE ✅ only when both = TRUE
+Otherwise := IN_PROGRESS ⏳ or BLOCKED ❌
+```
+
+**Rationale**: Automated tests verify code correctness and prevent regressions. Manual user testing verifies the feature works as intended in real-world scenarios and catches issues that automated tests cannot detect (UI/UX, performance, integration edge cases). Requiring both ensures high quality and prevents incomplete features from advancing. This is critical for portfolio demonstration where quality matters more than speed.
 ### Versioning Policy
 - **MAJOR**: Backward-incompatible governance changes, principle removals or redefinitions
 - **MINOR**: New principles added, materially expanded guidance
@@ -296,11 +371,25 @@ For day-to-day development guidance and implementation details, refer to the fil
 ### CI/CD Validation (GitHub Actions)
 **GATE**: All tests MUST pass in GitHub Actions before merging.
 
-- Every pull request MUST trigger automated test runs
-- All unit tests MUST pass
+**GitHub Actions Workflow Requirements**:
+- Every pull request MUST trigger automated test runs automatically
+- All unit tests MUST pass in CI environment (not just locally)
 - Linting and code quality checks MUST pass
-- Coverage reports MUST be generated
-- Failed CI builds MUST block merging
+- Test coverage reports MUST be generated and archived
+- Failed CI builds MUST block merging (branch protection enabled)
+- CI/CD pipeline MUST be documented in `.github/workflows/` directory
+
+**Phase Completion CI/CD Requirements**:
+- When phase is declared complete, all CI/CD checks MUST be passing
+- Test execution must be verified in GitHub Actions UI
+- Build logs MUST be reviewed to confirm no hidden failures
+- Coverage metrics MUST meet minimum thresholds (90% for critical code)
+- CI/CD validation is mandatory gate - no exceptions
+
+**Documentation Requirement**:
+- PROGRESS.md MUST include: "Automated Testing: ✅ PASS (X/Y tests) - Verified on GitHub Actions YYYY-MM-DD"
+- Link to GitHub Actions workflow run is recommended
+- If CI/CD not yet configured, mark as "⏳ CI/CD Setup Pending" and make this blocking for phase completion
 
 ## Governance
 
@@ -315,10 +404,12 @@ This constitution supersedes all other development practices, guidelines, and ad
 5. All dependent artifacts MUST be updated upon approval
 
 ### Compliance Verification
-Each development phase conclusion MUST include constitutional compliance review:
+Each development phase conclusion MUST include constitutional compliance review AND testing verification:
 - All 14 principles adhered to
 - Quality gates passed
-- Tests documented and passing
+- **Automated Tests**: ✅ All tests pass in GitHub Actions (dated verification required)
+- **Manual User Tests**: ✅ All scenarios pass (dated verification required)
+- Tests documented in PROGRESS.md with both Automated and User Testing columns showing ✅ PASS
 - Progress tracking completed
 - Chinese communication maintained
 - Dependency verification completed (no unauthorized tools)
@@ -331,8 +422,34 @@ Each development phase conclusion MUST include constitutional compliance review:
 
 ---
 
-**Version**: 1.7.0  
+**Version**: 1.8.0  
 **Ratified**: 2025-12-07  
-**Last Amended**: 2025-12-10
+**Last Amended**: 2025-12-14
 
-For day-to-day development guidance and implementation details, refer to the files in `.specify/templates/` and `.github/prompts/` which provide mode-specific instructions that operate within the boundaries established by this constitution.
+---
+
+## LATEST AMENDMENT (2025-12-14)
+
+**Amendment Type**: MINOR (Enhanced testing and gating requirements)
+
+**Changes Made**:
+1. **Phase Completion Testing Requirements**: Added explicit dual-gate requirement - both automated tests AND manual user tests must pass before phase is marked complete
+2. **GitHub Actions CI/CD Enhancement**: Expanded CI/CD validation section with specific workflow requirements and phase completion gating
+3. **Compliance Verification Update**: Updated to explicitly require both Automated Testing and User Testing verification with dated proof
+
+**Rationale**: 
+- Automated tests alone cannot catch all quality issues (UI/UX, real-world scenarios, edge cases)
+- Manual user testing is necessary to verify features work as intended for actual users
+- GitHub Actions verification ensures consistency and prevents "works on my machine" issues
+- Both gates together ensure high-quality portfolio features ready for demonstration
+
+**Impact**:
+- Phase completion criteria now stricter (requires 2 verification stages)
+- PROGRESS.md table format unchanged (same columns used)
+- No code breaking changes
+- Applies to all future phases (Phase 6 onwards must follow both-gate requirement)
+
+**Migration Plan for Existing Phases**:
+- Phase 3-5: Already partially comply (retroactively mark as complete with both gates verified)
+- Phase 6+ : MUST follow both-gate requirement from start
+- CI/CD setup: Required before Phase 6 can be marked complete

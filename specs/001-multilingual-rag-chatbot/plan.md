@@ -309,19 +309,27 @@ After task generation, work through tasks.md sequentially, starting with:
 - Phase 2: Foundational (core infrastructure)
 - Phase 3: US-01 Session Creation (P1 MVP core)
 
-### 4. Testing Strategy (Constitutional Requirement II)
+### 4. Testing Strategy (Constitutional Requirement II & XV)
+
+**CRITICAL**: All tests MUST use the same framework throughout the project (see Constitution Principle XV):
+- **Backend**: pytest ONLY (test functions named `def test_*()` or `def test_...()`)
+  - ❌ NO custom test runners or print-statement-based tests
+  - ❌ NO classes without `def test_` methods
+  - ALL tests must be executable via `pytest` command
+- **Frontend**: Jest ONLY (test files named `*.test.ts`, `*.spec.ts`, etc.)
 
 **Test-First Approach** (recommended):
-1. Write contract tests (validate API responses against OpenAPI schemas)
-2. Write integration tests (test complete workflows)
+1. Write contract tests (validate API responses against OpenAPI schemas) - pytest format
+2. Write integration tests (test complete workflows) - pytest format
 3. Implement features to make tests pass
-4. Write unit tests for individual services
-5. Run full test suite in GitHub Actions
+4. Write unit tests for individual services - pytest format
+5. Run full test suite in GitHub Actions with `pytest` command
 
 **Manual Testing**:
 - Follow `quickstart.md` scenarios
 - Verify all 10 success criteria from `spec.md`
 - Test all 6 edge cases
+- Document manual test results with checklist format in PROGRESS.md
 
 ### 5. Deployment Preparation
 

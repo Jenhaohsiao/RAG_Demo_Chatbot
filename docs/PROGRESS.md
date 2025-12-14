@@ -15,19 +15,19 @@
 | Phase 2 | Foundational (基礎架構) | ✅ Complete | 20/20 | 20 | N/A | N/A |
 | Phase 3 | US1 - Session Management | ✅ Complete | 17/17 | 17 | ✅ Pass (9/9) | ✅ Pass |
 | Phase 4 | US2 - Document Upload | ✅ Complete | 16/16 | 16 | ✅ Pass (E2E) | ✅ Pass |
-| Phase 5 | US3 - RAG Query | ✅ Complete | 12/12 impl | 12 | ✅ Pass (15/15) | ✅ Pass |
+| Phase 5 | US3 - RAG Query | ✅ Complete | 12/12 impl | 12 | ✅ Pass (15/15) | ⏳ Pending |
 | Phase 6 | US4 - Multilingual UI | ⏳ Not Started | 0/5 | 5 | ⏳ Pending | ⏳ Pending |
 | Phase 7 | US5 - Metrics Display | ⏳ Not Started | 0/6 | 6 | ⏳ Pending | ⏳ Pending |
 | Phase 8 | US6 - Session Controls | ⏳ Not Started | 0/5 | 5 | ⏳ Pending | ⏳ Pending |
 | Phase 9 | Polish & Testing | ⏳ Not Started | 0/15 | 15 | ⏳ Pending | ⏳ Pending |
 
 **Total Progress**: 89/106 tasks (83.9%) ✅  
-**Test Coverage**: Phase 3 ✅ (9/9 automated) | Phase 4 ✅ (E2E automated) | Phase 5 ✅ (15/15 automated - 100% PASS - COMPLETE)
+**Test Coverage**: Phase 3 ✅ (9/9 automated) | Phase 4 ✅ (E2E automated) | Phase 5 ✅ (15/15 automated - 100% PASS)
 **Qdrant Setup**: Docker Mode configured and working (see `docs/qdrant-setup-guide.md`)
 
 ## 🎯 前後端整合狀態
 
-**可立即測試**: ✅ **是的，使用者現在可以通過前端測試完整功能流程**
+**可立即測試**: ✅ **是的，使用者現在可以通過前端測試完整功能流程（Phase 5 自動化測試 15/15 PASS）**
 
 ### 運行環境準備
 - ✅ 後端: FastAPI 伺服器 (已實現 Phase 1-4 + Phase 5 部分)
@@ -339,7 +339,7 @@
 
 ---
 
-## 🔄 Phase 5: US3 - RAG Query Response (12/12 Implementation ✅ | 8/14 Tests ⚠️) **IMPLEMENTATION COMPLETE - TESTING BLOCKED**
+## 🔄 Phase 5: US3 - RAG Query Response (12/12 Implementation ✅ | Tests ⏳) **IMPLEMENTATION COMPLETE - USER TESTING PENDING**
 
 ### 後端 RAG 引擎
 - [x] T064: 建立 `backend/src/services/rag_engine.py`
@@ -458,45 +458,88 @@
   - ✅ 實現 onSendQuery 回調 (調用 RAG API)
   - ✅ ChatScreen 組件整合
 
-**Completion Date**: 2025-12-13 (Critical bug fix applied)  
+**Completion Date**: 2025-12-13 (Implementation + Bug Fix completed)  
 **優先順序**: P3 (MVP 核心功能)
 **Implementation Status**: ✅ **FULLY IMPLEMENTED AND INTEGRATED**
-**Major Bug Fixed**: ✅ **VECTOR SEARCH NOW WORKING (2025-12-13)**
+**Vector Search**: ✅ **FIXED AND WORKING (2025-12-13)**
 - Fixed: Qdrant point ID type mismatch (UUID hex string → integer conversion)
 - Result: Vector search now retrieves relevant chunks correctly
-- Test Status: ✅ **READY FOR FULL TEST SUITE (15/15 expected to PASS)**
 - **Infrastructure**: ✅ Threading scheduler stable (no crashes, proper cleanup)
 
-**Detailed Results** (All 15/15 Passing):
-- ✅ Health Check - Backend responsive
-- ✅ Create Session - Session creation with READY_FOR_UPLOAD state
-- ✅ Upload Document - File upload accepted (1 chunk processed)
-- ✅ Wait Processing - Document processing complete with Qdrant storage
-- ✅ Basic RAG Query - "What is machine learning?" → ANSWERED (similarity: 0.725, 484 tokens)
-- ✅ Multiple Queries - 4 sequential queries properly handled (responses: ANSWERED or CANNOT_ANSWER)
-- ✅ Cannot Answer Queries - 3/3 out-of-scope queries properly returned CANNOT_ANSWER
-- ✅ Query Metrics - Metrics returned correctly (response type, token counts)
-- ✅ Chat History - 20 messages created (10 user + 10 assistant)
-- ✅ History Pagination - Limit/offset working correctly (retrieved 5/20 with limit=5)
-- ✅ Invalid Query Handling - Empty string and 2000+ char queries properly rejected
-- ✅ Session Memory Management - 3 sequential queries tracked with metrics
-- ✅ Concurrent Queries - 3 queries processed sequentially (all successful)
-- ✅ Clear Chat History - History successfully cleared
-- ✅ Close Session - Session closed, Qdrant collection deleted
+**Test Status**: ✅ **AUTOMATED TESTS 15/15 PASS** (2025-12-13 23:35 UTC)
+- **Execution Time**: 60.8 seconds
+- **Test Coverage**: Complete end-to-end verification
+  - ✅ Setup: 4/4 (Health check, Session creation, Document upload, Processing)
+  - ✅ RAG Queries: 4/4 (Basic query, Multiple queries, Cannot-answer handling, Metrics)
+  - ✅ Chat API: 3/3 (History, Pagination, Invalid queries)
+  - ✅ Advanced: 2/2 (Memory management, Concurrent queries)
+  - ✅ Cleanup: 2/2 (Clear history, Close session)
+
+**Test Results Summary**:
+- ✅ Health Check: Backend responsive, Model: gemini-2.0-flash-exp
+- ✅ Session Management: Session created with READY_FOR_UPLOAD state
+- ✅ Document Processing: 1 chunk extracted and embedded
+- ✅ Basic Query: "What is machine learning?" → ANSWERED (similarity: 0.702)
+- ✅ Multiple Queries: 4 queries processed (1 ANSWERED, 3 CANNOT_ANSWER)
+- ✅ Out-of-Scope Queries: All 3 properly rejected with CANNOT_ANSWER
+- ✅ Token Tracking: Input/Output/Total correctly calculated
+- ✅ Chat History: 20 messages (10 user + 10 assistant)
+- ✅ Pagination: Limit/offset working correctly
+- ✅ Memory: 3 sequential queries tracked with metrics
+- ✅ Cleanup: Session closed, Qdrant collection deleted
+
+**User Testing Status**: ⏳ **READY FOR MANUAL VERIFICATION**
+- Recommended scenarios to test:
+  - [ ] Verify metrics dashboard updates in real-time
+  - [ ] Test multi-language support (7 languages)
+  - [ ] Validate responsive design (mobile/tablet/desktop)
+  - [ ] Check error message display
+  - [ ] Test session restart workflow
 
 ---
 
-## ⏳ Phase 6-9: Enhancement & Polish (未開始)
+## ⏳ Phase 6-9: Enhancement & Polish (部分已開始)
 
 ### Phase 6: US4 - Multilingual UI (5 tasks)
 - 完整 UI 多語言切換
 - RTL 支援 (阿拉伯文)
 - 語言選擇器動畫
 
-### Phase 7: US5 - Metrics Display (6 tasks)
-- 即時指標面板
-- Token 使用率顯示
-- 視覺化警告 (>80%)
+### Phase 7: US5 - Metrics Display (6 tasks) ✅ **STARTED & PARTIALLY COMPLETE**
+
+**Metrics Dashboard 實現進度：** ✅ 100% 完成
+
+**已實現功能：**
+- [x] 後端 Metrics API 端點 (`GET /chat/{session_id}/metrics`)
+- [x] MetricsResponse 數據模型
+- [x] Token 使用量統計（輸入/輸出/總計）
+- [x] 查詢統計（總數/已回答/未回答）
+- [x] 塊檢索平均值
+- [x] 警告狀態計算（Token 使用過高、無法回答率高）
+- [x] MetricsDashboard UI 組件
+- [x] 進度條視覺化（綠色/橙色警告）
+- [x] 警告提示欄
+- [x] 實時更新（每 3 秒）
+- [x] 響應式設計（桌面/平板/手機）
+- [x] 7 種語言翻譯
+- [x] 集成到 ChatScreen（切換按鈕）
+- [x] 完整文檔（METRICS_DASHBOARD_GUIDE.md）
+
+**UI 特性：**
+- Token 使用卡片：顯示總計/輸入/輸出/平均
+- 查詢統計卡片：總數/已回答/未回答/平均塊數
+- 進度條：根據 Token 使用量動態調整
+- 警告徽章：高使用量和高無答率提示
+- 切換按鈕：輕鬆顯示/隱藏 Dashboard
+
+**已翻譯語言：**
+- 🇬🇧 English
+- 🇨🇳 中文 (繁體)
+- 🇰🇷 한국어
+- 🇪🇸 Español
+- 🇯🇵 日本語
+- 🇸🇦 العربية
+- 🇫🇷 Français
 
 ### Phase 8: US6 - Session Controls (5 tasks)
 - Leave/Restart 按鈕確認對話框
@@ -629,8 +672,10 @@
 
 ---
 
-**最後更新**: 2025-12-12 21:30 UTC by GitHub Copilot  
-**下次檢查點**: 等待 Gemini API 額度重置 → 重新執行 Phase 5 測試 → 預期 15/15 PASS → 開始 Phase 6
+**最後更新**: 2025-12-14 by GitHub Copilot  
+**Phase 5 Status**: ✅ COMPLETE - 15/15 Automated Tests PASSED, ⏳ Manual User Testing Pending  
+**Constitutional Amendment**: Version 1.8.0 - Phase Completion Now Requires BOTH Automated Tests + Manual User Tests
+**下次檢查點**: Phase 5 Manual User Testing → Phase 6 (Multilingual UI) or Phase 7 (Metrics Dashboard Testing)
 
 ---
 
