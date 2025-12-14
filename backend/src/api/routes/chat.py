@@ -63,6 +63,21 @@ class ChatHistoryResponse(BaseModel):
     total_count: int
 
 
+class MetricsResponse(BaseModel):
+    """Session Metrics 回應"""
+    session_id: str
+    total_queries: int
+    total_tokens: int
+    total_input_tokens: int
+    total_output_tokens: int
+    avg_tokens_per_query: float
+    avg_chunks_retrieved: float
+    unanswered_ratio: float
+    token_warning_threshold: int
+    is_token_warning: bool
+    is_unanswered_warning: bool
+
+
 # 聊天歷史儲存（實際應使用資料庫）
 _chat_history: dict[UUID, List[ChatMessage]] = {}
 
@@ -275,3 +290,77 @@ async def clear_history(session_id: UUID):
     logger.info(f"[{session_id}] Chat history cleared")
     
     return {"message": "Chat history cleared successfully"}
+
+
+@router.get("/{session_id}/metrics", response_model=MetricsResponse)
+async def get_metrics(session_id: UUID):
+    """
+    取得 Session 指標（Token 使用、查詢統計、警告狀態）
+    
+    Flow:
+    1. 驗證 session 存在
+    2. 從 RAG Engine 取得 metrics
+    3. 計算警告狀態
+    4. 返回詳細統計數據
+    
+    Returns:
+        MetricsResponse: 包含所有運作指標
+    """
+    # 驗證 session
+    session = session_manager.get_session(session_id)
+    if not session:
+        error = get_error_response(ErrorCode.SESSION_NOT_FOUND)
+        raise HTTPException(
+            status_code=get_http_status_code(ErrorCode.SESSION_NOT_FOUND),
+            detail=error.dict()
+        )
+    
+    try:
+        # 從 RAG Engine 取得 metrics
+        metrics = rag_engine.get_session_metrics(session_id)
+        
+        if metrics is None:
+            # 若尚無 metrics，返回初始值
+            metrics = {
+                'total_queries': 0,
+                'total_tokens': 0,
+                'total_input_tokens': 0,
+                'total_output_tokens': 0,
+                'avg_tokens_per_query': 0.0,
+                'avg_chunks_retrieved': 0.0,
+                'unanswered_ratio': 0.0,
+            }
+        
+        # 取得 token 閾值
+        token_threshold = rag_engine.token_threshold
+        is_token_warning = metrics.get('total_tokens', 0) >= token_threshold
+        is_unanswered_warning = metrics.get('unanswered_ratio', 0) >= 0.8
+        
+        logger.info(
+            f"[{session_id}] Metrics retrieved: "
+            f"queries={metrics.get('total_queries')}, "
+            f"tokens={metrics.get('total_tokens')}, "
+            f"unanswered_ratio={metrics.get('unanswered_ratio', 0):.1%}"
+        )
+        
+        return MetricsResponse(
+            session_id=str(session_id),
+            total_queries=metrics.get('total_queries', 0),
+            total_tokens=metrics.get('total_tokens', 0),
+            total_input_tokens=metrics.get('total_input_tokens', 0),
+            total_output_tokens=metrics.get('total_output_tokens', 0),
+            avg_tokens_per_query=metrics.get('avg_tokens_per_query', 0.0),
+            avg_chunks_retrieved=metrics.get('avg_chunks_retrieved', 0.0),
+            unanswered_ratio=metrics.get('unanswered_ratio', 0.0),
+            token_warning_threshold=token_threshold,
+            is_token_warning=is_token_warning,
+            is_unanswered_warning=is_unanswered_warning,
+        )
+        
+    except Exception as e:
+        logger.error(f"[{session_id}] Error retrieving metrics: {str(e)}")
+        error = get_error_response(ErrorCode.INTERNAL_SERVER_ERROR)
+        raise HTTPException(
+            status_code=get_http_status_code(ErrorCode.INTERNAL_SERVER_ERROR),
+            detail=error.dict()
+        )

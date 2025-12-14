@@ -161,5 +161,31 @@
       "chunks": "{{count}} fragments pertinents trouvés",
       "similarity": "Similarité"
     }
+  },
+  "metrics": {
+    "tokens": {
+      "title": "🔋 Utilisation des tokens",
+      "total": "Total",
+      "input": "Entrée",
+      "output": "Sortie",
+      "avgPerQuery": "Moyenne/Requête",
+      "warning": "⚠️ Utilisation élevée"
+    },
+    "queries": {
+      "title": "📊 Statistiques des requêtes",
+      "total": "Nombre total de requêtes",
+      "answered": "Réponse donnée",
+      "unanswered": "Aucune réponse",
+      "avgChunks": "Moyenne de fragments",
+      "efficiency": "Efficacité"
+    },
+    "common": {
+      "queries": "requêtes",
+      "requests": "demandes",
+      "perQuery": "par requête"
+    },
+    "warnings": {
+      "highUnanswered": "Taux élevé de requêtes sans réponse. Veuillez télécharger davantage de documents pertinents."
+    }
   }
 }

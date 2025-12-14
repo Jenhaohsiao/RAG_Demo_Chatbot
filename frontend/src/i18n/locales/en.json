@@ -161,5 +161,39 @@
       "chunks": "{{count}} relevant chunks found",
       "similarity": "Similarity"
     }
+  },
+  "metrics": {
+    "tokens": {
+      "title": "🔋 Token Usage",
+      "total": "Total",
+      "input": "Input",
+      "output": "Output",
+      "avgPerQuery": "Avg/Query",
+      "warning": "⚠️ High Usage"
+    },
+    "queries": {
+      "title": "📊 Query Statistics",
+      "total": "Total Queries",
+      "answered": "Answered",
+      "unanswered": "Unanswered",
+      "avgChunks": "Avg Chunks",
+      "efficiency": "Efficiency"
+    },
+    "vectorDb": {
+      "title": "💾 Vector DB",
+      "totalChunks": "Total Chunks",
+      "documentsStored": "Documents Stored",
+      "avgChunkSize": "Avg Chunk Size",
+      "memoryUsage": "Memory Usage"
+    },
+    "common": {
+      "queries": "queries",
+      "requests": "requests",
+      "perQuery": "per query"
+    },
+    "warnings": {
+      "highTokenUsage": "Token usage has reached {{percentage}}% of the threshold",
+      "highUnanswered": "High unanswered rate. Consider uploading more relevant documents."
+    }
   }
 }

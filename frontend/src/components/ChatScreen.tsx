@@ -7,7 +7,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
+import { MetricsDashboard } from './MetricsDashboard';
 import { ChatRole, ResponseType, type ChatMessage as ChatMessageType, type ChatResponse } from '../types/chat';
+import { getSessionMetrics, type SessionMetrics } from '../services/metricsService';
 
 interface ChatScreenProps {
   sessionId: string;
@@ -31,6 +33,8 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [responseTypes, setResponseTypes] = useState<Record<string, ResponseType>>({});
+  const [metrics, setMetrics] = useState<SessionMetrics | null>(null);
+  const [showMetrics, setShowMetrics] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // 自動滾動到最新訊息
@@ -41,6 +45,26 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // 定期更新 metrics
+  useEffect(() => {
+    const updateMetrics = async () => {
+      try {
+        const data = await getSessionMetrics(sessionId);
+        setMetrics(data);
+      } catch (err) {
+        console.error('Failed to update metrics:', err);
+      }
+    };
+
+    // 初始載入
+    updateMetrics();
+
+    // 每隔 3 秒更新一次
+    const interval = setInterval(updateMetrics, 3000);
+
+    return () => clearInterval(interval);
+  }, [sessionId]);
 
   const handleSendMessage = async (content: string) => {
     setError(null);
@@ -78,6 +102,10 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
         [response.message_id]: response.response_type
       }));
 
+      // 查詢後立即更新 metrics
+      const updatedMetrics = await getSessionMetrics(sessionId);
+      setMetrics(updatedMetrics);
+
     } catch (err: any) {
       setError(err.response?.data?.detail || t('chat.error.sendFailed'));
       console.error('Query failed:', err);
@@ -89,9 +117,29 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   return (
     <div className="chat-screen">
       <div className="chat-header">
-        <h2>{t('chat.title')}</h2>
-        <p className="chat-subtitle">{t('chat.subtitle')}</p>
+        <div className="chat-header-content">
+          <div>
+            <h2>{t('chat.title')}</h2>
+            <p className="chat-subtitle">{t('chat.subtitle')}</p>
+          </div>
+          <button
+            className="metrics-toggle-btn"
+            onClick={() => setShowMetrics(!showMetrics)}
+            title={showMetrics ? '隱藏統計' : '顯示統計'}
+          >
+            {showMetrics ? '📊 隱藏' : '📊 顯示'}
+          </button>
+        </div>
       </div>
+
+      {/* Metrics Dashboard */}
+      {showMetrics && metrics && (
+        <MetricsDashboard
+          sessionId={sessionId}
+          metrics={metrics}
+          onMetricsUpdate={setMetrics}
+        />
+      )}
 
       {/* 文件內容說明區域 */}
       {documentSummary && (
@@ -166,19 +214,49 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
         .chat-header {
           padding: 20px;
           border-bottom: 1px solid #e1e8ed;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
+          background: white;
+        }
+
+        .chat-header-content {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 1rem;
         }
 
         .chat-header h2 {
           margin: 0 0 8px 0;
           font-size: 24px;
+          color: #2d3748;
         }
 
         .chat-subtitle {
           margin: 0;
           font-size: 14px;
-          opacity: 0.9;
+          color: #718096;
+        }
+
+        .metrics-toggle-btn {
+          padding: 0.5rem 1rem;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 0.9rem;
+          font-weight: 600;
+          transition: all 0.2s ease;
+          white-space: nowrap;
+          height: fit-content;
+        }
+
+        .metrics-toggle-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .metrics-toggle-btn:active {
+          transform: translateY(0);
         }
 
         .document-summary-container {

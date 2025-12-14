@@ -406,7 +406,7 @@ class RAGEngine:
             f"{len(memory)}/{self.memory_limit} queries in window"
         )
     
-    def get_session_metrics(self, session_id: UUID) -> Optional[SessionMetrics]:
+    def get_session_metrics(self, session_id: UUID) -> Optional[dict]:
         """
         取得 Session 指標
         
@@ -414,9 +414,23 @@ class RAGEngine:
             session_id: Session ID
         
         Returns:
-            SessionMetrics: Session 指標，若無則回傳 None
+            dict: Session 指標字典，若無則回傳 None
         """
-        return self._session_metrics.get(session_id)
+        metrics = self._session_metrics.get(session_id)
+        if metrics is None:
+            return None
+        
+        # 轉換為字典便於 API 回應
+        return {
+            'total_queries': metrics.total_queries,
+            'total_tokens': metrics.total_tokens,
+            'total_input_tokens': metrics.total_input_tokens,
+            'total_output_tokens': metrics.total_output_tokens,
+            'avg_tokens_per_query': metrics.avg_tokens_per_query,
+            'total_documents': metrics.total_documents,
+            'avg_chunks_retrieved': metrics.avg_chunks_retrieved,
+            'unanswered_ratio': metrics.unanswered_ratio,
+        }
     
     def clear_session(self, session_id: UUID) -> None:
         """
