@@ -173,13 +173,18 @@ def process_document(document: Document):
         collection_name = f"session_{clean_session_id}"
         
         # 準備 points 資料
-        # NOTE: Qdrant 只接受 UUID 或整數作為 point ID，不接受字串
-        # 我們為每個 chunk 生成唯一的 UUID，但在 payload 中保留 document_id 用於查詢
+        # NOTE: Qdrant 要求點 ID 是整數（通過 hash），不接受字串
+        # 我們為每個 chunk 生成唯一的整數 ID (基於 document_id + chunk_index)
         import uuid
+        import hashlib
         points = []
         for idx, (chunk, emb_result) in enumerate(zip(chunks, embedding_results)):
+            # 產生唯一的整數 ID (基於 document_id 和 chunk_index)
+            id_string = f"{document.document_id}_{chunk.chunk_index}"
+            point_id = int(hashlib.md5(id_string.encode()).hexdigest(), 16) % (2**31)  # 轉換為 32-bit 整數
+            
             point_data = {
-                "id": uuid.uuid4().hex,  # Qdrant-compatible ID (32-char hex string = valid UUID format)
+                "id": point_id,  # Qdrant 要求的整數 ID
                 "vector": emb_result.vector,
                 "payload": {
                     "document_id": str(document.document_id),

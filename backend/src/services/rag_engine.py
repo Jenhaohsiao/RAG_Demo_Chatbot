@@ -166,7 +166,7 @@ class RAGEngine:
             
             for result in search_results:
                 chunk = RetrievedChunk(
-                    chunk_id=result['id'],
+                    chunk_id=str(result['id']),  # 轉換為字符串（Qdrant 返回整數 ID）
                     text=result['payload'].get('text', ''),
                     similarity_score=result['score'],
                     document_id=result['payload'].get('document_id', ''),
