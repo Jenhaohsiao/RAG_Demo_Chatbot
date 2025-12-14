@@ -672,10 +672,36 @@
 
 ---
 
-**最後更新**: 2025-12-14 by GitHub Copilot  
+**最後更新**: 2025-12-14 01:45  
 **Phase 5 Status**: ✅ COMPLETE - 15/15 Automated Tests PASSED, ⏳ Manual User Testing Pending  
-**Constitutional Amendment**: Version 1.8.0 - Phase Completion Now Requires BOTH Automated Tests + Manual User Tests
-**下次檢查點**: Phase 5 Manual User Testing → Phase 6 (Multilingual UI) or Phase 7 (Metrics Dashboard Testing)
+**Constitutional Amendment**: Version 1.9.0 - Principle XV (Testing Framework Standardization)
+**下次檢查點**: Phase 5 Manual User Testing → Phase 6 (Multilingual UI)
+
+---
+
+## 📌 新憲法原則 - Principle XV (2025-12-14 10:45)
+
+**Testing Framework Standardization (統一測試框架)**
+
+為避免重複浪費時間在不同測試風格上，已在 constitution 中加入 **Principle XV**：
+
+**關鍵規則**:
+- ✅ **Python**: 所有測試必須使用 pytest (`def test_*()` 函數)
+- ✅ **TypeScript**: 所有測試必須使用 Jest (`*.test.ts`, `*.spec.ts`)
+- ❌ **禁止**: 混合風格 (pytest + 自定義 print 腳本)
+- ❌ **禁止**: 自定義測試運行器 (沒有 `def test_` 的 Python 類別)
+
+**已執行**:
+- [x] 在 constitution.md 加入 Principle XV (詳細規則與範例)
+- [x] 在 speckit/plan.md 強調框架統一
+- [x] 轉換 `test_phase2.py` 從自定義腳本到 pytest 格式
+  - 11 個獨立的 pytest 測試函數
+  - Phase 2 Tests: ✅ **11/11 PASS**
+
+**影響**:
+- 所有 Phase 3-5 測試已是 pytest 格式 ✅
+- Phase 6+ 必須從開始就使用統一框架
+- CI/CD 驗證更簡單 (單一 `pytest` 命令)
 
 ---
 
