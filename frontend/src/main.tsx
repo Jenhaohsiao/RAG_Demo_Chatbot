@@ -76,12 +76,22 @@ const App: React.FC = () => {
   };
 
   // Modal 確認按鈕
-  const handleModalConfirm = () => {
+  const handleModalConfirm = async () => {
     if (isFailed) {
       // 失敗時回到上傳畫面
       setShowModal(false);
       resetUpload();
     } else if (isCompleted) {
+      // 等待 session 狀態更新為 READY_FOR_CHAT
+      // (後端在文件處理完成後會更新狀態)
+      let attempts = 0;
+      const maxAttempts = 30; // 最多 30 秒
+      
+      while (attempts < maxAttempts && sessionState !== 'READY_FOR_CHAT') {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        attempts++;
+      }
+      
       // 成功時進入聊天畫面
       setShowModal(false);
       setChatPhase(true);
