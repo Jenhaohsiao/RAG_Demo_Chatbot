@@ -11,11 +11,11 @@
 
 | Phase | Name | Status | Progress | Tasks | Automated Testing | GitHub Actions | User Testing |
 |-------|------|--------|----------|-------|---------|---|--------------|
-| Phase 1 | Setup (專案初始化) | ✅ Complete | 10/10 | 10 | N/A | ⏳ Testing | N/A |
-| Phase 2 | Foundational (基礎架構) | ✅ Complete | 20/20 | 20 | ✅ (11/11) | ⏳ Testing | N/A |
-| Phase 3 | US1 - Session Management | ✅ Complete | 17/17 | 17 | ✅ Pass (9/9) | ⏳ Testing | ✅ Pass |
-| Phase 4 | US2 - Document Upload | ✅ Complete | 16/16 | 16 | ✅ Pass (E2E) | ⏳ Testing | ✅ Pass |
-| Phase 5 | US3 - RAG Query | ✅ Complete | 12/12 impl | 12 | ✅ Pass (15/15) | ⏳ Testing | ⏳ Pending |
+| Phase 1 | Setup (專案初始化) | ✅ Complete | 10/10 | 10 | N/A | N/A | N/A |
+| Phase 2 | Foundational (基礎架構) | ✅ Complete | 20/20 | 20 | ✅ (11/11) | ✅ PASS (11/11) | N/A |
+| Phase 3 | US1 - Session Management | ✅ Complete | 17/17 | 17 | ✅ Pass (9/9) | ⏳ Config (Qdrant) | ✅ Pass |
+| Phase 4 | US2 - Document Upload | ✅ Complete | 16/16 | 16 | ✅ Pass (E2E) | ⏳ Config (Qdrant) | ✅ Pass |
+| Phase 5 | US3 - RAG Query | ✅ Complete | 12/12 impl | 12 | ✅ Pass (15/15) | ⏳ Config (API Key) | ⏳ Pending |
 | Phase 6 | US4 - Multilingual UI | ⏳ Not Started | 0/5 | 5 | ⏳ Pending | ⏳ Pending |
 | Phase 7 | US5 - Metrics Display | ⏳ Not Started | 0/6 | 6 | ⏳ Pending | ⏳ Pending |
 | Phase 8 | US6 - Session Controls | ⏳ Not Started | 0/5 | 5 | ⏳ Pending | ⏳ Pending |
@@ -675,7 +675,34 @@
 **最後更新**: 2025-12-14 01:45  
 **Phase 5 Status**: ✅ COMPLETE - 15/15 Automated Tests PASSED, ⏳ Manual User Testing Pending  
 **Constitutional Amendment**: Version 1.9.0 - Principle XV (Testing Framework Standardization)
+**GitHub Actions**: ✅ Configured (Phase 2 verified, Phase 3-5 pending secrets)
 **下次檢查點**: Phase 5 Manual User Testing → Phase 6 (Multilingual UI)
+
+---
+
+## 🔄 GitHub Actions CI/CD Configuration (2025-12-14)
+
+### Workflow Setup
+- ✅ Created `.github/workflows/test.yml`
+- ✅ Docker Qdrant service configured (port 6333)
+- ✅ Python 3.12 environment
+- ✅ Test report generation and artifact upload
+
+### Phase Testing Status in GitHub Actions
+
+| Phase | Test File | Status | Notes |
+|-------|-----------|--------|-------|
+| **Phase 2** | `test_phase2.py` | ✅ **11/11 PASS** | Fully automated, no external dependencies |
+| **Phase 3** | `test_phase3_integration.py` | ⚠️ Config Pending | Requires Qdrant Docker (now available) |
+| **Phase 4** | `test_phase4_e2e.py` | ⚠️ Config Pending | Requires Qdrant Docker + Gemini API key |
+| **Phase 5** | `test_phase5_rag_query.py` | ⚠️ Config Pending | Requires Gemini API key (`GOOGLE_API_KEY` secret) |
+
+### Next Steps for Full CI/CD Integration
+1. Add `GOOGLE_API_KEY` as GitHub Secret (Settings → Secrets and variables → Actions)
+2. Phase 3-5 tests will auto-execute when secret is configured
+3. All test results will display in GitHub Actions UI on push/PR
+
+---
 
 ---
 
