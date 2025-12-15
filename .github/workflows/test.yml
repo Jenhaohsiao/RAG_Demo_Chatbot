@@ -30,9 +30,9 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
 
-      - name: Start Qdrant with docker-compose
+      - name: Start Qdrant with docker compose
         run: |
-          docker-compose up -d qdrant
+          docker compose up -d qdrant
           echo "Waiting for Qdrant to be ready..."
           for i in {1..30}; do
             if curl -s http://localhost:6333/health > /dev/null; then
