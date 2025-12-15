@@ -14,6 +14,38 @@ services:
     restart: unless-stopped
     networks:
       - rag-chatbot-network
+# Temporarily disabled health check to debug startup issues
+    # healthcheck:
+    #   test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:6333 || exit 1"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rag-chatbot-backend
+    ports:
+      - "8000:8000"  # FastAPI server
+    environment:
+      - QDRANT_MODE=docker
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+      - QDRANT_URL=http://qdrant:6333
+      - ENABLE_CONTENT_MODERATION=false  # Disable for testing
+    env_file:
+      - ./backend/.env.local
+    depends_on:
+      - qdrant
+    restart: unless-stopped
+    networks:
+      - rag-chatbot-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 networks:
   rag-chatbot-network:

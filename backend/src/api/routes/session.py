@@ -100,6 +100,8 @@ async def get_session_with_metrics(session_id: UUID):
     
     # Get vector count from Qdrant
     vector_count = vector_store.get_vector_count(session.qdrant_collection_name)
+    if vector_count is None:
+        vector_count = 0  # Default to 0 if collection doesn't exist or is empty
     session_manager.update_vector_count(session_id, vector_count)
     
     # Create metrics (placeholder values for now, will be updated during chat)

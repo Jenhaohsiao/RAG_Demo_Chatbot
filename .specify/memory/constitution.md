@@ -2,34 +2,37 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: 1.6.0 → 1.7.0 (MINOR - Terminal Session Management Principle)
-Date: 2025-12-10
+Version Change: 1.8.0 → 1.9.0 (MINOR - Temporary Files Management Principle)
+Date: 2025-12-15
 
 MODIFIED PRINCIPLES:
-  - Principle XIV (Terminal Session Management): NEW PRINCIPLE ADDED
-    Requirement: AI MUST reuse existing terminals instead of creating new ones repeatedly
+  - Principle XV (Temporary Files Management): NEW PRINCIPLE ADDED
+    Requirement: "暫存檔/短期筆記，在任務達成後請刪除" - Clean workspace by removing temporary files upon task completion
+  - Principle XVI: Renumbered from XV (Testing Framework Standardization)
 
 REASON FOR CHANGE:
-  - Prevent terminal proliferation and workspace clutter
-  - Avoid port conflicts from multiple server instances
-  - Maintain clear tracking of running processes
-  - Reduce resource consumption and confusion
-  - User explicitly requested: "你又重複開新的 terminal 了, 可以保持同一個視窗嗎?"
-  - Observed issue: AI repeatedly created new terminals causing backend duplication
+  - User explicitly requested: "請在constitution中加入. '暫存檔/短期筆記, 在任務達成後請刪除.'"
+  - Maintain clean workspace and prevent repository bloat
+  - Reduce confusion about which files are current vs temporary
+  - Make navigation easier for future developers
+  - Observed issue: Accumulation of debugging files, outdated docs, and temporary artifacts
 
 ADDED SECTIONS:
-  - Principle XIV: Terminal Session Management (Reuse Over Create)
+  - Principle XV: Temporary Files Management (Clean-As-You-Go)
+    - Requirements for removing debugging files, interim docs, test artifacts
+    - File types to remove vs exceptions for permanent files
+    - Enforcement through task completion reviews
 
 REMOVED SECTIONS: None
 
 TEMPLATES REQUIRING UPDATES:
-  ✅ AI agent workflows must prioritize terminal reuse
-  ✅ Process management guidelines updated
+  ✅ Task completion workflows must include workspace cleanup verification
+  ✅ Pull request reviews must check for temporary file removal
   
 FOLLOW-UP TODOs: 
-  - AI assistants should track active terminal sessions
-  - Document proper terminal lifecycle management
-  - Update development mode instructions to emphasize terminal reuse
+  - AI assistants should verify clean workspace before marking tasks complete
+  - Document temporary file identification guidelines
+  - Update development workflow to emphasize cleanup responsibility
 -->
 
 ## Project Identity
@@ -198,6 +201,34 @@ FOLLOW-UP TODOs:
 
 **Enforcement**: Before invoking `run_in_terminal` with `isBackground=true`, AI MUST verify no existing terminal is running the same or similar process. Repeated violations of this principle indicate need for workflow adjustment.
 
+### XV. Temporary Files Management (Clean-As-You-Go)
+**NON-NEGOTIABLE**: 暫存檔/短期筆記，在任務達成後請刪除。All temporary files, interim notes, debugging artifacts, and short-term documentation MUST be removed upon task completion. Only permanent, valuable documentation should remain in the repository.
+
+**Requirements**:
+- **Temporary debugging files**: Delete immediately after issue resolution
+- **Interim documentation**: Remove duplicates, outdated guides, and work-in-progress notes
+- **Test artifacts**: Remove temporary test files, outdated test results, and diagnostic scripts
+- **Development notes**: Clean up TODO comments, debug print statements, and temporary code
+- **Documentation cleanup**: Consolidate overlapping documents, remove superseded versions
+- **Before task completion**: Verify no temporary files remain in the workspace
+
+**File Types to Remove**:
+- Debugging scripts (diagnose_*.py, test_*.py for temporary use)
+- Outdated documentation (superseded guides, old versions)
+- Temporary configuration files (.env.backup, config.temp)
+- Work-in-progress notes (WIP_*, TEMP_*, debugging logs)
+- Duplicate or redundant files serving the same purpose
+
+**Exceptions (Permanent Files)**:
+- Core documentation (README.md, setup guides)
+- Production configuration templates
+- Established test files (part of test suite)
+- Historical records with lasting value (PROGRESS.md, constitution.md)
+
+**Rationale**: Maintains clean workspace, reduces confusion about which files are current, prevents repository bloat, makes navigation easier for future developers, and ensures only valuable artifacts remain. Temporary files accumulate quickly during development and create clutter that makes it harder to find important resources.
+
+**Enforcement**: Task completion reviews MUST include workspace cleanup verification. Pull requests MUST not contain temporary files unless explicitly justified as permanent additions.
+
 ## Technology Stack Constraints
 
 The following technologies are mandated for this project:
@@ -267,7 +298,7 @@ Any deviation from this stack requires a constitutional amendment.
 3. Implement the minimum code to make tests pass (Green phase)
 4. Refactor while keeping tests green (Refactor phase)
 
-### XV. Testing Framework Standardization (Unified, No Mixed Styles)
+### XVI. Testing Framework Standardization (Unified, No Mixed Styles)
 **NON-NEGOTIABLE**: All test files in the project MUST use the same testing framework. Mixed testing styles (pytest + custom frameworks in the same project) waste development time and create confusion during test execution and debugging.
 
 **Framework Choice**: `pytest` for Python backend, `Jest/Vitest` for TypeScript frontend
@@ -422,34 +453,37 @@ Each development phase conclusion MUST include constitutional compliance review 
 
 ---
 
-**Version**: 1.8.0  
+**Version**: 1.9.0  
 **Ratified**: 2025-12-07  
-**Last Amended**: 2025-12-14
+**Last Amended**: 2025-12-15
 
 ---
 
-## LATEST AMENDMENT (2025-12-14)
+## LATEST AMENDMENT (2025-12-15)
 
-**Amendment Type**: MINOR (Enhanced testing and gating requirements)
+**Amendment Type**: MINOR (Temporary Files Management Principle)
 
 **Changes Made**:
-1. **Phase Completion Testing Requirements**: Added explicit dual-gate requirement - both automated tests AND manual user tests must pass before phase is marked complete
-2. **GitHub Actions CI/CD Enhancement**: Expanded CI/CD validation section with specific workflow requirements and phase completion gating
-3. **Compliance Verification Update**: Updated to explicitly require both Automated Testing and User Testing verification with dated proof
+1. **New Principle XV**: "暫存檔/短期筆記，在任務達成後請刪除" - Added comprehensive temporary files management requirements
+2. **Principle Renumbering**: Testing Framework Standardization moved from XV to XVI
+3. **Workspace Cleanup Requirements**: Explicit guidelines for removing debugging files, interim documentation, and temporary artifacts
+4. **Task Completion Enhancement**: Added workspace cleanup verification to task completion reviews
 
 **Rationale**: 
-- Automated tests alone cannot catch all quality issues (UI/UX, real-world scenarios, edge cases)
-- Manual user testing is necessary to verify features work as intended for actual users
-- GitHub Actions verification ensures consistency and prevents "works on my machine" issues
-- Both gates together ensure high-quality portfolio features ready for demonstration
+- User explicitly requested inclusion of temporary files cleanup principle
+- Workspace cleanliness is essential for maintainable projects
+- Temporary files accumulate quickly during development and create confusion
+- Clean repositories are more professional and easier to navigate
+- Prevents repository bloat and makes CI/CD pipelines more efficient
 
 **Impact**:
-- Phase completion criteria now stricter (requires 2 verification stages)
-- PROGRESS.md table format unchanged (same columns used)
-- No code breaking changes
-- Applies to all future phases (Phase 6 onwards must follow both-gate requirement)
+- Task completion workflows now include mandatory cleanup verification
+- Pull requests must demonstrate removal of temporary files
+- AI assistants must verify clean workspace before marking tasks complete
+- No breaking changes to existing code
+- Applies immediately to all ongoing and future development
 
-**Migration Plan for Existing Phases**:
-- Phase 3-5: Already partially comply (retroactively mark as complete with both gates verified)
-- Phase 6+ : MUST follow both-gate requirement from start
-- CI/CD setup: Required before Phase 6 can be marked complete
+**Migration Plan**:
+- Immediate application: Current docs folder cleanup already demonstrates this principle
+- Future tasks: MUST include cleanup verification before completion
+- Repository audit: Periodic review recommended to identify accumulated temporary files
