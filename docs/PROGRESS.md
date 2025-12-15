@@ -9,13 +9,13 @@
 
 ## 📊 整體進度概覽
 
-| Phase | Name | Status | Progress | Tasks | Automated Testing | User Testing |
-|-------|------|--------|----------|-------|---------|--------------|
-| Phase 1 | Setup (專案初始化) | ✅ Complete | 10/10 | 10 | N/A | N/A |
-| Phase 2 | Foundational (基礎架構) | ✅ Complete | 20/20 | 20 | N/A | N/A |
-| Phase 3 | US1 - Session Management | ✅ Complete | 17/17 | 17 | ✅ Pass (9/9) | ✅ Pass |
-| Phase 4 | US2 - Document Upload | ✅ Complete | 16/16 | 16 | ✅ Pass (E2E) | ✅ Pass |
-| Phase 5 | US3 - RAG Query | ✅ Complete | 12/12 impl | 12 | ✅ Pass (15/15) | ⏳ Pending |
+| Phase | Name | Status | Progress | Tasks | Automated Testing | GitHub Actions | User Testing |
+|-------|------|--------|----------|-------|---------|---|--------------|
+| Phase 1 | Setup (專案初始化) | ✅ Complete | 10/10 | 10 | N/A | ⏳ Testing | N/A |
+| Phase 2 | Foundational (基礎架構) | ✅ Complete | 20/20 | 20 | ✅ (11/11) | ⏳ Testing | N/A |
+| Phase 3 | US1 - Session Management | ✅ Complete | 17/17 | 17 | ✅ Pass (9/9) | ⏳ Testing | ✅ Pass |
+| Phase 4 | US2 - Document Upload | ✅ Complete | 16/16 | 16 | ✅ Pass (E2E) | ⏳ Testing | ✅ Pass |
+| Phase 5 | US3 - RAG Query | ✅ Complete | 12/12 impl | 12 | ✅ Pass (15/15) | ⏳ Testing | ⏳ Pending |
 | Phase 6 | US4 - Multilingual UI | ⏳ Not Started | 0/5 | 5 | ⏳ Pending | ⏳ Pending |
 | Phase 7 | US5 - Metrics Display | ⏳ Not Started | 0/6 | 6 | ⏳ Pending | ⏳ Pending |
 | Phase 8 | US6 - Session Controls | ⏳ Not Started | 0/5 | 5 | ⏳ Pending | ⏳ Pending |
