@@ -19,6 +19,17 @@ jobs:
     name: Backend Tests (Python)
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    
+    services:
+      qdrant:
+        image: qdrant/qdrant:latest
+        ports:
+          - 6333:6333
+        options: >-
+          --health-cmd="curl -f http://localhost:6333/health || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - name: Checkout repository
@@ -30,12 +41,17 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
 
-      - name: Create .env.local (without API key for Phase 2 only)
+      - name: Create .env.local (with Qdrant Docker service + Gemini API from secret)
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           cat > backend/.env.local << EOF
-          QDRANT_MODE=embedded
+          QDRANT_MODE=docker
+          QDRANT_HOST=localhost
+          QDRANT_PORT=6333
+          QDRANT_URL=http://localhost:6333
           ENABLE_CONTENT_MODERATION=false
-          GOOGLE_API_KEY=
+          GOOGLE_API_KEY=${GEMINI_API_KEY}
           EOF
         working-directory: .
 
@@ -54,19 +70,16 @@ jobs:
         run: |
           python -m pytest tests/test_phase3_integration.py -v --tb=short --no-cov
         working-directory: backend
-        continue-on-error: true
 
       - name: Run Phase 4 Tests (Document Upload - Requires Qdrant + API)
         run: |
           python -m pytest tests/test_phase4_e2e.py -v --tb=short --no-cov
         working-directory: backend
-        continue-on-error: true
 
       - name: Run Phase 5 Tests (RAG Query - Requires Gemini API Key)
         run: |
           python -m pytest tests/test_phase5_rag_query.py -v --tb=short --no-cov
         working-directory: backend
-        continue-on-error: true
 
       - name: Generate test report
         if: always()
@@ -76,30 +89,31 @@ jobs:
 
           | Phase | Tests | Status | Notes |
           |-------|-------|--------|-------|
-          | Phase 2 | 11/11 | ✅ PASS | Automated (no external deps) |
-          | Phase 3 | 9/9 | ⏳ Skipped | Requires Docker Qdrant |
-          | Phase 4 | E2E | ⏳ Skipped | Requires Qdrant + Gemini API |
-          | Phase 5 | 15/15 | ⏳ Skipped | Requires Gemini API key |
+          | Phase 2 | 11/11 | ✅ Automated | Pure Python models (no external deps) |
+          | Phase 3 | 9/9 | ✅ Automated | Qdrant Docker service running |
+          | Phase 4 | E2E | ✅ Automated | Qdrant + Gemini API via GitHub Secret |
+          | Phase 5 | 15/15 | ✅ Automated | Gemini API via GitHub Secret |
 
-          ## GitHub Actions Environment Limitations
+          ## GitHub Actions CI/CD Configuration
 
-          - **Phase 2**: ✅ Fully automated (pure Python models, no external dependencies)
-          - **Phase 3-5**: Skipped in CI/CD
-            - Phase 3-4: Require Docker Qdrant service (complex to setup in Actions)
-            - Phase 5: Requires Gemini API key (security concerns for CI/CD)
+          - **Docker Service**: Qdrant running on port 6333 (auto-health-check)
+          - **API Key**: `GEMINI_API_KEY` from GitHub Secrets
+          - **All Phases**: Automated in CI/CD (Phase 2-5)
 
-          ## Recommended Testing Strategy
+          ## Test Execution Flow
 
-          1. **Automated**: Run Phase 2 in GitHub Actions (model imports)
-          2. **Local**: Run Phase 3-5 locally with:
-             - Docker: `docker-compose up -d qdrant`
-             - API Key: Set `GOOGLE_API_KEY` in `.env.local`
-             - Command: `py -3.12 -m pytest tests/ -v --no-cov`
+          1. **Phase 2**: Model imports and basic validation
+          2. **Phase 3**: Session management with Qdrant
+          3. **Phase 4**: Document upload and RAG pipeline
+          4. **Phase 5**: Full RAG query with Gemini API
 
-          3. **CI/CD Secret Setup** (Optional - for future):
-             - Add `GOOGLE_API_KEY` as GitHub Secret
-             - Enable Docker-in-Docker for Qdrant in Actions
-             - Both are complex and not necessary for MVP phase
+          ## Setup Required (GitHub Repository)
+
+          Add the following GitHub Secret:
+          - **Name**: `GEMINI_API_KEY`
+          - **Value**: Your Gemini API key from [Google AI Studio](https://aistudio.google.com/)
+
+          Go to: Settings → Secrets and variables → Actions → New repository secret
           EOF
         working-directory: .
 
@@ -135,5 +149,6 @@ jobs:
         run: |
           echo "✅ GitHub Actions workflow completed successfully"
           echo ""
-          echo "Phase 2: Automated testing via pytest"
-          echo "Phase 3-5: Run locally with Docker + API key"
+          echo "All Phases (2-5): Automated testing via pytest"
+          echo "Docker Qdrant: Running in service container"
+          echo "Gemini API: Loaded from GitHub Secrets"
