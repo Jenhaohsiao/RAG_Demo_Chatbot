@@ -19,17 +19,6 @@ jobs:
     name: Backend Tests (Python)
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    
-    services:
-      qdrant:
-        image: qdrant/qdrant:latest
-        ports:
-          - 6333:6333
-        options: >-
-          --health-cmd="curl -f http://localhost:6333/health || exit 1"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
 
     steps:
       - name: Checkout repository
@@ -41,7 +30,21 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
 
-      - name: Create .env.local (with Qdrant Docker service + Gemini API from secret)
+      - name: Start Qdrant with docker-compose
+        run: |
+          docker-compose up -d qdrant
+          echo "Waiting for Qdrant to be ready..."
+          for i in {1..30}; do
+            if curl -s http://localhost:6333/health > /dev/null; then
+              echo "✅ Qdrant is ready!"
+              break
+            fi
+            echo "Attempt $i/30: Waiting for Qdrant..."
+            sleep 2
+          done
+        working-directory: .
+
+      - name: Create .env.local (with Qdrant docker-compose + Gemini API from secret)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
