@@ -3,8 +3,10 @@ import ReactDOM from 'react-dom/client';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import './styles/badges.css';
+import './styles/rtl.css';
 import './i18n/config';
 import { useTranslation } from 'react-i18next';
+import i18n from './i18n/config';
 
 import Header from './components/Header';
 import UploadScreen from './components/UploadScreen';
@@ -60,6 +62,35 @@ const App: React.FC = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [similarityThreshold, setSimilarityThreshold] = useState(0.5);
 
+  // T074: Setup RTL support for Arabic language
+  React.useEffect(() => {
+    const handleLanguageChanged = (lng: string) => {
+      // RTL support for Arabic
+      const isRTL = lng === 'ar';
+      document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+      document.documentElement.lang = lng;
+      
+      // Also apply to body for some CSS properties
+      if (isRTL) {
+        document.body.classList.add('rtl-layout');
+      } else {
+        document.body.classList.remove('rtl-layout');
+      }
+      
+      console.log('[RTL] Language changed to:', lng, 'Direction:', isRTL ? 'rtl' : 'ltr');
+    };
+
+    // Initial setup based on current language
+    handleLanguageChanged(i18n.language);
+
+    // Listen for language changes
+    i18n.on('languageChanged', handleLanguageChanged);
+
+    return () => {
+      i18n.off('languageChanged', handleLanguageChanged);
+    };
+  }, []);
+
   // 當 threshold 改變時重新創建 session（僅在沒有上傳文件時）
   const handleThresholdChange = async (newThreshold: number) => {
     setSimilarityThreshold(newThreshold);
@@ -111,7 +142,17 @@ const App: React.FC = () => {
   };
 
   const handleLanguageChange = async (newLanguage: SupportedLanguage) => {
-    await updateLanguage(newLanguage);
+    try {
+      console.log('[handleLanguageChange] Changing language to:', newLanguage, 'with sessionId:', sessionId);
+      
+      // T075: Pass sessionId for backend sync
+      await updateLanguage(newLanguage, sessionId);
+      
+      console.log('[handleLanguageChange] Language change successful');
+    } catch (err) {
+      console.error('[handleLanguageChange] Error:', err);
+      // Error is already handled in useSession.updateLanguage
+    }
   };
 
   const handleLeave = async () => {

@@ -75,9 +75,10 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 className="btn btn-sm btn-light border dropdown-toggle"
                 type="button"
+                data-testid="language-selector-button"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 aria-expanded={dropdownOpen}
-                title="Select Language"
+                title={t('labels.selectLanguage')}
               >
                 <i className="bi bi-globe me-2"></i>
                 <span className="d-none d-sm-inline text-truncate" style={{ maxWidth: '100px' }}>
@@ -90,6 +91,7 @@ export const Header: React.FC<HeaderProps> = ({
                     <li key={lang.code}>
                       <button
                         className={`dropdown-item ${currentLanguage === lang.code ? 'active' : ''}`}
+                        data-testid={`language-option-${lang.code}`}
                         onClick={() => handleLanguageChange(lang.code)}
                         style={{ cursor: 'pointer' }}
                       >

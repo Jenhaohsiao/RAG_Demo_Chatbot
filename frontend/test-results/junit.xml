@@ -1,0 +1,221 @@
+<testsuites id="" name="" tests="8" failures="4" skipped="0" errors="0" time="13.668148">
+<testsuite name="phase6-language-switching.spec.ts" timestamp="2025-12-18T02:32:00.369Z" hostname="chromium" tests="8" failures="4" skipped="0" time="46.945" errors="0">
+<testcase name="Phase 6 - 多語言 UI 語言切換 (T073-T077) › T073: 語言選擇器循環動畫" classname="phase6-language-switching.spec.ts" time="9.095">
+<failure message="phase6-language-switching.spec.ts:20:3 T073: 語言選擇器循環動畫" type="FAILURE">
+<![CDATA[  [chromium] › phase6-language-switching.spec.ts:20:3 › Phase 6 - 多語言 UI 語言切換 (T073-T077) › T073: 語言選擇器循環動畫 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "中文"
+    Received: "English"
+
+      45 |     const expectedCycle = ['English', '中文', '한국어', 'Español', '日本語', 'العربية', 'Français'];
+      46 |     for (let i = 0; i < 7; i++) {
+    > 47 |       expect(cycleTexts[i]).toBe(expectedCycle[i]);
+         |                             ^
+      48 |     }
+      49 |     
+      50 |     // 驗證循環重新開始
+        at C:\Projects\AI_projects\RAG_Demo_Chatbot\frontend\tests\e2e\phase6-language-switching.spec.ts:47:29
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\test-results\phase6-language-switching--59013-切換-T073-T077-T073-語言選擇器循環動畫-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\test-results\phase6-language-switching--59013-切換-T073-T077-T073-語言選擇器循環動畫-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\..\test-results\phase6-language-switching--59013-切換-T073-T077-T073-語言選擇器循環動畫-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[開始測試 T073：語言選擇器循環動畫
+時刻 0s: "English"
+時刻 1s: "English"
+時刻 2s: "English"
+時刻 3s: "English"
+時刻 4s: "English"
+時刻 5s: "English"
+時刻 6s: "English"
+時刻 7s: "English"
+
+[[ATTACHMENT|phase6-language-switching--59013-切換-T073-T077-T073-語言選擇器循環動畫-chromium\test-failed-1.png]]
+
+[[ATTACHMENT|phase6-language-switching--59013-切換-T073-T077-T073-語言選擇器循環動畫-chromium\video.webm]]
+
+[[ATTACHMENT|phase6-language-switching--59013-切換-T073-T077-T073-語言選擇器循環動畫-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Phase 6 - 多語言 UI 語言切換 (T073-T077) › T074: RTL 布局支持（阿拉伯語）" classname="phase6-language-switching.spec.ts" time="2.417">
+<system-out>
+<![CDATA[開始測試 T074：RTL 布局支持
+✅ document.dir 已設定為 RTL
+✅ body 含有 rtl-layout 類別
+✅ 文本對齐: right
+✅ T074 通過：RTL 布局已套用
+]]>
+</system-out>
+</testcase>
+<testcase name="Phase 6 - 多語言 UI 語言切換 (T073-T077) › T075: 語言改變處理器與後端同步" classname="phase6-language-switching.spec.ts" time="3.701">
+<failure message="phase6-language-switching.spec.ts:94:3 T075: 語言改變處理器與後端同步" type="FAILURE">
+<![CDATA[  [chromium] › phase6-language-switching.spec.ts:94:3 › Phase 6 - 多語言 UI 語言切換 (T073-T077) › T075: 語言改變處理器與後端同步 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Matcher error: received value must not be null nor undefined
+
+    Received has value: null
+
+      130 |       localStorage.getItem('rag-chatbot-language')
+      131 |     );
+    > 132 |     expect(savedLanguage).toContain('zh');
+          |                           ^
+      133 |     console.log('✅ localStorage 已更新');
+      134 |     
+      135 |     // 驗證後端 API 被呼叫（如果有會話 ID）
+        at C:\Projects\AI_projects\RAG_Demo_Chatbot\frontend\tests\e2e\phase6-language-switching.spec.ts:132:27
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\test-results\phase6-language-switching--eec0b-T073-T077-T075-語言改變處理器與後端同步-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\test-results\phase6-language-switching--eec0b-T073-T077-T075-語言改變處理器與後端同步-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\..\test-results\phase6-language-switching--eec0b-T073-T077-T075-語言改變處理器與後端同步-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[開始測試 T075：語言改變處理器與後端同步
+初始語言: English
+🔄 API 呼叫: PUT http://localhost:5173/api/v1/session/1d3d81e1-4f10-4aa7-86bd-f60cbf05bcc8/language
+✅ 前端語言已改變為中文
+
+[[ATTACHMENT|phase6-language-switching--eec0b-T073-T077-T075-語言改變處理器與後端同步-chromium\test-failed-1.png]]
+
+[[ATTACHMENT|phase6-language-switching--eec0b-T073-T077-T075-語言改變處理器與後端同步-chromium\video.webm]]
+
+[[ATTACHMENT|phase6-language-switching--eec0b-T073-T077-T075-語言改變處理器與後端同步-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Phase 6 - 多語言 UI 語言切換 (T073-T077) › T076: 驗證所有組件使用 i18n" classname="phase6-language-switching.spec.ts" time="2.19">
+<failure message="phase6-language-switching.spec.ts:145:3 T076: 驗證所有組件使用 i18n" type="FAILURE">
+<![CDATA[  [chromium] › phase6-language-switching.spec.ts:145:3 › Phase 6 - 多語言 UI 語言切換 (T073-T077) › T076: 驗證所有組件使用 i18n 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: undefined
+
+      190 |       }, translationKeys);
+      191 |       
+    > 192 |       expect(i18nLoaded).toBe(true);
+          |                          ^
+      193 |       console.log(`✅ ${language.name} 翻譯完整`);
+      194 |     }
+      195 |     
+        at C:\Projects\AI_projects\RAG_Demo_Chatbot\frontend\tests\e2e\phase6-language-switching.spec.ts:192:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\test-results\phase6-language-switching--05c80-073-T077-T076-驗證所有組件使用-i18n-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\test-results\phase6-language-switching--05c80-073-T077-T076-驗證所有組件使用-i18n-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\..\test-results\phase6-language-switching--05c80-073-T077-T076-驗證所有組件使用-i18n-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[開始測試 T076：驗證所有組件使用 i18n
+✅ 無硬編碼文字發現
+檢查 English 翻譯...
+
+[[ATTACHMENT|phase6-language-switching--05c80-073-T077-T076-驗證所有組件使用-i18n-chromium\test-failed-1.png]]
+
+[[ATTACHMENT|phase6-language-switching--05c80-073-T077-T076-驗證所有組件使用-i18n-chromium\video.webm]]
+
+[[ATTACHMENT|phase6-language-switching--05c80-073-T077-T076-驗證所有組件使用-i18n-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Phase 6 - 多語言 UI 語言切換 (T073-T077) › T077: 完整的語言切換流程測試" classname="phase6-language-switching.spec.ts" time="10.978">
+<system-out>
+<![CDATA[開始測試 T077：完整的語言切換流程
+場景 1：連續改變語言
+✅ 已切換至 English
+✅ 已切換至 中文
+✅ 已切換至 한국어
+✅ 已切換至 Español
+✅ 已切換至 日本語
+✅ 已切換至 العربية
+✅ 已切換至 Français
+場景 2：刷新後語言保留
+✅ 刷新後語言已保留
+場景 3：RTL 與 LTR 切換
+✅ 已切換至 RTL 模式
+✅ 已切換回 LTR 模式
+✅ T077 通過：完整的語言切換流程成功
+]]>
+</system-out>
+</testcase>
+<testcase name="Phase 6 - 多語言 UI 語言切換 (T073-T077) › T073-T077 完整性驗證" classname="phase6-language-switching.spec.ts" time="2.421">
+<failure message="phase6-language-switching.spec.ts:269:3 T073-T077 完整性驗證" type="FAILURE">
+<![CDATA[  [chromium] › phase6-language-switching.spec.ts:269:3 › Phase 6 - 多語言 UI 語言切換 (T073-T077) › T073-T077 完整性驗證 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 7
+    Received: 0
+
+      281 |     const count = await languageOptions.count();
+      282 |     
+    > 283 |     expect(count).toBe(7);
+          |                   ^
+      284 |     console.log(`✅ 所有 7 種語言都可用`);
+      285 |     
+      286 |     // 驗證每種語言都可選
+        at C:\Projects\AI_projects\RAG_Demo_Chatbot\frontend\tests\e2e\phase6-language-switching.spec.ts:283:19
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\test-results\phase6-language-switching--ebeee-換-T073-T077-T073-T077-完整性驗證-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\test-results\phase6-language-switching--ebeee-換-T073-T077-T073-T077-完整性驗證-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\..\test-results\phase6-language-switching--ebeee-換-T073-T077-T073-T077-完整性驗證-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[開始進行完整性驗證
+
+[[ATTACHMENT|phase6-language-switching--ebeee-換-T073-T077-T073-T077-完整性驗證-chromium\test-failed-1.png]]
+
+[[ATTACHMENT|phase6-language-switching--ebeee-換-T073-T077-T073-T077-完整性驗證-chromium\video.webm]]
+
+[[ATTACHMENT|phase6-language-switching--ebeee-換-T073-T077-T073-T077-完整性驗證-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Phase 6 - 性能測試 › 語言切換響應時間" classname="phase6-language-switching.spec.ts" time="3.289">
+<system-out>
+<![CDATA[語言切換響應時間: 406ms
+]]>
+</system-out>
+</testcase>
+<testcase name="Phase 6 - 性能測試 › 循環動畫流暢度" classname="phase6-language-switching.spec.ts" time="12.854">
+<system-out>
+<![CDATA[平均循環間隔: 1011.67ms
+間隔方差: 7.56
+]]>
+</system-out>
+</testcase>
+</testsuite>
+</testsuites>

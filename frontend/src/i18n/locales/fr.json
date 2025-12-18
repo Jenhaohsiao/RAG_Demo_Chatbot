@@ -26,6 +26,7 @@
     "session": "Session",
     "sessionId": "ID de Session",
     "language": "Langue",
+    "selectLanguage": "Sélectionner la langue",
     "expires": "Expire",
     "documents": "Documents",
     "chunks": "Fragments",
@@ -57,6 +58,12 @@
   },
   "settings": {
     "title": "Paramètres RAG",
+    "customPrompt": {
+      "label": "Modèle d'invite personnalisé",
+      "placeholder": "Laissez vide pour utiliser l'invite par défaut, ou entrez votre modèle d'invite personnalisé ici...",
+      "hint": "Utilisez {{context}} et {{question}} comme espaces réservés",
+      "reset": "Réinitialiser"
+    },
     "threshold": {
       "label": "Seuil de Similitude",
       "description": "Contrôle la rigueur du système RAG. Des valeurs plus élevées fournissent des réponses plus précises mais potentiellement moins nombreuses, des valeurs plus basses fournissent plus de réponses mais potentiellement moins pertinentes.",

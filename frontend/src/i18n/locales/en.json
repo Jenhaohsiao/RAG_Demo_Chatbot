@@ -26,6 +26,7 @@
     "session": "Session",
     "sessionId": "Session ID",
     "language": "Language",
+    "selectLanguage": "Select Language",
     "expires": "Expires",
     "documents": "Documents",
     "chunks": "Chunks",
@@ -57,6 +58,12 @@
   },
   "settings": {
     "title": "RAG Settings",
+    "customPrompt": {
+      "label": "Custom Prompt Template",
+      "placeholder": "Leave empty to use default prompt, or enter your custom prompt template here...",
+      "hint": "Use {{context}} and {{question}} as placeholders",
+      "reset": "Reset"
+    },
     "threshold": {
       "label": "Similarity Threshold",
       "description": "Controls how strict the RAG system is. Higher values provide more precise but potentially fewer answers, lower values provide more but potentially less relevant answers.",

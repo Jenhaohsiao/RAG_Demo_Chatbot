@@ -1,0 +1,88 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - navigation [ref=e5]:
+      - generic [ref=e6]:
+        - link "RAG Demo Chatbot" [ref=e7] [cursor=pointer]:
+          - /url: /
+          - strong [ref=e8]: RAG Demo Chatbot
+        - generic [ref=e9]:
+          - generic [ref=e10]:
+            - button " English" [expanded] [active] [ref=e11] [cursor=pointer]:
+              - generic [ref=e12]: 
+              - text: English
+            - list [ref=e13]:
+              - listitem [ref=e14]:
+                - button " English" [ref=e15] [cursor=pointer]:
+                  - generic [ref=e17]: 
+                  - text: English
+              - listitem [ref=e18]:
+                - button "中文" [ref=e19] [cursor=pointer]: 中文
+              - listitem [ref=e20]:
+                - button "日本語" [ref=e21] [cursor=pointer]: 日本語
+              - listitem [ref=e22]:
+                - button "Español" [ref=e23] [cursor=pointer]: Español
+              - listitem [ref=e24]:
+                - button "한국어" [ref=e25] [cursor=pointer]: 한국어
+              - listitem [ref=e26]:
+                - button "العربية" [ref=e27] [cursor=pointer]: العربية
+              - listitem [ref=e28]:
+                - button "Français" [ref=e29] [cursor=pointer]: Français
+          - group [ref=e30]:
+            - button " Restart" [ref=e31] [cursor=pointer]:
+              - generic [ref=e32]: 
+              - text: Restart
+            - button " Leave Session" [ref=e33] [cursor=pointer]:
+              - generic [ref=e34]: 
+              - text: Leave Session
+    - generic [ref=e37]:
+      - generic [ref=e38]:
+        - generic [ref=e39]: 
+        - strong [ref=e40]: "Session ID:"
+        - code [ref=e41]: 43d67b8d-d18a-4112-b432-d43a3fcb0d98
+      - generic [ref=e42]:
+        - generic [ref=e43]: 
+        - text: Session expires in ~30 minutes
+  - main [ref=e44]:
+    - generic [ref=e47]:
+      - generic [ref=e49]:
+        - heading "RAG Demo Chatbot" [level=1] [ref=e50]
+        - paragraph [ref=e51]: Upload documents or web content, then ask questions about them using AI-powered semantic search.
+        - generic [ref=e52]:
+          - generic [ref=e53]: 📄 PDF & Text Support
+          - generic [ref=e54]: 🔗 URL Extraction
+          - generic [ref=e55]: 🤖 AI Q&A
+          - generic [ref=e56]: 🌐 Multilingual
+      - generic [ref=e57]:
+        - generic [ref=e58]:
+          - heading "Upload Document" [level=2] [ref=e59]
+          - paragraph [ref=e60]: Upload a PDF, text file, or provide a URL to get started
+        - generic [ref=e61]:
+          - generic [ref=e62]:
+            - heading "Similarity Threshold" [level=3] [ref=e63]
+            - generic [ref=e64]: Balanced Mode
+          - generic [ref=e65]:
+            - slider [ref=e66]: "0.5"
+            - generic [ref=e67]:
+              - generic [ref=e68]: Lenient
+              - generic [ref=e69]: "0.5"
+              - generic [ref=e70]: Strict
+          - paragraph [ref=e71]: Controls how strict the RAG system is. Higher values provide more precise but potentially fewer answers, lower values provide more but potentially less relevant answers.
+        - generic [ref=e74] [cursor=pointer]:
+          - generic [ref=e75]: 📁
+          - paragraph [ref=e76]: Drag & drop a file here, or click to browse
+          - paragraph [ref=e77]: "Supported formats: PDF, TXT (max 10 MB)"
+        - generic [ref=e79]: Or
+        - generic [ref=e80]:
+          - generic [ref=e81]: 🌐 Provide a URL
+          - generic [ref=e82]:
+            - generic [ref=e83]:
+              - textbox "Enter URL (http:// or https://)" [ref=e84]
+              - button "Fetch" [disabled] [ref=e85]
+            - paragraph [ref=e86]: We will extract text content from the URL
+        - generic [ref=e88]: "Session ID: 43d67b8d-d18a-4112-b432-d43a3fcb0d98"
+  - contentinfo [ref=e89]:
+    - generic [ref=e90]: "RAG Demo Chatbot | Phase 4: Document Upload | 2025"
+```

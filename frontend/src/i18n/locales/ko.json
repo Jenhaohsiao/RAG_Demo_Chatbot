@@ -26,6 +26,7 @@
     "session": "세션",
     "sessionId": "세션 ID",
     "language": "언어",
+    "selectLanguage": "언어 선택",
     "expires": "만료 시간",
     "documents": "문서",
     "chunks": "청크",
@@ -57,6 +58,12 @@
   },
   "settings": {
     "title": "RAG 설정",
+    "customPrompt": {
+      "label": "사용자 정의 프롬프트 템플릿",
+      "placeholder": "기본 프롬프트를 사용하려면 비워두거나 사용자 정의 프롬프트 템플릿을 입력하세요...",
+      "hint": "{{context}} 및 {{question}}을 자리 표시자로 사용",
+      "reset": "재설정"
+    },
     "threshold": {
       "label": "유사도 임계값",
       "description": "RAG 시스템의 엄격함을 제어합니다. 높은 값은 더 정확하지만 더 적은 답변을 제공하고, 낮은 값은 더 많지만 덜 관련된 답변을 제공할 수 있습니다.",

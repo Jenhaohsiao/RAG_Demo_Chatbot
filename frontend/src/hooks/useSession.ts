@@ -20,7 +20,7 @@ interface UseSessionReturn {
   createSession: (similarityThreshold?: number) => Promise<void>;
   closeSession: () => Promise<void>;
   restartSession: () => Promise<void>;
-  updateLanguage: (newLanguage: string) => Promise<void>;
+  updateLanguage: (newLanguage: string, passedSessionId?: string | null) => Promise<void>;
 }
 
 /**
@@ -167,10 +167,17 @@ export const useSession = (): UseSessionReturn => {
 
   /**
    * Update session language
+   * T075: Language change handler with backend sync
+   * @param newLanguage Language code to update to
+   * @param passedSessionId Optional sessionId to use (allows parent to pass current session)
    */
-  const updateLanguage = useCallback(async (newLanguage: string) => {
-    if (!sessionId) {
+  const updateLanguage = useCallback(async (newLanguage: string, passedSessionId?: string | null) => {
+    // Use passed sessionId if available, otherwise use state sessionId
+    const targetSessionId = passedSessionId !== undefined ? passedSessionId : sessionId;
+
+    if (!targetSessionId) {
       // No session yet, just update local state
+      console.log('[updateLanguage] No session ID, updating local state only');
       setLanguage(newLanguage);
       i18n.changeLanguage(newLanguage);
       return;
@@ -180,15 +187,19 @@ export const useSession = (): UseSessionReturn => {
     setError(null);
 
     try {
-      const response = await sessionService.updateLanguage(sessionId, newLanguage);
+      console.log('[updateLanguage] Updating language to:', newLanguage, 'for session:', targetSessionId);
+      
+      const response = await sessionService.updateLanguage(targetSessionId, newLanguage);
       
       setLanguage(response.language);
       i18n.changeLanguage(response.language);
       
-      console.log('Language updated:', newLanguage);
+      console.log('[updateLanguage] Language successfully updated:', newLanguage);
     } catch (err: any) {
-      setError(err.message || 'Failed to update language');
-      console.error('Update language error:', err);
+      const errorMsg = err.message || 'Failed to update language';
+      setError(errorMsg);
+      console.error('[updateLanguage] Error:', errorMsg);
+      throw err; // Re-throw for caller to handle
     } finally {
       setIsLoading(false);
     }

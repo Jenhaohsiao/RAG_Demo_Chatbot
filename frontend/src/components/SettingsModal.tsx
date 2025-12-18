@@ -135,7 +135,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 rows={6}
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
-                placeholder="Leave empty to use default prompt, or enter your custom prompt template here..."
+                placeholder={t('settings.customPrompt.placeholder')}
                 style={{ fontSize: '0.85rem' }}
               />
               

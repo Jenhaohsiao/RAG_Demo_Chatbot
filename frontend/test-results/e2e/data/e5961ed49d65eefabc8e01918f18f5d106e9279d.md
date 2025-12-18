@@ -1,0 +1,70 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - navigation [ref=e5]:
+      - generic [ref=e6]:
+        - link "RAG Demo Chatbot" [ref=e7] [cursor=pointer]:
+          - /url: /
+          - strong [ref=e8]: RAG Demo Chatbot
+        - generic [ref=e9]:
+          - button " English" [ref=e11] [cursor=pointer]:
+            - generic [ref=e12]: 
+            - text: English
+          - group [ref=e13]:
+            - button " Restart" [ref=e14] [cursor=pointer]:
+              - generic [ref=e15]: 
+              - text: Restart
+            - button " Leave Session" [ref=e16] [cursor=pointer]:
+              - generic [ref=e17]: 
+              - text: Leave Session
+    - generic [ref=e20]:
+      - generic [ref=e21]:
+        - generic [ref=e22]: 
+        - strong [ref=e23]: "Session ID:"
+        - code [ref=e24]: 862d405a-1a35-4114-ad03-e0385061a5de
+      - generic [ref=e25]:
+        - generic [ref=e26]: 
+        - text: Session expires in ~30 minutes
+  - main [ref=e27]:
+    - generic [ref=e30]:
+      - generic [ref=e32]:
+        - heading "RAG Demo Chatbot" [level=1] [ref=e33]
+        - paragraph [ref=e34]: Upload documents or web content, then ask questions about them using AI-powered semantic search.
+        - generic [ref=e35]:
+          - generic [ref=e36]: 📄 PDF & Text Support
+          - generic [ref=e37]: 🔗 URL Extraction
+          - generic [ref=e38]: 🤖 AI Q&A
+          - generic [ref=e39]: 🌐 Multilingual
+      - generic [ref=e40]:
+        - generic [ref=e41]:
+          - heading "Upload Document" [level=2] [ref=e42]
+          - paragraph [ref=e43]: Upload a PDF, text file, or provide a URL to get started
+        - generic [ref=e44]:
+          - generic [ref=e45]:
+            - heading "Similarity Threshold" [level=3] [ref=e46]
+            - generic [ref=e47]: Balanced Mode
+          - generic [ref=e48]:
+            - slider [ref=e49]: "0.5"
+            - generic [ref=e50]:
+              - generic [ref=e51]: Lenient
+              - generic [ref=e52]: "0.5"
+              - generic [ref=e53]: Strict
+          - paragraph [ref=e54]: Controls how strict the RAG system is. Higher values provide more precise but potentially fewer answers, lower values provide more but potentially less relevant answers.
+        - generic [ref=e57] [cursor=pointer]:
+          - generic [ref=e58]: 📁
+          - paragraph [ref=e59]: Drag & drop a file here, or click to browse
+          - paragraph [ref=e60]: "Supported formats: PDF, TXT (max 10 MB)"
+        - generic [ref=e62]: Or
+        - generic [ref=e63]:
+          - generic [ref=e64]: 🌐 Provide a URL
+          - generic [ref=e65]:
+            - generic [ref=e66]:
+              - textbox "Enter URL (http:// or https://)" [ref=e67]
+              - button "Fetch" [disabled] [ref=e68]
+            - paragraph [ref=e69]: We will extract text content from the URL
+        - generic [ref=e71]: "Session ID: 862d405a-1a35-4114-ad03-e0385061a5de"
+  - contentinfo [ref=e72]:
+    - generic [ref=e73]: "RAG Demo Chatbot | Phase 4: Document Upload | 2025"
+```

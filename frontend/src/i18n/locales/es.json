@@ -26,6 +26,7 @@
     "session": "Sesión",
     "sessionId": "ID de Sesión",
     "language": "Idioma",
+    "selectLanguage": "Seleccionar idioma",
     "expires": "Expira",
     "documents": "Documentos",
     "chunks": "Fragmentos",
@@ -57,6 +58,12 @@
   },
   "settings": {
     "title": "Configuración de RAG",
+    "customPrompt": {
+      "label": "Plantilla de indicación personalizada",
+      "placeholder": "Déjalo vacío para usar el indicador predeterminado, o ingresa tu plantilla de indicación personalizada aquí...",
+      "hint": "Usa {{context}} y {{question}} como marcadores de posición",
+      "reset": "Restablecer"
+    },
     "threshold": {
       "label": "Umbral de Similitud",
       "description": "Controla qué tan estricto es el sistema RAG. Valores más altos proporcionan respuestas más precisas pero potencialmente menos, valores más bajos proporcionan más respuestas pero potencialmente menos relevantes.",

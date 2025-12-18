@@ -26,6 +26,7 @@
     "session": "セッション",
     "sessionId": "セッションID",
     "language": "言語",
+    "selectLanguage": "言語を選択",
     "expires": "有効期限",
     "documents": "ドキュメント",
     "chunks": "チャンク",
@@ -57,6 +58,12 @@
   },
   "settings": {
     "title": "RAG設定",
+    "customPrompt": {
+      "label": "カスタムプロンプトテンプレート",
+      "placeholder": "デフォルトプロンプトを使用するには空白のままにするか、カスタムプロンプトテンプレートを入力してください...",
+      "hint": "{{context}}と{{question}}をプレースホルダーとして使用",
+      "reset": "リセット"
+    },
     "threshold": {
       "label": "類似度しきい値",
       "description": "RAGシステムの厳格さを制御します。高い値はより正確ですが回答数が少なく、低い値はより多くの回答を提供しますが関連性が低い可能性があります。",
