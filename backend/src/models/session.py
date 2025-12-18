@@ -29,6 +29,8 @@ class Session(BaseModel):
     document_count: int = Field(default=0, ge=0)
     vector_count: int = Field(default=0, ge=0)
     language: str = Field(default="en", pattern="^(en|zh|ko|es|ja|ar|fr)$")
+    similarity_threshold: float = Field(default=0.5, ge=0.0, le=1.0, description="RAG similarity threshold (0.0-1.0)")
+    custom_prompt: str | None = Field(default=None, description="Custom prompt template for RAG responses")
     
     def __init__(self, **data):
         super().__init__(**data)
@@ -68,7 +70,9 @@ class Session(BaseModel):
                 "qdrant_collection_name": "session_a1b2c3d4e5f67890abcdef1234567890",
                 "document_count": 0,
                 "vector_count": 0,
-                "language": "en"
+                "language": "en",
+                "similarity_threshold": 0.5,
+                "custom_prompt": None
             }
         }
 
@@ -78,12 +82,14 @@ class SessionResponse(BaseModel):
     session_id: UUID
     state: SessionState
     created_at: datetime
+    similarity_threshold: float
     expires_at: datetime
     last_activity: datetime
     qdrant_collection_name: str
     language: str
     document_count: int = 0
     vector_count: int = 0
+    custom_prompt: str | None = None
     
     class Config:
         json_schema_extra = {

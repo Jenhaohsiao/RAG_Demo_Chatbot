@@ -11,11 +11,18 @@ import type { ChatResponse, ChatHistoryResponse } from '../types/chat';
  */
 export async function submitQuery(
   sessionId: string,
-  userQuery: string
+  userQuery: string,
+  language?: string
 ): Promise<ChatResponse> {
+  const lang = language || 'en';
+  console.log('[chatService] Submitting query with language:', lang);
+  
   const response = await api.post<ChatResponse>(
     `/chat/${sessionId}/query`,
-    { user_query: userQuery }
+    { 
+      user_query: userQuery,
+      language: lang
+    }
   );
   return response.data;
 }

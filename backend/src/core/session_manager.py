@@ -24,12 +24,14 @@ class SessionManager:
         self._sessions: Dict[UUID, Session] = {}
         logger.info("SessionManager initialized")
     
-    def create_session(self, language: str = "en") -> Session:
+    def create_session(self, language: str = "en", similarity_threshold: float = 0.5, custom_prompt: str | None = None) -> Session:
         """
         Create a new session with unique ID and Qdrant collection
         
         Args:
             language: Initial UI language (default: en)
+            similarity_threshold: RAG similarity threshold (default: 0.5)
+            custom_prompt: Custom prompt template (default: None)
             
         Returns:
             Session: Newly created session
@@ -37,12 +39,14 @@ class SessionManager:
         session = Session(
             session_id=uuid4(),
             language=language,
+            similarity_threshold=similarity_threshold,
+            custom_prompt=custom_prompt,
             state=SessionState.INITIALIZING
         )
         
         self._sessions[session.session_id] = session
         
-        logger.info(f"Session created: {session.session_id} (language: {language})")
+        logger.info(f"Session created: {session.session_id} (language: {language}, custom_prompt: {bool(custom_prompt)})")
         return session
     
     def get_session(self, session_id: UUID) -> Optional[Session]:
@@ -227,8 +231,10 @@ class SessionManager:
             last_activity=session.last_activity,
             qdrant_collection_name=session.qdrant_collection_name,
             language=session.language,
+            similarity_threshold=session.similarity_threshold,
             document_count=session.document_count,
-            vector_count=session.vector_count
+            vector_count=session.vector_count,
+            custom_prompt=session.custom_prompt
         )
 
 

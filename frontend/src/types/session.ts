@@ -22,6 +22,7 @@ export interface Session {
   document_count: number;
   vector_count: number;
   language: 'en' | 'zh' | 'ko' | 'es' | 'ja' | 'ar' | 'fr';
+  similarity_threshold: number; // RAG similarity threshold (0.0-1.0)
 }
 
 export interface SessionResponse {
@@ -31,6 +32,8 @@ export interface SessionResponse {
   expires_at: string;
   qdrant_collection: string;
   language: 'en' | 'zh' | 'ko' | 'es' | 'ja' | 'ar' | 'fr';
+  similarity_threshold: number; // RAG similarity threshold (0.0-1.0)
+  custom_prompt?: string; // Optional custom prompt template
 }
 
 export interface SessionWithMetrics extends SessionResponse {

@@ -214,12 +214,19 @@ class VectorStore:
             list: Search results with id, score, and payload
         """
         try:
+            logger.info(f"Searching in '{collection_name}' with threshold={score_threshold}, limit={limit}")
+            
             results = self.client.search(
                 collection_name=collection_name,
                 query_vector=query_vector,
                 limit=limit,
                 score_threshold=score_threshold
             )
+            
+            logger.info(f"Qdrant returned {len(results)} results")
+            if results:
+                scores = [r.score for r in results]
+                logger.info(f"Scores: {scores}")
             
             formatted_results = [
                 {
@@ -230,7 +237,8 @@ class VectorStore:
                 for result in results
             ]
             
-            logger.debug(f"Found {len(formatted_results)} similar chunks in '{collection_name}'")
+            logger.info(f"Found {len(formatted_results)} similar chunks in '{collection_name}'")
+            return formatted_results
             return formatted_results
             
         except Exception as e:

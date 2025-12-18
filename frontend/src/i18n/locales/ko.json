@@ -19,7 +19,8 @@
     "restart": "다시 시작",
     "close": "닫기",
     "cancel": "취소",
-    "confirm": "확인"
+    "confirm": "확인",
+    "settings": "설정"
   },
   "labels": {
     "session": "세션",
@@ -53,6 +54,22 @@
     "invalidUrl": "잘못된 URL 형식",
     "noDocuments": "아직 업로드된 문서가 없습니다",
     "confirmLeave": "이 세션을 나가시겠습니까?"
+  },
+  "settings": {
+    "title": "RAG 설정",
+    "threshold": {
+      "label": "유사도 임계값",
+      "description": "RAG 시스템의 엄격함을 제어합니다. 높은 값은 더 정확하지만 더 적은 답변을 제공하고, 낮은 값은 더 많지만 덜 관련된 답변을 제공할 수 있습니다.",
+      "low": "관대함",
+      "high": "엄격함",
+      "strict": "엄격 모드",
+      "balanced": "균형 모드",
+      "lenient": "관대 모드",
+      "recommendations": "권장사항",
+      "rec_lenient": "탐색적 질문에 적합하며 관련 없는 내용이 더 포함될 수 있습니다",
+      "rec_balanced": "권장 설정으로 정밀도와 재현율의 균형을 맞춥니다",
+      "rec_strict": "매우 관련성 높은 질문에만 답변하며 자주 답변 불가를 반환할 수 있습니다"
+    }
   },
   "states": {
     "INITIALIZING": "초기화 중...",

@@ -121,7 +121,10 @@ class RAGEngine:
     def query(
         self,
         session_id: UUID,
-        user_query: str
+        user_query: str,
+        similarity_threshold: Optional[float] = None,
+        language: str = "en",
+        custom_prompt: Optional[str] = None
     ) -> RAGResponse:
         """
         執行 RAG 查詢
@@ -129,6 +132,9 @@ class RAGEngine:
         Args:
             session_id: Session ID
             user_query: 使用者查詢
+            similarity_threshold: Session specific similarity threshold (overrides default)
+            language: UI language code
+            custom_prompt: Custom prompt template (overrides default)
         
         Returns:
             RAGResponse: RAG 回應結果
@@ -140,7 +146,10 @@ class RAGEngine:
         if not user_query or not user_query.strip():
             raise ValueError("Query cannot be empty")
         
-        logger.info(f"[{session_id}] RAG query: {user_query[:100]}")
+        # Use session-specific threshold or default
+        threshold = similarity_threshold if similarity_threshold is not None else self.similarity_threshold
+        
+        logger.info(f"[{session_id}] RAG query: {user_query[:100]} (threshold={threshold})")
         
         try:
             # Step 1: 查詢嵌入
@@ -157,7 +166,7 @@ class RAGEngine:
                 collection_name=collection_name,
                 query_vector=query_embedding.vector,
                 limit=self.max_chunks,
-                score_threshold=self.similarity_threshold
+                score_threshold=threshold
             )
             
             # 轉換為 RetrievedChunk
@@ -181,32 +190,10 @@ class RAGEngine:
                 f"(scores: {[f'{s:.3f}' for s in similarity_scores]})"
             )
             
-            # Step 3: 判斷是否有足夠內容回答
-            if not retrieved_chunks:
-                logger.warning(f"[{session_id}] No chunks found above threshold")
-                
-                # 更新 metrics（無法回答）
-                metrics = self._calculate_metrics(
-                    session_id, 0, 0, 0, 
-                    response_type="CANNOT_ANSWER"
-                )
-                self._update_memory(session_id, user_query, "CANNOT_ANSWER", 0)
-                
-                return RAGResponse(
-                    llm_response=self._get_cannot_answer_message(),
-                    response_type="CANNOT_ANSWER",
-                    retrieved_chunks=[],
-                    similarity_scores=[],
-                    token_input=0,
-                    token_output=0,
-                    token_total=0,
-                    metrics=metrics
-                )
+            # Step 3: 建構 Prompt（即使沒有檢索到文檔，也讓 LLM 嘗試回答）
+            prompt = self._build_prompt(user_query, retrieved_chunks, language, custom_prompt)
             
-            # Step 4: 建構 Prompt
-            prompt = self._build_prompt(user_query, retrieved_chunks)
-            
-            # Step 5: LLM 生成
+            # Step 4: LLM 生成
             logger.debug(f"[{session_id}] Generating LLM response...")
             response = self.model.generate_content(
                 prompt,
@@ -253,20 +240,69 @@ class RAGEngine:
     def _build_prompt(
         self,
         user_query: str,
-        retrieved_chunks: List[RetrievedChunk]
+        retrieved_chunks: List[RetrievedChunk],
+        language: str = "en",
+        custom_prompt: Optional[str] = None
     ) -> str:
         """
         建構 RAG Prompt
         
-        憲法 Principle V: 嚴格基於檢索內容回答
+        憲法 Principle V: 嚴格基於檢索內容回答（但允許回答合理的一般性問題）
         
         Args:
             user_query: 使用者查詢
             retrieved_chunks: 檢索到的文字塊
+            language: UI 語言代碼
+            custom_prompt: 自定義 prompt 模板（優先使用）
         
         Returns:
             str: 完整 Prompt
         """
+        # If custom prompt is provided, use it directly with variable substitution
+        if custom_prompt:
+            # 語言映射
+            language_names = {
+                "zh": "Traditional Chinese (繁體中文)",
+                "en": "English",
+                "ko": "Korean (한국어)",
+                "es": "Spanish (Español)",
+                "ja": "Japanese (日本語)",
+                "ar": "Arabic (العربية)",
+                "fr": "French (Français)"
+            }
+            response_language = language_names.get(language, "English")
+            
+            # 組合檢索內容
+            context_parts = []
+            for i, chunk in enumerate(retrieved_chunks, 1):
+                context_parts.append(
+                    f"[Document {i}] (Similarity: {chunk.similarity_score:.3f})\n"
+                    f"Source: {chunk.source_reference}\n"
+                    f"Content: {chunk.text}\n"
+                )
+            context = "\n---\n".join(context_parts) if context_parts else "No documents retrieved."
+            
+            # Replace variables in custom prompt
+            prompt = custom_prompt.replace('{{language}}', response_language)
+            prompt = prompt.replace('{{context}}', context)
+            prompt = prompt.replace('{{query}}', user_query)
+            
+            return prompt
+        
+        # Default prompt logic (existing code)
+        # 語言映射：UI 語言代碼 -> 語言名稱
+        language_names = {
+            "zh": "Traditional Chinese (繁體中文)",
+            "en": "English",
+            "ko": "Korean (한국어)",
+            "es": "Spanish (Español)",
+            "ja": "Japanese (日本語)",
+            "ar": "Arabic (العربية)",
+            "fr": "French (Français)"
+        }
+        
+        response_language = language_names.get(language, "English")
+        
         # 組合檢索內容
         context_parts = []
         for i, chunk in enumerate(retrieved_chunks, 1):
@@ -276,17 +312,35 @@ class RAGEngine:
                 f"Content: {chunk.text}\n"
             )
         
-        context = "\n---\n".join(context_parts)
+        context = "\n---\n".join(context_parts) if context_parts else "No documents retrieved."
         
-        # 建構 Prompt（遵循 Strict RAG 原則）
-        prompt = f"""You are a helpful assistant that answers questions based STRICTLY on the provided documents.
+        # 建構 Prompt（允許回答基本問題，但優先使用文檔內容）
+        if not retrieved_chunks:
+            # 沒有檢索到相關文檔片段時的 Prompt
+            prompt = f"""You are a helpful multilingual assistant.
 
 **IMPORTANT RULES**:
-1. ONLY use information from the documents provided below
-2. If the answer is not in the documents, respond with: "I cannot answer this question based on the uploaded documents."
-3. Do NOT use external knowledge or make assumptions
-4. Cite the document number when providing answers
-5. Be concise and accurate
+1. **Response Language**: Always respond in {response_language}
+2. **Context**: Some documents may have been uploaded to the system, but no relevant passages were found for this specific question
+3. For general questions (greetings, simple requests, common knowledge), answer naturally and helpfully
+4. If the user asks to summarize or explain "the document/file content", politely explain that you cannot find relevant passages matching their query, and suggest they ask more specific questions about the topics they're interested in
+5. Be friendly, concise, and helpful
+
+**User Question**:
+{user_query}
+
+**Your Answer** (in {response_language}):"""
+        else:
+            # 有文檔時的標準 RAG Prompt
+            prompt = f"""You are a helpful multilingual assistant. 
+
+**IMPORTANT RULES**:
+1. **Primary**: Answer based on the provided documents when relevant information is available
+2. **Secondary**: For general questions (greetings, language requests), you may answer politely
+3. **Response Language**: Always respond in {response_language}
+4. If the user asks about document content and it's not in the documents, say: "I cannot find this information in the uploaded documents."
+5. Cite document numbers when using document information
+6. Be helpful, concise, and accurate
 
 **Retrieved Documents**:
 {context}
@@ -294,18 +348,30 @@ class RAGEngine:
 **User Question**:
 {user_query}
 
-**Your Answer** (based ONLY on the documents above):"""
+**Your Answer** (in {response_language}):"""
         
         return prompt
     
-    def _get_cannot_answer_message(self) -> str:
+    def _get_cannot_answer_message(self, language: str = "en") -> str:
         """
         取得「無法回答」訊息
         
+        Args:
+            language: UI 語言代碼
+        
         Returns:
-            str: 標準「無法回答」訊息
+            str: 標準「無法回答」訊息（根據語言）
         """
-        return "I cannot answer this question based on the uploaded documents."
+        messages = {
+            "zh": "無法根據已上傳的文檔回答此問題。",
+            "en": "I cannot answer this question based on the uploaded documents.",
+            "ko": "업로드된 문서를 기반으로 이 질문에 답할 수 없습니다.",
+            "es": "No puedo responder esta pregunta basándome en los documentos cargados.",
+            "ja": "アップロードされた文書に基づいてこの質問に答えることができません。",
+            "ar": "لا أستطيع الإجابة على هذا السؤال بناءً على المستندات المحملة.",
+            "fr": "Je ne peux pas répondre à cette question en me basant sur les documents téléchargés."
+        }
+        return messages.get(language, messages["en"])
     
     def _calculate_metrics(
         self,

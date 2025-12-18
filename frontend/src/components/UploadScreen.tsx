@@ -21,6 +21,9 @@ export interface UploadScreenProps {
   onFileSelected: (file: File) => void;
   onUrlSubmitted: (url: string) => void;
   disabled?: boolean;
+  similarityThreshold?: number;
+  onThresholdChange?: (threshold: number) => void;
+  hasDocuments?: boolean;  // 是否已有上傳文件
 }
 
 const UploadScreen: React.FC<UploadScreenProps> = ({
@@ -28,6 +31,9 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
   onFileSelected,
   onUrlSubmitted,
   disabled = false,
+  similarityThreshold = 0.5,
+  onThresholdChange,
+  hasDocuments = false,
 }) => {
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
@@ -141,6 +147,19 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
     fileInputRef.current?.click();
   };
 
+  // 獲取當前模式的標籤和顏色
+  const getThresholdMode = () => {
+    if (similarityThreshold <= 0.4) {
+      return { label: t('settings.threshold.lenient'), color: 'success' };
+    } else if (similarityThreshold <= 0.6) {
+      return { label: t('settings.threshold.balanced'), color: 'warning' };
+    } else {
+      return { label: t('settings.threshold.strict'), color: 'danger' };
+    }
+  };
+
+  const mode = getThresholdMode();
+
   return (
     <div className="upload-screen">
       <style>{`
@@ -152,7 +171,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
 
         .upload-header {
           text-align: center;
-          margin-bottom: 40px;
+          margin-bottom: 24px;
         }
 
         .upload-header h2 {
@@ -166,6 +185,107 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
           font-size: 16px;
           color: #666;
           margin: 0;
+        }
+
+        .threshold-section {
+          background-color: #f8f9fa;
+          border: 1px solid #dee2e6;
+          border-radius: 8px;
+          padding: 20px;
+          margin-bottom: 32px;
+        }
+
+        .threshold-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 16px;
+        }
+
+        .threshold-title {
+          font-size: 15px;
+          font-weight: 600;
+          color: #333;
+          margin: 0;
+        }
+
+        .threshold-badge {
+          font-size: 12px;
+          font-weight: 600;
+          padding: 4px 12px;
+          border-radius: 12px;
+        }
+
+        .threshold-badge.success {
+          background-color: #d4edda;
+          color: #155724;
+        }
+
+        .threshold-badge.warning {
+          background-color: #fff3cd;
+          color: #856404;
+        }
+
+        .threshold-badge.danger {
+          background-color: #f8d7da;
+          color: #721c24;
+        }
+
+        .threshold-slider-container {
+          margin-bottom: 12px;
+        }
+
+        .threshold-slider {
+          width: 100%;
+          height: 6px;
+          border-radius: 3px;
+          background: linear-gradient(to right, #28a745 0%, #ffc107 50%, #dc3545 100%);
+          outline: none;
+          -webkit-appearance: none;
+        }
+
+        .threshold-slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: white;
+          border: 3px solid #4285f4;
+          cursor: pointer;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .threshold-slider::-moz-range-thumb {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: white;
+          border: 3px solid #4285f4;
+          cursor: pointer;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .threshold-labels {
+          display: flex;
+          justify-content: space-between;
+          font-size: 12px;
+          color: #666;
+          margin-top: 8px;
+        }
+
+        .threshold-value {
+          text-align: center;
+          font-size: 13px;
+          color: #666;
+          margin-top: 8px;
+        }
+
+        .threshold-description {
+          font-size: 13px;
+          color: #666;
+          margin-top: 12px;
+          line-height: 1.5;
         }
 
         .upload-container {
@@ -387,6 +507,48 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
         <h2>{t('upload.title', 'Upload Document')}</h2>
         <p className="upload-subtitle">
           {t('upload.subtitle', 'Upload a PDF, text file, or provide a URL to get started')}
+        </p>
+      </div>
+
+      {/* 相似度閾值設定 */}
+      <div className="threshold-section">
+        <div className="threshold-header">
+          <h3 className="threshold-title">
+            {t('settings.threshold.label', '相似度閾值')}
+          </h3>
+          <span className={`threshold-badge ${mode.color}`}>
+            {mode.label}
+          </span>
+        </div>
+        
+        <div className="threshold-slider-container">
+          <input
+            type="range"
+            min="0.3"
+            max="0.9"
+            step="0.1"
+            value={similarityThreshold}
+            onChange={(e) => onThresholdChange?.(parseFloat(e.target.value))}
+            className="threshold-slider"
+            disabled={disabled || hasDocuments}
+          />
+          <div className="threshold-labels">
+            <span>{t('settings.threshold.low', '寬鬆')}</span>
+            <span className="threshold-value">
+              {similarityThreshold.toFixed(1)}
+            </span>
+            <span>{t('settings.threshold.high', '嚴格')}</span>
+          </div>
+        </div>
+
+        <p className="threshold-description">
+          {hasDocuments ? (
+            <span style={{color: '#856404'}}>
+              ⚠️ 已上傳文件後無法調整閾值。如需更改，請重新開始新的會話。
+            </span>
+          ) : (
+            t('settings.threshold.description', '控制 RAG 系統的嚴格程度。較高的值提供更精確但可能較少的答案，較低的值提供更多但可能較不相關的答案。')
+          )}
         </p>
       </div>
 

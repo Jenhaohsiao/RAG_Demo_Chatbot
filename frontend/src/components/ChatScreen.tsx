@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
 import { MetricsDashboard } from './MetricsDashboard';
+import { DocumentInfoCard } from './DocumentInfoCard';
 import { ChatRole, ResponseType, type ChatMessage as ChatMessageType, type ChatResponse } from '../types/chat';
 import { getSessionMetrics, type SessionMetrics } from '../services/metricsService';
 
@@ -141,30 +142,13 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
         />
       )}
 
-      {/* 文件內容說明區域 */}
-      {documentSummary && (
-        <div className="document-summary-container">
-          <div className="document-info">
-            <div className="document-header mb-3">
-              <p className="document-filename">
-                {sourceType === 'PDF' && '📄'}
-                {sourceType === 'TEXT' && '📝'}
-                {sourceType === 'URL' && '🌐'} {sourceReference}
-              </p>
-              {chunkCount && (
-                <small className="text-muted">
-                  <i className="bi bi-file-text me-1"></i>
-                  {chunkCount} chunks
-                </small>
-              )}
-            </div>
-
-            <div className="document-description bg-light p-3 rounded">
-              <p className="mb-0">{documentSummary}</p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Document Info Card - 顯示文檔摘要和 Vector DB 信息 */}
+      <DocumentInfoCard
+        sessionId={sessionId}
+        documentSummary={documentSummary}
+        sourceReference={sourceReference}
+        chunkCount={chunkCount}
+      />
 
       <div className="messages-container">
         {messages.length === 0 ? (

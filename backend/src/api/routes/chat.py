@@ -31,6 +31,7 @@ rag_engine = get_rag_engine()
 class QueryRequest(BaseModel):
     """查詢請求"""
     user_query: str = Field(..., min_length=1, max_length=2000, description="使用者查詢")
+    language: str = Field(default="en", description="UI 語言代碼 (en, zh, ko, es, ja, ar, fr)")
 
 
 class RetrievedChunkResponse(BaseModel):
@@ -126,12 +127,18 @@ async def query(
         )
     
     try:
-        # 執行 RAG 查詢
-        logger.info(f"[{session_id}] Processing query: {user_query[:100]}")
+        # 執行 RAG 查詢（使用 session 特定的 similarity_threshold 和 custom_prompt）
+        logger.info(
+            f"[{session_id}] Processing query: {user_query[:100]} "
+            f"(threshold={session.similarity_threshold}, language={request.language}, custom_prompt={bool(session.custom_prompt)})"
+        )
         
         rag_response = rag_engine.query(
             session_id=session_id,
-            user_query=user_query
+            user_query=user_query,
+            similarity_threshold=session.similarity_threshold,
+            language=request.language,
+            custom_prompt=session.custom_prompt
         )
         
         # 建立使用者訊息

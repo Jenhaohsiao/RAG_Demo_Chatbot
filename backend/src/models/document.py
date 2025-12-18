@@ -38,6 +38,7 @@ class Document(BaseModel):
     source_type: SourceType
     source_reference: str  # Filename or URL
     raw_content: str | None = None  # Transient, extracted text
+    summary: str | None = None  # LLM 生成的摘要
     upload_timestamp: datetime = Field(default_factory=datetime.utcnow)
     extraction_status: ExtractionStatus = Field(default=ExtractionStatus.PENDING)
     moderation_status: ModerationStatus = Field(default=ModerationStatus.PENDING)

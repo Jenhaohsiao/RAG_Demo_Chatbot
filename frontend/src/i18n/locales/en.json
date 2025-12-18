@@ -19,7 +19,8 @@
     "restart": "Restart",
     "close": "Close",
     "cancel": "Cancel",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "settings": "Settings"
   },
   "labels": {
     "session": "Session",
@@ -53,6 +54,22 @@
     "invalidUrl": "Invalid URL format",
     "noDocuments": "No documents uploaded yet",
     "confirmLeave": "Are you sure you want to leave this session?"
+  },
+  "settings": {
+    "title": "RAG Settings",
+    "threshold": {
+      "label": "Similarity Threshold",
+      "description": "Controls how strict the RAG system is. Higher values provide more precise but potentially fewer answers, lower values provide more but potentially less relevant answers.",
+      "low": "Lenient",
+      "high": "Strict",
+      "strict": "Strict Mode",
+      "balanced": "Balanced Mode",
+      "lenient": "Lenient Mode",
+      "recommendations": "Recommendations",
+      "rec_lenient": "Suitable for exploratory queries, may include more irrelevant content",
+      "rec_balanced": "Recommended setting, balances precision and recall",
+      "rec_strict": "Only answers highly relevant questions, may often return cannot answer"
+    }
   },
   "states": {
     "INITIALIZING": "Initializing...",

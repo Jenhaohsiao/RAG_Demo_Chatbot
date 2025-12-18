@@ -17,7 +17,7 @@ interface UseSessionReturn {
   language: string;
   isLoading: boolean;
   error: string | null;
-  createSession: () => Promise<void>;
+  createSession: (similarityThreshold?: number) => Promise<void>;
   closeSession: () => Promise<void>;
   restartSession: () => Promise<void>;
   updateLanguage: (newLanguage: string) => Promise<void>;
@@ -79,12 +79,12 @@ export const useSession = (): UseSessionReturn => {
   /**
    * Create new session
    */
-  const createSession = useCallback(async () => {
+  const createSession = useCallback(async (similarityThreshold: number = 0.5, customPrompt?: string) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await sessionService.createSession(language);
+      const response = await sessionService.createSession(language, similarityThreshold, customPrompt);
       
       setSessionId(response.session_id);
       setSessionState(response.state);

@@ -19,7 +19,8 @@
     "restart": "重新開始",
     "close": "關閉",
     "cancel": "取消",
-    "confirm": "確認"
+    "confirm": "確認",
+    "settings": "設定"
   },
   "labels": {
     "session": "會話",
@@ -53,6 +54,22 @@
     "invalidUrl": "無效的網址格式",
     "noDocuments": "尚未上傳任何文件",
     "confirmLeave": "您確定要離開此會話嗎?"
+  },
+  "settings": {
+    "title": "RAG 設定",
+    "threshold": {
+      "label": "相似度閈值",
+      "description": "控制 RAG 系統的嚴格程度。較高的值會提供更精確但可能更少的回答，較低的值會提供更多但可能較不相關的回答。",
+      "low": "寬鬆",
+      "high": "嚴格",
+      "strict": "嚴格模式",
+      "balanced": "平衡模式",
+      "lenient": "寬鬆模式",
+      "recommendations": "建議",
+      "rec_lenient": "適合探索性查詢，可能包含更多不相關內容",
+      "rec_balanced": "建議設定，平衡精確性和包容性",
+      "rec_strict": "僅回答高度相關的問題，可能經常無法回答"
+    }
   },
   "states": {
     "INITIALIZING": "初始化中...",

@@ -19,7 +19,8 @@
     "restart": "再起動",
     "close": "閉じる",
     "cancel": "キャンセル",
-    "confirm": "確認"
+    "confirm": "確認",
+    "settings": "設定"
   },
   "labels": {
     "session": "セッション",
@@ -53,6 +54,22 @@
     "invalidUrl": "無効なURL形式",
     "noDocuments": "まだドキュメントがアップロードされていません",
     "confirmLeave": "このセッションを終了してもよろしいですか?"
+  },
+  "settings": {
+    "title": "RAG設定",
+    "threshold": {
+      "label": "類似度しきい値",
+      "description": "RAGシステムの厳格さを制御します。高い値はより正確ですが回答数が少なく、低い値はより多くの回答を提供しますが関連性が低い可能性があります。",
+      "low": "寛容",
+      "high": "厳格",
+      "strict": "厳格モード",
+      "balanced": "バランスモード",
+      "lenient": "寛容モード",
+      "recommendations": "推奨事項",
+      "rec_lenient": "探索的なクエリに適していますが、より多くの無関係なコンテンツが含まれる可能性があります",
+      "rec_balanced": "推奨設定で、精度と再現率のバランスを取ります",
+      "rec_strict": "非常に関連性の高い質問にのみ回答し、頻繁に回答不可を返す可能性があります"
+    }
   },
   "states": {
     "INITIALIZING": "初期化中...",

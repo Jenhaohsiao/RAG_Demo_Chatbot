@@ -155,22 +155,28 @@ export const MetricsDashboard: React.FC<MetricsDashboardProps> = ({
 
       <style>{`
         .metrics-dashboard {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-          padding: 1rem;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 0.75rem;
+          padding: 0.75rem;
           background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
           border-radius: 8px;
           margin-bottom: 1rem;
-          font-size: 0.9rem;
+          font-size: 0.85rem;
+        }
+
+        @media (max-width: 768px) {
+          .metrics-dashboard {
+            grid-template-columns: 1fr;
+          }
         }
 
         .metrics-section {
           background: white;
           border-radius: 6px;
-          padding: 1rem;
+          padding: 0.75rem;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-          border-left: 4px solid #4CAF50;
+          border-left: 3px solid #4CAF50;
         }
 
         .metrics-section.token-section {
@@ -185,38 +191,38 @@ export const MetricsDashboard: React.FC<MetricsDashboardProps> = ({
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 1rem;
-          padding-bottom: 0.5rem;
+          margin-bottom: 0.75rem;
+          padding-bottom: 0.4rem;
           border-bottom: 1px solid #e0e0e0;
         }
 
         .section-title {
           font-weight: 600;
           color: #333;
-          font-size: 1rem;
+          font-size: 0.9rem;
         }
 
         .warning-badge {
           background: #FFE5E5;
           color: #D32F2F;
-          padding: 0.25rem 0.75rem;
+          padding: 0.2rem 0.5rem;
           border-radius: 4px;
-          font-size: 0.8rem;
+          font-size: 0.75rem;
           font-weight: 600;
         }
 
         .metrics-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-          gap: 1rem;
-          margin-bottom: 1rem;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 0.5rem;
+          margin-bottom: 0.5rem;
         }
 
         .metric-item {
           display: flex;
           flex-direction: column;
-          gap: 0.25rem;
-          padding: 0.75rem;
+          gap: 0.15rem;
+          padding: 0.5rem;
           background: #f9f9f9;
           border-radius: 4px;
           border: 1px solid #e0e0e0;
@@ -234,14 +240,14 @@ export const MetricsDashboard: React.FC<MetricsDashboardProps> = ({
         }
 
         .metric-label {
-          font-size: 0.75rem;
+          font-size: 0.7rem;
           color: #666;
           text-transform: uppercase;
-          letter-spacing: 0.5px;
+          letter-spacing: 0.3px;
         }
 
         .metric-value {
-          font-size: 1.25rem;
+          font-size: 1.1rem;
           font-weight: 700;
           color: #333;
         }
@@ -251,7 +257,7 @@ export const MetricsDashboard: React.FC<MetricsDashboardProps> = ({
         }
 
         .metric-sublabel {
-          font-size: 0.7rem;
+          font-size: 0.65rem;
           color: #999;
         }
 
@@ -264,9 +270,9 @@ export const MetricsDashboard: React.FC<MetricsDashboardProps> = ({
 
         .progress-bar-wrapper {
           flex: 1;
-          height: 8px;
+          height: 6px;
           background: #e0e0e0;
-          border-radius: 4px;
+          border-radius: 3px;
           overflow: hidden;
         }
 

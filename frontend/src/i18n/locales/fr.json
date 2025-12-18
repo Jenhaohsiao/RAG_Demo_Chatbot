@@ -19,7 +19,8 @@
     "restart": "Redémarrer",
     "close": "Fermer",
     "cancel": "Annuler",
-    "confirm": "Confirmer"
+    "confirm": "Confirmer",
+    "settings": "Paramètres"
   },
   "labels": {
     "session": "Session",
@@ -53,6 +54,22 @@
     "invalidUrl": "Format d'URL invalide",
     "noDocuments": "Aucun document téléchargé pour le moment",
     "confirmLeave": "Êtes-vous sûr de vouloir quitter cette session ?"
+  },
+  "settings": {
+    "title": "Paramètres RAG",
+    "threshold": {
+      "label": "Seuil de Similitude",
+      "description": "Contrôle la rigueur du système RAG. Des valeurs plus élevées fournissent des réponses plus précises mais potentiellement moins nombreuses, des valeurs plus basses fournissent plus de réponses mais potentiellement moins pertinentes.",
+      "low": "Tolérant",
+      "high": "Strict",
+      "strict": "Mode Strict",
+      "balanced": "Mode Équilibré",
+      "lenient": "Mode Tolérant",
+      "recommendations": "Recommandations",
+      "rec_lenient": "Convient aux requêtes exploratoires, peut inclure plus de contenu non pertinent",
+      "rec_balanced": "Paramètre recommandé, équilibre précision et exhaustivité",
+      "rec_strict": "Répond uniquement aux questions très pertinentes, peut souvent retourner ne peut pas répondre"
+    }
   },
   "states": {
     "INITIALIZING": "Initialisation...",

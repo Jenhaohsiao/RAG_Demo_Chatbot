@@ -28,6 +28,7 @@ from ...services.moderation import ModerationService, ModerationStatus as ModSta
 from ...services.chunker import TextChunker
 from ...services.embedder import Embedder
 from ...services.vector_store import VectorStore
+from ...services.rag_engine import RAGEngine
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +40,7 @@ moderator = ModerationService(api_key=settings.gemini_api_key)
 chunker = TextChunker()
 embedder = Embedder()
 vector_store = VectorStore()
+rag_engine = RAGEngine()
 
 
 class UrlUploadRequest(BaseModel):
@@ -198,15 +200,94 @@ def process_document(document: Document):
             }
             points.append(point_data)
         
-        # Upsert 到 Qdrant
-        vector_store.upsert_chunks(
+        # Upsert 到 Qdrant（增強錯誤處理）
+        upsert_success = vector_store.upsert_chunks(
             collection_name=collection_name,
             chunks=points
         )
         
+        if not upsert_success:
+            raise Exception(f"Failed to upsert {len(points)} chunks to Qdrant collection '{collection_name}'")
+        
+        # 驗證資料已成功寫入
+        collection_info = vector_store.get_collection_info(collection_name)
+        if collection_info:
+            actual_count = collection_info.get('vectors_count') or collection_info.get('points_count', 0)
+            # 確保 actual_count 不是 None
+            if actual_count is None:
+                actual_count = 0
+            logger.info(
+                f"[{document.document_id}] Storage verified: {actual_count} vectors in collection (expected: {len(points)})"
+            )
+            if actual_count < len(points):
+                logger.warning(
+                    f"[{document.document_id}] Vector count mismatch! Expected {len(points)}, got {actual_count}"
+                )
+        else:
+            logger.error(f"[{document.document_id}] Cannot verify storage - collection info unavailable")
+        
         logger.info(
             f"[{document.document_id}] Storage complete: {len(points)} points uploaded"
         )
+        
+        # Step 6: 生成摘要（改進的 Prompt）
+        logger.info(f"[{document.document_id}] Generating summary")
+        try:
+            # 使用改進的 Prompt，要求 LLM 進行分析和整理
+            # 根據文檔長度選擇不同的截取策略
+            max_chars = min(len(document.raw_content), 8000)  # 增加到 8000 字符
+            content_sample = document.raw_content[:max_chars]
+            
+            prompt = f"""你是一位專業的文檔分析助手。請仔細閱讀以下文檔內容，並生成一個專業的摘要。
+
+**重要要求**：
+1. **分析內容**：理解文檔的主題、核心觀點和關鍵信息
+2. **整理結構**：用清晰的段落組織摘要，不要只是複製原文
+3. **提煉重點**：突出最重要的概念、數據或結論
+4. **控制長度**：摘要應在 300-500 字之間
+5. **使用繁體中文**：確保輸出為繁體中文
+
+**文檔內容**：
+{content_sample}
+
+**請生成摘要**："""
+            
+            # 使用同步方式生成摘要
+            import google.generativeai as genai
+            genai.configure(api_key=settings.gemini_api_key)
+            model = genai.GenerativeModel(settings.gemini_model)
+            
+            # 使用更高的 temperature 來獲得更有創造性的摘要
+            response = model.generate_content(
+                prompt,
+                generation_config=genai.GenerationConfig(
+                    temperature=0.3,  # 稍微提高創造性
+                    max_output_tokens=1024,  # 增加輸出長度限制
+                )
+            )
+            document.summary = response.text.strip()
+            
+            # 如果摘要太長，智能截取到句子結尾
+            if len(document.summary) > 550:
+                # 嘗試在句號處截取
+                truncated = document.summary[:500]
+                last_period_zh = truncated.rfind('。')
+                last_period_en = truncated.rfind('.')
+                last_period = max(last_period_zh, last_period_en)
+                
+                # 確保找到了句號且位置合理
+                if last_period > 300:  # 至少保留 300 字
+                    document.summary = truncated[:last_period + 1] + "..."
+                else:
+                    document.summary = truncated + "..."
+                
+            logger.info(f"[{document.document_id}] Summary generated: {len(document.summary)} chars")
+            
+        except Exception as e:
+            logger.error(f"[{document.document_id}] Failed to generate summary: {e}", exc_info=True)
+            # 如果生成失敗，提供更有意義的 fallback
+            content_preview = document.raw_content[:300].strip()
+            document.summary = f"文檔已上傳並處理完成。內容預覽：{content_preview}..."
         
         # 更新 session 狀態
         session = session_manager.get_session(document.session_id)
@@ -446,10 +527,8 @@ async def get_upload_status(
     elif document.extraction_status == ExtractionStatus.FAILED:
         progress = 0
     
-    # 產生摘要
-    summary = None
-    if document.raw_content and len(document.raw_content) > 100:
-        summary = document.raw_content[:200] + "..."
+    # 產生摘要（使用已緩存的 summary）
+    summary = document.summary if document.summary else None
     
     return UploadStatusResponse(
         document_id=document.document_id,

@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     session_ttl_minutes: int = 30
     
     # RAG Configuration
-    similarity_threshold: float = 0.7
+    similarity_threshold: float = 0.5  # Lowered from 0.7 to improve recall
     chunk_size: int = 512
     chunk_overlap: int = 128
     

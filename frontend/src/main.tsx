@@ -10,9 +10,11 @@ import Header from './components/Header';
 import UploadScreen from './components/UploadScreen';
 import ProcessingModal from './components/ProcessingModal';
 import ChatScreen from './components/ChatScreen';
+import SettingsModal from './components/SettingsModal';
 import { useSession } from './hooks/useSession';
 import { useUpload } from './hooks/useUpload';
 import { submitQuery } from './services/chatService';
+import sessionService from './services/sessionService';
 import type { SupportedLanguage } from './hooks/useLanguage';
 import type { ChatResponse } from './types/chat';
 
@@ -55,13 +57,26 @@ const App: React.FC = () => {
   // Modal state
   const [showModal, setShowModal] = useState(false);
   const [chatPhase, setChatPhase] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [similarityThreshold, setSimilarityThreshold] = useState(0.5);
+
+  // 當 threshold 改變時重新創建 session（僅在沒有上傳文件時）
+  const handleThresholdChange = async (newThreshold: number) => {
+    setSimilarityThreshold(newThreshold);
+    
+    // 只在沒有上傳文件時才重新創建 session
+    if (sessionId && !uploadResponse) {
+      await closeSession();
+      await createSession(newThreshold);
+    }
+  };
 
   // Auto-create session on component mount
   React.useEffect(() => {
     if (!sessionId && !isLoading) {
-      createSession();
+      createSession(similarityThreshold);
     }
-  }, [sessionId, isLoading, createSession]);
+  }, [sessionId, isLoading, createSession, similarityThreshold]);
 
   // 上傳檔案時顯示 modal
   const wrappedFileUpload = async (file: File) => {
@@ -77,24 +92,21 @@ const App: React.FC = () => {
 
   // Modal 確認按鈕
   const handleModalConfirm = async () => {
+    console.log('[handleModalConfirm] Called', { isFailed, isCompleted });
+    
     if (isFailed) {
       // 失敗時回到上傳畫面
+      console.log('[handleModalConfirm] Upload failed, resetting');
       setShowModal(false);
       resetUpload();
     } else if (isCompleted) {
-      // 等待 session 狀態更新為 READY_FOR_CHAT
-      // (後端在文件處理完成後會更新狀態)
-      let attempts = 0;
-      const maxAttempts = 30; // 最多 30 秒
-      
-      while (attempts < maxAttempts && sessionState !== 'READY_FOR_CHAT') {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        attempts++;
-      }
-      
-      // 成功時進入聊天畫面
+      // 直接進入聊天畫面，不需要等待狀態更新
+      // 因為文件處理完成後，後端已經將狀態設置為 READY_FOR_CHAT
+      console.log('[handleModalConfirm] Upload completed, entering chat phase');
       setShowModal(false);
       setChatPhase(true);
+    } else {
+      console.log('[handleModalConfirm] Unexpected state - not failed and not completed');
     }
   };
 
@@ -115,6 +127,17 @@ const App: React.FC = () => {
       await restartSession();
       resetUpload();
       setChatPhase(false);
+    }
+  };
+
+  const handleSettingsSave = async (threshold: number, customPrompt?: string) => {
+    setSimilarityThreshold(threshold);
+    setShowSettings(false);
+    
+    // If session already exists, recreate it with new threshold and custom prompt
+    if (sessionId) {
+      await closeSession();
+      await createSession(threshold, customPrompt);
     }
   };
 
@@ -210,6 +233,9 @@ const App: React.FC = () => {
                   onFileSelected={wrappedFileUpload}
                   onUrlSubmitted={wrappedUrlUpload}
                   disabled={false}
+                  similarityThreshold={similarityThreshold}
+                  onThresholdChange={handleThresholdChange}
+                  hasDocuments={!!uploadResponse}
                 />
               </div>
             )}
@@ -223,7 +249,10 @@ const App: React.FC = () => {
                 sourceType={uploadResponse.source_type}
                 chunkCount={statusResponse.chunk_count}
                 onSendQuery={async (query: string): Promise<ChatResponse> => {
-                  return await submitQuery(sessionId, query);
+                  // 標準化語言代碼：zh-TW -> zh, en-US -> en
+                  const normalizedLang = language.split('-')[0];
+                  console.log('[App] Sending query with language:', normalizedLang, '(original:', language, ')');
+                  return await submitQuery(sessionId, query, normalizedLang);
                 }}
               />
             )}
@@ -247,6 +276,14 @@ const App: React.FC = () => {
           onConfirm={handleModalConfirm}
         />
       )}
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={showSettings}
+        currentThreshold={similarityThreshold}
+        onClose={() => setShowSettings(false)}
+        onSave={handleSettingsSave}
+      />
 
       <footer className="bg-light text-center py-3 mt-auto border-top">
         <small className="text-muted">

@@ -20,19 +20,32 @@ router = APIRouter()
 
 
 @router.post("/create", response_model=SessionResponse, status_code=status.HTTP_201_CREATED)
-async def create_session(language: str = "en"):
+async def create_session(language: str = "en", similarity_threshold: float = 0.5, custom_prompt: str | None = None):
     """
     Create a new session with unique ID and Qdrant collection
     
     Args:
         language: Initial UI language (default: en)
+        similarity_threshold: RAG similarity threshold (0.0-1.0, default: 0.5)
+        custom_prompt: Custom prompt template (optional)
         
     Returns:
         SessionResponse: Session details
     """
     try:
+        # Validate similarity_threshold
+        if not 0.0 <= similarity_threshold <= 1.0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="similarity_threshold must be between 0.0 and 1.0"
+            )
+        
         # Create session
-        session = session_manager.create_session(language=language)
+        session = session_manager.create_session(
+            language=language, 
+            similarity_threshold=similarity_threshold,
+            custom_prompt=custom_prompt
+        )
         
         # Create Qdrant collection
         collection_created = vector_store.create_collection(
