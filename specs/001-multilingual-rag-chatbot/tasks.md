@@ -58,9 +58,10 @@
 - [ ] T020 [P] Create TypeScript types in `frontend/src/types/chat.ts` matching backend ChatMessage schema
 - [ ] T021 [P] Create TypeScript types in `frontend/src/types/metrics.ts` matching backend Metrics schema
 - [ ] T022 Create Axios client configuration in `frontend/src/services/api.ts` with base URL and error interceptors
-- [ ] T023 Create i18n configuration in `frontend/src/i18n/config.ts` with react-i18next setup for 7 languages
+- [ ] T023 Create i18n configuration in `frontend/src/i18n/config.ts` with react-i18next setup for 8 languages
 - [ ] T024 [P] Create English translations in `frontend/src/i18n/locales/en.json` with all UI strings
-- [ ] T025 [P] Create Chinese translations in `frontend/src/i18n/locales/zh.json`
+- [ ] T025 [P] Create Traditional Chinese translations in `frontend/src/i18n/locales/zh-TW.json`
+- [ ] T025b [P] Create Simplified Chinese translations in `frontend/src/i18n/locales/zh-CN.json`
 - [ ] T026 [P] Create Korean translations in `frontend/src/i18n/locales/ko.json`
 - [ ] T027 [P] Create Spanish translations in `frontend/src/i18n/locales/es.json`
 - [ ] T028 [P] Create Japanese translations in `frontend/src/i18n/locales/ja.json`

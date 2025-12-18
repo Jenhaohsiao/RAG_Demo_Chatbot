@@ -97,14 +97,15 @@
 
 ### 多語言翻譯檔案
 - [x] T024: 建立 `frontend/src/i18n/locales/en.json`
-- [x] T025: 建立 `frontend/src/i18n/locales/zh.json`
+- [x] T025: 建立 `frontend/src/i18n/locales/zh-TW.json`
+- [x] T025b: 建立 `frontend/src/i18n/locales/zh-CN.json`
 - [x] T026: 建立 `frontend/src/i18n/locales/ko.json`
 - [x] T027: 建立 `frontend/src/i18n/locales/es.json`
 - [x] T028: 建立 `frontend/src/i18n/locales/ja.json`
 - [x] T029: 建立 `frontend/src/i18n/locales/ar.json`
 - [x] T030: 建立 `frontend/src/i18n/locales/fr.json`
 
-**驗證**: ✅ 基礎架構完整，7 種語言支援就緒
+**驗證**: ✅ 基礎架構完整，8 種語言支援就緒
 
 ---
 
@@ -609,7 +610,8 @@
 
 - [x] 翻譯文件完整性檢查
   - ✅ en.json: 新增 labels.selectLanguage, settings.customPrompt.*
-  - ✅ zh.json: 新增繁體中文翻譯
+  - ✅ zh-TW.json: 新增繁體中文翻譯
+  - ✅ zh-CN.json: 新增簡體中文翻譯
   - ✅ ko.json: 新增韓語翻譯
   - ✅ es.json: 新增西班牙語翻譯
   - ✅ ja.json: 新增日語翻譯

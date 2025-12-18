@@ -117,7 +117,8 @@ Features:
 #### 6. Translations (All 7 languages)
 Added complete translations for settings feature:
 - **English** (`en.json`)
-- **Chinese Traditional** (`zh.json`)
+- **Traditional Chinese** (`zh-TW.json`)
+- **Simplified Chinese** (`zh-CN.json`)
 - **Korean** (`ko.json`)
 - **Spanish** (`es.json`)
 - **Japanese** (`ja.json`)

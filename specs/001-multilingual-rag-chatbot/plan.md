@@ -221,7 +221,8 @@ RAG_Demo_Chatbot/
 │   │   │   ├── config.ts            # react-i18next setup
 │   │   │   └── locales/
 │   │   │       ├── en.json          # English translations
-│   │   │       ├── zh.json          # Chinese translations
+│   │   │       ├── zh-TW.json       # Traditional Chinese translations
+│   │   │       ├── zh-CN.json       # Simplified Chinese translations
 │   │   │       ├── ko.json          # Korean translations
 │   │   │       ├── es.json          # Spanish translations
 │   │   │       ├── ja.json          # Japanese translations

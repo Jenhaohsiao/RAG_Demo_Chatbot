@@ -269,8 +269,8 @@ components:
           description: Number of uploaded documents
         language:
           type: string
-          enum: [en, zh, ko, es, ja, ar, fr]
-          description: Current UI language preference
+          enum: [en, zh-TW, zh-CN, ko, es, ja, ar, fr]
+          description: Current UI language preference (zh-TW for Traditional Chinese, zh-CN for Simplified Chinese)
 
     Error:
       type: object

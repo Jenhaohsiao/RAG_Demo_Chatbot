@@ -76,12 +76,12 @@ def test_phase3_integration():
     print(f"\n[4/9] Testing PUT /api/v1/session/{session_id}/language...")
     response = client.put(
         f"/api/v1/session/{session_id}/language",
-        json={"language": "zh"}
+        json={"language": "zh-TW"}
     )
     assert response.status_code == 200, f"Expected 200, got {response.status_code}"
     updated_data = response.json()
-    assert updated_data["language"] == "zh", "Language not updated"
-    print(f"✓ Language updated: en → zh")
+    assert updated_data["language"] == "zh-TW", "Language not updated"
+    print(f"✓ Language updated: en → zh-TW")
     
     # Test 5: Get Session with Metrics
     print(f"\n[5/9] Testing GET /api/v1/session/{session_id}/metrics...")
