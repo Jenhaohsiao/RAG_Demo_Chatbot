@@ -101,11 +101,16 @@ def process_document(document: Document):
         logger.info(f"[{document.document_id}] Starting extraction ({document.source_type})")
         document.extraction_status = ExtractionStatus.EXTRACTING
         
-        # 從檔案路徑讀取內容
-        if document.source_type == SourceType.PDF:
+        # 讀取或抓取內容
+        if document.source_type == SourceType.URL:
+            # URL: 直接使用 URL 字符串
+            content = document.source_reference
+        elif document.source_type == SourceType.PDF:
+            # PDF: 從檔案路徑讀取二進位內容
             with open(document.source_reference, 'rb') as f:
                 content = f.read()
         else:  # TEXT
+            # TEXT: 從檔案路徑讀取文字內容
             with open(document.source_reference, 'r', encoding='utf-8') as f:
                 content = f.read()
         
@@ -232,62 +237,47 @@ def process_document(document: Document):
         
         # Step 6: 生成摘要（改進的 Prompt）
         logger.info(f"[{document.document_id}] Generating summary")
+        document.extraction_status = ExtractionStatus.SUMMARIZING  # 標記為摘要生成中
+        
         try:
-            # 使用改進的 Prompt，要求 LLM 進行分析和整理
-            # 根據文檔長度選擇不同的截取策略
-            max_chars = min(len(document.raw_content), 8000)  # 增加到 8000 字符
-            content_sample = document.raw_content[:max_chars]
+            # 重新獲取 Session 以確保獲得最新的語言設定
+            session = session_manager.get_session(document.session_id)
+            language = session.language if session else "en"
+            logger.info(f"[{document.document_id}] Session language for summary: {language}")
             
-            prompt = f"""你是一位專業的文檔分析助手。請仔細閱讀以下文檔內容，並生成一個專業的摘要。
-
-**重要要求**：
-1. **分析內容**：理解文檔的主題、核心觀點和關鍵信息
-2. **整理結構**：用清晰的段落組織摘要，不要只是複製原文
-3. **提煉重點**：突出最重要的概念、數據或結論
-4. **控制長度**：摘要應在 300-500 字之間
-5. **使用繁體中文**：確保輸出為繁體中文
-
-**文檔內容**：
-{content_sample}
-
-**請生成摘要**："""
-            
-            # 使用同步方式生成摘要
-            import google.generativeai as genai
-            genai.configure(api_key=settings.gemini_api_key)
-            model = genai.GenerativeModel(settings.gemini_model)
-            
-            # 使用更高的 temperature 來獲得更有創造性的摘要
-            response = model.generate_content(
-                prompt,
-                generation_config=genai.GenerationConfig(
-                    temperature=0.3,  # 稍微提高創造性
-                    max_output_tokens=1024,  # 增加輸出長度限制
-                )
+            # 使用 RAG Engine 的摘要生成方法（減少至 300 token 限制摘要長度）
+            document.summary = rag_engine.generate_summary(
+                session_id=document.session_id,
+                document_content=document.raw_content,
+                language=language,
+                max_tokens=300  # 限制摘要長度至 ~300 字
             )
-            document.summary = response.text.strip()
             
-            # 如果摘要太長，智能截取到句子結尾
-            if len(document.summary) > 550:
-                # 嘗試在句號處截取
-                truncated = document.summary[:500]
-                last_period_zh = truncated.rfind('。')
-                last_period_en = truncated.rfind('.')
-                last_period = max(last_period_zh, last_period_en)
-                
-                # 確保找到了句號且位置合理
-                if last_period > 300:  # 至少保留 300 字
-                    document.summary = truncated[:last_period + 1] + "..."
-                else:
-                    document.summary = truncated + "..."
-                
-            logger.info(f"[{document.document_id}] Summary generated: {len(document.summary)} chars")
+            logger.info(f"[{document.document_id}] Summary generated: {len(document.summary)} chars, summary[:100]={document.summary[:100] if document.summary else 'None'}")
             
         except Exception as e:
             logger.error(f"[{document.document_id}] Failed to generate summary: {e}", exc_info=True)
             # 如果生成失敗，提供更有意義的 fallback
-            content_preview = document.raw_content[:300].strip()
-            document.summary = f"文檔已上傳並處理完成。內容預覽：{content_preview}..."
+            content_preview = document.raw_content[:200].strip()
+            language = "en"
+            if session and hasattr(session, 'language'):
+                language = session.language
+            
+            fallback_messages = {
+                "zh-TW": f"文檔已上傳並處理完成。內容預覽：{content_preview}...",
+                "zh-CN": f"文档已上传并处理完成。内容预览：{content_preview}...",
+                "zh": f"文檔已上傳並處理完成。內容預覽：{content_preview}...",
+                "en": f"Document uploaded and processed successfully. Content preview: {content_preview}...",
+                "ko": f"문서가 업로드되고 처리되었습니다. 콘텐츠 미리보기: {content_preview}...",
+                "es": f"Documento cargado y procesado exitosamente. Vista previa: {content_preview}...",
+                "ja": f"ドキュメントがアップロードおよび処理されました。プレビュー: {content_preview}...",
+                "ar": f"تم تحميل المستند ومعالجته بنجاح. معاينة: {content_preview}...",
+                "fr": f"Document téléchargé et traité avec succès. Aperçu: {content_preview}..."
+            }
+            document.summary = fallback_messages.get(language, fallback_messages["en"])
+        
+        # 標記為完全完成
+        document.extraction_status = ExtractionStatus.COMPLETED
         
         # 更新 session 狀態
         session = session_manager.get_session(document.session_id)
@@ -523,12 +513,18 @@ async def get_upload_status(
         if document.moderation_status == ModerationStatus.APPROVED:
             progress = 75
             if document.chunk_count > 0:
-                progress = 100
+                progress = 90  # 向量已準備，等待摘要生成
+    elif document.extraction_status == ExtractionStatus.SUMMARIZING:
+        progress = 95  # 摘要正在生成
+    elif document.extraction_status == ExtractionStatus.COMPLETED:
+        progress = 100  # 完全完成
     elif document.extraction_status == ExtractionStatus.FAILED:
         progress = 0
     
     # 產生摘要（使用已緩存的 summary）
     summary = document.summary if document.summary else None
+    
+    logger.info(f"[{document.document_id}] Status check: extraction_status={document.extraction_status}, chunk_count={document.chunk_count}, progress={progress}, has_summary={summary is not None}, summary_len={len(summary) if summary else 0}")
     
     return UploadStatusResponse(
         document_id=document.document_id,
@@ -580,6 +576,7 @@ async def list_documents(session_id: UUID):
             moderation_status=doc.moderation_status,
             chunk_count=doc.chunk_count,
             processing_progress=progress,
+            summary=doc.summary,
             error_code=doc.error_code,
             error_message=doc.error_message,
             moderation_categories=doc.moderation_categories

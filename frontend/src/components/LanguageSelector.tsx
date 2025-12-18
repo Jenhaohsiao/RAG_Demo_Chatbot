@@ -15,15 +15,16 @@ import { useLanguage, type SupportedLanguage } from '../hooks/useLanguage';
 
 const LANGUAGE_LABELS: Record<SupportedLanguage, string> = {
   en: 'English',
-  zh: '中文',
+  'zh-TW': '繁體中文',
   ko: '한국어',
   es: 'Español',
   ja: '日本語',
   ar: 'العربية',
-  fr: 'Français'
+  fr: 'Français',
+  'zh-CN': '简体中文'
 };
 
-const LANGUAGE_ORDER: SupportedLanguage[] = ['en', 'zh', 'ko', 'es', 'ja', 'ar', 'fr'];
+const LANGUAGE_ORDER: SupportedLanguage[] = ['en', 'zh-TW', 'ko', 'es', 'ja', 'ar', 'fr', 'zh-CN'];
 
 // Cycle interval: 1 second
 const CYCLE_INTERVAL = 1000;

@@ -31,7 +31,7 @@ rag_engine = get_rag_engine()
 class QueryRequest(BaseModel):
     """查詢請求"""
     user_query: str = Field(..., min_length=1, max_length=2000, description="使用者查詢")
-    language: str = Field(default="en", description="UI 語言代碼 (en, zh, ko, es, ja, ar, fr)")
+    language: str = Field(default="en", description="UI 語言代碼 (en, zh-TW, ko, es, ja, ar, fr, zh-CN)")
 
 
 class RetrievedChunkResponse(BaseModel):

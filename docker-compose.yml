@@ -41,6 +41,10 @@ services:
     restart: unless-stopped
     networks:
       - rag-chatbot-network
+    # DNS configuration for URL fetching
+    dns:
+      - 8.8.8.8  # Google DNS
+      - 8.8.4.4  # Google DNS backup
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s

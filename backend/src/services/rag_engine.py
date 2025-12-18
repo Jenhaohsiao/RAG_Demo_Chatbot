@@ -237,6 +237,154 @@ class RAGEngine:
             logger.error(f"[{session_id}] RAG query failed: {str(e)}", exc_info=True)
             raise
     
+    def generate_summary(
+        self,
+        session_id: UUID,
+        document_content: str,
+        language: str = "en",
+        max_tokens: int = 300
+    ) -> str:
+        """
+        生成文檔摘要
+        
+        Args:
+            session_id: Session ID
+            document_content: 文檔內容
+            language: UI 語言代碼 (en, zh-TW, zh-CN, ko, es, ja, ar, fr)
+            max_tokens: 摘要最大 token 數
+        
+        Returns:
+            str: 生成的摘要
+        
+        Raises:
+            ValueError: 當文檔內容為空時
+            Exception: 當摘要生成失敗時
+        """
+        if not document_content or not document_content.strip():
+            raise ValueError("Document content cannot be empty")
+        
+        # 不進行語言映射，直接使用傳入的語言代碼
+        logger.info(f"[{session_id}] Generating summary (language={language}, max_tokens={max_tokens})")
+        
+        try:
+            # 多語言摘要提示詞（包括繁體中文和簡體中文）
+            summary_prompts = {
+                "zh-TW": """請為以下文檔內容提供一段簡潔的摘要（最多 300 個字）。摘要應該：
+1. 使用繁體中文寫作
+2. 包含主要主題和關鍵點
+3. 簡潔清晰，適合快速瀏覽
+4. 不超過 300 字
+
+文檔內容：
+""",
+                "zh-CN": """请为以下文档内容提供一段简洁的摘要（最多 300 个字）。摘要应该：
+1. 使用简体中文写作
+2. 包含主要主题和关键点
+3. 简洁清晰，适合快速浏览
+4. 不超过 300 字
+
+文档内容：
+""",
+                "zh": """請為以下文檔內容提供一段簡潔的摘要（最多 300 個字）。摘要應該：
+1. 直接用中文寫作，無需翻譯聲明
+2. 包含主要主題和關鍵點
+3. 簡潔清晰，適合快速瀏覽
+4. 不超過 300 字
+
+文檔內容：
+""",
+                "en": """Please provide a concise summary of the following document (max 300 words). The summary should:
+1. Be written directly in English
+2. Include main topics and key points
+3. Be clear and suitable for quick scanning
+4. Not exceed 300 words
+
+Document content:
+""",
+                "ko": """다음 문서에 대한 간단한 요약을 제공하십시오(최대 300단어). 요약은 다음과 같아야 합니다:
+1. 한국어로 직접 작성
+2. 주요 주제 및 핵심 포인트 포함
+3. 명확하고 빠른 스캔에 적합
+4. 300단어를 초과하지 않음
+
+문서 내용:
+""",
+                "es": """Proporcione un resumen conciso del siguiente documento (máximo 300 palabras). El resumen debe:
+1. Ser escrito directamente en español
+2. Incluir temas principales y puntos clave
+3. Ser claro y apto para escaneo rápido
+4. No exceder 300 palabras
+
+Contenido del documento:
+""",
+                "ja": """次のドキュメントの簡潔な要約を提供してください（最大300語）。要約は次のようにしてください:
+1. 日本語で直接作成
+2. 主要なトピックと重要なポイントを含める
+3. 明確で、素早いスキャンに適している
+4. 300語を超えない
+
+ドキュメント内容:
+""",
+                "ar": """يرجى تقديم ملخص موجز للمستند التالي (بحد أقصى 300 كلمة). يجب أن يكون الملخص:
+1. مكتوبًا مباشرة باللغة العربية
+2. يتضمن المواضيع الرئيسية والنقاط الرئيسية
+3. واضحًا ومناسبًا للمسح السريع
+4. لا يتجاوز 300 كلمة
+
+محتوى المستند:
+""",
+                "fr": """Veuillez fournir un résumé concis du document suivant (maximum 300 mots). Le résumé doit:
+1. Être écrit directement en français
+2. Inclure les sujets principaux et les points clés
+3. Être clair et approprié pour un balayage rapide
+4. Ne pas dépasser 300 mots
+
+Contenu du document:
+"""
+            }
+            
+            # 取得語言對應的提示詞，如果不存在則使用英文
+            system_prompt = summary_prompts.get(language, summary_prompts["en"])
+            
+            # 若文檔過長，只取前面部分
+            max_content_length = 4000  # 限制輸入內容長度以控制成本
+            content_to_summarize = document_content[:max_content_length]
+            if len(document_content) > max_content_length:
+                content_to_summarize += "\n[... 文檔已截斷 ...]"
+            
+            full_prompt = system_prompt + content_to_summarize
+            
+            # 調用 Gemini API 生成摘要
+            logger.debug(f"[{session_id}] Calling Gemini API for summary...")
+            response = self.model.generate_content(
+                full_prompt,
+                generation_config=genai.GenerationConfig(
+                    temperature=0.5,  # 比查詢時稍高，允許更多創意表達
+                    max_output_tokens=max_tokens,
+                )
+            )
+            
+            summary = response.text.strip()
+            
+            # 提取 token 使用量（用於日誌記錄）
+            token_usage = 0
+            if hasattr(response, 'usage_metadata'):
+                token_usage = (
+                    response.usage_metadata.prompt_token_count + 
+                    response.usage_metadata.candidates_token_count
+                )
+            
+            logger.info(
+                f"[{session_id}] Summary generated successfully "
+                f"({len(summary)} chars, {token_usage} tokens)"
+            )
+            
+            return summary
+            
+        except Exception as e:
+            logger.error(f"[{session_id}] Summary generation failed: {str(e)}", exc_info=True)
+            raise
+    
     def _build_prompt(
         self,
         user_query: str,
@@ -315,16 +463,43 @@ class RAGEngine:
         context = "\n---\n".join(context_parts) if context_parts else "No documents retrieved."
         
         # 建構 Prompt（允許回答基本問題，但優先使用文檔內容）
+        # 定義術語（用於幫助LLM理解"文檔"的定義）
+        document_definition = {
+            "zh": """**術語定義**:
+- **文檔 (Documents)**: 用戶上傳到系統中的內容，包括網頁、PDF、文本文件等。這些內容已被提取、清理、分塊和索引。
+- **分塊 (Chunks)**: 文檔被分成的小段落，以便進行語義搜索。""",
+            "en": """**Term Definitions**:
+- **Documents**: Content uploaded by the user (webpages, PDFs, text files, etc.) that has been extracted, cleaned, chunked and indexed.
+- **Chunks**: Small passages that documents are split into for semantic search.""",
+            "ko": """**용어 정의**:
+- **문서**: 사용자가 시스템에 업로드한 콘텐츠(웹페이지, PDF, 텍스트 파일 등)로, 추출, 정리, 청크 분할 및 인덱싱되었습니다.
+- **청크**: 의미론적 검색을 위해 문서를 분할한 작은 구절입니다.""",
+            "es": """**Definiciones de términos**:
+- **Documentos**: Contenido cargado por el usuario (páginas web, PDF, archivos de texto, etc.) que ha sido extraído, limpiado, dividido y indexado.
+- **Fragmentos**: Pasajes pequeños en los que se dividen los documentos para la búsqueda semántica.""",
+            "ja": """**用語定義**:
+- **文書**: ユーザーがシステムにアップロードしたコンテンツ（Webページ、PDF、テキストファイルなど）で、抽出、クリーニング、チャンク分割、インデックス化されています。
+- **チャンク**: セマンティック検索のために文書を分割した小さな段落です。""",
+            "ar": """**تعريف المصطلحات**:
+- **المستندات**: المحتوى الذي حمله المستخدم إلى النظام (صفحات الويب وملفات PDF وملفات نصية وما إلى ذلك) الذي تم استخراجه وتنظيفه وتقسيمه وفهرسته.
+- **القطع**: فقرات صغيرة يتم تقسيم المستندات إليها للبحث الدلالي.""",
+            "fr": """**Définitions des termes**:
+- **Documents**: Contenu téléchargé par l'utilisateur (pages web, PDF, fichiers texte, etc.) qui a été extrait, nettoyé, divisé en chunks et indexé.
+- **Chunks**: Petits passages dans lesquels les documents sont divisés pour la recherche sémantique."""
+        }
+        
         if not retrieved_chunks:
             # 沒有檢索到相關文檔片段時的 Prompt
             prompt = f"""You are a helpful multilingual assistant.
 
+{document_definition.get(response_language, document_definition['en'])}
+
 **IMPORTANT RULES**:
-1. **Response Language**: Always respond in {response_language}
+1. **Response Language**: Always respond in {response_language}. Even if the user types in English, respond in {response_language}
 2. **Context**: Some documents may have been uploaded to the system, but no relevant passages were found for this specific question
 3. For general questions (greetings, simple requests, common knowledge), answer naturally and helpfully
-4. If the user asks to summarize or explain "the document/file content", politely explain that you cannot find relevant passages matching their query, and suggest they ask more specific questions about the topics they're interested in
-5. Be friendly, concise, and helpful
+4. If the user asks to summarize or explain "the document/文檔/file content", politely explain that you cannot find relevant passages matching their query, and suggest they ask more specific questions about the topics they're interested in
+5. Be friendly, concise, and helpful in {response_language}
 
 **User Question**:
 {user_query}
@@ -332,20 +507,22 @@ class RAGEngine:
 **Your Answer** (in {response_language}):"""
         else:
             # 有文檔時的標準 RAG Prompt
-            prompt = f"""You are a helpful multilingual assistant. 
+            prompt = f"""You are a helpful multilingual assistant.
+
+{document_definition.get(response_language, document_definition['en'])}
 
 **IMPORTANT RULES**:
-1. **Primary**: Answer based on the provided documents when relevant information is available
-2. **Secondary**: For general questions (greetings, language requests), you may answer politely
-3. **Response Language**: Always respond in {response_language}
-4. If the user asks about document content and it's not in the documents, say: "I cannot find this information in the uploaded documents."
+1. **Response Language**: Always respond in {response_language}. Even if the user types in English, respond in {response_language}
+2. **Primary**: Answer based on the provided documents/文檔 when relevant information is available
+3. **Secondary**: For general questions (greetings, language requests), you may answer politely
+4. If the user asks about document/文檔 content and it's not in the documents, say in {response_language}: "I cannot find this information in the uploaded documents" (中文: "我無法在已上傳的文檔中找到此信息")
 5. Cite document numbers when using document information
-6. Be helpful, concise, and accurate
+6. Be helpful, concise, and accurate in {response_language}
 
-**Retrieved Documents**:
+**Retrieved Documents/已上傳文檔**:
 {context}
 
-**User Question**:
+**User Question/用戶問題**:
 {user_query}
 
 **Your Answer** (in {response_language}):"""

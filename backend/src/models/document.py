@@ -20,6 +20,8 @@ class ExtractionStatus(str, Enum):
     PENDING = "PENDING"
     EXTRACTING = "EXTRACTING"
     EXTRACTED = "EXTRACTED"
+    SUMMARIZING = "SUMMARIZING"  # 生成摘要中
+    COMPLETED = "COMPLETED"  # 完全完成（包括摘要）
     FAILED = "FAILED"
 
 

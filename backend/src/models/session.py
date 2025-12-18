@@ -28,7 +28,7 @@ class Session(BaseModel):
     qdrant_collection_name: str = Field(default="")
     document_count: int = Field(default=0, ge=0)
     vector_count: int = Field(default=0, ge=0)
-    language: str = Field(default="en", pattern="^(en|zh|ko|es|ja|ar|fr)$")
+    language: str = Field(default="en", pattern="^(en|zh-TW|ko|es|ja|ar|fr|zh-CN)$")
     similarity_threshold: float = Field(default=0.5, ge=0.0, le=1.0, description="RAG similarity threshold (0.0-1.0)")
     custom_prompt: str | None = Field(default=None, description="Custom prompt template for RAG responses")
     
@@ -44,8 +44,8 @@ class Session(BaseModel):
     @field_validator('language')
     @classmethod
     def validate_language(cls, v: str) -> str:
-        """Validate language code is one of the 7 supported languages"""
-        valid_languages = ["en", "zh", "ko", "es", "ja", "ar", "fr"]
+        """Validate language code is one of the 8 supported languages"""
+        valid_languages = ["en", "zh-TW", "ko", "es", "ja", "ar", "fr", "zh-CN"]
         if v not in valid_languages:
             raise ValueError(f"Language must be one of {valid_languages}")
         return v
@@ -133,11 +133,11 @@ class SessionWithMetrics(SessionResponse):
 
 class LanguageUpdateRequest(BaseModel):
     """Request to update session language"""
-    language: str = Field(pattern="^(en|zh|ko|es|ja|ar|fr)$")
+    language: str = Field(pattern="^(en|zh-TW|ko|es|ja|ar|fr|zh-CN)$")
     
     class Config:
         json_schema_extra = {
             "example": {
-                "language": "zh"
+                "language": "zh-TW"
             }
         }

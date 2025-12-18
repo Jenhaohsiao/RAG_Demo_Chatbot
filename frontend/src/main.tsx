@@ -283,19 +283,27 @@ const App: React.FC = () => {
 
             {/* Chat Screen - After Upload Complete */}
             {sessionId && chatPhase && uploadResponse && statusResponse && (
-              <ChatScreen
-                sessionId={sessionId}
-                documentSummary={statusResponse.summary}
-                sourceReference={statusResponse.source_reference}
-                sourceType={uploadResponse.source_type}
-                chunkCount={statusResponse.chunk_count}
-                onSendQuery={async (query: string): Promise<ChatResponse> => {
-                  // 標準化語言代碼：zh-TW -> zh, en-US -> en
-                  const normalizedLang = language.split('-')[0];
-                  console.log('[App] Sending query with language:', normalizedLang, '(original:', language, ')');
+              <>
+                {console.log('[App] ChatScreen props:', {
+                  sessionId,
+                  documentSummary: statusResponse.summary,
+                  chunkCount: statusResponse.chunk_count,
+                  fullStatusResponse: statusResponse
+                })}
+                <ChatScreen
+                  sessionId={sessionId}
+                  documentSummary={statusResponse.summary}
+                  sourceReference={statusResponse.source_reference}
+                  sourceType={uploadResponse.source_type}
+                  chunkCount={statusResponse.chunk_count}
+                  onSendQuery={async (query: string): Promise<ChatResponse> => {
+                    // 標準化語言代碼：zh-TW -> zh, en-US -> en
+                    const normalizedLang = language.split('-')[0];
+                    console.log('[App] Sending query with language:', normalizedLang, '(original:', language, ')');
                   return await submitQuery(sessionId, query, normalizedLang);
                 }}
-              />
+                />
+              </>
             )}
           </div>
         </div>
