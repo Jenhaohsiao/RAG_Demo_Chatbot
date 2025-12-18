@@ -411,7 +411,8 @@ curl http://localhost:8000/api/v1/chat/{session_id}/history
 2. Click language selector dropdown
 3. Select each language and verify:
    - **English (en)**: "Upload Document" button
-   - **中文 (zh)**: "上傳文件" button
+   - **繁體中文 (zh-TW)**: "上傳文件" button
+   - **简体中文 (zh-CN)**: "上傳文件" button
    - **한국어 (ko)**: "문서 업로드" button
    - **Español (es)**: "Cargar Documento" button
    - **日本語 (ja)**: "ドキュメントをアップロード" button
@@ -426,26 +427,26 @@ curl http://localhost:8000/api/v1/chat/{session_id}/history
 #### Test 4.2: Backend Language Update
 
 ```bash
-# Request
+# Request - Traditional Chinese
 curl -X PUT http://localhost:8000/api/v1/session/{session_id}/language \
   -H "Content-Type: application/json" \
-  -d '{"language": "zh"}'
+  -d '{"language": "zh-TW"}'
 
 # Expected Response (200 OK)
 {
   "session_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  "language": "zh",
+  "language": "zh-TW",
   "updated_at": "2025-12-08T10:20:00Z"
 }
 ```
 
-**Verification**: Subsequent session GET returns `"language": "zh"`
+**Verification**: Subsequent session GET returns `"language": "zh-TW"`
 
 #### Test 4.3: Language Cycling Animation
 
 **Manual UI Test**:
 1. Create new session (no language selected yet)
-2. Observe language selector cycling through 7 languages
+2. Observe language selector cycling through 8 languages
 3. Verify 1-second interval between cycles
 4. Click any language to stop cycling
 

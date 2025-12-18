@@ -10,7 +10,7 @@ import sessionService from '../services/sessionService';
 
 const LANGUAGE_STORAGE_KEY = 'rag-chatbot-language';
 
-const SUPPORTED_LANGUAGES = ['en', 'zh', 'ko', 'es', 'ja', 'ar', 'fr'] as const;
+const SUPPORTED_LANGUAGES = ['en', 'zh-TW', 'zh-CN', 'ko', 'es', 'ja', 'ar', 'fr'] as const;
 export type SupportedLanguage = typeof SUPPORTED_LANGUAGES[number];
 
 interface UseLanguageReturn {

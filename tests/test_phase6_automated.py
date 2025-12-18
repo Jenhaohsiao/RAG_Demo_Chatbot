@@ -52,10 +52,10 @@ class Phase6Tester:
             return False
     
     def test_language_files_exist(self) -> bool:
-        """T076: 驗證所有 7 種語言翻譯檔案存在"""
+        """T076: 驗證所有 8 種語言翻譯檔案存在"""
         import os
         
-        languages = ['en', 'zh', 'ko', 'es', 'ja', 'ar', 'fr']
+        languages = ['en', 'zh-TW', 'zh-CN', 'ko', 'es', 'ja', 'ar', 'fr']
         locales_dir = "c:\\Projects\\AI_projects\\RAG_Demo_Chatbot\\frontend\\src\\i18n\\locales"
         
         all_exist = True
@@ -189,8 +189,8 @@ class Phase6Tester:
             with open(filepath, 'r', encoding='utf-8') as f:
                 content = f.read()
             
-            # 檢查 i18n 配置 - 驗證所有 7 種語言
-            languages = ['en', 'zh', 'ko', 'es', 'ja', 'ar', 'fr']
+            # 檢查 i18n 配置 - 驗證所有 8 種語言
+            languages = ['en', 'zh-TW', 'zh-CN', 'ko', 'es', 'ja', 'ar', 'fr']
             lang_checks = {}
             for lang in languages:
                 # 檢查 supportedLanguages 物件和 resources 中的語言

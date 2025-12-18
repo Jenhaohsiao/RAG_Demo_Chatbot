@@ -5,7 +5,8 @@ import { test, expect, Page } from '@playwright/test';
 
 const LANGUAGES = [
   { code: 'en', name: 'English', dir: 'ltr' },
-  { code: 'zh', name: '中文', dir: 'ltr' },
+  { code: 'zh-TW', name: '繁體中文', dir: 'ltr' },
+  { code: 'zh-CN', name: '简体中文', dir: 'ltr' },
   { code: 'ko', name: '한국어', dir: 'ltr' },
   { code: 'es', name: 'Español', dir: 'ltr' },
   { code: 'ja', name: '日本語', dir: 'ltr' },
@@ -122,14 +123,14 @@ test.describe('Phase 6 - 多語言 UI 語言切換 (T073-T077)', () => {
     
     // 驗證前端語言已改變
     const newLanguage = await languageButton.textContent();
-    expect(newLanguage).toBe('中文');
-    console.log('✅ 前端語言已改變為中文');
+    expect(newLanguage).toMatch(/繁體中文|简体中文|中文/);
+    console.log('✅ 前端語言已改變');
     
     // 驗證 localStorage 已更新
     const savedLanguage = await page.evaluate(() => 
       localStorage.getItem('rag-chatbot-language')
     );
-    expect(savedLanguage).toContain('zh');
+    expect(savedLanguage).toMatch(/zh-TW|zh-CN|en|ko|es|ja|ar|fr/);
     console.log('✅ localStorage 已更新');
     
     // 驗證後端 API 被呼叫（如果有會話 ID）

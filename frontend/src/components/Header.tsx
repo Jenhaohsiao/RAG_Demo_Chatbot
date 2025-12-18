@@ -46,7 +46,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   React.useEffect(() => {
     // Update state when i18n language changes
-    setCurrentLanguage((i18n.language as SupportedLanguage) || 'zh');
+    setCurrentLanguage((i18n.language as SupportedLanguage) || 'en');
   }, [i18n.language]);
 
   const handleLanguageChange = (langCode: SupportedLanguage) => {
