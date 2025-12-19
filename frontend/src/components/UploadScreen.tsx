@@ -16,7 +16,7 @@ import {
   formatFileSize,
   uploadWebsite,
 } from '../services/uploadService';
-import WebsiteCrawlerPanel, { WebsiteCrawlerPanelProps } from './WebsiteCrawlerPanel';
+import WebsiteCrawlerPanel from './WebsiteCrawlerPanel';
 
 export interface UploadScreenProps {
   sessionId: string;
