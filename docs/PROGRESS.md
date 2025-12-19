@@ -19,10 +19,10 @@
 | Phase 6 | US4 - Multilingual UI | ✅ Complete | 5/5 | ✅ (6/6) | ✅ Executed | ✅ Completed |
 | Phase 7 | US5 - Metrics Display | ✅ Complete | 6/6 | ✅ (6/6) | ⏳ Pending | ✅ Completed |
 | Phase 8 | US6 - Session Controls | ✅ Complete | 5/5 | ✅ (11/11) | ✅ Executed | ⏳ Pending |
-| Phase 9 | Polish & Testing | ✅ Complete | **12/15** | ✅ Verified | ⏳ Pending | ⏳ Pending |
+| Phase 9 | Polish & Testing | ✅ Complete | **14/15** | ✅ Verified | ⏳ Pending | ⏳ Pending |
 
 **總進度**: 103/103 tasks (100%) - 代碼實施完成  
-**自動化測試狀態**: Phase 1-9 完成，T089-T091 已驗證  
+**自動化測試狀態**: Phase 1-9 完成，T089-T091 已驗證，T099-T100 新增  
 **Github Action 測試**: Phase 1-2 可自動化，Phase 3-8 需完整環境，Phase 9 驗證完成  
 **使用者測試**: Phase 8-9 併行執行中（待開始）
 
@@ -784,13 +784,13 @@
 - [x] T096: File size validation (reject >10MB files)
 - [x] T097: Empty/scanned PDF detection
 - [x] T098: URL timeout handling (30-second limit)
-- [ ] T099: Gemini API rate limiting with retry logic (已規劃)
-- [ ] T100: Qdrant connection error handling (已規劃)
+- [x] **T099: Gemini API rate limiting with retry logic** ✨ NEW (2025-12-19)
+- [x] **T100: Qdrant connection error handling** ✨ NEW (2025-12-19)
 - [x] T101: README.md (已完成)
 - [ ] T102: Manual user testing (Phase 8-9 combined - 18 test cases)
 - [ ] T103: Success criteria verification (10 criteria)
 
-**狀態**: 代碼實施完成 (12/15)，待用戶測試執行
+**狀態**: 代碼實施完成 (14/15)，待用戶測試執行
 
 **關鍵改進**:
 1. **T089 - 全面錯誤處理**: 
@@ -818,6 +818,31 @@
    - 檔案大小限制 (10MB 最大值)
    - 空 PDF 檢測
    - URL 超時處理 (30 秒)
+
+6. **T099 - Gemini API Rate Limiting** ✨ NEW:
+   - 指數退避重試邏輯 (1s → 2s → 4s → 8s → 16s → 32s)
+   - 最多 3 次重試嘗試
+   - 處理 4 種 API 異常：
+     - `ResourceExhausted`: Rate limit 錯誤
+     - `InternalServerError`: 伺服器錯誤
+     - `ServiceUnavailable`: 服務不可用
+     - `DeadlineExceeded`: 請求超時
+   - 中文用戶友善錯誤訊息
+   - 完整日誌記錄（調試重試過程）
+
+7. **T100 - Qdrant Connection Error Handling** ✨ NEW:
+   - 初始化時健康檢查 (get_collections 測試)
+   - 連接超時設定：
+     - Docker 模式: 5 秒超時
+     - Cloud 模式: 10 秒超時
+   - 所有操作增強錯誤處理：
+     - `create_collection()`: 檢查 Qdrant 服務狀態
+     - `delete_collection()`: 報告清理失敗但不中斷
+     - `search_similar()`: 返回空結果，記錄連接錯誤
+     - `upsert_chunks()`: 報告存儲失敗
+     - `get_collection_info()`: 返回 None，記錄連接錯誤
+   - 區分連接錯誤與邏輯錯誤
+   - 建議用戶修復步驟的日誌訊息
 
 ---
 
