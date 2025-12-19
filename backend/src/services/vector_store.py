@@ -10,6 +10,10 @@ import os
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 from qdrant_client.http import models
+from qdrant_client.http.exceptions import (
+    RespExc,
+    UnexpectedResponse,
+)
 
 from src.core.config import settings
 
@@ -32,6 +36,8 @@ class VectorStore:
         
         IMPORTANT: Embedded mode on Windows may experience file locking issues.
         For development and production, use Docker mode instead.
+        
+        T100: Enhanced error handling for Qdrant connection issues
         """
         try:
             if settings.qdrant_mode == "embedded":
@@ -56,23 +62,51 @@ class VectorStore:
                 logger.info(f"Qdrant client initialized in embedded mode: {qdrant_path}")
                 
             elif settings.qdrant_mode == "docker":
-                # Docker mode - connect to local Qdrant container
-                self.client = QdrantClient(
-                    host=settings.qdrant_host,
-                    port=settings.qdrant_port
-                )
-                logger.info(f"Qdrant client initialized in docker mode ({settings.qdrant_host}:{settings.qdrant_port})")
+                # Docker mode - connect to local Qdrant container (T100: with error handling)
+                try:
+                    self.client = QdrantClient(
+                        host=settings.qdrant_host,
+                        port=settings.qdrant_port,
+                        timeout=5.0  # 5-second timeout for connection
+                    )
+                    # Test connection with health check
+                    logger.info(f"Testing connection to Qdrant ({settings.qdrant_host}:{settings.qdrant_port})")
+                    self.client.get_collections()  # Simple health check
+                    logger.info(f"Qdrant client initialized in docker mode ({settings.qdrant_host}:{settings.qdrant_port})")
+                    
+                except (ConnectionError, TimeoutError, RespExc) as e:
+                    logger.error(
+                        f"Failed to connect to Qdrant service at {settings.qdrant_host}:{settings.qdrant_port}: {e}. "
+                        "Ensure Qdrant container is running: docker-compose up -d qdrant"
+                    )
+                    raise Exception(
+                        f"無法連接到 Qdrant 向量資料庫。請確保 Docker 容器正在運行。"
+                    ) from e
                 
             elif settings.qdrant_mode == "cloud":
-                # Cloud mode - Qdrant Cloud
+                # Cloud mode - Qdrant Cloud (T100: with error handling)
                 if not settings.qdrant_url or not settings.qdrant_api_key:
                     raise ValueError("Qdrant cloud mode requires QDRANT_URL and QDRANT_API_KEY")
                 
-                self.client = QdrantClient(
-                    url=settings.qdrant_url,
-                    api_key=settings.qdrant_api_key
-                )
-                logger.info(f"Qdrant client initialized in cloud mode ({settings.qdrant_url})")
+                try:
+                    self.client = QdrantClient(
+                        url=settings.qdrant_url,
+                        api_key=settings.qdrant_api_key,
+                        timeout=10.0  # 10-second timeout for cloud
+                    )
+                    # Test connection with health check
+                    logger.info(f"Testing connection to Qdrant Cloud ({settings.qdrant_url})")
+                    self.client.get_collections()  # Simple health check
+                    logger.info(f"Qdrant client initialized in cloud mode ({settings.qdrant_url})")
+                    
+                except (ConnectionError, TimeoutError, RespExc, UnexpectedResponse) as e:
+                    logger.error(
+                        f"Failed to connect to Qdrant Cloud at {settings.qdrant_url}: {e}. "
+                        "Check QDRANT_URL and QDRANT_API_KEY settings."
+                    )
+                    raise Exception(
+                        f"無法連接到 Qdrant Cloud 服務。請檢查 API 密鑰和 URL。"
+                    ) from e
             
             else:
                 raise ValueError(f"Invalid Qdrant mode: {settings.qdrant_mode}")
@@ -91,8 +125,14 @@ class VectorStore:
             
         Returns:
             bool: True if created successfully
+            
+        T100: Enhanced error handling for Qdrant operations
         """
         try:
+            if not self.client:
+                logger.error("Qdrant client not initialized")
+                return False
+                
             # Check if collection already exists
             collections = self.client.get_collections().collections
             if any(col.name == collection_name for col in collections):
@@ -111,6 +151,12 @@ class VectorStore:
             logger.info(f"Collection '{collection_name}' created successfully")
             return True
             
+        except (ConnectionError, TimeoutError, RespExc) as e:
+            logger.error(
+                f"Qdrant connection error while creating collection '{collection_name}': {e}. "
+                "Check if Qdrant service is running."
+            )
+            return False
         except Exception as e:
             logger.error(f"Failed to create collection '{collection_name}': {e}")
             return False
@@ -124,12 +170,24 @@ class VectorStore:
             
         Returns:
             bool: True if deleted successfully
+            
+        T100: Enhanced error handling for Qdrant operations
         """
         try:
+            if not self.client:
+                logger.error("Qdrant client not initialized")
+                return False
+                
             self.client.delete_collection(collection_name=collection_name)
             logger.info(f"Collection '{collection_name}' deleted successfully")
             return True
             
+        except (ConnectionError, TimeoutError, RespExc) as e:
+            logger.error(
+                f"Qdrant connection error while deleting collection '{collection_name}': {e}. "
+                "Collection may not be properly cleaned up."
+            )
+            return False
         except Exception as e:
             logger.error(f"Failed to delete collection '{collection_name}': {e}")
             return False
@@ -143,8 +201,14 @@ class VectorStore:
             
         Returns:
             dict: Collection info (vector count, etc.) or None if not found
+            
+        T100: Enhanced error handling for Qdrant operations
         """
         try:
+            if not self.client:
+                logger.error("Qdrant client not initialized")
+                return None
+                
             info = self.client.get_collection(collection_name=collection_name)
             return {
                 "vectors_count": info.vectors_count,
@@ -152,6 +216,12 @@ class VectorStore:
                 "status": info.status
             }
             
+        except (ConnectionError, TimeoutError, RespExc) as e:
+            logger.error(
+                f"Qdrant connection error while getting info for '{collection_name}': {e}. "
+                "Check if Qdrant service is running."
+            )
+            return None
         except Exception as e:
             logger.error(f"Failed to get collection info for '{collection_name}': {e}")
             return None
@@ -171,8 +241,14 @@ class VectorStore:
             
         Returns:
             bool: True if upserted successfully
+            
+        T100: Enhanced error handling for Qdrant operations
         """
         try:
+            if not self.client:
+                logger.error("Qdrant client not initialized")
+                return False
+                
             points = [
                 PointStruct(
                     id=chunk["id"],
@@ -190,6 +266,12 @@ class VectorStore:
             logger.info(f"Upserted {len(chunks)} chunks to '{collection_name}'")
             return True
             
+        except (ConnectionError, TimeoutError, RespExc) as e:
+            logger.error(
+                f"Qdrant connection error while upserting chunks to '{collection_name}': {e}. "
+                "Check if Qdrant service is running."
+            )
+            return False
         except Exception as e:
             logger.error(f"Failed to upsert chunks to '{collection_name}': {e}")
             return False
@@ -212,8 +294,14 @@ class VectorStore:
             
         Returns:
             list: Search results with id, score, and payload
+            
+        T100: Enhanced error handling for Qdrant operations
         """
         try:
+            if not self.client:
+                logger.error("Qdrant client not initialized")
+                return []
+                
             logger.info(f"Searching in '{collection_name}' with threshold={score_threshold}, limit={limit}")
             
             results = self.client.search(
@@ -239,8 +327,13 @@ class VectorStore:
             
             logger.info(f"Found {len(formatted_results)} similar chunks in '{collection_name}'")
             return formatted_results
-            return formatted_results
             
+        except (ConnectionError, TimeoutError, RespExc) as e:
+            logger.error(
+                f"Qdrant connection error while searching in '{collection_name}': {e}. "
+                "Check if Qdrant service is running."
+            )
+            return []
         except Exception as e:
             logger.error(f"Failed to search in '{collection_name}': {e}")
             return []

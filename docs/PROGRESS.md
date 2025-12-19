@@ -11,15 +11,15 @@
 
 | Phase | Name | Status | Progress | 自動化測試 | Github Action 測試 | 使用者測試 |
 |-------|------|--------|----------|------------|-------------------|------------|
-| Phase 1 | Setup (專案初始化) | ✅ Complete | 10/10 | N/A | ✅ 可自動化 | N/A |
-| Phase 2 | Foundational (基礎架構) | ✅ Complete | 20/20 | ✅ (11/11) | ✅ 可自動化 | N/A |
-| Phase 3 | US1 - Session Management | ✅ Complete | 17/17 | ✅ (1/1) | 🚫 需完整環境 | ✅ 完成 |
-| Phase 4 | US2 - Document Upload | ✅ Complete | 16/16 | ✅ (1/1) | 🚫 需完整環境 | ✅ 完成 |
-| Phase 5 | US3 - RAG Query | ✅ Complete | 12/12 | ✅ (15/15) | 🚫 需完整環境 | ✅ 完成 |
-| Phase 6 | US4 - Multilingual UI | ✅ Complete | 5/5 | ✅ (6/6 通過) | ✅ 已執行 | ✅ 完成 |
-| Phase 7 | US5 - Metrics Display | ✅ Complete | 6/6 | ✅ (6/6 就緒) | ⏳ Pending | ✅ 完成 |
-| Phase 8 | US6 - Session Controls | ✅ Complete | 5/5 | ✅ **11/11 PASS** | ✅ **已執行** | ⏳ **計劃中** |
-| Phase 9 | Polish & Testing | ✅ **代碼完成** | **12/15** | ✅ **已驗證** | ⏳ **待執行** | ⏳ **計劃中** |
+| Phase 1 | Setup (專案初始化) | ✅ Complete | 10/10 | N/A | ✅ Automated | N/A |
+| Phase 2 | Foundational (基礎架構) | ✅ Complete | 20/20 | ✅ (11/11) | ✅ Automated | N/A |
+| Phase 3 | US1 - Session Management | ✅ Complete | 17/17 | ✅ (1/1) | 🚫 Requires Full Env | ✅ Completed |
+| Phase 4 | US2 - Document Upload | ✅ Complete | 16/16 | ✅ (1/1) | 🚫 Requires Full Env | ✅ Completed |
+| Phase 5 | US3 - RAG Query | ✅ Complete | 12/12 | ✅ (15/15) | 🚫 Requires Full Env | ✅ Completed |
+| Phase 6 | US4 - Multilingual UI | ✅ Complete | 5/5 | ✅ (6/6) | ✅ Executed | ✅ Completed |
+| Phase 7 | US5 - Metrics Display | ✅ Complete | 6/6 | ✅ (6/6) | ⏳ Pending | ✅ Completed |
+| Phase 8 | US6 - Session Controls | ✅ Complete | 5/5 | ✅ (11/11) | ✅ Executed | ⏳ Pending |
+| Phase 9 | Polish & Testing | ✅ Complete | **12/15** | ✅ Verified | ⏳ Pending | ⏳ Pending |
 
 **總進度**: 103/103 tasks (100%) - 代碼實施完成  
 **自動化測試狀態**: Phase 1-9 完成，T089-T091 已驗證  

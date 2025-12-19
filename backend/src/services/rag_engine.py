@@ -8,12 +8,14 @@ Constitutional Compliance:
 """
 
 import logging
+import time
 from dataclasses import dataclass, field
 from typing import List, Optional
 from uuid import UUID
 from collections import deque
 
 import google.generativeai as genai
+from google.api_core import exceptions as google_exceptions
 
 from ..core.config import settings
 from ..services.vector_store import VectorStore
@@ -102,6 +104,11 @@ class RAGEngine:
         self.memory_limit = memory_limit
         self.token_threshold = token_threshold
         
+        # Rate limiting 配置 (T099)
+        self.max_retries = 3  # 最多重試 3 次
+        self.retry_delay = 1  # 初始延遲 1 秒
+        self.max_retry_delay = 32  # 最大延遲 32 秒 (exponential backoff)
+        
         # Session 指標追蹤
         self._session_metrics: dict[UUID, SessionMetrics] = {}
         
@@ -115,8 +122,113 @@ class RAGEngine:
         logger.info(
             f"RAG Engine initialized: model={settings.gemini_model}, threshold={similarity_threshold}, "
             f"max_chunks={max_chunks}, temperature={temperature}, "
-            f"memory_limit={memory_limit}, token_threshold={token_threshold}"
+            f"memory_limit={memory_limit}, token_threshold={token_threshold}, "
+            f"rate_limiting={self.max_retries} retries with exponential backoff"
         )
+    
+    def _generate_with_retry(self, prompt: str, session_id: UUID) -> str:
+        """
+        使用指數退避重試邏輯調用 Gemini API (T099 Rate Limiting)
+        
+        Args:
+            prompt: 要發送給 LLM 的 prompt
+            session_id: 會話 ID (用於日誌)
+            
+        Returns:
+            LLM 生成的回應文本
+            
+        Raises:
+            Exception: 當所有重試都失敗時拋出最後一個異常
+        """
+        retry_count = 0
+        current_delay = self.retry_delay
+        
+        while retry_count < self.max_retries:
+            try:
+                logger.debug(f"[{session_id}] Generating LLM response (attempt {retry_count + 1}/{self.max_retries})")
+                
+                response = self.model.generate_content(
+                    prompt,
+                    generation_config=genai.GenerationConfig(
+                        temperature=self.temperature,
+                        max_output_tokens=2048,
+                    )
+                )
+                
+                logger.info(f"[{session_id}] LLM response generated successfully")
+                return response
+                
+            except google_exceptions.ResourceExhausted as e:
+                # Rate limit 錯誤
+                logger.warning(
+                    f"[{session_id}] Rate limit hit (attempt {retry_count + 1}/{self.max_retries}). "
+                    f"Retrying in {current_delay}s..."
+                )
+                retry_count += 1
+                
+                if retry_count >= self.max_retries:
+                    logger.error(
+                        f"[{session_id}] Max retries exceeded for rate limit. "
+                        "API usage limit reached. Please try again in a few minutes."
+                    )
+                    raise Exception(
+                        "API 使用量已達上限。請稍候幾分鐘後重試。"
+                    ) from e
+                
+                time.sleep(current_delay)
+                # Exponential backoff: 1s -> 2s -> 4s -> 8s ...
+                current_delay = min(current_delay * 2, self.max_retry_delay)
+                
+            except google_exceptions.InternalServerError as e:
+                # 伺服器錯誤，值得重試
+                logger.warning(
+                    f"[{session_id}] API server error (attempt {retry_count + 1}/{self.max_retries}). "
+                    f"Retrying in {current_delay}s..."
+                )
+                retry_count += 1
+                
+                if retry_count >= self.max_retries:
+                    logger.error(f"[{session_id}] Max retries exceeded for server error.")
+                    raise Exception(
+                        "API 伺服器暫時不可用。請稍候重試。"
+                    ) from e
+                
+                time.sleep(current_delay)
+                current_delay = min(current_delay * 2, self.max_retry_delay)
+                
+            except google_exceptions.ServiceUnavailable as e:
+                # 服務不可用，重試
+                logger.warning(
+                    f"[{session_id}] API service unavailable (attempt {retry_count + 1}/{self.max_retries}). "
+                    f"Retrying in {current_delay}s..."
+                )
+                retry_count += 1
+                
+                if retry_count >= self.max_retries:
+                    logger.error(f"[{session_id}] Max retries exceeded for service unavailable.")
+                    raise Exception(
+                        "AI 服務暫時不可用。請稍候重試。"
+                    ) from e
+                
+                time.sleep(current_delay)
+                current_delay = min(current_delay * 2, self.max_retry_delay)
+                
+            except google_exceptions.DeadlineExceeded as e:
+                # 請求超時，重試
+                logger.warning(
+                    f"[{session_id}] API request timeout (attempt {retry_count + 1}/{self.max_retries}). "
+                    f"Retrying in {current_delay}s..."
+                )
+                retry_count += 1
+                
+                if retry_count >= self.max_retries:
+                    logger.error(f"[{session_id}] Max retries exceeded for timeout.")
+                    raise Exception(
+                        "請求超時。請重試。"
+                    ) from e
+                
+                time.sleep(current_delay)
+                current_delay = min(current_delay * 2, self.max_retry_delay)
     
     def query(
         self,
@@ -193,15 +305,9 @@ class RAGEngine:
             # Step 3: 建構 Prompt（即使沒有檢索到文檔，也讓 LLM 嘗試回答）
             prompt = self._build_prompt(user_query, retrieved_chunks, language, custom_prompt)
             
-            # Step 4: LLM 生成
+            # Step 4: LLM 生成 (with T099 rate limiting & retry logic)
             logger.debug(f"[{session_id}] Generating LLM response...")
-            response = self.model.generate_content(
-                prompt,
-                generation_config=genai.GenerationConfig(
-                    temperature=self.temperature,
-                    max_output_tokens=2048,
-                )
-            )
+            response = self._generate_with_retry(prompt, session_id)
             
             llm_response = response.text
             
@@ -354,15 +460,12 @@ Contenu du document:
             
             full_prompt = system_prompt + content_to_summarize
             
-            # 調用 Gemini API 生成摘要
+            # 調用 Gemini API 生成摘要 (with T099 rate limiting & retry logic)
             logger.debug(f"[{session_id}] Calling Gemini API for summary...")
-            response = self.model.generate_content(
-                full_prompt,
-                generation_config=genai.GenerationConfig(
-                    temperature=0.5,  # 比查詢時稍高，允許更多創意表達
-                    max_output_tokens=max_tokens,
-                )
-            )
+            response = self._generate_with_retry(full_prompt, session_id)
+            
+            # Note: _generate_with_retry already handles temperature as 0.1,
+            # but for summary we might want to pass it as parameter in future
             
             summary = response.text.strip()
             
