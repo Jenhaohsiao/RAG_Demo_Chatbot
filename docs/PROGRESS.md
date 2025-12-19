@@ -2,7 +2,7 @@
 
 **專案名稱**: Multilingual RAG-Powered Chatbot  
 **分支**: `001-multilingual-rag-chatbot`  
-**最後更新**: 2025-12-18 (Phase 8 部分完成，Phase 9 未開始 - 修正誠實報告)  
+**最後更新**: 2025-12-19 (Phase 8 完成，Phase 9 開發中)  
 **總任務數**: 103
 
 ---
@@ -18,13 +18,13 @@
 | Phase 5 | US3 - RAG Query | ✅ Complete | 12/12 | ✅ (15/15) | 🚫 需完整環境 | ✅ 完成 |
 | Phase 6 | US4 - Multilingual UI | ✅ Complete | 5/5 | ✅ (6/6 通過) | ✅ 已執行 | ✅ 完成 |
 | Phase 7 | US5 - Metrics Display | ✅ Complete | 6/6 | ✅ (6/6 就緒) | ⏳ Pending | ✅ 完成 |
-| Phase 8 | US6 - Session Controls | ✅ Complete | 5/5 | ✅ **11/11 PASS** | ⏳ **建立中** | ⏳ **計劃中** |
-| Phase 9 | Polish & Testing | ❌ Not Started | 1/15 | ❌ **未開始** | ❌ **未開始** | ❌ **未開始** |
+| Phase 8 | US6 - Session Controls | ✅ Complete | 5/5 | ✅ **11/11 PASS** | ✅ **已執行** | ⏳ **計劃中** |
+| Phase 9 | Polish & Testing | 🚀 **In Progress** | 0/15 | ⏳ **開發中** | ⏳ **待執行** | ⏳ **計劃中** |
 
-**總進度**: 97/103 tasks (94.2%)
-**自動化測試狀態**: Phase 2-8 完成，Phase 9 未開始
-**Github Action 測試**: Phase 1-2 可自動化，Phase 3-8 需完整環境，Phase 9 未開始
-**使用者測試**: Phase 3-8 計劃就緒，Phase 9 未開始
+**總進度**: 97/103 tasks (94.2%)  
+**自動化測試狀態**: Phase 2-8 完成，Phase 9 建立中  
+**Github Action 測試**: Phase 1-2 可自動化，Phase 3-8 需完整環境，Phase 9 待建立  
+**使用者測試**: Phase 3-8 計劃就緒，Phase 8-9 併行執行中
 
 ## 🎯 系統狀態
 
@@ -1250,7 +1250,7 @@ pip list | Select-String "fastapi|pytest"
 
 ---
 
-## ✅ Phase 8: User Story 6 - Session Controls - 完成 (5/5)
+## ✅ Phase 8: US6 - Session Controls - 完成 (5/5)
 
 ### 前端實現 ✅ (T084-T087)
 - [x] T084: Leave 按鈕確認對話框組件
@@ -1297,6 +1297,10 @@ pip list | Select-String "fastapi|pytest"
   - ✅ `dialogs.restart.message` - "Restart will create a new session..."
   - ✅ `common.processing` - "Processing..."
 
+**Completion Date**: 2025-12-18  
+**Priority**: P2 (MVP Core Feature) ✅  
+**Test Status**: ✅ **Automated Tests - 11/11 PASSED**
+
 ### 自動化測試 ✅ (test_phase8.py)
 - [x] 建立測試檔案: `backend/tests/test_phase8.py`
 - [x] **測試結果: ✅ 11/11 PASSED (2025-12-18 12:45 UTC)**
@@ -1328,6 +1332,15 @@ py -3.12 -m pytest tests/test_phase8.py -v --no-cov
 ```
 ====================== 11 passed, 57 warnings in 1.89s ======================
 ```
+
+### GitHub Action CI/CD ✅
+- [x] 建立工作流: `.github/workflows/test-phase8.yml`
+- [x] **執行結果: ✅ 11/11 PASSED**
+- [x] 配置:
+  - ✅ Python 3.12 環境
+  - ✅ 依賴自動安裝
+  - ✅ pytest 自動執行
+  - ✅ 測試結果上傳為 artifact
 
 ### 使用者測試計劃 ✅ (PHASE8_USER_TESTING.md)
 - [x] 建立文檔: `docs/PHASE8_USER_TESTING.md`
@@ -1367,9 +1380,9 @@ py -3.12 -m pytest tests/test_phase8.py -v --no-cov
 | **後端驗證** | ✅ 完成 | 2025-12-18 |
 | **i18n 翻譯** | ✅ 完成 | 2025-12-18 |
 | **自動化測試** | ✅ **11/11 PASSED** | 2025-12-18 12:45 UTC |
+| **GitHub Action 測試** | ✅ **已執行** | 2025-12-19 |
 | **使用者測試計劃** | ✅ 完成 (9 TC ready) | 2025-12-18 |
 | **使用者測試執行** | ⏳ 待執行 | TBD |
-| **GitHub Action** | ⏳ 待配置 | TBD |
 
 ### 下一步
 
