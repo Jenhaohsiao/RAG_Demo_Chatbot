@@ -187,37 +187,18 @@
     }
   },
   "metrics": {
-    "tokens": {
-      "title": "🔋 Token 使用量",
-      "total": "总计",
-      "input": "输入",
-      "output": "输出",
-      "avgPerQuery": "平均/查询",
-      "warning": "⚠️ 使用量过高"
-    },
-    "queries": {
-      "title": "📊 查询统计",
-      "total": "总查询数",
-      "answered": "已回答",
-      "unanswered": "未回答",
-      "avgChunks": "平均块数",
-      "efficiency": "效率"
-    },
-    "vectorDb": {
-      "title": "💾 向量数据库",
-      "totalChunks": "总块数",
-      "documentsStored": "已存储文件数",
-      "avgChunkSize": "平均块大小",
-      "memoryUsage": "内存使用"
-    },
-    "common": {
-      "queries": "个查询",
-      "requests": "个请求",
-      "perQuery": "每个查询"
-    },
-    "warnings": {
-      "highTokenUsage": "Token 使用量已达到 {{percentage}}% 的阈值",
-      "highUnanswered": "未回答率较高。建议上传更多相关文件。"
-    }
+    "title": "📊 实时指标",
+    "loading": "加载指标中...",
+    "tokens": "Token 使用量",
+    "tokenInput": "输入 Tokens",
+    "tokenOutput": "输出 Tokens",
+    "tokenTotal": "总 Tokens",
+    "tokenPercent": "使用百分比",
+    "context": "上下文窗口",
+    "contextTokens": "上下文 Tokens",
+    "contextPercent": "上下文百分比",
+    "vectors": "向量数据库",
+    "vectorCount": "存储的向量",
+    "tokenWarning": "⚠️ Token 使用量已超过 80%。建议开始新会话。"
   }
 }

@@ -23,9 +23,19 @@ test.describe('Phase 6 - 多語言 UI 語言切換 (T073-T077)', () => {
     
     await page.goto(BASE_URL);
     await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000); // 等待 React 應用初始化
     
     // 檢查語言選擇器元素存在
     const languageButton = page.locator('[data-testid="language-selector-button"]');
+    console.log('等待語言選擇器按鈕出現...');
+    try {
+      await languageButton.waitFor({ state: 'visible', timeout: 10000 });
+      console.log('✅ 語言選擇器按鈕已出現');
+    } catch (error) {
+      console.error('❌ 語言選擇器按鈕未找到，頁面內容：');
+      console.error(await page.content());
+      throw error;
+    }
     await expect(languageButton).toBeVisible();
     
     // 記錄循環過程
@@ -59,9 +69,11 @@ test.describe('Phase 6 - 多語言 UI 語言切換 (T073-T077)', () => {
     
     await page.goto(BASE_URL);
     await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000); // 等待應用初始化
     
     // 打開語言選擇器
     const languageButton = page.locator('[data-testid="language-selector-button"]');
+    await languageButton.waitFor({ state: 'visible', timeout: 10000 });
     await languageButton.click();
     await page.waitForTimeout(300);
     
@@ -106,9 +118,12 @@ test.describe('Phase 6 - 多語言 UI 語言切換 (T073-T077)', () => {
     
     await page.goto(BASE_URL);
     await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000); // 等待應用初始化
     
     // 獲取當前語言
-    const initialLanguage = await page.locator('[data-testid="language-selector-button"]').textContent();
+    const languageButton = page.locator('[data-testid="language-selector-button"]');
+    await languageButton.waitFor({ state: 'visible', timeout: 10000 });
+    const initialLanguage = await languageButton.textContent();
     console.log(`初始語言: ${initialLanguage}`);
     
     // 打開語言選擇器
@@ -148,6 +163,7 @@ test.describe('Phase 6 - 多語言 UI 語言切換 (T073-T077)', () => {
     
     await page.goto(BASE_URL);
     await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000); // 等待應用初始化
     
     // 檢查硬編碼文字（應該沒有）
     const pageContent = await page.content();
@@ -174,6 +190,7 @@ test.describe('Phase 6 - 多語言 UI 語言切換 (T073-T077)', () => {
       
       // 選擇該語言
       const languageButton = page.locator('[data-testid="language-selector-button"]');
+      await languageButton.waitFor({ state: 'visible', timeout: 10000 });
       await languageButton.click();
       await page.waitForTimeout(300);
       
@@ -202,11 +219,13 @@ test.describe('Phase 6 - 多語言 UI 語言切換 (T073-T077)', () => {
     
     await page.goto(BASE_URL);
     await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000); // 等待應用初始化
     
     // 測試場景 1：連續改變語言
     console.log('場景 1：連續改變語言');
     for (const language of LANGUAGES) {
       const languageButton = page.locator('[data-testid="language-selector-button"]');
+      await languageButton.waitFor({ state: 'visible', timeout: 10000 });
       await languageButton.click();
       await page.waitForTimeout(200);
       
@@ -272,24 +291,27 @@ test.describe('Phase 6 - 多語言 UI 語言切換 (T073-T077)', () => {
     
     await page.goto(BASE_URL);
     await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000); // 等待應用初始化
     
-    // 驗證所有 7 種語言
+    // 驗證所有 8 種語言
     const languageButton = page.locator('[data-testid="language-selector-button"]');
+    await languageButton.waitFor({ state: 'visible', timeout: 10000 });
     await languageButton.click();
     await page.waitForTimeout(300);
     
-    const languageOptions = page.locator('[data-testid="language-option"]');
-    const count = await languageOptions.count();
-    
-    expect(count).toBe(7);
-    console.log(`✅ 所有 7 種語言都可用`);
-    
-    // 驗證每種語言都可選
+    // 檢查所有語言選項
+    let languageCount = 0;
     for (const language of LANGUAGES) {
       const option = page.locator(`button:has-text("${language.name}")`).first();
-      await expect(option).toBeVisible();
+      const isVisible = await option.isVisible();
+      if (isVisible) {
+        languageCount++;
+        console.log(`✅ 語言選項 "${language.name}" 可見`);
+      }
     }
-    console.log('✅ 所有語言選項可見');
+    
+    expect(languageCount).toBe(8);
+    console.log(`✅ 所有 8 種語言都可用`);
     
     // 驗證循環動畫在菜單關閉時恢復
     const firstLangText = await languageButton.textContent();
@@ -309,8 +331,10 @@ test.describe('Phase 6 - 性能測試', () => {
   test('語言切換響應時間', async ({ page }) => {
     await page.goto(BASE_URL);
     await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000); // 等待應用初始化
     
     const languageButton = page.locator('[data-testid="language-selector-button"]');
+    await languageButton.waitFor({ state: 'visible', timeout: 10000 });
     
     const startTime = Date.now();
     
@@ -330,9 +354,11 @@ test.describe('Phase 6 - 性能測試', () => {
   test('循環動畫流暢度', async ({ page }) => {
     await page.goto(BASE_URL);
     await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000); // 等待應用初始化
     
     // 記錄 10 個循環週期
     const languageButton = page.locator('[data-testid="language-selector-button"]');
+    await languageButton.waitFor({ state: 'visible', timeout: 10000 });
     const timestamps: number[] = [];
     
     for (let i = 0; i < 10; i++) {

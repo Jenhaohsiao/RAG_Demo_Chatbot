@@ -201,7 +201,43 @@ FOLLOW-UP TODOs:
 
 **Enforcement**: Before invoking `run_in_terminal` with `isBackground=true`, AI MUST verify no existing terminal is running the same or similar process. Repeated violations of this principle indicate need for workflow adjustment.
 
-### XV. Temporary Files Management (Clean-As-You-Go)
+### XV. Web Accessibility (WCAG AA Compliance)
+**NON-NEGOTIABLE**: All web interface components MUST comply with WCAG 2.1 Level AA accessibility standards. This applies to all HTML, CSS, and React components that users interact with.
+
+**Color Contrast Requirements**:
+- **Normal text**: Minimum 4.5:1 contrast ratio (foreground vs background)
+- **Large text** (≥18pt or ≥14pt bold): Minimum 3:1 contrast ratio
+- **UI components & graphical elements**: Minimum 3:1 contrast ratio
+- All color-dependent information MUST have redundant non-color indicators
+- Do NOT rely on color alone to convey information (e.g., warnings, status)
+
+**Component & Interaction Requirements**:
+- All interactive elements MUST be keyboard accessible (Tab, Enter, Escape, Arrow keys)
+- Focus indicators MUST be clearly visible (never use `outline: none` without replacement)
+- Labels MUST be associated with form inputs via `<label for="">` or ARIA
+- Buttons MUST have descriptive text or ARIA-labels
+- Images MUST have alt text describing content and function
+- Form validation messages MUST be programmatically associated with input fields
+- Dynamic content updates MUST use ARIA live regions to announce changes
+
+**Testing & Verification**:
+- Use browser DevTools accessibility inspector to verify each component
+- Test color contrast with WebAIM Contrast Checker before merging
+- Keyboard-only navigation MUST be tested (no mouse/trackpad) on all pages
+- Screen reader testing recommended for critical user flows
+- Document verification results before marking component as complete
+
+**Tools & Resources**:
+- Color Contrast Analyzer: https://www.tpgi.com/color-contrast-checker/
+- WebAIM: https://webaim.org/articles/contrast/
+- Browser Extensions: Axe DevTools, WAVE, Lighthouse
+- WCAG 2.1 Reference: https://www.w3.org/WAI/WCAG21/quickref/
+
+**Rationale**: Accessibility is not optional—it's a fundamental principle of ethical design. WCAG AA compliance ensures the interface is usable by people with disabilities (color blindness, low vision, mobility impairments, cognitive disabilities). This improves usability for ALL users, not just those with disabilities. Inaccessible websites create liability and exclude potential users. Additionally, accessible code is often better-designed code (clear structure, semantic HTML, robust interactions).
+
+**Enforcement**: Code reviews MUST check accessibility compliance. Any component that fails WCAG AA requirements MUST NOT be merged. This is enforced retroactively on all existing components.
+
+### XVI. Temporary Files Management (Clean-As-You-Go)
 **NON-NEGOTIABLE**: 暫存檔/短期筆記，在任務達成後請刪除。All temporary files, interim notes, debugging artifacts, and short-term documentation MUST be removed upon task completion. Only permanent, valuable documentation should remain in the repository.
 
 **Requirements**:
@@ -298,7 +334,7 @@ Any deviation from this stack requires a constitutional amendment.
 3. Implement the minimum code to make tests pass (Green phase)
 4. Refactor while keeping tests green (Refactor phase)
 
-### XVI. Testing Framework Standardization (Unified, No Mixed Styles)
+### XVII. Testing Framework Standardization (Unified, No Mixed Styles)
 **NON-NEGOTIABLE**: All test files in the project MUST use the same testing framework. Mixed testing styles (pytest + custom frameworks in the same project) waste development time and create confusion during test execution and debugging.
 
 **Framework Choice**: `pytest` for Python backend, `Jest/Vitest` for TypeScript frontend

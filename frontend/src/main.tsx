@@ -222,7 +222,7 @@ const App: React.FC = () => {
 
       <main className="flex-grow-1 container mt-4">
         <div className="row">
-          <div className="col-lg-8 mx-auto">
+          <div className="col-lg-12 mx-auto">
             {/* Error Display */}
             {error && (
               <div className="alert alert-danger alert-dismissible fade show" role="alert">

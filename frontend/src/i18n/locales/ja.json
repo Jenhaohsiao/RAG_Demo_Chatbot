@@ -187,29 +187,18 @@
     }
   },
   "metrics": {
-    "tokens": {
-      "title": "🔋 トークン使用量",
-      "total": "合計",
-      "input": "入力",
-      "output": "出力",
-      "avgPerQuery": "平均/クエリ",
-      "warning": "⚠️ 使用量多い"
-    },
-    "queries": {
-      "title": "📊 クエリ統計",
-      "total": "合計クエリ数",
-      "answered": "回答済み",
-      "unanswered": "回答なし",
-      "avgChunks": "平均チャンク数",
-      "efficiency": "効率"
-    },
-    "common": {
-      "queries": "クエリ",
-      "requests": "リクエスト",
-      "perQuery": "クエリあたり"
-    },
-    "warnings": {
-      "highUnanswered": "回答なし率が高いです。より関連性の高いドキュメントをアップロードしてください。"
-    }
+    "title": "📊 リアルタイムメトリクス",
+    "loading": "メトリクスを読み込み中...",
+    "tokens": "トークン使用量",
+    "tokenInput": "入力トークン",
+    "tokenOutput": "出力トークン",
+    "tokenTotal": "総トークン数",
+    "tokenPercent": "使用率",
+    "context": "コンテキストウィンドウ",
+    "contextTokens": "コンテキストトークン使用量",
+    "contextPercent": "コンテキスト割合",
+    "vectors": "ベクターデータベース",
+    "vectorCount": "保存されたベクター",
+    "tokenWarning": "⚠️ トークン使用量が80%を超えています。新しいセッションを開始することをお勧めします。"
   }
 }

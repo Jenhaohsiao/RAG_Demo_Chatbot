@@ -1,13 +1,15 @@
 /**
  * ChatScreen Component
  * 聊天介面主畫面
+ * 
+ * T082: Integrate MetricsPanel into ChatScreen updating after each query-response cycle
  */
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
-import { MetricsDashboard } from './MetricsDashboard';
+import { MetricsPanel } from './MetricsPanel';
 import { DocumentInfoCard } from './DocumentInfoCard';
 import { ChatRole, ResponseType, type ChatMessage as ChatMessageType, type ChatResponse } from '../types/chat';
 import { getSessionMetrics, type SessionMetrics } from '../services/metricsService';
@@ -133,12 +135,30 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
         </div>
       </div>
 
-      {/* Metrics Dashboard */}
-      {showMetrics && metrics && (
+      {/* Metrics Dashboard - Consolidated into MetricsPanel below */}
+      {/* MetricsDashboard hidden - metrics consolidated into single MetricsPanel for compact display */}
+      {/* {showMetrics && metrics && (
         <MetricsDashboard
           sessionId={sessionId}
           metrics={metrics}
           onMetricsUpdate={setMetrics}
+        />
+      )} */}
+      
+      {/* T082: MetricsPanel showing updated metrics after each query-response cycle */}
+      {/* Consolidated real-time metrics in single horizontal row layout */}
+      {showMetrics && metrics && (
+        <MetricsPanel
+          metrics={{
+            token_input: metrics.input_tokens || 0,
+            token_output: metrics.output_tokens || 0,
+            token_total: metrics.total_tokens || 0,
+            token_limit: metrics.token_warning_threshold || 32000,
+            token_percent: (metrics.total_tokens || 0) / (metrics.token_warning_threshold || 32000) * 100,
+            context_tokens: metrics.context_size || 0,
+            context_percent: (metrics.context_size || 0) / 8000 * 100, // assuming ~8k context window
+            vector_count: metrics.vector_count || 0,
+          }}
         />
       )}
 

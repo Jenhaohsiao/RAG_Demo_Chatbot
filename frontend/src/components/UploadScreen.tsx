@@ -164,7 +164,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
     <div className="upload-screen">
       <style>{`
         .upload-screen {
-          max-width: 600px;
+          width: 100%;
           margin: 0 auto;
           padding: 40px 20px;
         }
@@ -340,34 +340,22 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
           margin: 0;
         }
 
-        .upload-divider {
-          text-align: center;
-          margin: 32px 0;
-          position: relative;
+        .upload-content-wrapper {
+          display: flex;
+          gap: 24px;
+          margin-top: 24px;
         }
 
-        .upload-divider::before {
-          content: '';
-          position: absolute;
-          top: 50%;
-          left: 0;
-          right: 0;
-          height: 1px;
-          background-color: #ddd;
+        .upload-file-column {
+          flex: 0 0 30%;
         }
 
-        .upload-divider-text {
-          position: relative;
-          display: inline-block;
-          padding: 0 16px;
-          background-color: white;
-          color: #999;
-          font-size: 13px;
-          font-weight: 500;
+        .upload-url-column {
+          flex: 1;
         }
 
         .url-section {
-          margin-top: 24px;
+          margin-top: 0;
         }
 
         .url-section-title {
@@ -493,6 +481,15 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
             font-size: 14px;
           }
 
+          .upload-content-wrapper {
+            flex-direction: column;
+            gap: 16px;
+          }
+
+          .upload-file-column {
+            flex: 0 0 100%;
+          }
+
           .url-input-group {
             flex-direction: column;
           }
@@ -503,15 +500,16 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
         }
       `}</style>
 
-      <div className="upload-header">
-        <h2>{t('upload.title', 'Upload Document')}</h2>
-        <p className="upload-subtitle">
-          {t('upload.subtitle', 'Upload a PDF, text file, or provide a URL to get started')}
-        </p>
-      </div>
+      <div className="col-lg-12 mx-auto">
+        <div className="upload-header">
+          <h2>{t('upload.title', 'Upload Document')}</h2>
+          <p className="upload-subtitle">
+            {t('upload.subtitle', 'Upload a PDF, text file, or provide a URL to get started')}
+          </p>
+        </div>
 
-      {/* 相似度閾值設定 */}
-      <div className="threshold-section">
+        {/* 相似度閾值設定 */}
+        <div className="threshold-section">
         <div className="threshold-header">
           <h3 className="threshold-title">
             {t('settings.threshold.label', '相似度閾值')}
@@ -559,71 +557,73 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
         </div>
       )}
 
-      {/* 主要上傳區域 - 檔案拖放 */}
-      <div className={`upload-container ${isDragging ? 'dragging' : ''}`}>
-        <div
-          className={`upload-dropzone ${disabled ? 'disabled' : ''}`}
-          onDragEnter={handleDragEnter}
-          onDragLeave={handleDragLeave}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onClick={handleBrowseClick}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".pdf,.txt"
-            onChange={handleFileInputChange}
-            disabled={disabled}
-            style={{ display: 'none' }}
-          />
+      {/* 主要上傳區域 - 檔案拖放 + URL 輸入 */}
+      <div className="upload-content-wrapper">
+        {/* 左側：檔案拖放 */}
+        <div className="upload-file-column">
+          <div className={`upload-container ${isDragging ? 'dragging' : ''}`}>
+            <div
+              className={`upload-dropzone ${disabled ? 'disabled' : ''}`}
+              onDragEnter={handleDragEnter}
+              onDragLeave={handleDragLeave}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              onClick={handleBrowseClick}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.txt"
+                onChange={handleFileInputChange}
+                disabled={disabled}
+                style={{ display: 'none' }}
+              />
 
-          <div className="dropzone-content">
-            <div className="dropzone-icon">📁</div>
-            <p className="dropzone-text">
-              {isDragging
-                ? t('upload.dropzone.drop', 'Drop file here')
-                : t('upload.dropzone.dragOrClick', 'Drag & drop a file here, or click to browse')}
-            </p>
-            <p className="dropzone-hint">
-              {t('upload.dropzone.hint', 'Supported formats: PDF, TXT (max {{maxSize}})', {
-                maxSize: formatFileSize(MAX_FILE_SIZE),
-              })}
-            </p>
+              <div className="dropzone-content">
+                <div className="dropzone-icon">📁</div>
+                <p className="dropzone-text">
+                  {isDragging
+                    ? t('upload.dropzone.drop', 'Drop file here')
+                    : t('upload.dropzone.dragOrClick', 'Drag & drop a file here, or click to browse')}
+                </p>
+                <p className="dropzone-hint">
+                  {t('upload.dropzone.hint', 'Supported formats: PDF, TXT (max {{maxSize}})', {
+                    maxSize: formatFileSize(MAX_FILE_SIZE),
+                  })}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* 分隔線 */}
-      <div className="upload-divider">
-        <span className="upload-divider-text">{t('upload.divider', 'Or')}</span>
-      </div>
-
-      {/* 次要選項 - URL 輸入 */}
-      <div className="url-section">
-        <label className="url-section-title">🌐 {t('upload.url.label', 'Provide a URL')}</label>
-        <form className="upload-url-form" onSubmit={handleUrlSubmit}>
-          <div className="url-input-group">
-            <input
-              type="text"
-              className="url-input"
-              placeholder={t('upload.url.placeholder', 'Enter URL (http:// or https://)')}
-              value={urlInput}
-              onChange={(e) => setUrlInput(e.target.value)}
-              disabled={disabled}
-            />
-            <button
-              type="submit"
-              className="url-submit-button"
-              disabled={disabled || !urlInput.trim()}
-            >
-              {t('upload.url.submit', 'Fetch')}
-            </button>
+        {/* 右側：URL 輸入 */}
+        <div className="upload-url-column">
+          <div className="url-section">
+            <label className="url-section-title">🌐 {t('upload.url.label', 'Provide a URL')}</label>
+            <form className="upload-url-form" onSubmit={handleUrlSubmit}>
+              <div className="url-input-group">
+                <input
+                  type="text"
+                  className="url-input"
+                  placeholder={t('upload.url.placeholder', 'Enter URL (http:// or https://)')}
+                  value={urlInput}
+                  onChange={(e) => setUrlInput(e.target.value)}
+                  disabled={disabled}
+                />
+                <button
+                  type="submit"
+                  className="url-submit-button"
+                  disabled={disabled || !urlInput.trim()}
+                >
+                  {t('upload.url.submit', 'Fetch')}
+                </button>
+              </div>
+              <p className="url-hint">
+                {t('upload.url.hint', 'We will extract text content from the URL')}
+              </p>
+            </form>
           </div>
-          <p className="url-hint">
-            {t('upload.url.hint', 'We will extract text content from the URL')}
-          </p>
-        </form>
+        </div>
       </div>
 
       {/* Session ID 顯示（開發用） */}
@@ -632,6 +632,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
           <small>Session ID: {sessionId}</small>
         </div>
       )}
+      </div>
     </div>
   );
 };

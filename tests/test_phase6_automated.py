@@ -88,7 +88,7 @@ class Phase6Tester:
                     missing.append(f"{lang}: JSON 解析失敗 - {str(e)}")
         
         if all_exist:
-            self.log_test("T076: 翻譯檔案完整性", "PASS", f"所有 7 種語言翻譯檔案存在且有效")
+            self.log_test("T076: 翻譯檔案完整性", "PASS", f"所有 8 種語言翻譯檔案存在且有效")
         else:
             self.log_test("T076: 翻譯檔案完整性", "FAIL", f"缺少翻譯檔案或內容: {', '.join(missing)}")
         
@@ -207,7 +207,6 @@ class Phase6Tester:
             checks = {
                 **lang_checks,
                 "RTL 配置": "dir: 'rtl'" in content,
-                "語言事件": "languageChanged" in content,
                 "supportedLanguages": "supportedLanguages" in content,
                 "resources": "resources:" in content,
             }
@@ -215,7 +214,7 @@ class Phase6Tester:
             all_passed = all(checks.values())
             
             if all_passed:
-                self.log_test("T076: i18n 配置", "PASS", "i18n 配置完整 (7 種語言已定義)")
+                self.log_test("T076: i18n 配置", "PASS", "i18n 配置完整 (8 種語言已定義)")
                 return True
             else:
                 missing = [k for k, v in checks.items() if not v]

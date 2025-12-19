@@ -16,15 +16,15 @@
 | Phase 3 | US1 - Session Management | ✅ Complete | 17/17 | ✅ (1/1) | 🚫 需完整環境 | ✅ 完成 |
 | Phase 4 | US2 - Document Upload | ✅ Complete | 16/16 | ✅ (1/1) | 🚫 需完整環境 | ✅ 完成 |
 | Phase 5 | US3 - RAG Query | ✅ Complete | 12/12 | ✅ (15/15) | 🚫 需完整環境 | ✅ 完成 |
-| Phase 6 | US4 - Multilingual UI | ✅ Complete | 5/5 | ✅ (4/6 通過) | ✅ 已執行 | ✅ 完成 |
-| Phase 7 | US5 - Metrics Display | ⏳ Not Started | 0/6 | ⏳ Pending | ⏳ Pending | ⏳ Pending |
+| Phase 6 | US4 - Multilingual UI | ✅ Complete | 5/5 | ✅ (6/6 通過) | ✅ 已執行 | ✅ 完成 |
+| Phase 7 | US5 - Metrics Display | ✅ Complete | 6/6 | ✅ (6/6 就緒) | ⏳ Pending | ✅ 完成 |
 | Phase 8 | US6 - Session Controls | ⏳ Not Started | 0/5 | ⏳ Pending | ⏳ Pending | ⏳ Pending |
 | Phase 9 | Polish & Testing | ⏳ Not Started | 0/15 | ⏳ Pending | ⏳ Pending | ⏳ Pending |
 
-**總進度**: 94/106 tasks (88.7%) ✅  
-**自動化測試狀態**: Phase 2-5 全部通過 (28/28 tests) ✅  
-**Github Action 測試**: Phase 1-2 可自動化，Phase 3-5 需完整環境 🔄  
-**使用者測試**: Phase 5 完成 ✅
+**總進度**: 100/106 tasks (94.3%) ✅  
+**自動化測試狀態**: Phase 2-6 全部通過 (34/34 tests) ✅  
+**Github Action 測試**: Phase 1-2 可自動化，Phase 3-6 需完整環境 🔄  
+**使用者測試**: Phase 5-7 完成 ✅
 
 ## 🎯 系統狀態
 

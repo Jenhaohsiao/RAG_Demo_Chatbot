@@ -5,6 +5,7 @@
  * Constitutional Compliance:
  * - Principle II (Testability): 獨立 React 組件
  * - User Story US2: Document Upload 進度追蹤
+ * - User Story US5: Real-time Metrics Display (T081)
  */
 
 import React from 'react';
@@ -14,6 +15,7 @@ import {
   ModerationStatus,
   SourceType,
 } from '../types/document';
+import MetricsPanel from './MetricsPanel';
 
 export interface ProcessingScreenProps {
   documentId: string;
@@ -27,6 +29,17 @@ export interface ProcessingScreenProps {
   errorCode?: string;
   errorMessage?: string;
   moderationCategories?: string[];
+  // T081: Metrics Display during upload
+  metrics?: {
+    token_input: number;
+    token_output: number;
+    token_total: number;
+    token_limit: number;
+    token_percent: number;
+    context_tokens: number;
+    context_percent: number;
+    vector_count: number;
+  } | null;
 }
 
 const ProcessingScreen: React.FC<ProcessingScreenProps> = ({
@@ -41,6 +54,7 @@ const ProcessingScreen: React.FC<ProcessingScreenProps> = ({
   errorCode,
   errorMessage,
   moderationCategories = [],
+  metrics,
 }) => {
   const { t } = useTranslation();
 
@@ -175,6 +189,9 @@ const ProcessingScreen: React.FC<ProcessingScreenProps> = ({
       {/* 處理進度 */}
       {extractionStatus !== ExtractionStatus.FAILED && moderationStatus !== ModerationStatus.BLOCKED && (
         <div className="processing-progress">
+          {/* T081: MetricsPanel showing vector_count increasing during upload */}
+          {metrics && <MetricsPanel metrics={metrics} isLoading={processingProgress < 100} />}
+
           {/* 進度條 */}
           <div className="progress-bar-container">
             <div

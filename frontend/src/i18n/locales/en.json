@@ -187,37 +187,18 @@
     }
   },
   "metrics": {
-    "tokens": {
-      "title": "🔋 Token Usage",
-      "total": "Total",
-      "input": "Input",
-      "output": "Output",
-      "avgPerQuery": "Avg/Query",
-      "warning": "⚠️ High Usage"
-    },
-    "queries": {
-      "title": "📊 Query Statistics",
-      "total": "Total Queries",
-      "answered": "Answered",
-      "unanswered": "Unanswered",
-      "avgChunks": "Avg Chunks",
-      "efficiency": "Efficiency"
-    },
-    "vectorDb": {
-      "title": "💾 Vector DB",
-      "totalChunks": "Total Chunks",
-      "documentsStored": "Documents Stored",
-      "avgChunkSize": "Avg Chunk Size",
-      "memoryUsage": "Memory Usage"
-    },
-    "common": {
-      "queries": "queries",
-      "requests": "requests",
-      "perQuery": "per query"
-    },
-    "warnings": {
-      "highTokenUsage": "Token usage has reached {{percentage}}% of the threshold",
-      "highUnanswered": "High unanswered rate. Consider uploading more relevant documents."
-    }
+    "title": "📊 Real-time Metrics",
+    "loading": "Loading metrics...",
+    "tokens": "Token Usage",
+    "tokenInput": "Input Tokens",
+    "tokenOutput": "Output Tokens",
+    "tokenTotal": "Total Tokens",
+    "tokenPercent": "Usage Percentage",
+    "context": "Context Window",
+    "contextTokens": "Context Tokens Used",
+    "contextPercent": "Context Percentage",
+    "vectors": "Vector Database",
+    "vectorCount": "Vectors Stored",
+    "tokenWarning": "⚠️ Token usage is above 80%. Consider starting a new session."
   }
 }

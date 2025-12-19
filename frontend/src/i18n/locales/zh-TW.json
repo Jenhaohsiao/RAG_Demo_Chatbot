@@ -187,37 +187,18 @@
     }
   },
   "metrics": {
-    "tokens": {
-      "title": "🔋 Token 使用量",
-      "total": "總計",
-      "input": "輸入",
-      "output": "輸出",
-      "avgPerQuery": "平均/查詢",
-      "warning": "⚠️ 使用量過高"
-    },
-    "queries": {
-      "title": "📊 查詢統計",
-      "total": "總查詢數",
-      "answered": "已回答",
-      "unanswered": "未回答",
-      "avgChunks": "平均區塊數",
-      "efficiency": "效率"
-    },
-    "vectorDb": {
-      "title": "💾 向量資料庫",
-      "totalChunks": "總區塊數",
-      "documentsStored": "已存儲文件數",
-      "avgChunkSize": "平均區塊大小",
-      "memoryUsage": "記憶體使用"
-    },
-    "common": {
-      "queries": "個查詢",
-      "requests": "個請求",
-      "perQuery": "每個查詢"
-    },
-    "warnings": {
-      "highTokenUsage": "Token 使用量已達到 {{percentage}}% 的閾值",
-      "highUnanswered": "未回答率較高。建議上傳更多相關文件。"
-    }
+    "title": "📊 實時指標",
+    "loading": "載入指標中...",
+    "tokens": "Token 使用量",
+    "tokenInput": "輸入 Tokens",
+    "tokenOutput": "輸出 Tokens",
+    "tokenTotal": "總 Tokens",
+    "tokenPercent": "使用百分比",
+    "context": "上下文窗口",
+    "contextTokens": "上下文 Tokens",
+    "contextPercent": "上下文百分比",
+    "vectors": "向量資料庫",
+    "vectorCount": "儲存的向量",
+    "tokenWarning": "⚠️ Token 使用量已超過 80%。建議開始新會話。"
   }
 }

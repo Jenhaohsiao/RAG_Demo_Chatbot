@@ -187,29 +187,18 @@
     }
   },
   "metrics": {
-    "tokens": {
-      "title": "🔋 Uso de tokens",
-      "total": "Total",
-      "input": "Entrada",
-      "output": "Salida",
-      "avgPerQuery": "Promedio/Consulta",
-      "warning": "⚠️ Uso alto"
-    },
-    "queries": {
-      "title": "📊 Estadísticas de consultas",
-      "total": "Total de consultas",
-      "answered": "Respondidas",
-      "unanswered": "No respondidas",
-      "avgChunks": "Promedio de fragmentos",
-      "efficiency": "Eficiencia"
-    },
-    "common": {
-      "queries": "consultas",
-      "requests": "solicitudes",
-      "perQuery": "por consulta"
-    },
-    "warnings": {
-      "highUnanswered": "Tasa alta de no respondidas. Considere cargar más documentos relevantes."
-    }
+    "title": "📊 Métricas en tiempo real",
+    "loading": "Cargando métricas...",
+    "tokens": "Uso de tokens",
+    "tokenInput": "Tokens de entrada",
+    "tokenOutput": "Tokens de salida",
+    "tokenTotal": "Total de tokens",
+    "tokenPercent": "Porcentaje de uso",
+    "context": "Ventana de contexto",
+    "contextTokens": "Tokens de contexto utilizados",
+    "contextPercent": "Porcentaje de contexto",
+    "vectors": "Base de datos de vectores",
+    "vectorCount": "Vectores almacenados",
+    "tokenWarning": "⚠️ El uso de tokens está por encima del 80%. Se recomienda iniciar una nueva sesión."
   }
 }
