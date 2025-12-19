@@ -1,6 +1,8 @@
 """
 Content Extractor Service
 Extracts text content from PDF files, text files, and web URLs
+
+T095-T097: File validation for type, size, and content
 """
 import io
 import logging
@@ -14,9 +16,18 @@ from bs4 import BeautifulSoup
 logger = logging.getLogger(__name__)
 
 # Constants
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB (T096)
 MAX_URL_FETCH_SIZE = 10 * 1024 * 1024  # 10MB
-URL_FETCH_TIMEOUT = 30  # seconds
+URL_FETCH_TIMEOUT = 30  # seconds (T098)
 SUPPORTED_PDF_ENCODINGS = ['utf-8', 'latin-1', 'cp1252']
+
+# T095: Supported file types
+SUPPORTED_FILE_TYPES = {
+    'pdf': ['application/pdf', 'application/x-pdf'],
+    'txt': ['text/plain']
+}
+
+SUPPORTED_EXTENSIONS = ['.pdf', '.txt']
 
 
 class ExtractionError(Exception):
@@ -39,9 +50,75 @@ class TextExtractionError(ExtractionError):
     pass
 
 
+def validate_file_type(filename: str, content_type: Optional[str] = None) -> tuple[bool, Optional[str]]:
+    """
+    T095: Validate file type based on extension and content type
+    
+    Args:
+        filename: Original filename
+        content_type: MIME type from upload
+        
+    Returns:
+        tuple: (is_valid, error_message)
+    """
+    # Check extension
+    file_ext = ''.join([c for c in filename.lower() if c.isalnum() or c == '.'])
+    if not any(filename.lower().endswith(ext) for ext in SUPPORTED_EXTENSIONS):
+        return False, f"Unsupported file format. Only .pdf and .txt files are allowed. Got: {file_ext}"
+    
+    # Check content type if provided
+    if content_type:
+        supported_types = []
+        for types in SUPPORTED_FILE_TYPES.values():
+            supported_types.extend(types)
+        
+        if content_type not in supported_types:
+            return False, f"Unsupported file type: {content_type}"
+    
+    return True, None
+
+
+def validate_file_size(file_content: bytes) -> tuple[bool, Optional[str]]:
+    """
+    T096: Validate file size does not exceed maximum
+    
+    Args:
+        file_content: File content as bytes
+        
+    Returns:
+        tuple: (is_valid, error_message)
+    """
+    file_size = len(file_content)
+    if file_size > MAX_FILE_SIZE:
+        size_mb = file_size / (1024 * 1024)
+        max_mb = MAX_FILE_SIZE / (1024 * 1024)
+        return False, f"File too large ({size_mb:.1f}MB > {max_mb}MB limit)"
+    
+    return True, None
+
+
+def validate_content_not_empty(content: str, source: str = "file") -> tuple[bool, Optional[str]]:
+    """
+    T097: Validate that extracted content is not empty
+    
+    Args:
+        content: Extracted content text
+        source: Source type (file, url)
+        
+    Returns:
+        tuple: (is_valid, error_message)
+    """
+    if not content or not content.strip():
+        return False, f"Empty {source}: no text content extracted"
+    
+    return True, None
+
+
 def extract_pdf(file_content: bytes, filename: str = "unknown.pdf") -> str:
     """
     Extract text content from PDF file bytes
+    
+    T095-T097: Validate file type, size, and content before extraction
     
     Args:
         file_content: PDF file content as bytes
@@ -53,6 +130,16 @@ def extract_pdf(file_content: bytes, filename: str = "unknown.pdf") -> str:
     Raises:
         PDFExtractionError: If PDF extraction fails
     """
+    # T095: Validate file type
+    is_valid, error_msg = validate_file_type(filename)
+    if not is_valid:
+        raise PDFExtractionError(error_msg)
+    
+    # T096: Validate file size
+    is_valid, error_msg = validate_file_size(file_content)
+    if not is_valid:
+        raise PDFExtractionError(error_msg)
+    
     try:
         # Create PDF reader from bytes
         pdf_file = io.BytesIO(file_content)
@@ -78,6 +165,11 @@ def extract_pdf(file_content: bytes, filename: str = "unknown.pdf") -> str:
         
         # Combine all pages
         full_text = "\n\n".join(extracted_text)
+        
+        # T097: Validate content is not empty
+        is_valid, error_msg = validate_content_not_empty(full_text, "PDF")
+        if not is_valid:
+            raise PDFExtractionError(error_msg)
         
         # Validate extraction
         if not full_text.strip():
@@ -131,6 +223,8 @@ def extract_url(url: str) -> str:
     """
     Fetch and extract text content from a web URL
     
+    T098: URL timeout handling with 30-second limit
+    
     Args:
         url: Web URL to fetch content from
         
@@ -151,16 +245,23 @@ def extract_url(url: str) -> str:
         
         logger.info(f"Fetching content from URL: {url}")
         
-        # Fetch URL content with timeout and size limit
-        response = requests.get(
-            url,
-            timeout=URL_FETCH_TIMEOUT,
-            stream=True,
-            headers={
-                'User-Agent': 'RAG-Chatbot/1.0 (Document Extractor)',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-            }
-        )
+        # T098: Fetch URL content with 30-second timeout and size limit
+        try:
+            response = requests.get(
+                url,
+                timeout=URL_FETCH_TIMEOUT,  # 30 seconds
+                stream=True,
+                headers={
+                    'User-Agent': 'RAG-Chatbot/1.0 (Document Extractor)',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+                }
+            )
+        except requests.exceptions.Timeout:
+            raise URLFetchError(f"URL fetch timeout after {URL_FETCH_TIMEOUT} seconds")
+        except requests.exceptions.ConnectionError as e:
+            raise URLFetchError(f"Failed to connect to URL: {e}")
+        except requests.exceptions.RequestException as e:
+            raise URLFetchError(f"Request failed: {e}")
         
         # Check response status
         response.raise_for_status()
