@@ -129,6 +129,17 @@ class UploadStatusResponse(BaseModel):
     error_code: str | None = None
     error_message: str | None = None
     moderation_categories: list[str] = []
+    # T089+ 新增 token 追蹤和頁面計數
+    tokens_used: int = 0  # 本文件/爬蟲使用的 tokens
+    pages_crawled: int = 0  # 爬蟲頁面數
+
+
+class WebsiteUploadStatusResponse(UploadStatusResponse):
+    """網站爬蟲上傳狀態回應"""
+    crawl_status: str = "pending"  # pending, crawling, completed, token_limit_reached, page_limit_reached
+    total_tokens: int = 0  # 爬蟲總 tokens
+    avg_tokens_per_page: int = 0  # 平均每頁 tokens
+    crawl_duration_seconds: float = 0.0  # 爬蟲耗時
 
 
 # 文件儲存（實際實作中應使用資料庫）
@@ -173,7 +184,9 @@ def process_document(document: Document):
         
         document.raw_content = extracted_text
         document.extraction_status = ExtractionStatus.EXTRACTED
-        logger.info(f"[{document.document_id}] Extraction complete: {len(extracted_text)} chars")
+        # T089+ 計算文件 tokens（1 token ≈ 3 字符）
+        document.tokens_used = max(1, len(extracted_text) // 3)
+        logger.info(f"[{document.document_id}] Extraction complete: {len(extracted_text)} chars, {document.tokens_used} tokens")
         
         # Step 2: Moderate 內容審核（憲法 Principle VI）
         if settings.enable_content_moderation:
@@ -585,6 +598,10 @@ async def upload_website(
             raw_content=combined_content  # 直接設定合併後的內容
         )
         
+        # T089+ 設置爬蟲統計信息
+        crawl_document.pages_crawled = len(crawled_pages)
+        crawl_document.tokens_used = crawl_result.get('total_tokens', 0)
+        
         # 標記為已提取（跳過 extraction 步驟，因為爬蟲已經提取了）
         crawl_document.extraction_status = ExtractionStatus.EXTRACTED
         
@@ -707,7 +724,10 @@ async def get_upload_status(
         summary=summary,
         error_code=document.error_code,
         error_message=document.error_message,
-        moderation_categories=document.moderation_categories
+        moderation_categories=document.moderation_categories,
+        # T089+ 返回 token 信息
+        tokens_used=document.tokens_used,
+        pages_crawled=document.pages_crawled
     )
 
 

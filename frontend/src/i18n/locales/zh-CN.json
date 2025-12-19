@@ -138,7 +138,9 @@
     "complete": {
       "message": "文件处理成功！",
       "chunks": "已创建 {{count}} 个文本块",
-      "preview": "预览"
+      "preview": "预览",
+      "tokensUsed": "已使用令牌",
+      "pagesCrawled": "已爬取页面"
     },
     "error": {
       "moderationBlocked": "内容被安全检查阻止",

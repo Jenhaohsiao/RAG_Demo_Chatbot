@@ -138,7 +138,9 @@
     "complete": {
       "message": "تمت معالجة المستند بنجاح!",
       "chunks": "تم إنشاء {{count}} قطعة نصية",
-      "preview": "معاينة"
+      "preview": "معاينة",
+      "tokensUsed": "الرموز المستخدمة",
+      "pagesCrawled": "الصفحات المتزحلقة"
     },
     "error": {
       "moderationBlocked": "تم حظر المحتوى بواسطة فحص السلامة",

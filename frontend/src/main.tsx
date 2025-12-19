@@ -348,6 +348,9 @@ const App: React.FC = () => {
           isCompleted={isCompleted}
           summary={statusResponse.summary}
           chunkCount={statusResponse.chunk_count}
+          // T089+ 傳遞 token 和頁面信息
+          tokensUsed={statusResponse.tokens_used}
+          pagesCrawled={statusResponse.pages_crawled}
           onConfirm={handleModalConfirm}
         />
       )}

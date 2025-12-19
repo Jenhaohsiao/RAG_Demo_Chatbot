@@ -48,6 +48,9 @@ class Document(BaseModel):
     chunk_count: int = Field(default=0, ge=0)
     error_code: str | None = None
     error_message: str | None = None
+    # T089+ 新增 token 追蹤
+    tokens_used: int = Field(default=0, ge=0)  # 本文件使用的 tokens
+    pages_crawled: int = Field(default=0, ge=0)  # 爬蟲頁面數（僅用於網站爬蟲）
     
     @field_validator('source_reference')
     @classmethod

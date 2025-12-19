@@ -167,7 +167,9 @@
     "complete": {
       "message": "Document processed successfully!",
       "chunks": "{{count}} text chunks created",
-      "preview": "Preview"
+      "preview": "Preview",
+      "tokensUsed": "Tokens Used",
+      "pagesCrawled": "Pages Crawled"
     },
     "error": {
       "moderationBlocked": "Content Blocked by Safety Check",

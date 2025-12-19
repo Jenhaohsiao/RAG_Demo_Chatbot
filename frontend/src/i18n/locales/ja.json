@@ -138,7 +138,9 @@
     "complete": {
       "message": "ドキュメントの処理が成功しました！",
       "chunks": "{{count}}個のテキストチャンクが作成されました",
-      "preview": "プレビュー"
+      "preview": "プレビュー",
+      "tokensUsed": "使用トークン",
+      "pagesCrawled": "クロールされたページ"
     },
     "error": {
       "moderationBlocked": "安全確認によりコンテンツがブロックされました",

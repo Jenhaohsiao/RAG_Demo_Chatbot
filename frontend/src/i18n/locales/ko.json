@@ -138,7 +138,9 @@
     "complete": {
       "message": "문서가 성공적으로 처리되었습니다!",
       "chunks": "{{count}}개의 텍스트 청크가 생성되었습니다",
-      "preview": "미리보기"
+      "preview": "미리보기",
+      "tokensUsed": "사용된 토큰",
+      "pagesCrawled": "크롤링된 페이지"
     },
     "error": {
       "moderationBlocked": "안전 검사에서 콘텐츠가 차단되었습니다",

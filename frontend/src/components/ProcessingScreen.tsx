@@ -40,6 +40,9 @@ export interface ProcessingScreenProps {
     context_percent: number;
     vector_count: number;
   } | null;
+  // T089+ Token 和頁面信息
+  tokensUsed?: number;
+  pagesCrawled?: number;
 }
 
 const ProcessingScreen: React.FC<ProcessingScreenProps> = ({
@@ -55,6 +58,8 @@ const ProcessingScreen: React.FC<ProcessingScreenProps> = ({
   errorMessage,
   moderationCategories = [],
   metrics,
+  tokensUsed = 0,
+  pagesCrawled = 0,
 }) => {
   const { t } = useTranslation();
 
@@ -233,6 +238,21 @@ const ProcessingScreen: React.FC<ProcessingScreenProps> = ({
                   })}
                 </p>
               )}
+              {/* T089+ 顯示 Token 和頁面信息 */}
+              <div className="processing-stats">
+                {tokensUsed > 0 && (
+                  <p className="stat-item">
+                    <span className="stat-label">{t('processing.complete.tokensUsed', 'Tokens Used')}:</span>
+                    <span className="stat-value">{tokensUsed.toLocaleString()}</span>
+                  </p>
+                )}
+                {pagesCrawled > 0 && (
+                  <p className="stat-item">
+                    <span className="stat-label">{t('processing.complete.pagesCrawled', 'Pages Crawled')}:</span>
+                    <span className="stat-value">{pagesCrawled}</span>
+                  </p>
+                )}
+              </div>
               {summary && (
                 <div className="document-summary">
                   <p className="summary-label">

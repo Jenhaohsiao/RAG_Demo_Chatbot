@@ -36,6 +36,9 @@ export interface Document {
   chunk_count: number;
   error_code?: string | null;
   error_message?: string | null;
+  // T089+ 新增 token 追蹤
+  tokens_used?: number;
+  pages_crawled?: number;
 }
 
 export interface DocumentChunk {

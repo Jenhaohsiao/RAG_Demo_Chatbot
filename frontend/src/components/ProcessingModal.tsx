@@ -17,6 +17,9 @@ export interface ProcessingModalProps {
   isCompleted?: boolean;
   summary?: string;
   chunkCount?: number;
+  // T089+ Token 和頁面信息
+  tokensUsed?: number;
+  pagesCrawled?: number;
   onConfirm: () => void;
 }
 
@@ -31,6 +34,8 @@ const ProcessingModal: React.FC<ProcessingModalProps> = ({
   isCompleted = false,
   summary,
   chunkCount,
+  tokensUsed = 0,
+  pagesCrawled = 0,
   onConfirm,
 }) => {
   const { t } = useTranslation();
@@ -85,13 +90,29 @@ const ProcessingModal: React.FC<ProcessingModalProps> = ({
                 </div>
 
                 {chunkCount && (
-                  <p className="text-muted mb-3">
+                  <p className="text-muted mb-2">
                     <i className="bi bi-file-text me-2"></i>
                     {t('processing.complete.chunks', '{{count}} text chunks created', {
                       count: chunkCount,
                     })}
                   </p>
                 )}
+
+                {/* T089+ 顯示 Token 和頁面信息 */}
+                <div className="processing-stats mb-3">
+                  {tokensUsed > 0 && (
+                    <p className="text-muted mb-1">
+                      <i className="bi bi-lightning-fill me-2" style={{ color: '#FFC107' }}></i>
+                      <strong>{t('processing.complete.tokensUsed', 'Tokens Used')}:</strong> {tokensUsed.toLocaleString()}
+                    </p>
+                  )}
+                  {pagesCrawled > 0 && (
+                    <p className="text-muted mb-0">
+                      <i className="bi bi-globe me-2" style={{ color: '#17A2B8' }}></i>
+                      <strong>{t('processing.complete.pagesCrawled', 'Pages Crawled')}:</strong> {pagesCrawled}
+                    </p>
+                  )}
+                </div>
               </div>
             )}
 

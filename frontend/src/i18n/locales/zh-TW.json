@@ -167,7 +167,9 @@
     "complete": {
       "message": "文件處理成功！",
       "chunks": "已建立 {{count}} 個文字塊",
-      "preview": "預覽"
+      "preview": "預覽",
+      "tokensUsed": "已使用 Token",
+      "pagesCrawled": "已爬取頁面"
     },
     "error": {
       "moderationBlocked": "內容被安全檢查封鎖",

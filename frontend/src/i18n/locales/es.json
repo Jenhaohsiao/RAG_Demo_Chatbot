@@ -138,7 +138,9 @@
     "complete": {
       "message": "¡Documento procesado exitosamente!",
       "chunks": "{{count}} fragmentos de texto creados",
-      "preview": "Vista Previa"
+      "preview": "Vista previa",
+      "tokensUsed": "Tokens Utilizados",
+      "pagesCrawled": "Páginas Rastreadas"
     },
     "error": {
       "moderationBlocked": "Contenido Bloqueado por Verificación de Seguridad",
