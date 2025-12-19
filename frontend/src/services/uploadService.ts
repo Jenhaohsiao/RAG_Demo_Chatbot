@@ -48,6 +48,35 @@ export interface UrlUploadRequest {
 }
 
 /**
+ * 爬蟲抓取的單個頁面
+ */
+export interface CrawledPage {
+  url: string;
+  title: string;
+  tokens: number;
+  content: string;  // 頁面內容預覽（前 200 字）
+}
+
+/**
+ * 網站爬蟲上傳請求
+ */
+export interface WebsiteUploadRequest {
+  url: string;
+  max_tokens?: number;  // 默認 100K
+  max_pages?: number;   // 默認 100
+}
+
+/**
+ * 網站爬蟲上傳回應
+ */
+export interface WebsiteUploadResponse extends UploadResponse {
+  pages_found: number;
+  total_tokens: number;
+  crawl_status: string;  // pending, crawling, completed, token_limit_reached, page_limit_reached
+  crawled_pages: CrawledPage[];
+}
+
+/**
  * 上傳檔案
  * 
  * @param sessionId - Session ID
@@ -90,6 +119,34 @@ export const uploadUrl = async (
   const response = await api.post<UploadResponse>(
     `/upload/${sessionId}/url`,
     { url }
+  );
+
+  return response.data;
+};
+
+/**
+ * 爬蟲網站內容
+ * 
+ * @param sessionId - Session ID
+ * @param url - 網站 URL
+ * @param maxTokens - 最大 Token 數（默認 100K）
+ * @param maxPages - 最大頁面數（默認 100）
+ * @returns 爬蟲上傳回應（包含 URL 列表）
+ * @throws Error 當爬蟲失敗時
+ */
+export const uploadWebsite = async (
+  sessionId: string,
+  url: string,
+  maxTokens: number = 100000,
+  maxPages: number = 100
+): Promise<WebsiteUploadResponse> => {
+  const response = await api.post<WebsiteUploadResponse>(
+    `/upload/${sessionId}/website`,
+    {
+      url,
+      max_tokens: maxTokens,
+      max_pages: maxPages,
+    }
   );
 
   return response.data;
@@ -259,6 +316,7 @@ export const formatFileSize = (bytes: number): string => {
 export default {
   uploadFile,
   uploadUrl,
+  uploadWebsite,
   getUploadStatus,
   listDocuments,
   pollUploadStatus,

@@ -28,6 +28,10 @@ from ...core.config import settings
 from ...services.extractor import extract_content, PDFExtractionError, URLFetchError, TextExtractionError
 from ...services.moderation import ModerationService, ModerationStatus as ModStatus
 from ...services.chunker import TextChunker
+from ...services.embedder import EmbeddingService
+from ...services.rag_engine import RAGEngine
+from ...services.vector_store import VectorStore
+from ...services.web_crawler import WebCrawler
 from ...services.embedder import Embedder
 from ...services.vector_store import VectorStore
 from ...services.rag_engine import RAGEngine
@@ -57,6 +61,42 @@ class UrlUploadRequest(BaseModel):
         return v
 
 
+class WebsiteUploadRequest(BaseModel):
+    """網站爬蟲上傳請求"""
+    url: HttpUrl
+    max_tokens: int = 100000  # 默認 100K tokens
+    max_pages: int = 100  # 默認最多 100 頁
+    
+    @field_validator('url')
+    @classmethod
+    def validate_url_scheme(cls, v):
+        if v.scheme not in ['http', 'https']:
+            raise ValueError("URL must use http or https scheme")
+        return v
+    
+    @field_validator('max_tokens')
+    @classmethod
+    def validate_max_tokens(cls, v):
+        if v < 1000 or v > 1000000:
+            raise ValueError("max_tokens must be between 1,000 and 1,000,000")
+        return v
+    
+    @field_validator('max_pages')
+    @classmethod
+    def validate_max_pages(cls, v):
+        if v < 1 or v > 1000:
+            raise ValueError("max_pages must be between 1 and 1,000")
+        return v
+
+
+class CrawledPage(BaseModel):
+    """爬蟲抓取的單個頁面"""
+    url: str
+    title: str
+    tokens: int
+    content: str
+
+
 class UploadResponse(BaseModel):
     """上傳回應（202 Accepted）"""
     document_id: UUID
@@ -66,6 +106,14 @@ class UploadResponse(BaseModel):
     upload_timestamp: str
     extraction_status: ExtractionStatus
     moderation_status: ModerationStatus
+
+
+class WebsiteUploadResponse(UploadResponse):
+    """網站爬蟲上傳回應"""
+    pages_found: int = 0
+    total_tokens: int = 0
+    crawl_status: str = "pending"  # pending, crawling, completed, token_limit_reached, page_limit_reached
+    crawled_pages: list[CrawledPage] = []
 
 
 class UploadStatusResponse(BaseModel):
@@ -468,6 +516,126 @@ async def upload_url(
         extraction_status=document.extraction_status,
         moderation_status=document.moderation_status
     )
+
+
+@router.post("/{session_id}/website", status_code=202, response_model=WebsiteUploadResponse)
+async def upload_website(
+    session_id: UUID,
+    background_tasks: BackgroundTasks,
+    request: WebsiteUploadRequest
+):
+    """
+    爬蟲網站內容並處理
+    
+    Flow:
+    1. 驗證 session 存在
+    2. 驗證 URL 格式
+    3. 使用 WebCrawler 爬取網站（帶 Token 限制）
+    4. 為每個爬取的頁面建立 Document
+    5. 啟動背景處理任務
+    6. 回傳 202 Accepted + 爬蟲結果預覽
+    
+    特點：
+    - 100K token 默認限制
+    - 自動發現頁面鏈接
+    - 尊重域名邊界（僅爬蟲同域名）
+    - 返回 URL 列表供用戶預覽
+    """
+    # 驗證 session
+    session = session_manager.get_session(session_id)
+    if not session:
+        error = get_error_response(ErrorCode.SESSION_NOT_FOUND)
+        raise HTTPException(
+            status_code=get_http_status_code(ErrorCode.SESSION_NOT_FOUND),
+            detail=error.dict()
+        )
+    
+    # 啟動爬蟲
+    crawler = WebCrawler(
+        base_url=str(request.url),
+        max_tokens=request.max_tokens,
+        max_pages=request.max_pages
+    )
+    
+    try:
+        logger.info(f"Starting website crawl: {request.url} (session: {session_id})")
+        crawl_result = crawler.crawl()
+        
+        # 記錄爬蟲結果
+        logger.info(
+            f"Website crawl complete: {crawl_result['total_pages']} pages, "
+            f"{crawl_result['total_tokens']} tokens, "
+            f"status: {crawl_result['status']}"
+        )
+        
+        # 提取爬蟲的頁面
+        crawled_pages = crawl_result.get('pages', [])
+        
+        # 為爬蟲結果建立主 Document
+        # 將所有頁面的內容合併為一個文件
+        combined_content = "\n\n---\n\n".join([
+            f"# {page.get('title', 'Untitled')}\nURL: {page.get('url')}\n\n{page.get('content', '')}"
+            for page in crawled_pages
+        ])
+        
+        crawl_document = Document(
+            session_id=session_id,
+            source_type=SourceType.URL,
+            source_reference=str(request.url),
+            raw_content=combined_content  # 直接設定合併後的內容
+        )
+        
+        # 標記為已提取（跳過 extraction 步驟，因為爬蟲已經提取了）
+        crawl_document.extraction_status = ExtractionStatus.EXTRACTED
+        
+        _documents[crawl_document.document_id] = crawl_document
+        
+        # 更新 session 狀態
+        session_manager.update_state(session_id, SessionState.PROCESSING)
+        
+        # 啟動背景處理任務（從審核開始，跳過提取）
+        background_tasks.add_task(process_document, crawl_document)
+        
+        logger.info(
+            f"Website upload accepted: {crawl_document.document_id} "
+            f"(session: {session_id}, pages: {len(crawled_pages)})"
+        )
+        
+        # 轉換爬蟲頁面為回應格式
+        response_pages = [
+            CrawledPage(
+                url=page.get('url', ''),
+                title=page.get('title', 'Untitled'),
+                tokens=page.get('tokens', 0),
+                content=page.get('content', '')[:200]  # 預覽前 200 字
+            )
+            for page in crawled_pages
+        ]
+        
+        return WebsiteUploadResponse(
+            document_id=crawl_document.document_id,
+            session_id=crawl_document.session_id,
+            source_type=crawl_document.source_type,
+            source_reference=str(request.url),
+            upload_timestamp=crawl_document.upload_timestamp.isoformat() + "Z",
+            extraction_status=crawl_document.extraction_status,
+            moderation_status=crawl_document.moderation_status,
+            pages_found=len(crawled_pages),
+            total_tokens=crawl_result.get('total_tokens', 0),
+            crawl_status=crawl_result.get('status', 'completed'),
+            crawled_pages=response_pages
+        )
+    
+    except Exception as e:
+        logger.error(f"Website crawl failed: {str(e)}", exc_info=True)
+        error = get_error_response(
+            ErrorCode.FETCH_FAILED,
+            details={"error": str(e)}
+        )
+        raise HTTPException(
+            status_code=get_http_status_code(ErrorCode.FETCH_FAILED),
+            detail=error.dict()
+        )
 
 
 @router.get("/{session_id}/status/{document_id}", response_model=UploadStatusResponse)

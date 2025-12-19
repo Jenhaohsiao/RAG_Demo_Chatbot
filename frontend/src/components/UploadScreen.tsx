@@ -14,7 +14,9 @@ import {
   validateFileSize,
   validateUrl,
   formatFileSize,
+  uploadWebsite,
 } from '../services/uploadService';
+import WebsiteCrawlerPanel, { WebsiteCrawlerPanelProps } from './WebsiteCrawlerPanel';
 
 export interface UploadScreenProps {
   sessionId: string;
@@ -39,6 +41,10 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [urlInput, setUrlInput] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'file' | 'url' | 'crawler'>('file');  // 新增：選項卡狀態
+  const [crawlerLoading, setCrawlerLoading] = useState(false);  // 新增：爬蟲加載狀態
+  const [crawlerError, setCrawlerError] = useState<string | null>(null);  // 新增：爬蟲錯誤
+  const [crawlerResults, setCrawlerResults] = useState<any | null>(null);  // 新增：爬蟲結果
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 最大檔案大小：10MB
@@ -145,6 +151,27 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
    */
   const handleBrowseClick = () => {
     fileInputRef.current?.click();
+  };
+
+  /**
+   * 處理網站爬蟲提交
+   */
+  const handleCrawlerSubmit = async (url: string, maxTokens: number, maxPages: number) => {
+    setCrawlerError(null);
+    setCrawlerLoading(true);
+    
+    try {
+      const response = await uploadWebsite(sessionId, url, maxTokens, maxPages);
+      setCrawlerResults(response);
+      
+      // 自動提交爬蟲結果進行處理
+      // 爬蟲已經將內容上傳，現在只需要開始處理流程
+      onUrlSubmitted(url);  // 使用爬蟲 URL 作為來源
+    } catch (err) {
+      setCrawlerError(err instanceof Error ? err.message : 'Failed to crawl website');
+    } finally {
+      setCrawlerLoading(false);
+    }
   };
 
   // 獲取當前模式的標籤和顏色
@@ -286,6 +313,51 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
           color: #666;
           margin-top: 12px;
           line-height: 1.5;
+        }
+
+        .upload-container {
+          border: 2px dashed #ddd;
+          border-radius: 12px;
+          background-color: #fafafa;
+          padding: 40px 24px;
+          transition: all 0.3s ease;
+          margin-bottom: 24px;
+        }
+
+        /* 上傳選項卡 */
+        .upload-tabs {
+          display: flex;
+          gap: 12px;
+          margin-bottom: 24px;
+          border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab-button {
+          padding: 12px 20px;
+          background: none;
+          border: none;
+          border-bottom: 3px solid transparent;
+          font-size: 14px;
+          font-weight: 500;
+          color: #666;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          white-space: nowrap;
+        }
+
+        .tab-button:hover:not(:disabled) {
+          color: #333;
+          border-bottom-color: #ccc;
+        }
+
+        .tab-button.active {
+          color: #4285f4;
+          border-bottom-color: #4285f4;
+        }
+
+        .tab-button:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
         }
 
         .upload-container {
@@ -557,7 +629,33 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
         </div>
       )}
 
+      {/* 上傳選項卡 */}
+      <div className="upload-tabs">
+        <button
+          className={`tab-button ${activeTab === 'file' ? 'active' : ''}`}
+          onClick={() => setActiveTab('file')}
+          disabled={disabled}
+        >
+          📁 {t('upload.tab.file', 'File Upload')}
+        </button>
+        <button
+          className={`tab-button ${activeTab === 'url' ? 'active' : ''}`}
+          onClick={() => setActiveTab('url')}
+          disabled={disabled}
+        >
+          🔗 {t('upload.tab.url', 'Single URL')}
+        </button>
+        <button
+          className={`tab-button ${activeTab === 'crawler' ? 'active' : ''}`}
+          onClick={() => setActiveTab('crawler')}
+          disabled={disabled}
+        >
+          🌐 {t('upload.tab.crawler', 'Website Crawler')}
+        </button>
+      </div>
+
       {/* 主要上傳區域 - 檔案拖放 + URL 輸入 */}
+      {(activeTab === 'file' || activeTab === 'url') && (
       <div className="upload-content-wrapper">
         {/* 左側：檔案拖放 */}
         <div className="upload-file-column">
@@ -625,6 +723,18 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
           </div>
         </div>
       </div>
+      )}
+
+      {/* 網站爬蟲選項卡 */}
+      {activeTab === 'crawler' && (
+        <WebsiteCrawlerPanel
+          onCrawl={handleCrawlerSubmit}
+          isLoading={crawlerLoading}
+          error={crawlerError}
+          crawlResults={crawlerResults}
+          disabled={disabled}
+        />
+      )}
 
       {/* Session ID 顯示（開發用） */}
       {process.env.NODE_ENV === 'development' && (

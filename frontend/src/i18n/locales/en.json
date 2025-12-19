@@ -95,6 +95,11 @@
   "upload": {
     "title": "Upload Document",
     "subtitle": "Upload a PDF, text file, or provide a URL to get started",
+    "tab": {
+      "file": "File Upload",
+      "url": "Single URL",
+      "crawler": "Website Crawler"
+    },
     "mode": {
       "file": "File Upload",
       "url": "URL"
@@ -116,6 +121,30 @@
       "fileTooLarge": "File size exceeds {{maxSize}}",
       "emptyFile": "File is empty",
       "invalidUrl": "Invalid URL format. Must be http:// or https://"
+    }
+  },
+  "crawler": {
+    "title": "Website Crawler",
+    "description": "Enter a website URL to automatically crawl and extract content",
+    "url": "Website URL",
+    "maxTokens": "Max Tokens",
+    "maxPages": "Max Pages",
+    "advancedOptions": "Advanced Options",
+    "start": "Start Crawl",
+    "crawling": "Crawling...",
+    "results": "Crawl Results",
+    "pagesFound": "Pages Found",
+    "totalTokens": "Total Tokens",
+    "urlList": "Crawled URLs",
+    "urlNote": "{{count}} URLs crawled and ready for processing",
+    "error": {
+      "emptyUrl": "Please enter a website URL",
+      "invalidUrl": "Please enter a valid URL"
+    },
+    "tokenHint": {
+      "small": "Suitable for small websites",
+      "medium": "Suitable for medium websites",
+      "large": "Suitable for large websites"
     }
   },
   "processing": {

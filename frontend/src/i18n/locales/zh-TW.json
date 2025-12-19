@@ -95,6 +95,11 @@
   "upload": {
     "title": "上傳文件",
     "subtitle": "上傳 PDF、文字檔或提供 URL 來開始",
+    "tab": {
+      "file": "檔案上傳",
+      "url": "單一 URL",
+      "crawler": "網站爬蟲"
+    },
     "mode": {
       "file": "檔案上傳",
       "url": "網址"
@@ -116,6 +121,30 @@
       "fileTooLarge": "檔案大小超過 {{maxSize}}",
       "emptyFile": "檔案為空",
       "invalidUrl": "無效的網址格式。必須是 http:// 或 https://"
+    }
+  },
+  "crawler": {
+    "title": "網站爬蟲",
+    "description": "輸入網站 URL 以自動爬取和提取內容",
+    "url": "網站 URL",
+    "maxTokens": "最大 Token 數",
+    "maxPages": "最大頁面數",
+    "advancedOptions": "進階選項",
+    "start": "開始爬蟲",
+    "crawling": "爬蟲中...",
+    "results": "爬蟲結果",
+    "pagesFound": "找到頁面",
+    "totalTokens": "總 Token 數",
+    "urlList": "爬蟲的 URL",
+    "urlNote": "已爬蟲 {{count}} 個 URL，準備處理",
+    "error": {
+      "emptyUrl": "請輸入網站 URL",
+      "invalidUrl": "請輸入有效的 URL"
+    },
+    "tokenHint": {
+      "small": "適合小型網站",
+      "medium": "適合中型網站",
+      "large": "適合大型網站"
     }
   },
   "processing": {
