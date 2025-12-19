@@ -231,8 +231,30 @@
 - [ ] T099 [P] Implement rate limit handling for Gemini API with retry logic and user-friendly error messages
 - [ ] T100 [P] Add Qdrant connection error handling with fallback messages
 - [x] T101 Create README.md with project description, setup instructions, environment variables, Qdrant setup (embedded/Docker/Cloud), running instructions
-- [ ] T102 Run manual testing scenarios from `specs/001-multilingual-rag-chatbot/quickstart.md` validating all 6 user stories + 6 edge cases
-- [ ] T103 Verify all 10 success criteria from spec.md are met (SC-001 to SC-010)
+
+---
+
+## Phase 10: Deployment & Production Readiness
+
+**Purpose**: Prepare application for production deployment with monitoring, optimization, and deployment infrastructure
+
+- [ ] T104 [P] Performance optimization: Implement caching for embeddings and vector search results with TTL-based invalidation
+- [ ] T105 [P] Security hardening: Add HTTPS/SSL certificate configuration, API rate limiting (100 requests/minute per IP), CSRF protection
+- [ ] T106 [P] Monitoring setup: Implement application health check endpoint `/health` returning service status, Qdrant connectivity, and API quota
+- [ ] T107 [P] Logging configuration: Setup structured logging with JSON output for easy parsing, configurable log levels (DEBUG/INFO/WARNING/ERROR)
+- [ ] T108 Create deployment documentation in `docs/DEPLOYMENT.md` with cloud provider setup (AWS/Azure/GCP), environment configuration, scaling recommendations
+- [ ] T109 Create production checklist in `docs/PRODUCTION_CHECKLIST.md` with database backups, API key rotation, monitoring dashboards, incident response procedures
+- [ ] T110 [P] Database backup strategy: Implement Qdrant collection export/import utilities for disaster recovery
+- [ ] T111 Create docker-compose.prod.yml for production deployment with separate services for backend, frontend, Qdrant with resource limits and restart policies
+- [ ] T112 [P] Frontend optimization: Bundle size reduction, lazy loading for chat history, image optimization for metrics dashboard
+- [ ] T113 [P] Backend optimization: Add database connection pooling, query result caching, async request processing for long-running operations
+- [ ] T114 Create CI/CD pipeline configuration in `.github/workflows/` for automated testing, building, and deployment
+- [ ] T115 [P] API documentation generation: Export OpenAPI schema to Swagger UI at `/docs` endpoint for API consumers
+- [ ] T116 Create SLA documentation in `docs/SLA.md` with uptime targets, performance SLAs, support response times
+- [ ] T117 [P] Cost optimization: Implement API usage tracking, quota alerts, and cost estimation tools for Gemini API
+- [ ] T118 Create user feedback and analytics setup guide in `docs/ANALYTICS.md` with event tracking, error monitoring, user behavior analysis
+
+**Checkpoint**: Application ready for production deployment with monitoring, scaling, and disaster recovery capabilities
 
 ---
 
@@ -387,7 +409,7 @@ Before marking each phase complete:
 
 ## Task Count Summary
 
-- **Total Tasks**: 103
+- **Total Tasks**: 118
 - **Phase 1 (Setup)**: 10 tasks
 - **Phase 2 (Foundational)**: 20 tasks
 - **Phase 3 (US1 - P1 MVP)**: 14 tasks ← CRITICAL
@@ -396,9 +418,11 @@ Before marking each phase complete:
 - **Phase 6 (US4 - P4)**: 5 tasks
 - **Phase 7 (US5 - P5)**: 6 tasks
 - **Phase 8 (US6 - P6)**: 5 tasks
-- **Phase 9 (Polish)**: 15 tasks
+- **Phase 9 (Polish)**: 13 tasks
+- **Phase 10 (Deployment)**: 15 tasks
 
-**MVP Task Count**: Phase 1 + Phase 2 + Phase 3 + Phase 4 + Phase 5 = **72 tasks** (70% of total)
+**MVP Task Count**: Phase 1 + Phase 2 + Phase 3 + Phase 4 + Phase 5 = **72 tasks** (61% of total)
+**Production Ready**: Phase 1-9 = **103 tasks** (87% of total)
 
 **Parallel Opportunities**: 47 tasks marked [P] can run in parallel within their phase
 
