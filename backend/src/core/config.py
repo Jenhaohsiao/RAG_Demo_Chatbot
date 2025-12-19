@@ -51,6 +51,9 @@ class Settings(BaseSettings):
     api_port: int = 8000
     api_prefix: str = "/api/v1"
     
+    # T091: Logging Configuration
+    log_level: str = "INFO"  # Can be DEBUG, INFO, WARNING, ERROR, CRITICAL
+    
     # CORS Configuration
     cors_origins: str = "http://localhost:5173,http://localhost:3000"
     

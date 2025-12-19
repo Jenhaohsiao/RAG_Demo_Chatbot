@@ -3,6 +3,8 @@ FastAPI application initialization
 Entry point for the RAG Demo Chatbot backend
 
 T089: Global error handling with correct HTTP status codes
+T090: Request validation middleware
+T091: Comprehensive logging system
 """
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
@@ -10,19 +12,15 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 import google.generativeai as genai
-import logging
 from typing import Dict, Any
 
 from .core.config import settings
 from .core.scheduler import scheduler
+from .core.logger import logger, configure_logging  # T091: Import logger
 from .models.errors import ErrorCode
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+# T091: Configure logging at startup
+configure_logging(log_level=settings.log_level)
 
 
 # Custom exception classes for Phase 9
@@ -79,6 +77,13 @@ app = FastAPI(
     redoc_url="/api/redoc",
     openapi_url="/api/openapi.json"
 )
+
+# T090: Add middleware for validation, logging, and security
+from .api.middleware import RequestLoggingMiddleware, RequestValidationMiddleware, SecurityHeadersMiddleware
+
+app.add_middleware(SecurityHeadersMiddleware)  # Add security headers last (outermost)
+app.add_middleware(RequestValidationMiddleware)  # Validate requests
+app.add_middleware(RequestLoggingMiddleware)  # Log requests first (innermost)
 
 # CORS middleware
 app.add_middleware(
