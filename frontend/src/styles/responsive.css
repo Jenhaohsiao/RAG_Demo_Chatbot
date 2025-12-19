@@ -1,0 +1,213 @@
+/**
+ * Responsive Design Utilities
+ * T094: Responsive design breakpoints for mobile/tablet/desktop
+ * 
+ * Bootstrap breakpoints:
+ * - xs: < 576px
+ * - sm: >= 576px
+ * - md: >= 768px
+ * - lg: >= 992px
+ * - xl: >= 1200px
+ * - xxl: >= 1400px
+ */
+
+/* T094: Base responsive utilities */
+.container-responsive {
+  padding: 16px;
+}
+
+@media (min-width: 576px) {
+  .container-responsive {
+    padding: 20px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container-responsive {
+    padding: 24px;
+  }
+}
+
+@media (min-width: 992px) {
+  .container-responsive {
+    padding: 32px;
+  }
+}
+
+/* T094: Typography responsiveness */
+.heading-responsive {
+  font-size: 20px;
+  line-height: 1.4;
+}
+
+@media (min-width: 576px) {
+  .heading-responsive {
+    font-size: 24px;
+  }
+}
+
+@media (min-width: 768px) {
+  .heading-responsive {
+    font-size: 28px;
+  }
+}
+
+@media (min-width: 992px) {
+  .heading-responsive {
+    font-size: 32px;
+  }
+}
+
+/* T094: Grid responsive */
+.grid-responsive {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 576px) {
+  .grid-responsive {
+    gap: 16px;
+  }
+}
+
+@media (min-width: 768px) {
+  .grid-responsive {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (min-width: 992px) {
+  .grid-responsive {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+}
+
+/* T094: Flexbox responsive */
+.flex-responsive {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (min-width: 768px) {
+  .flex-responsive {
+    flex-direction: row;
+    gap: 16px;
+  }
+}
+
+@media (min-width: 992px) {
+  .flex-responsive {
+    gap: 20px;
+  }
+}
+
+/* T094: Hide/show responsive elements */
+.hide-mobile {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .hide-mobile {
+    display: block;
+  }
+}
+
+.hide-tablet {
+  display: block;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  .hide-tablet {
+    display: none;
+  }
+}
+
+.hide-desktop {
+  display: block;
+}
+
+@media (min-width: 992px) {
+  .hide-desktop {
+    display: none;
+  }
+}
+
+/* T094: Touch-friendly sizing for mobile */
+@media (max-width: 576px) {
+  button,
+  .btn,
+  input,
+  select,
+  textarea {
+    min-height: 44px;  /* iOS touch target minimum */
+  }
+}
+
+/* T094: Chat interface responsive */
+.chat-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 576px) {
+  .chat-container {
+    height: 100dvh;  /* Dynamic viewport height for mobile */
+  }
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+@media (min-width: 768px) {
+  .chat-messages {
+    padding: 16px;
+  }
+}
+
+@media (min-width: 992px) {
+  .chat-messages {
+    padding: 20px;
+  }
+}
+
+.chat-input {
+  padding: 12px;
+  border-top: 1px solid #e1e8ed;
+}
+
+@media (min-width: 768px) {
+  .chat-input {
+    padding: 16px;
+  }
+}
+
+/* T094: Modal responsive */
+.modal-responsive {
+  margin: 0;
+  border-radius: 0;
+  height: 100vh;
+  max-height: 100vh;
+}
+
+@media (min-width: 576px) {
+  .modal-responsive {
+    margin: auto;
+    border-radius: 12px;
+    height: auto;
+    max-height: 90vh;
+  }
+}
+
+@media (min-width: 992px) {
+  .modal-responsive {
+    max-height: 80vh;
+  }
+}

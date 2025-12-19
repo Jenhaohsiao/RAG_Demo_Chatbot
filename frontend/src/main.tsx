@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import './styles/badges.css';
 import './styles/rtl.css';
+import './styles/responsive.css';  // T094: Import responsive design utilities
 import './i18n/config';
 import { useTranslation } from 'react-i18next';
 import i18n from './i18n/config';
@@ -14,6 +15,7 @@ import ProcessingModal from './components/ProcessingModal';
 import ChatScreen from './components/ChatScreen';
 import SettingsModal from './components/SettingsModal';
 import ConfirmDialog from './components/ConfirmDialog';
+import ErrorBoundary from './components/ErrorBoundary';  // T093: Import Error Boundary
 import { useSession } from './hooks/useSession';
 import { useUpload } from './hooks/useUpload';
 import { submitQuery } from './services/chatService';
@@ -24,6 +26,7 @@ import type { ChatResponse } from './types/chat';
 /**
  * Main App Component
  * Phase 4: Document Upload Integration
+ * T093: Wrapped with Error Boundary for error handling
  * 
  * Flow:
  * 1. Upload Screen - 初始畫面
@@ -392,7 +395,9 @@ const App: React.FC = () => {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <ErrorBoundary>  {/* T093: Wrap App with Error Boundary */}
+      <App />
+    </ErrorBoundary>
   </React.StrictMode>,
 );
 

@@ -1,6 +1,8 @@
 /**
  * ChatInput Component
  * 聊天訊息輸入框
+ * 
+ * T092: Added loading states and spinners during API calls
  */
 
 import React, { useState, KeyboardEvent } from 'react';
@@ -9,12 +11,14 @@ import { useTranslation } from 'react-i18next';
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
   disabled?: boolean;
+  isLoading?: boolean;  // T092: Add loading state prop
   placeholder?: string;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
   onSendMessage,
   disabled = false,
+  isLoading = false,  // T092: Default to not loading
   placeholder
 }) => {
   const { t } = useTranslation();
@@ -22,14 +26,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   const handleSend = () => {
     const trimmed = input.trim();
-    if (trimmed && !disabled) {
+    if (trimmed && !disabled && !isLoading) {
       onSendMessage(trimmed);
       setInput('');
     }
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey && !isLoading) {
       e.preventDefault();
       handleSend();
     }
@@ -42,7 +46,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder || t('chat.input.placeholder')}
-        disabled={disabled}
+        disabled={disabled || isLoading}  // T092: Disable during loading
         className="chat-input-textarea"
         rows={3}
         maxLength={2000}
@@ -53,10 +57,17 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         </span>
         <button
           onClick={handleSend}
-          disabled={disabled || !input.trim()}
-          className="send-button"
+          disabled={disabled || !input.trim() || isLoading}  // T092: Disable during loading
+          className={`send-button ${isLoading ? 'loading' : ''}`}
         >
-          {t('chat.input.send')}
+          {isLoading ? (
+            <>
+              <span className="spinner"></span>
+              {t('chat.input.sending')}
+            </>
+          ) : (
+            t('chat.input.send')
+          )}
         </button>
       </div>
 
@@ -75,7 +86,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           font-size: 14px;
           font-family: inherit;
           resize: none;
-          transition: border-color 0.2s;
+          transition: border-color 0.2s, background-color 0.2s;
         }
 
         .chat-input-textarea:focus {
@@ -86,6 +97,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         .chat-input-textarea:disabled {
           background: #f7fafc;
           cursor: not-allowed;
+          opacity: 0.7;
         }
 
         .chat-input-footer {
@@ -109,6 +121,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           font-weight: 600;
           cursor: pointer;
           transition: background 0.2s;
+          display: flex;
+          align-items: center;
+          gap: 8px;
         }
 
         .send-button:hover:not(:disabled) {
@@ -118,6 +133,28 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         .send-button:disabled {
           background: #cbd5e0;
           cursor: not-allowed;
+        }
+
+        /* T092: Loading state styling */
+        .send-button.loading {
+          background: #4299e1;
+          opacity: 0.8;
+        }
+
+        /* T092: Spinner animation */
+        .spinner {
+          display: inline-block;
+          width: 14px;
+          height: 14px;
+          border: 2px solid #ffffff;
+          border-top: 2px solid transparent;
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
       `}</style>
     </div>
