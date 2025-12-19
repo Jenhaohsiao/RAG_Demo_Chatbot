@@ -5,6 +5,8 @@ Chat API Routes
 Constitutional Compliance:
 - Principle V (Strict RAG): 僅基於檢索內容回答，相似度 ≥0.7
 - Principle VIII (API Contract Stability): 遵循 contracts/chat.openapi.yaml
+
+T089: Enhanced error handling with appropriate HTTP status codes
 """
 
 import logging
@@ -18,6 +20,8 @@ from ...models.session import SessionState
 from ...models.errors import ErrorCode, get_error_response, get_http_status_code
 from ...core.session_manager import session_manager
 from ...services.rag_engine import get_rag_engine, RAGError
+from ...main import AppException
+from fastapi import status
 
 logger = logging.getLogger(__name__)
 
@@ -96,34 +100,41 @@ async def query(
     2. 執行 RAG 查詢 (embed → search → generate)
     3. 儲存聊天歷史
     4. 回傳回應
+    
+    T089: Enhanced error handling:
+    - 404 if session not found
+    - 400 if query empty
+    - 409 if session in invalid state
+    - 500 if RAG processing fails
     """
-    # 驗證 session
+    # 驗證 session 存在
     session = session_manager.get_session(session_id)
     if not session:
-        error = get_error_response(ErrorCode.SESSION_NOT_FOUND)
-        raise HTTPException(
-            status_code=get_http_status_code(ErrorCode.SESSION_NOT_FOUND),
-            detail=error.dict()
+        logger.warning(f"Session {session_id} not found")
+        raise AppException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            error_code=ErrorCode.SESSION_NOT_FOUND,
+            message=f"Session {session_id} not found or expired"
         )
     
     # 驗證 session 狀態 (允許 READY_FOR_CHAT 或 CHATTING)
     if session.state not in (SessionState.READY_FOR_CHAT, SessionState.CHATTING):
-        error = get_error_response(
-            ErrorCode.SESSION_INVALID_STATE,
-            details={"current_state": session.state.value, "required_state": "READY_FOR_CHAT or CHATTING"}
-        )
-        raise HTTPException(
-            status_code=get_http_status_code(ErrorCode.SESSION_INVALID_STATE),
-            detail=error.dict()
+        logger.warning(f"Session {session_id} in invalid state: {session.state}")
+        raise AppException(
+            status_code=status.HTTP_409_CONFLICT,
+            error_code=ErrorCode.SESSION_INVALID_STATE,
+            message=f"Session is in {session.state.value} state, expected READY_FOR_CHAT or CHATTING",
+            details={"current_state": session.state.value}
         )
     
     # 驗證查詢非空
     user_query = request.user_query.strip()
     if not user_query:
-        error = get_error_response(ErrorCode.QUERY_EMPTY)
-        raise HTTPException(
-            status_code=get_http_status_code(ErrorCode.QUERY_EMPTY),
-            detail=error.dict()
+        logger.warning(f"Empty query from session {session_id}")
+        raise AppException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            error_code=ErrorCode.QUERY_EMPTY,
+            message="Query cannot be empty"
         )
     
     try:

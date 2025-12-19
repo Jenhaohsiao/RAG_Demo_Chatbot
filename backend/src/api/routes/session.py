@@ -1,6 +1,8 @@
 """
 Session API Routes
 Handles session lifecycle endpoints
+
+T089: Enhanced error handling with appropriate HTTP status codes
 """
 from fastapi import APIRouter, HTTPException, status
 from uuid import UUID
@@ -13,6 +15,8 @@ from src.models.session import (
     SessionWithMetrics, LanguageUpdateRequest
 )
 from src.models.metrics import Metrics
+from src.models.errors import ErrorCode
+from src.main import AppException
 
 logger = logging.getLogger(__name__)
 
@@ -80,13 +84,18 @@ async def get_session(session_id: UUID):
         
     Returns:
         SessionResponse: Session details
+        
+    Raises:
+        404: Session not found or expired (T089)
     """
     session = session_manager.get_session(session_id)
     
     if not session:
-        raise HTTPException(
+        logger.warning(f"Session {session_id} not found or expired")
+        raise AppException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Session {session_id} not found or expired"
+            error_code=ErrorCode.SESSION_NOT_FOUND,
+            message=f"Session {session_id} not found or expired"
         )
     
     return session_manager.to_response(session)

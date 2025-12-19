@@ -1,6 +1,8 @@
 """
 FastAPI application initialization
 Entry point for the RAG Demo Chatbot backend
+
+T089: Global error handling with correct HTTP status codes
 """
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
@@ -9,9 +11,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 import google.generativeai as genai
 import logging
+from typing import Dict, Any
 
 from .core.config import settings
 from .core.scheduler import scheduler
+from .models.errors import ErrorCode
 
 # Configure logging
 logging.basicConfig(
@@ -19,6 +23,17 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+
+# Custom exception classes for Phase 9
+class AppException(Exception):
+    """Base exception for application"""
+    def __init__(self, status_code: int, error_code: ErrorCode, message: str, details: Dict[str, Any] = None):
+        self.status_code = status_code
+        self.error_code = error_code
+        self.message = message
+        self.details = details or {}
+        super().__init__(self.message)
 
 
 @asynccontextmanager
@@ -75,16 +90,44 @@ app.add_middleware(
 )
 
 
-# Global exception handlers
+# Global exception handlers (T089: Comprehensive error handling)
+@app.exception_handler(AppException)
+async def app_exception_handler(request: Request, exc: AppException):
+    """Handle application-specific exceptions with error codes"""
+    logger.warning(f"AppException on {request.url}: {exc.error_code} - {exc.message}")
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": {
+                "code": exc.error_code.value,
+                "message": exc.message,
+                "details": exc.details
+            },
+            "request_id": request.headers.get("x-request-id", "N/A")
+        }
+    )
+
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    """Handle Pydantic validation errors"""
+    """Handle Pydantic validation errors (422 Unprocessable Entity)"""
     logger.warning(f"Validation error on {request.url}: {exc.errors()}")
+    errors = []
+    for error in exc.errors():
+        errors.append({
+            "field": ".".join(str(loc) for loc in error["loc"][1:]),
+            "type": error["type"],
+            "message": error["msg"]
+        })
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content={
-            "detail": "Validation error",
-            "errors": exc.errors()
+            "error": {
+                "code": ErrorCode.QUERY_EMPTY.value,
+                "message": "Request validation failed",
+                "details": {"validation_errors": errors}
+            },
+            "request_id": request.headers.get("x-request-id", "N/A")
         }
     )
 
@@ -95,7 +138,14 @@ async def not_found_handler(request: Request, exc):
     logger.warning(f"404 Not Found: {request.url}")
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
-        content={"detail": "Resource not found"}
+        content={
+            "error": {
+                "code": ErrorCode.SESSION_NOT_FOUND.value,
+                "message": "Resource not found",
+                "path": str(request.url)
+            },
+            "request_id": request.headers.get("x-request-id", "N/A")
+        }
     )
 
 
@@ -105,17 +155,30 @@ async def internal_error_handler(request: Request, exc):
     logger.error(f"500 Internal Server Error on {request.url}: {exc}")
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={"detail": "Internal server error"}
+        content={
+            "error": {
+                "code": "ERR_INTERNAL_SERVER_ERROR",
+                "message": "An internal server error occurred",
+                "request_id": request.headers.get("x-request-id", "N/A")
+            }
+        }
     )
 
 
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception):
-    """Catch-all exception handler"""
-    logger.error(f"Unhandled exception on {request.url}: {exc}", exc_info=True)
+    """Catch-all exception handler for unhandled exceptions"""
+    logger.error(f"Unhandled exception on {request.url}: {type(exc).__name__}: {exc}", exc_info=True)
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={"detail": "An unexpected error occurred"}
+        content={
+            "error": {
+                "code": "ERR_INTERNAL_SERVER_ERROR",
+                "message": "An unexpected error occurred",
+                "exception_type": type(exc).__name__,
+                "request_id": request.headers.get("x-request-id", "N/A")
+            }
+        }
     )
 
 

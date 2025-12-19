@@ -6,11 +6,13 @@ Constitutional Compliance:
 - Principle VI (Moderation First): 所有內容必須通過審核
 - Principle II (Testability): 獨立路由模組，可測試
 - Principle VIII (API Contract Stability): 遵循 contracts/upload.openapi.yaml
+
+T089: Enhanced error handling with appropriate HTTP status codes
 """
 
 import logging
 from uuid import UUID
-from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks, Depends
+from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks, Depends, status
 from pydantic import BaseModel, HttpUrl, field_validator
 
 from ...models.document import (
@@ -29,6 +31,7 @@ from ...services.chunker import TextChunker
 from ...services.embedder import Embedder
 from ...services.vector_store import VectorStore
 from ...services.rag_engine import RAGEngine
+from ...main import AppException
 
 logger = logging.getLogger(__name__)
 
