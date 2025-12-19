@@ -200,5 +200,18 @@
     "vectors": "向量資料庫",
     "vectorCount": "儲存的向量",
     "tokenWarning": "⚠️ Token 使用量已超過 80%。建議開始新會話。"
+  },
+  "dialogs": {
+    "leave": {
+      "title": "離開會話",
+      "message": "您確定要離開嗎？所有會話資料將被永久刪除。"
+    },
+    "restart": {
+      "title": "重新啟動會話",
+      "message": "您確定要重新啟動嗎？當前會話將被關閉，並建立新會話。"
+    }
+  },
+  "common": {
+    "processing": "處理中..."
   }
 }

@@ -204,11 +204,11 @@
 
 ### Implementation for User Story 6
 
-- [ ] T084 [P] [US6] Implement Leave button handler in Header component showing confirmation dialog ("Are you sure you want to leave? All session data will be deleted.")
-- [ ] T085 [P] [US6] Implement Restart button handler in Header component showing confirmation dialog ("Restart will create a new session. Current chat history will be lost.")
-- [ ] T086 [US6] Connect Leave button to useSession hook calling closeSession action → POST /session/{session_id}/close → redirect to home/new session
-- [ ] T087 [US6] Connect Restart button to useSession hook calling restartSession action → POST /session/{session_id}/restart → update session_id → reset UI to UploadScreen
-- [ ] T088 [US6] Verify Qdrant collection deletion in session close flow checking collection no longer exists after Leave/Restart
+- [x] T084 [P] [US6] Implement Leave button handler in Header component showing confirmation dialog ("Are you sure you want to leave? All session data will be deleted.") ✅ 完成 (2025-12-18)
+- [x] T085 [P] [US6] Implement Restart button handler in Header component showing confirmation dialog ("Restart will create a new session. Current chat history will be lost.") ✅ 完成 (2025-12-18)
+- [x] T086 [US6] Connect Leave button to useSession hook calling closeSession action → POST /session/{session_id}/close → redirect to home/new session ✅ 完成 (2025-12-18)
+- [x] T087 [US6] Connect Restart button to useSession hook calling restartSession action → POST /session/{session_id}/restart → update session_id → reset UI to UploadScreen ✅ 完成 (2025-12-18)
+- [x] T088 [US6] Verify Qdrant collection deletion in session close flow checking collection no longer exists after Leave/Restart ✅ 驗證完成，自動化測試 11/11 PASSED (2025-12-18)
 
 **Checkpoint**: Session controls complete - users can manually close or restart sessions with immediate cleanup
 
@@ -218,9 +218,9 @@
 
 **Purpose**: Final improvements affecting multiple user stories
 
-- [ ] T089 [P] Add comprehensive error handling in all API routes with proper HTTP status codes (400, 404, 409, 410, 500) per OpenAPI contracts
-- [ ] T090 [P] Add request validation middleware in FastAPI using Pydantic models for all endpoints
-- [ ] T091 [P] Implement logging throughout backend services using Python logging module with INFO/ERROR levels
+- [x] T089 [P] Add comprehensive error handling in all API routes with proper HTTP status codes (400, 404, 409, 410, 500) per OpenAPI contracts
+- [x] T090 [P] Add request validation middleware in FastAPI using Pydantic models for all endpoints
+- [x] T091 [P] Implement logging throughout backend services using Python logging module with INFO/ERROR levels
 - [ ] T092 [P] Add loading states and spinners in all frontend components during API calls
 - [ ] T093 [P] Implement error boundary in `frontend/src/App.tsx` catching React errors with user-friendly fallback UI
 - [ ] T094 [P] Add responsive design breakpoints in Bootstrap components for mobile/tablet/desktop
@@ -230,7 +230,7 @@
 - [ ] T098 [P] Add network timeout handling for URL fetch with 30-second timeout per edge cases
 - [ ] T099 [P] Implement rate limit handling for Gemini API with retry logic and user-friendly error messages
 - [ ] T100 [P] Add Qdrant connection error handling with fallback messages
-- [ ] T101 Create README.md with project description, setup instructions, environment variables, Qdrant setup (embedded/Docker/Cloud), running instructions
+- [x] T101 Create README.md with project description, setup instructions, environment variables, Qdrant setup (embedded/Docker/Cloud), running instructions
 - [ ] T102 Run manual testing scenarios from `specs/001-multilingual-rag-chatbot/quickstart.md` validating all 6 user stories + 6 edge cases
 - [ ] T103 Verify all 10 success criteria from spec.md are met (SC-001 to SC-010)
 

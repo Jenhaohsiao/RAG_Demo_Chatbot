@@ -200,5 +200,18 @@
     "vectors": "Base de datos de vectores",
     "vectorCount": "Vectores almacenados",
     "tokenWarning": "⚠️ El uso de tokens está por encima del 80%. Se recomienda iniciar una nueva sesión."
+  },
+  "dialogs": {
+    "leave": {
+      "title": "Salir de la sesión",
+      "message": "¿Está seguro de que desea salir? Todos los datos de la sesión serán eliminados permanentemente."
+    },
+    "restart": {
+      "title": "Reiniciar sesión",
+      "message": "¿Está seguro de que desea reiniciar? La sesión actual se cerrará y se creará una nueva sesión."
+    }
+  },
+  "common": {
+    "processing": "Procesando..."
   }
 }

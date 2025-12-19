@@ -13,6 +13,7 @@ import UploadScreen from './components/UploadScreen';
 import ProcessingModal from './components/ProcessingModal';
 import ChatScreen from './components/ChatScreen';
 import SettingsModal from './components/SettingsModal';
+import ConfirmDialog from './components/ConfirmDialog';
 import { useSession } from './hooks/useSession';
 import { useUpload } from './hooks/useUpload';
 import { submitQuery } from './services/chatService';
@@ -61,6 +62,10 @@ const App: React.FC = () => {
   const [chatPhase, setChatPhase] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [similarityThreshold, setSimilarityThreshold] = useState(0.5);
+  
+  // T084-T085: Session control confirmation dialogs
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [showRestartConfirm, setShowRestartConfirm] = useState(false);
 
   // T074: Setup RTL support for Arabic language
   React.useEffect(() => {
@@ -155,19 +160,37 @@ const App: React.FC = () => {
     }
   };
 
-  const handleLeave = async () => {
-    if (window.confirm('Are you sure you want to leave? All data will be deleted.')) {
+  // T086: Leave button handler - shows confirmation dialog
+  const handleLeaveClick = () => {
+    setShowLeaveConfirm(true);
+  };
+
+  // T086: Confirm leave - close session and reset UI
+  const handleConfirmLeave = async () => {
+    try {
       await closeSession();
       resetUpload();
       setChatPhase(false);
+      setShowLeaveConfirm(false);
+    } catch (err) {
+      console.error('[handleConfirmLeave] Error:', err);
     }
   };
 
-  const handleRestart = async () => {
-    if (window.confirm('Are you sure you want to restart? Current session will be closed.')) {
+  // T087: Restart button handler - shows confirmation dialog
+  const handleRestartClick = () => {
+    setShowRestartConfirm(true);
+  };
+
+  // T087: Confirm restart - close session, create new one, reset UI
+  const handleConfirmRestart = async () => {
+    try {
       await restartSession();
       resetUpload();
       setChatPhase(false);
+      setShowRestartConfirm(false);
+    } catch (err) {
+      console.error('[handleConfirmRestart] Error:', err);
     }
   };
 
@@ -216,8 +239,8 @@ const App: React.FC = () => {
       <Header
         sessionId={sessionId}
         onLanguageChange={handleLanguageChange}
-        onLeave={handleLeave}
-        onRestart={handleRestart}
+        onLeave={handleLeaveClick}
+        onRestart={handleRestartClick}
       />
 
       <main className="flex-grow-1 container mt-4">
@@ -332,6 +355,30 @@ const App: React.FC = () => {
         currentThreshold={similarityThreshold}
         onClose={() => setShowSettings(false)}
         onSave={handleSettingsSave}
+      />
+
+      {/* T084: Leave Confirmation Dialog */}
+      <ConfirmDialog
+        title={t('dialogs.leave.title')}
+        message={t('dialogs.leave.message')}
+        confirmText={t('buttons.leave')}
+        cancelText={t('buttons.cancel')}
+        isDangerous={true}
+        isOpen={showLeaveConfirm}
+        onConfirm={handleConfirmLeave}
+        onCancel={() => setShowLeaveConfirm(false)}
+      />
+
+      {/* T085: Restart Confirmation Dialog */}
+      <ConfirmDialog
+        title={t('dialogs.restart.title')}
+        message={t('dialogs.restart.message')}
+        confirmText={t('buttons.restart')}
+        cancelText={t('buttons.cancel')}
+        isDangerous={false}
+        isOpen={showRestartConfirm}
+        onConfirm={handleConfirmRestart}
+        onCancel={() => setShowRestartConfirm(false)}
       />
 
       <footer className="bg-light text-center py-3 mt-auto border-top">

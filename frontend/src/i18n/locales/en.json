@@ -200,5 +200,18 @@
     "vectors": "Vector Database",
     "vectorCount": "Vectors Stored",
     "tokenWarning": "⚠️ Token usage is above 80%. Consider starting a new session."
+  },
+  "dialogs": {
+    "leave": {
+      "title": "Leave Session",
+      "message": "Are you sure you want to leave? All session data will be deleted permanently."
+    },
+    "restart": {
+      "title": "Restart Session",
+      "message": "Are you sure you want to restart? Your current session will be closed and a new session will be created."
+    }
+  },
+  "common": {
+    "processing": "Processing..."
   }
 }
