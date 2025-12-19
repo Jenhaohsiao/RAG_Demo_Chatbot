@@ -17,7 +17,7 @@ interface UseSessionReturn {
   language: string;
   isLoading: boolean;
   error: string | null;
-  createSession: (similarityThreshold?: number) => Promise<void>;
+  createSession: (similarityThreshold?: number, customPrompt?: string) => Promise<void>;
   closeSession: () => Promise<void>;
   restartSession: () => Promise<void>;
   updateLanguage: (newLanguage: string, passedSessionId?: string | null) => Promise<void>;

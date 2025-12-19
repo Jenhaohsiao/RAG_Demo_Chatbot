@@ -38,6 +38,9 @@ export interface UploadStatusResponse {
   error_code?: string;
   error_message?: string;
   moderation_categories: string[];
+  // T089+: Token tracking fields
+  tokens_used?: number;
+  pages_crawled?: number;
 }
 
 /**

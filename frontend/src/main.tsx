@@ -19,7 +19,6 @@ import ErrorBoundary from './components/ErrorBoundary';  // T093: Import Error B
 import { useSession } from './hooks/useSession';
 import { useUpload } from './hooks/useUpload';
 import { submitQuery } from './services/chatService';
-import sessionService from './services/sessionService';
 import type { SupportedLanguage } from './hooks/useLanguage';
 import type { ChatResponse } from './types/chat';
 
@@ -37,8 +36,6 @@ const App: React.FC = () => {
   const { t } = useTranslation();
   const {
     sessionId,
-    sessionState,
-    expiresAt,
     language,
     isLoading,
     error,
@@ -49,10 +46,8 @@ const App: React.FC = () => {
   } = useSession();
 
   const {
-    uploadState,
     uploadResponse,
     statusResponse,
-    error: uploadError,
     handleFileUpload,
     handleUrlUpload,
     reset: resetUpload,
@@ -314,6 +309,8 @@ const App: React.FC = () => {
                   sessionId,
                   documentSummary: statusResponse.summary,
                   chunkCount: statusResponse.chunk_count,
+                  tokensUsed: statusResponse.tokens_used,
+                  pagesCrawled: statusResponse.pages_crawled,
                   fullStatusResponse: statusResponse
                 })}
                 <ChatScreen
@@ -322,6 +319,8 @@ const App: React.FC = () => {
                   sourceReference={statusResponse.source_reference}
                   sourceType={uploadResponse.source_type}
                   chunkCount={statusResponse.chunk_count}
+                  tokensUsed={statusResponse.tokens_used}
+                  pagesCrawled={statusResponse.pages_crawled}
                   onSendQuery={async (query: string): Promise<ChatResponse> => {
                     // 標準化語言代碼：zh-TW -> zh, en-US -> en
                     const normalizedLang = language.split('-')[0];
@@ -357,10 +356,10 @@ const App: React.FC = () => {
 
       {/* Settings Modal */}
       <SettingsModal
-        isOpen={showSettings}
-        currentThreshold={similarityThreshold}
-        onClose={() => setShowSettings(false)}
-        onSave={handleSettingsSave}
+        show={showSettings}
+        defaultThreshold={similarityThreshold}
+        onCancel={() => setShowSettings(false)}
+        onConfirm={handleSettingsSave}
       />
 
       {/* T084: Leave Confirmation Dialog */}

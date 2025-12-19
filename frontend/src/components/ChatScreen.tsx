@@ -3,6 +3,7 @@
  * 聊天介面主畫面
  * 
  * T082: Integrate MetricsPanel into ChatScreen updating after each query-response cycle
+ * T089+: Display token tracking and page crawl statistics
  */
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -11,6 +12,7 @@ import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
 import { MetricsPanel } from './MetricsPanel';
 import { DocumentInfoCard } from './DocumentInfoCard';
+import UploadedDocumentInfo from './UploadedDocumentInfo';  // T089+
 import { ChatRole, ResponseType, type ChatMessage as ChatMessageType, type ChatResponse } from '../types/chat';
 import { getSessionMetrics, type SessionMetrics } from '../services/metricsService';
 
@@ -20,6 +22,8 @@ interface ChatScreenProps {
   sourceReference?: string;
   sourceType?: string;
   chunkCount?: number;
+  tokensUsed?: number;  // T089+
+  pagesCrawled?: number;  // T089+
   onSendQuery: (query: string) => Promise<ChatResponse>;
 }
 
@@ -29,6 +33,8 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   sourceReference,
   sourceType,
   chunkCount,
+  tokensUsed,  // T089+
+  pagesCrawled,  // T089+
   onSendQuery,
 }) => {
   const { t } = useTranslation();
@@ -168,6 +174,16 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
         documentSummary={documentSummary}
         sourceReference={sourceReference}
         chunkCount={chunkCount}
+      />
+
+      {/* T089+: Uploaded Document Info - 顯示上傳文檔的統計信息 */}
+      <UploadedDocumentInfo
+        sourceType={sourceType as any}
+        sourceReference={sourceReference}
+        tokensUsed={tokensUsed}
+        pagesCrawled={pagesCrawled}
+        chunkCount={chunkCount}
+        summary={documentSummary}
       />
 
       <div className="messages-container">
