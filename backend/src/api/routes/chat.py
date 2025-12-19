@@ -12,7 +12,7 @@ T089: Enhanced error handling with appropriate HTTP status codes
 import logging
 from uuid import UUID
 from typing import List
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
 from ...models.chat import ChatMessage, ChatRole
@@ -20,8 +20,6 @@ from ...models.session import SessionState
 from ...models.errors import ErrorCode, get_error_response, get_http_status_code
 from ...core.session_manager import session_manager
 from ...services.rag_engine import get_rag_engine, RAGError
-from ...main import AppException
-from fastapi import status
 
 logger = logging.getLogger(__name__)
 
@@ -107,6 +105,9 @@ async def query(
     - 409 if session in invalid state
     - 500 if RAG processing fails
     """
+    # 延遲導入以避免循環導入
+    from ...main import AppException
+    
     # 驗證 session 存在
     session = session_manager.get_session(session_id)
     if not session:

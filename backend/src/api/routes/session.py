@@ -16,7 +16,6 @@ from src.models.session import (
 )
 from src.models.metrics import Metrics
 from src.models.errors import ErrorCode
-from src.main import AppException
 
 logger = logging.getLogger(__name__)
 
@@ -88,6 +87,9 @@ async def get_session(session_id: UUID):
     Raises:
         404: Session not found or expired (T089)
     """
+    # 延遲導入以避免循環導入
+    from src.main import AppException
+    
     session = session_manager.get_session(session_id)
     
     if not session:

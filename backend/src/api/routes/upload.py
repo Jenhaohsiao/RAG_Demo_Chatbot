@@ -31,7 +31,6 @@ from ...services.chunker import TextChunker
 from ...services.embedder import Embedder
 from ...services.vector_store import VectorStore
 from ...services.rag_engine import RAGEngine
-from ...main import AppException
 
 logger = logging.getLogger(__name__)
 
