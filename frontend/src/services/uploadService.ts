@@ -66,16 +66,6 @@ export interface UrlUploadRequest {
 }
 
 /**
- * 爬蟲抓取的單個頁面
- */
-export interface CrawledPage {
-  url: string;
-  title: string;
-  tokens: number;
-  content: string;  // 頁面內容預覽（前 200 字）
-}
-
-/**
  * 網站爬蟲上傳請求
  */
 export interface WebsiteUploadRequest {

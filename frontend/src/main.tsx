@@ -326,7 +326,7 @@ const App: React.FC = () => {
                   pagesCrawled={statusResponse.pages_crawled}
                   crawledPages={statusResponse.crawled_pages}
                   baseUrl={statusResponse.source_reference}
-                  processingTimeMs={statusResponse.processing_time_ms}
+
                   crawlDurationSeconds={statusResponse.crawl_duration_seconds}
                   avgTokensPerPage={statusResponse.avg_tokens_per_page}
                   totalTokenLimit={32000}

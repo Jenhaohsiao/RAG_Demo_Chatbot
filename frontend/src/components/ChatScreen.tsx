@@ -12,8 +12,8 @@ import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
 import { MetricsPanel } from './MetricsPanel';
 import { DocumentInfoCard } from './DocumentInfoCard';
-import { ResourceConsumptionPanel } from './ResourceConsumptionPanel';
-import { CrawledUrlsPanel } from './CrawledUrlsPanel';
+import ResourceConsumptionPanel from './ResourceConsumptionPanel';
+import CrawledUrlsPanel from './CrawledUrlsPanel';
 import { ChatRole, ResponseType, type ChatMessage as ChatMessageType, type ChatResponse } from '../types/chat';
 import { getSessionMetrics, type SessionMetrics } from '../services/metricsService';
 import { type CrawledPage } from '../services/uploadService';
@@ -28,7 +28,6 @@ interface ChatScreenProps {
   pagesCrawled?: number;
   crawledPages?: CrawledPage[];
   baseUrl?: string;
-  processingTimeMs?: number;
   crawlDurationSeconds?: number;
   avgTokensPerPage?: number;
   totalTokenLimit?: number;
@@ -45,7 +44,6 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   pagesCrawled,
   crawledPages,
   baseUrl,
-  processingTimeMs,
   crawlDurationSeconds,
   avgTokensPerPage,
   totalTokenLimit,
@@ -170,14 +168,14 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
       {showMetrics && metrics && (
         <MetricsPanel
           metrics={{
-            token_input: metrics.input_tokens || 0,
-            token_output: metrics.output_tokens || 0,
+            token_input: metrics.total_input_tokens || 0,
+            token_output: metrics.total_output_tokens || 0,
             token_total: metrics.total_tokens || 0,
             token_limit: metrics.token_warning_threshold || 32000,
             token_percent: (metrics.total_tokens || 0) / (metrics.token_warning_threshold || 32000) * 100,
-            context_tokens: metrics.context_size || 0,
-            context_percent: (metrics.context_size || 0) / 8000 * 100, // assuming ~8k context window
-            vector_count: metrics.vector_count || 0,
+            context_tokens: metrics.avg_chunks_retrieved * 500 || 0, // Rough estimate: 500 tokens per chunk
+            context_percent: (metrics.avg_chunks_retrieved * 500 || 0) / 8000 * 100,
+            vector_count: metrics.avg_chunks_retrieved || 0,
           }}
         />
       )}
@@ -195,7 +193,6 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
         <ResourceConsumptionPanel
           tokensUsed={tokensUsed}
           chunkCount={chunkCount || 0}
-          processingTimeMs={processingTimeMs || 0}
           crawlDurationSeconds={crawlDurationSeconds}
           avgTokensPerPage={avgTokensPerPage}
           totalTokenLimit={totalTokenLimit || 32000}
