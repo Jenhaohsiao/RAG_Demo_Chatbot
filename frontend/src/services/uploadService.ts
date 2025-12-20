@@ -24,6 +24,16 @@ export interface UploadResponse {
 }
 
 /**
+ * 爬蟲抓取的單個頁面
+ */
+export interface CrawledPage {
+  url: string;
+  title: string;
+  tokens: number;
+  content?: string;
+}
+
+/**
  * 上傳狀態查詢回應
  */
 export interface UploadStatusResponse {
@@ -41,6 +51,11 @@ export interface UploadStatusResponse {
   // T089+: Token tracking fields
   tokens_used?: number;
   pages_crawled?: number;
+  // Crawler specific fields
+  crawled_pages?: CrawledPage[];
+  crawl_status?: string;
+  avg_tokens_per_page?: number;
+  crawl_duration_seconds?: number;
 }
 
 /**

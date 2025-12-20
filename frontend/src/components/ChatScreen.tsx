@@ -12,9 +12,11 @@ import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
 import { MetricsPanel } from './MetricsPanel';
 import { DocumentInfoCard } from './DocumentInfoCard';
-import UploadedDocumentInfo from './UploadedDocumentInfo';  // T089+
+import { ResourceConsumptionPanel } from './ResourceConsumptionPanel';
+import { CrawledUrlsPanel } from './CrawledUrlsPanel';
 import { ChatRole, ResponseType, type ChatMessage as ChatMessageType, type ChatResponse } from '../types/chat';
 import { getSessionMetrics, type SessionMetrics } from '../services/metricsService';
+import { type CrawledPage } from '../services/uploadService';
 
 interface ChatScreenProps {
   sessionId: string;
@@ -22,8 +24,14 @@ interface ChatScreenProps {
   sourceReference?: string;
   sourceType?: string;
   chunkCount?: number;
-  tokensUsed?: number;  // T089+
-  pagesCrawled?: number;  // T089+
+  tokensUsed?: number;
+  pagesCrawled?: number;
+  crawledPages?: CrawledPage[];
+  baseUrl?: string;
+  processingTimeMs?: number;
+  crawlDurationSeconds?: number;
+  avgTokensPerPage?: number;
+  totalTokenLimit?: number;
   onSendQuery: (query: string) => Promise<ChatResponse>;
 }
 
@@ -33,8 +41,14 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   sourceReference,
   sourceType,
   chunkCount,
-  tokensUsed,  // T089+
-  pagesCrawled,  // T089+
+  tokensUsed,
+  pagesCrawled,
+  crawledPages,
+  baseUrl,
+  processingTimeMs,
+  crawlDurationSeconds,
+  avgTokensPerPage,
+  totalTokenLimit,
   onSendQuery,
 }) => {
   const { t } = useTranslation();
@@ -176,15 +190,27 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
         chunkCount={chunkCount}
       />
 
-      {/* T089+: Uploaded Document Info - 顯示上傳文檔的統計信息 */}
-      <UploadedDocumentInfo
-        sourceType={sourceType as any}
-        sourceReference={sourceReference}
-        tokensUsed={tokensUsed}
-        pagesCrawled={pagesCrawled}
-        chunkCount={chunkCount}
-        summary={documentSummary}
-      />
+      {/* Resource Consumption Panel - 顯示資源消耗 (Token, 時間等) */}
+      {tokensUsed !== undefined && tokensUsed > 0 && (
+        <ResourceConsumptionPanel
+          tokensUsed={tokensUsed}
+          chunkCount={chunkCount || 0}
+          processingTimeMs={processingTimeMs || 0}
+          crawlDurationSeconds={crawlDurationSeconds}
+          avgTokensPerPage={avgTokensPerPage}
+          totalTokenLimit={totalTokenLimit || 32000}
+        />
+      )}
+
+      {/* Crawled URLs Panel - 顯示爬蟲結果的 URL 列表 */}
+      {crawledPages && crawledPages.length > 0 && (
+        <CrawledUrlsPanel
+          pages={crawledPages}
+          baseUrl={baseUrl || sourceReference || ''}
+          totalPages={crawledPages.length}
+          totalTokens={tokensUsed || 0}
+        />
+      )}
 
       <div className="messages-container">
         {messages.length === 0 ? (

@@ -311,6 +311,9 @@ const App: React.FC = () => {
                   chunkCount: statusResponse.chunk_count,
                   tokensUsed: statusResponse.tokens_used,
                   pagesCrawled: statusResponse.pages_crawled,
+                  crawledPages: statusResponse.crawled_pages,
+                  crawlDurationSeconds: statusResponse.crawl_duration_seconds,
+                  avgTokensPerPage: statusResponse.avg_tokens_per_page,
                   fullStatusResponse: statusResponse
                 })}
                 <ChatScreen
@@ -321,6 +324,12 @@ const App: React.FC = () => {
                   chunkCount={statusResponse.chunk_count}
                   tokensUsed={statusResponse.tokens_used}
                   pagesCrawled={statusResponse.pages_crawled}
+                  crawledPages={statusResponse.crawled_pages}
+                  baseUrl={statusResponse.source_reference}
+                  processingTimeMs={statusResponse.processing_time_ms}
+                  crawlDurationSeconds={statusResponse.crawl_duration_seconds}
+                  avgTokensPerPage={statusResponse.avg_tokens_per_page}
+                  totalTokenLimit={32000}
                   onSendQuery={async (query: string): Promise<ChatResponse> => {
                     // 標準化語言代碼：zh-TW -> zh, en-US -> en
                     const normalizedLang = language.split('-')[0];
