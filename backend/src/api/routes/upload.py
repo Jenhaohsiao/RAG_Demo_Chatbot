@@ -132,14 +132,16 @@ class UploadStatusResponse(BaseModel):
     # T089+ 新增 token 追蹤和頁面計數
     tokens_used: int = 0  # 本文件/爬蟲使用的 tokens
     pages_crawled: int = 0  # 爬蟲頁面數
+    # 爬蟲詳細信息
+    crawled_pages: list[CrawledPage] | None = None  # 爬蟲詳細頁面信息
+    crawl_status: str | None = None  # pending, crawling, completed, token_limit_reached, page_limit_reached
+    avg_tokens_per_page: int = 0  # 平均每頁 tokens
+    crawl_duration_seconds: float | None = None  # 爬蟲耗時
 
 
 class WebsiteUploadStatusResponse(UploadStatusResponse):
     """網站爬蟲上傳狀態回應"""
-    crawl_status: str = "pending"  # pending, crawling, completed, token_limit_reached, page_limit_reached
-    total_tokens: int = 0  # 爬蟲總 tokens
-    avg_tokens_per_page: int = 0  # 平均每頁 tokens
-    crawl_duration_seconds: float = 0.0  # 爬蟲耗時
+    pass  # 所有字段已在 UploadStatusResponse 中定義
 
 
 # 文件儲存（實際實作中應使用資料庫）
@@ -602,6 +604,19 @@ async def upload_website(
         crawl_document.pages_crawled = len(crawled_pages)
         crawl_document.tokens_used = crawl_result.get('total_tokens', 0)
         
+        # 轉換爬蟲頁面為儲存格式
+        crawled_pages_dict = [
+            {
+                'url': page.get('url', ''),
+                'title': page.get('title', 'Untitled'),
+                'tokens': page.get('tokens', 0),
+                'content': page.get('content', '')[:200]  # 預覽前 200 字
+            }
+            for page in crawled_pages
+        ]
+        crawl_document.crawled_pages = crawled_pages_dict
+        crawl_document.crawl_duration_seconds = crawl_result.get('duration_seconds', 0.0)
+        
         # 標記為已提取（跳過 extraction 步驟，因為爬蟲已經提取了）
         crawl_document.extraction_status = ExtractionStatus.EXTRACTED
         
@@ -618,7 +633,7 @@ async def upload_website(
             f"(session: {session_id}, pages: {len(crawled_pages)})"
         )
         
-        # 轉換爬蟲頁面為回應格式
+        # 使用已儲存的爬蟲頁面為回應格式
         response_pages = [
             CrawledPage(
                 url=page.get('url', ''),
@@ -626,7 +641,7 @@ async def upload_website(
                 tokens=page.get('tokens', 0),
                 content=page.get('content', '')[:200]  # 預覽前 200 字
             )
-            for page in crawled_pages
+            for page in crawled_pages_dict
         ]
         
         return WebsiteUploadResponse(
@@ -727,7 +742,12 @@ async def get_upload_status(
         moderation_categories=document.moderation_categories,
         # T089+ 返回 token 信息
         tokens_used=document.tokens_used,
-        pages_crawled=document.pages_crawled
+        pages_crawled=document.pages_crawled,
+        # 爬蟲詳細信息
+        crawled_pages=[CrawledPage(**page) for page in (document.crawled_pages or [])] if document.crawled_pages else None,
+        crawl_status="completed" if document.pages_crawled > 0 else None,
+        avg_tokens_per_page=int(document.tokens_used / document.pages_crawled) if document.pages_crawled > 0 else 0,
+        crawl_duration_seconds=document.crawl_duration_seconds
     )
 
 

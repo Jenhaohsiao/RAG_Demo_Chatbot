@@ -51,6 +51,8 @@ class Document(BaseModel):
     # T089+ 新增 token 追蹤
     tokens_used: int = Field(default=0, ge=0)  # 本文件使用的 tokens
     pages_crawled: int = Field(default=0, ge=0)  # 爬蟲頁面數（僅用於網站爬蟲）
+    crawl_duration_seconds: float | None = None  # 爬蟲耗時（秒）
+    crawled_pages: list[dict] | None = None  # 爬蟲詳細頁面信息 [{"url": str, "title": str, "tokens": int, "content": str}]
     
     @field_validator('source_reference')
     @classmethod
