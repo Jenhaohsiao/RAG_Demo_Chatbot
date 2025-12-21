@@ -2,8 +2,8 @@
 
 **專案名稱**: Multilingual RAG-Powered Chatbot  
 **分支**: `001-multilingual-rag-chatbot`  
-**最後更新**: 2025-12-19 22:30 UTC+8 (Phase 9.6 資源消耗面板完成)  
-**總任務數**: 118 + 新增 Phase 9.6
+**最後更新**: 2025-12-21 16:15 UTC-5 (AI Prompt 視覺化功能完成)  
+**總任務數**: 118 + Phase 9.5 (Website Crawler) + Phase 9.6 (Resource Consumption UI) + Phase 9.7 (Prompt Visualization)
 
 ---
 
@@ -22,9 +22,10 @@
 | Phase 9 | Polish & Testing | ✅ Complete | 13/13 |  ✅ Verified | ⏳ Pending | N/A |
 | Phase 9.5 | 🆕 Website Crawler | ✅ Complete | 5/5 | ✅ Unit Tests | ⏳ Pending | ⏳ Pending |
 | Phase 9.6 | 🆕 Resource Consumption UI | ✅ Complete | 4/4 | ✅ Type Checking | ⏳ Pending | ⏳ 準備中 |
+| Phase 9.7 | 🆕 AI Prompt Visualization | ✅ Complete | 6/6 | ✅ API Testing | ⏳ Pending | ✅ Completed |
 | Phase 10 | Deployment & Production | 📋 Planning | 0/15 | ⏳ Pending | ⏳ Pending | N/A |
 
-**總進度**: 103/103 MVP tasks + 5/5 Website Crawler + 4/4 Resource Consumption ✅  
+**總進度**: 103/103 MVP tasks + 5/5 Website Crawler + 4/4 Resource Consumption + 6/6 AI Prompt Visualization ✅  
 **Phase 10**: 15 tasks - 上線部署與生產準備 (規劃中)
 
 ## 🎯 系統狀態
@@ -39,6 +40,36 @@
 - ✅ **多語言**: 8 種語言支援 (包含爬蟲面板)
 - ✅ **Metrics**: 實時性能監控
 - ✅ **🆕 資源消耗面板**: Token 消耗、爬蟲統計、時間追蹤
+- ✅ **🆕 AI Prompt 視覺化**: 系統透明度、實時 Prompt 顯示、憲法原則展示
+
+### 🆕 AI Prompt 視覺化功能 (Phase 9.7) ✨ NEW
+- ✅ **後端 Prompt API** (256 行代碼)
+  - `/api/v1/prompt/system-prompts`: 系統 Prompt 模板
+  - `/api/v1/prompt/current-session-prompt`: 當前會話 Prompt
+  - RAG 模板、摘要模板、憲法原則
+  - Prompt 變數說明與配置信息
+
+- ✅ **PromptVisualization 組件** (532 行代碼)
+  - 三標籤界面: 當前 Prompt、系統模板、憲法原則
+  - 語法高亮與格式化
+  - 實時 API 數據拉取
+  - 錯誤處理與重試機制
+  - 詳細調試日誌
+  
+- ✅ **首頁集成**
+  - 從 ChatScreen 移動至主頁面 (main.tsx)
+  - 文件上傳前即可查看 AI 行為準則
+  - 完整的 AI 透明度展示
+  
+- ✅ **API 測試與驗證**
+  - Docker 容器重建以包含新路由
+  - API 端點正常響應 (200 OK)
+  - 前端 API 調用測試通過
+  
+- ✅ **用戶界面完成**
+  - 首頁顯示 "🤖 AI Prompt 視覺化" 區塊
+  - Session 信息、語言設置、文檔狀態展示
+  - 實際 Prompt 內容完整呈現
 
 ### 資源消耗面板功能 (Phase 9.6) ✨ NEW
 - ✅ **ResourceConsumptionPanel** (412 行代碼)
@@ -94,7 +125,29 @@
 - 📋 **手動測試**: Docker 環境正常運作，系統穩定
 - ✅ **爬蟲測試**: 可自動化測試 (HTTP、token limits、domain boundary)
 
-### 🆕 最新進展 (2025-12-19 22:30 UTC+8)
+### 🆕 最新進展 (2025-12-21 16:15 UTC-5)
+- ✅ **AI Prompt 視覺化完成**: 用戶要求將 Prompt 視覺化移至首頁
+  - ✅ 後端: 實現完整的 Prompt API (`/api/v1/prompt/*`)
+  - ✅ 前端: 創建 PromptVisualization 組件 (532 行)
+  - ✅ 集成: 從 ChatScreen 移動至 main.tsx 首頁
+  - ✅ 測試: API 響應正常，前端正確顯示
+  
+- ✅ **系統透明度增強**:
+  - 當前 Prompt: 顯示實際使用的 Prompt 模板
+  - 系統模板: 展示 RAG、摘要、憲法原則模板
+  - 配置信息: Token 閾值、相似度、支援語言等
+  
+- ✅ **Docker 環境更新**:
+  - 重新構建容器以包含新的 Prompt 路由
+  - 驗證 API 端點正常運行
+  - 前端服務正常運行在 http://localhost:5174
+  
+- ✅ **用戶測試完成**:
+  - 首頁成功顯示 "🤖 AI Prompt 視覺化" 區塊
+  - 三標籤界面正常工作
+  - Session 和語言信息正確顯示
+
+### 🆕 舊版進展 (2025-12-19 22:30 UTC+8)
 - ✅ **用戶反饋解決**: 識別出前面實現的錯誤理解
   - ❌ 原: 顯示文檔信息重複
   - ✅ 新: 顯示實際資源消耗 + 爬蟲 URL 清單
@@ -1573,6 +1626,63 @@ py -3.12 -m pytest tests/test_phase8.py -v --no-cov
 - [ ] T092-T094: 前端加載狀態、Error Boundary、響應式設計 (3 任務)
 - [ ] T095-T100: 邊界情況處理和驗證 (6 任務)
 - [ ] T102-T103: 手動測試和 Success Criteria 驗證 (2 任務)
+
+---
+
+## ✅ Phase 9.7: AI Prompt Visualization - 完成 (6/6)
+
+### 用戶需求實現
+- [x] T9.7.1: 用戶要求 "我要把 prompt 視覺化, 請把 Prompt 顯示在首頁"
+- [x] T9.7.2: 實現後端 Prompt API 端點
+- [x] T9.7.3: 創建 PromptVisualization React 組件
+- [x] T9.7.4: 從 ChatScreen 移動至首頁（main.tsx）
+- [x] T9.7.5: Docker 重建與 API 測試驗證
+- [x] T9.7.6: 用戶驗收測試通過
+
+### 後端實作 (T9.7.2)
+- ✅ **`backend/src/api/routes/prompt.py`** - 完整 Prompt API
+  - `GET /api/v1/prompt/system-prompts`: 系統 Prompt 模板
+  - `GET /api/v1/prompt/current-session-prompt/{session_id}`: 當前會話 Prompt
+  - RAG prompt 模板、摘要模板、憲法原則
+  - 系統配置信息（閾值、語言、檔案類型等）
+  - Prompt 變數說明字典
+
+- ✅ **API 路由註冊**: `backend/src/api/__init__.py` 更新
+  - 包含 prompt 路由於主 API router
+  - 正確的 `/api/v1/prompt` 前綴配置
+
+### 前端實作 (T9.7.3)
+- ✅ **`PromptVisualization.tsx`** (532 行代碼)
+  - 三標籤界面: 當前 Prompt、系統模板、憲法原則
+  - 實時 API 數據拉取（useEffect）
+  - 語法高亮與格式化 (`formatPromptText`)
+  - 加載狀態、錯誤處理、重試機制
+  - 詳細控制台調試日誌
+  - 完整 CSS-in-JS 樣式（深色代碼主題）
+
+### 首頁集成 (T9.7.4)
+- ✅ **從 ChatScreen 移除**: 
+  - 移除 `PromptVisualization` 組件 import 和渲染
+  - 清理相關 props 傳遞
+  
+- ✅ **添加到 main.tsx**:
+  - 首頁歡迎區塊下方放置
+  - 文件上傳之前就可查看 AI 行為
+  - 傳遞 `sessionId`, `currentLanguage`, `hasDocuments` props
+
+### Docker 與測試 (T9.7.5)
+- ✅ **容器重建**: `docker-compose build --no-cache`
+- ✅ **API 驗證**: `/api/v1/prompt/system-prompts` 返回 200 OK
+- ✅ **前端服務**: http://localhost:5174 正常運行
+- ✅ **CORS 配置**: 支援 port 5174
+
+### 用戶驗收 (T9.7.6)
+- ✅ **首頁顯示**: "🤖 AI Prompt 視覺化" 區塊正確出現
+- ✅ **標籤功能**: 當前 Prompt、系統模板、憲法原則三標籤正常切換
+- ✅ **數據展示**: Session ID、語言、文檔狀態、實際 Prompt 內容
+- ✅ **用戶確認**: "成功" - 功能符合期望
+
+**驗證**: ✅ AI Prompt 視覺化功能完整實現並通過用戶測試
 
 ---
 

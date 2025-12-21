@@ -33,14 +33,28 @@ const ResourceConsumptionPanel: React.FC<ResourceConsumptionPanelProps> = ({
 }) => {
   const { t } = useTranslation();
 
+  // 調試信息 - 臨時添加
+  console.log('[ResourceConsumptionPanel] Props:', {
+    sourceType,
+    tokensUsed,
+    chunkCount,
+    processingTimeMs,
+    crawlDurationSeconds,
+    avgTokensPerPage,
+    totalTokenLimit
+  });
+
   // 計算資源百分比
   const tokenPercent = Math.min(100, (tokensUsed / totalTokenLimit) * 100);
-  const processingTimeSeconds = Math.round(processingTimeMs / 1000 * 100) / 100;
 
-  // 判斷操作類型
-  const isWebCrawl = sourceType === 'URL' && crawlDurationSeconds > 0;
+  // 判斷操作類型 - 需要先定義，因為後面會用到
+  const isWebCrawl = sourceType === 'URL' && (crawlDurationSeconds > 0 || avgTokensPerPage > 0);
   const isFilePdf = sourceType === 'PDF';
   const isFileText = sourceType === 'TEXT';
+
+  // 使用爬蟲時間或處理時間
+  const displayTimeSeconds = isWebCrawl ? crawlDurationSeconds : (processingTimeMs ? processingTimeMs / 1000 : 0);
+  const processingTimeSeconds = Math.round(displayTimeSeconds * 100) / 100;
 
   // 獲取操作類型標籤
   const getOperationLabel = () => {
@@ -64,9 +78,6 @@ const ResourceConsumptionPanel: React.FC<ResourceConsumptionPanelProps> = ({
       {/* 標題 */}
       <div className="panel-header">
         <h3 className="panel-title">{getOperationLabel()}</h3>
-        <span className="operation-time">
-          ⏱️ {isWebCrawl ? `${crawlDurationSeconds}s` : `${processingTimeSeconds}s`}
-        </span>
       </div>
 
       {/* 資源消耗卡片 */}
@@ -117,18 +128,14 @@ const ResourceConsumptionPanel: React.FC<ResourceConsumptionPanelProps> = ({
           </div>
         )}
 
-        {/* 額外信息：標準文件 */}
-        {!isWebCrawl && (
-          <div className="consumption-card efficiency-card">
-            <div className="card-icon">⚙️</div>
+        {/* 處理時間卡片 - 所有模式都顯示 */}
+        {processingTimeSeconds > 0 && (
+          <div className="consumption-card time-card">
+            <div className="card-icon">⏱️</div>
             <div className="card-content">
-              <div className="card-label">效率</div>
-              <div className="card-value">
-                {processingTimeSeconds > 0
-                  ? `${(tokensUsed / processingTimeSeconds).toFixed(0)}`
-                  : '-'}
-              </div>
-              <div className="card-sublabel">tokens/秒</div>
+              <div className="card-label">{isWebCrawl ? '爬蟲時間' : '處理時間'}</div>
+              <div className="card-value">{processingTimeSeconds.toFixed(1)}</div>
+              <div className="card-sublabel">秒</div>
             </div>
           </div>
         )}
@@ -182,12 +189,15 @@ const ResourceConsumptionPanel: React.FC<ResourceConsumptionPanelProps> = ({
         }
 
         .consumption-cards {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          display: flex;
           gap: 12px;
+          margin-bottom: 16px;
+          flex-wrap: wrap;
         }
 
         .consumption-card {
+          flex: 1;
+          min-width: 160px;
           background: white;
           border-radius: 8px;
           padding: 12px;
@@ -300,11 +310,11 @@ const ResourceConsumptionPanel: React.FC<ResourceConsumptionPanelProps> = ({
           }
 
           .consumption-cards {
-            grid-template-columns: 1fr;
+            flex-direction: column;
           }
 
-          .token-card {
-            grid-column: 1;
+          .consumption-card {
+            min-width: unset;
           }
 
           .card-value {

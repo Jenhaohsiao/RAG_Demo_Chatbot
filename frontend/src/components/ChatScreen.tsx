@@ -180,6 +180,8 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
         />
       )}
 
+
+
       {/* Document Info Card - 顯示文檔摘要和 Vector DB 信息 */}
       <DocumentInfoCard
         sessionId={sessionId}
@@ -189,22 +191,26 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
       />
 
       {/* Resource Consumption Panel - 顯示資源消耗 (Token, 時間等) */}
-      {tokensUsed !== undefined && tokensUsed > 0 && (
+      {/* 修復：只要有文檔信息就顯示，不要求 tokensUsed > 0 */}
+      {(documentSummary || chunkCount || sourceReference) && (
         <ResourceConsumptionPanel
-          tokensUsed={tokensUsed}
+          sourceType={sourceType}
+          tokensUsed={tokensUsed || 0}
           chunkCount={chunkCount || 0}
-          crawlDurationSeconds={crawlDurationSeconds}
-          avgTokensPerPage={avgTokensPerPage}
+          processingTimeMs={0} // TODO: 後端需要提供實際處理時間
+          crawlDurationSeconds={crawlDurationSeconds || 0}
+          avgTokensPerPage={avgTokensPerPage || 0}
           totalTokenLimit={totalTokenLimit || 32000}
         />
       )}
 
       {/* Crawled URLs Panel - 顯示爬蟲結果的 URL 列表 */}
-      {crawledPages && crawledPages.length > 0 && (
+      {/* 修復：檢查是否為網站爬蟲並有頁面數據 */}
+      {((crawledPages && crawledPages.length > 0) || (sourceType === 'URL' && pagesCrawled && pagesCrawled > 0)) && (
         <CrawledUrlsPanel
-          pages={crawledPages}
+          pages={crawledPages || []}
           baseUrl={baseUrl || sourceReference || ''}
-          totalPages={crawledPages.length}
+          totalPages={pagesCrawled || crawledPages?.length || 0}
           totalTokens={tokensUsed || 0}
         />
       )}

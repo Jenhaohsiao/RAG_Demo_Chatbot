@@ -10,10 +10,7 @@ import os
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 from qdrant_client.http import models
-from qdrant_client.http.exceptions import (
-    RespExc,
-    UnexpectedResponse,
-)
+from qdrant_client.http.exceptions import UnexpectedResponse
 
 from src.core.config import settings
 
@@ -74,7 +71,7 @@ class VectorStore:
                     self.client.get_collections()  # Simple health check
                     logger.info(f"Qdrant client initialized in docker mode ({settings.qdrant_host}:{settings.qdrant_port})")
                     
-                except (ConnectionError, TimeoutError, RespExc) as e:
+                except (ConnectionError, TimeoutError, UnexpectedResponse) as e:
                     logger.error(
                         f"Failed to connect to Qdrant service at {settings.qdrant_host}:{settings.qdrant_port}: {e}. "
                         "Ensure Qdrant container is running: docker-compose up -d qdrant"
@@ -99,7 +96,7 @@ class VectorStore:
                     self.client.get_collections()  # Simple health check
                     logger.info(f"Qdrant client initialized in cloud mode ({settings.qdrant_url})")
                     
-                except (ConnectionError, TimeoutError, RespExc, UnexpectedResponse) as e:
+                except (ConnectionError, TimeoutError, UnexpectedResponse) as e:
                     logger.error(
                         f"Failed to connect to Qdrant Cloud at {settings.qdrant_url}: {e}. "
                         "Check QDRANT_URL and QDRANT_API_KEY settings."
@@ -151,7 +148,7 @@ class VectorStore:
             logger.info(f"Collection '{collection_name}' created successfully")
             return True
             
-        except (ConnectionError, TimeoutError, RespExc) as e:
+        except (ConnectionError, TimeoutError, UnexpectedResponse) as e:
             logger.error(
                 f"Qdrant connection error while creating collection '{collection_name}': {e}. "
                 "Check if Qdrant service is running."
@@ -182,7 +179,7 @@ class VectorStore:
             logger.info(f"Collection '{collection_name}' deleted successfully")
             return True
             
-        except (ConnectionError, TimeoutError, RespExc) as e:
+        except (ConnectionError, TimeoutError, UnexpectedResponse) as e:
             logger.error(
                 f"Qdrant connection error while deleting collection '{collection_name}': {e}. "
                 "Collection may not be properly cleaned up."
@@ -216,7 +213,7 @@ class VectorStore:
                 "status": info.status
             }
             
-        except (ConnectionError, TimeoutError, RespExc) as e:
+        except (ConnectionError, TimeoutError, UnexpectedResponse) as e:
             logger.error(
                 f"Qdrant connection error while getting info for '{collection_name}': {e}. "
                 "Check if Qdrant service is running."
@@ -266,7 +263,7 @@ class VectorStore:
             logger.info(f"Upserted {len(chunks)} chunks to '{collection_name}'")
             return True
             
-        except (ConnectionError, TimeoutError, RespExc) as e:
+        except (ConnectionError, TimeoutError, UnexpectedResponse) as e:
             logger.error(
                 f"Qdrant connection error while upserting chunks to '{collection_name}': {e}. "
                 "Check if Qdrant service is running."
@@ -328,7 +325,7 @@ class VectorStore:
             logger.info(f"Found {len(formatted_results)} similar chunks in '{collection_name}'")
             return formatted_results
             
-        except (ConnectionError, TimeoutError, RespExc) as e:
+        except (ConnectionError, TimeoutError, UnexpectedResponse) as e:
             logger.error(
                 f"Qdrant connection error while searching in '{collection_name}': {e}. "
                 "Check if Qdrant service is running."

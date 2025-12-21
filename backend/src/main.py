@@ -74,8 +74,18 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
     docs_url="/api/docs",
-    redoc_url="/api/redoc",
-    openapi_url="/api/openapi.json"
+    redoc_url="/api/redoc", 
+    openapi_url="/api/openapi.json",
+    # 添加 Swagger UI 自定義設定
+    swagger_ui_parameters={
+        "deepLinking": True,
+        "displayRequestDuration": True,
+        "docExpansion": "list",
+        "filter": True,
+        "showExtensions": True,
+        "showCommonExtensions": True,
+        "tryItOutEnabled": True
+    }
 )
 
 # T090: Add middleware for validation, logging, and security
@@ -219,3 +229,50 @@ async def health_check():
         "qdrant_mode": settings.qdrant_mode,
         "session_ttl_minutes": settings.session_ttl_minutes
     }
+
+
+# 測試用的簡單文檔頁面
+@app.get("/test-docs", include_in_schema=False)
+async def test_docs():
+    """簡單的測試頁面來驗證靜態內容載入"""
+    from fastapi.responses import HTMLResponse
+    
+    html_content = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>測試頁面</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 40px; }
+            .container { max-width: 800px; margin: 0 auto; }
+            .success { color: green; font-weight: bold; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>FastAPI 測試頁面</h1>
+            <p class="success">✓ FastAPI 正在正常運行</p>
+            <p>如果您看到這個頁面，說明：</p>
+            <ul>
+                <li>FastAPI 應用程序運行正常</li>
+                <li>靜態 HTML 內容可以載入</li>
+                <li>CSS 樣式可以應用</li>
+            </ul>
+            <p>API 文檔應該在 <a href="/api/docs" target="_blank">/api/docs</a></p>
+            <p>OpenAPI 規格在 <a href="/api/openapi.json" target="_blank">/api/openapi.json</a></p>
+            
+            <script>
+                console.log('JavaScript 正常運行');
+                document.addEventListener('DOMContentLoaded', function() {
+                    const now = new Date();
+                    const timeDiv = document.createElement('div');
+                    timeDiv.innerHTML = '<strong>頁面載入時間: ' + now.toLocaleString() + '</strong>';
+                    document.body.appendChild(timeDiv);
+                });
+            </script>
+        </div>
+    </body>
+    </html>
+    """
+    
+    return HTMLResponse(content=html_content)

@@ -11,6 +11,7 @@ import { useState, useCallback } from 'react';
 import {
   uploadFile,
   uploadUrl,
+  uploadWebsite,
   pollUploadStatus,
   UploadResponse,
   UploadStatusResponse,
@@ -125,8 +126,8 @@ export const useUpload = (
         setUploadState(UploadState.UPLOADING);
         setError(null);
 
-        // 上傳 URL
-        const response = await uploadUrl(sessionId, url);
+        // 上傳 URL - 使用網站爬蟲功能
+        const response = await uploadWebsite(sessionId, url);
         setUploadResponse(response);
 
         // 開始輪詢狀態

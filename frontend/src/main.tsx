@@ -16,6 +16,7 @@ import ChatScreen from './components/ChatScreen';
 import SettingsModal from './components/SettingsModal';
 import ConfirmDialog from './components/ConfirmDialog';
 import ErrorBoundary from './components/ErrorBoundary';  // T093: Import Error Boundary
+import PromptVisualization from './components/PromptVisualization';
 import { useSession } from './hooks/useSession';
 import { useUpload } from './hooks/useUpload';
 import { submitQuery } from './services/chatService';
@@ -288,6 +289,13 @@ const App: React.FC = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Prompt Visualization - AI Prompt 視覺化 */}
+                <PromptVisualization
+                  sessionId={sessionId}
+                  currentLanguage="zh"
+                  hasDocuments={!!uploadResponse}
+                />
 
                 {/* Upload Screen */}
                 <UploadScreen

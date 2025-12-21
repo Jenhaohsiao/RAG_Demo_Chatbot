@@ -94,9 +94,19 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         
         # Add security headers
         response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-        response.headers["Content-Security-Policy"] = "default-src 'self'"
+        
+        # 修復 CSP 設定以支持 Swagger UI
+        if request.url.path.startswith("/api/docs") or request.url.path.startswith("/api/redoc"):
+            # 文檔頁面允許框架嵌入並不設定 CSP
+            response.headers["X-Frame-Options"] = "SAMEORIGIN"  # 允許同域框架
+            # 完全禁用 CSP 來測試 Swagger UI - 臨時措施
+            # response.headers["Content-Security-Policy"] = "default-src 'self'"
+            pass  # 不設定 CSP 讓 Swagger UI 能完全載入
+        else:
+            # API 端點使用嚴格的安全設定
+            response.headers["X-Frame-Options"] = "DENY"
+            response.headers["Content-Security-Policy"] = "default-src 'self'"
         
         return response

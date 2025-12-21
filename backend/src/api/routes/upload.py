@@ -28,11 +28,10 @@ from ...core.config import settings
 from ...services.extractor import extract_content, PDFExtractionError, URLFetchError, TextExtractionError
 from ...services.moderation import ModerationService, ModerationStatus as ModStatus
 from ...services.chunker import TextChunker
-from ...services.embedder import EmbeddingService
+from ...services.embedder import Embedder
 from ...services.rag_engine import RAGEngine
 from ...services.vector_store import VectorStore
 from ...services.web_crawler import WebCrawler
-from ...services.embedder import Embedder
 from ...services.vector_store import VectorStore
 from ...services.rag_engine import RAGEngine
 
@@ -159,6 +158,9 @@ def process_document(document: Document):
     
     NOTE: 這必須是同步函數，因為 FastAPI BackgroundTasks 不支持 async 函數
     """
+    import time
+    processing_start_time = time.time()
+    
     try:
         # Step 1: Extract 文字萃取
         logger.info(f"[{document.document_id}] Starting extraction ({document.source_type})")
@@ -188,7 +190,8 @@ def process_document(document: Document):
         document.extraction_status = ExtractionStatus.EXTRACTED
         # T089+ 計算文件 tokens（1 token ≈ 3 字符）
         document.tokens_used = max(1, len(extracted_text) // 3)
-        logger.info(f"[{document.document_id}] Extraction complete: {len(extracted_text)} chars, {document.tokens_used} tokens")
+        logger.info(f"[{document.document_id}] Extraction complete: {len(extracted_text)} chars")
+        logger.info(f"[{document.document_id}] TOKENS_USED CALCULATION: {len(extracted_text)} chars // 3 = {document.tokens_used} tokens")
         
         # Step 2: Moderate 內容審核（憲法 Principle VI）
         if settings.enable_content_moderation:
@@ -343,6 +346,12 @@ def process_document(document: Document):
         
         # 標記為完全完成
         document.extraction_status = ExtractionStatus.COMPLETED
+        
+        # 計算處理時間並設置（如果不是爬蟲的話）
+        if not document.crawl_duration_seconds:
+            processing_duration = time.time() - processing_start_time
+            document.crawl_duration_seconds = processing_duration
+            logger.info(f"[{document.document_id}] Processing time: {processing_duration:.2f} seconds")
         
         # 更新 session 狀態
         session = session_manager.get_session(document.session_id)
@@ -565,16 +574,44 @@ async def upload_website(
             detail=error.dict()
         )
     
-    # 啟動爬蟲
+    # 啟動爬蟲 - 使用保守的參數以避免超時
     crawler = WebCrawler(
         base_url=str(request.url),
-        max_tokens=request.max_tokens,
-        max_pages=request.max_pages
+        max_tokens=min(request.max_tokens, 50000),  # 限制為50K tokens
+        max_pages=min(request.max_pages, 10)        # 限制為10個頁面
     )
     
     try:
         logger.info(f"Starting website crawl: {request.url} (session: {session_id})")
-        crawl_result = crawler.crawl()
+        
+        # 使用 threading 超時保護（跨平台兼容）
+        import threading
+        import time
+        
+        crawl_result = None
+        crawl_error = None
+        
+        def crawl_with_timeout():
+            nonlocal crawl_result, crawl_error
+            try:
+                crawl_result = crawler.crawl()
+            except Exception as e:
+                crawl_error = e
+        
+        # 啟動爬蟲線程
+        crawl_thread = threading.Thread(target=crawl_with_timeout)
+        crawl_thread.start()
+        crawl_thread.join(timeout=30)  # 30秒超時
+        
+        if crawl_thread.is_alive():
+            logger.error(f"Website crawl timed out for {request.url}")
+            raise TimeoutError("Website crawl timed out after 30 seconds")
+        
+        if crawl_error:
+            raise crawl_error
+            
+        if crawl_result is None:
+            raise Exception("Crawl completed but no result returned")
         
         # 記錄爬蟲結果
         logger.info(
@@ -725,6 +762,13 @@ async def get_upload_status(
     
     # 產生摘要（使用已緩存的 summary）
     summary = document.summary if document.summary else None
+    
+    # 調試信息 - 臨時添加
+    logger.info(f"[DEBUG] Status response for {document.document_id}:")
+    logger.info(f"  - tokens_used: {document.tokens_used}")
+    logger.info(f"  - pages_crawled: {document.pages_crawled}")
+    logger.info(f"  - crawled_pages count: {len(document.crawled_pages) if document.crawled_pages else 0}")
+    logger.info(f"  - crawl_duration_seconds: {document.crawl_duration_seconds}")
     
     logger.info(f"[{document.document_id}] Status check: extraction_status={document.extraction_status}, chunk_count={document.chunk_count}, progress={progress}, has_summary={summary is not None}, summary_len={len(summary) if summary else 0}")
     
