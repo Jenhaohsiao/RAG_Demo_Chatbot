@@ -11,6 +11,12 @@ interface HeaderProps {
   onLanguageChange?: (language: SupportedLanguage) => void;
   onLeave?: () => void;
   onRestart?: () => void;
+  onAboutClick?: () => void;
+  systemMessage?: {
+    type: 'error' | 'warning' | 'info' | 'success';
+    message: string;
+  } | null;
+  onDismissMessage?: () => void;
 }
 
 const SUPPORTED_LANGUAGES: { code: SupportedLanguage; name: string }[] = [
@@ -36,7 +42,10 @@ export const Header: React.FC<HeaderProps> = ({
   sessionId,
   onLanguageChange,
   onLeave,
-  onRestart
+  onRestart,
+  onAboutClick,
+  systemMessage,
+  onDismissMessage
 }) => {
   const { t, i18n } = useTranslation();
   const [currentLanguage, setCurrentLanguage] = React.useState<SupportedLanguage>(
@@ -62,19 +71,54 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header>
-      <nav className="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+      <nav className="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
         <div className="container-fluid">
           {/* App Title */}
           <a className="navbar-brand" href="/">
-            <strong>{t('app.title')}</strong>
+            <h3 className="mb-0 fw-bold" style={{ 
+              background: 'linear-gradient(135deg, #ffffff, #e8f4fd)', 
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              textShadow: '0 0 20px rgba(255, 255, 255, 0.3)',
+              letterSpacing: '0.5px'
+            }}>
+              {t('app.title')}
+            </h3>
           </a>
 
           {/* Right-side controls */}
           <div className="ms-auto d-flex align-items-center gap-2">
-            {/* Language Dropdown Selector */}
+            {/* About Project Button */}
+            {onAboutClick && (
+              <button
+                className="btn btn-sm btn-outline-light"
+                type="button"
+                onClick={onAboutClick}
+                title="關於本專案"
+              >
+                <i className="bi bi-info-circle me-1"></i>
+                <span className="d-none d-sm-inline">關於本專案</span>
+              </button>
+            )}
+
+            {/* Session Controls - Restart Button Only */}
+            {sessionId && onRestart && (
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-light"
+                onClick={onRestart}
+                title={t('buttons.restart')}
+              >
+                <i className="bi bi-arrow-clockwise me-1"></i>
+                <span className="d-none d-sm-inline">{t('buttons.restart')}</span>
+              </button>
+            )}
+
+            {/* Language Dropdown Selector - Moved to rightmost */}
             <div className="dropdown">
               <button
-                className="btn btn-sm btn-light border dropdown-toggle"
+                className="btn btn-sm btn-outline-light border dropdown-toggle"
                 type="button"
                 data-testid="language-selector-button"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -108,56 +152,49 @@ export const Header: React.FC<HeaderProps> = ({
                 </ul>
               )}
             </div>
-
-            {/* Session Controls */}
-            {sessionId && (
-              <div className="btn-group" role="group">
-                {/* Restart Button */}
-                {onRestart && (
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-outline-primary"
-                    onClick={onRestart}
-                    title={t('buttons.restart')}
-                  >
-                    <i className="bi bi-arrow-clockwise me-1"></i>
-                    <span className="d-none d-sm-inline">{t('buttons.restart')}</span>
-                  </button>
-                )}
-
-                {/* Leave Button */}
-                {onLeave && (
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-outline-danger"
-                    onClick={onLeave}
-                    title={t('buttons.leave')}
-                  >
-                    <i className="bi bi-box-arrow-right me-1"></i>
-                    <span className="d-none d-sm-inline">{t('buttons.leave')}</span>
-                  </button>
-                )}
-              </div>
-            )}
           </div>
         </div>
       </nav>
 
-      {/* Session Info Footer */}
-      {sessionId && (
-        <div className="bg-light border-bottom py-2">
+      {/* Session Info Footer with System Messages */}
+      {(sessionId || systemMessage) && (
+        <div className="bg-dark border-bottom py-2">
           <div className="container-fluid">
-            <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
-              <div className="text-muted small">
-                <i className="bi bi-info-circle me-2"></i>
-                <strong>{t('labels.sessionId')}:</strong>{' '}
-                <code>{sessionId}</code>
+            {/* System Message */}
+            {systemMessage && (
+              <div className={`alert alert-${systemMessage.type === 'error' ? 'danger' : systemMessage.type} alert-dismissible fade show mb-2`} role="alert">
+                <i className={`bi bi-${
+                  systemMessage.type === 'error' ? 'exclamation-triangle' :
+                  systemMessage.type === 'warning' ? 'exclamation-triangle' :
+                  systemMessage.type === 'info' ? 'info-circle' :
+                  'check-circle'
+                } me-2`}></i>
+                {systemMessage.message}
+                {onDismissMessage && (
+                  <button
+                    type="button"
+                    className="btn-close"
+                    aria-label="Close"
+                    onClick={onDismissMessage}
+                  ></button>
+                )}
               </div>
-              <div className="text-muted small">
-                <i className="bi bi-hourglass-split me-2"></i>
-                <span>{t('labels.sessionExpiresIn')}</span>
+            )}
+            
+            {/* Session Info */}
+            {sessionId && (
+              <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div className="text-light small">
+                  <i className="bi bi-info-circle me-2"></i>
+                  <strong>{t('labels.sessionId')}:</strong>{' '}
+                  <code className="text-warning">{sessionId}</code>
+                </div>
+                <div className="text-light small">
+                  <i className="bi bi-hourglass-split me-2"></i>
+                  <span>{t('labels.sessionExpiresIn')}</span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       )}

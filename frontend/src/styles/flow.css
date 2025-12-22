@@ -1,0 +1,280 @@
+/* RAG Process Flow Styles */
+
+.rag-process-flow {
+  padding: 2rem 0;
+  margin: 2rem 0;
+}
+
+.flow-title {
+  font-weight: 600;
+  color: #212529;
+  display: flex;
+  align-items: center;
+}
+
+.flow-diagram {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  margin-bottom: 2rem;
+}
+
+.flow-item-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.flow-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  background: #f8f9fa;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.flow-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.6s ease;
+}
+
+.flow-item:hover::before {
+  left: 100%;
+}
+
+.flow-item.active {
+  background: var(--step-color);
+  color: white;
+  border-color: var(--step-color);
+  transform: scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.flow-item:hover:not(.active) {
+  background: #e9ecef;
+  border-color: var(--step-color);
+  transform: translateX(5px);
+}
+
+.flow-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.flow-item.active .flow-icon {
+  background: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.flow-item:not(.active) .flow-icon {
+  background: var(--step-color);
+  color: white;
+}
+
+.flow-content {
+  flex: 1;
+}
+
+.flow-step-title {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.flow-step-desc {
+  margin: 0;
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.flow-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--step-color);
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.flow-item.active .flow-number {
+  background: rgba(255, 255, 255, 0.3);
+  animation: pulse-number 2s infinite;
+}
+
+.flow-connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0.5rem 0;
+  width: 100%;
+}
+
+.flow-line {
+  width: 2px;
+  height: 20px;
+  background: linear-gradient(to bottom, #dee2e6, #6c757d);
+  margin-bottom: 0.25rem;
+}
+
+.flow-arrow {
+  font-size: 1.2rem;
+  color: #6c757d;
+  font-weight: bold;
+  transform: rotate(90deg);
+}
+
+/* Step Details Panel */
+.step-details {
+  position: sticky;
+  top: 2rem;
+}
+
+.details-card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.details-header {
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.details-header i {
+  font-size: 1.5rem;
+}
+
+.details-header h4 {
+  margin: 0;
+  font-weight: 600;
+  color: #212529;
+}
+
+.details-body {
+  padding: 0 1.5rem 1.5rem;
+}
+
+.details-description {
+  color: #6c757d;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.details-subtitle {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 1rem;
+}
+
+.details-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.details-list li {
+  padding: 0.5rem 0;
+  position: relative;
+  padding-left: 1.5rem;
+  color: #6c757d;
+  line-height: 1.5;
+}
+
+.details-list li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: #0d6efd;
+  font-weight: bold;
+}
+
+@keyframes pulse-number {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 991.98px) {
+  .flow-diagram {
+    padding: 1.5rem;
+  }
+  
+  .flow-item {
+    padding: 1rem;
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+  
+  .flow-content {
+    text-align: center;
+  }
+  
+  .flow-connector {
+    margin: 1rem 0;
+  }
+  
+  .flow-line {
+    height: 30px;
+  }
+  
+  .step-details {
+    position: static;
+    margin-top: 2rem;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .flow-item {
+    padding: 0.75rem;
+  }
+  
+  .flow-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+  
+  .flow-step-title {
+    font-size: 1rem;
+  }
+  
+  .flow-step-desc {
+    font-size: 0.85rem;
+  }
+}

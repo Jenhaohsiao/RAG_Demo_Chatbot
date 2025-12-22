@@ -2,9 +2,18 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+
+// 確保Bootstrap JavaScript正確載入
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+
 import './styles/badges.css';
 import './styles/rtl.css';
 import './styles/responsive.css';  // T094: Import responsive design utilities
+import './styles/hero.css';  // Hero section styles
+import './styles/fixed-flow.css';  // Fixed RAG flow styles
+import './styles/professional-header.css';  // Professional header styles
+import './styles/fixed-rag-flow.css';  // Fixed flow styles
+import './styles/custom-tooltip.css';  // Flow step styles (Bootstrap tooltip compatible)
 import './i18n/config';
 import { useTranslation } from 'react-i18next';
 import i18n from './i18n/config';
@@ -17,6 +26,8 @@ import SettingsModal from './components/SettingsModal';
 import ConfirmDialog from './components/ConfirmDialog';
 import ErrorBoundary from './components/ErrorBoundary';  // T093: Import Error Boundary
 import PromptVisualization from './components/PromptVisualization';
+import FixedRagFlow from './components/FixedRagFlow';
+import AboutProjectModal from './components/AboutProjectModal';
 import { useSession } from './hooks/useSession';
 import { useUpload } from './hooks/useUpload';
 import { submitQuery } from './services/chatService';
@@ -65,6 +76,11 @@ const App: React.FC = () => {
   // T084-T085: Session control confirmation dialogs
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [showRestartConfirm, setShowRestartConfirm] = useState(false);
+  const [showAboutModal, setShowAboutModal] = useState(false);
+  const [systemMessage, setSystemMessage] = useState<{
+    type: 'error' | 'warning' | 'info' | 'success';
+    message: string;
+  } | null>(null);
 
   // T074: Setup RTL support for Arabic language
   React.useEffect(() => {
@@ -112,6 +128,23 @@ const App: React.FC = () => {
       createSession(similarityThreshold);
     }
   }, [sessionId, isLoading, createSession, similarityThreshold]);
+
+  // Handle error messages from session and upload
+  React.useEffect(() => {
+    if (error) {
+      setSystemMessage({
+        type: 'error',
+        message: error
+      });
+    } else if (isFailed && statusResponse?.error_message) {
+      setSystemMessage({
+        type: 'error',
+        message: statusResponse.error_message
+      });
+    } else if (systemMessage?.type === 'error') {
+      setSystemMessage(null);
+    }
+  }, [error, isFailed, statusResponse?.error_message, systemMessage?.type]);
 
   // 上傳檔案時顯示 modal
   const wrappedFileUpload = async (file: File) => {
@@ -240,25 +273,23 @@ const App: React.FC = () => {
         onLanguageChange={handleLanguageChange}
         onLeave={handleLeaveClick}
         onRestart={handleRestartClick}
+        onAboutClick={() => setShowAboutModal(true)}
+        systemMessage={systemMessage}
+        onDismissMessage={() => setSystemMessage(null)}
+      />
+
+      {/* Fixed RAG Process Flow */}
+      <FixedRagFlow 
+        currentStep={
+          chatPhase ? 'ready' :
+          isCompleted ? 'ready' :
+          uploadResponse ? 'processing' : 'prepare'
+        }
       />
 
       <main className="flex-grow-1 container mt-4">
         <div className="row">
           <div className="col-lg-12 mx-auto">
-            {/* Error Display */}
-            {error && (
-              <div className="alert alert-danger alert-dismissible fade show" role="alert">
-                <i className="bi bi-exclamation-triangle-fill me-2"></i>
-                {error}
-                <button
-                  type="button"
-                  className="btn-close"
-                  aria-label="Close"
-                  onClick={() => {}}
-                ></button>
-              </div>
-            )}
-
             {/* Loading State */}
             {isLoading && !sessionId && (
               <div className="card text-center">
@@ -274,22 +305,6 @@ const App: React.FC = () => {
             {/* Upload Screen - Initial State */}
             {sessionId && !chatPhase && (
               <div>
-                {/* Welcome Section */}
-                <div className="card mb-4 border-0 bg-light">
-                  <div className="card-body">
-                    <h1 className="card-title mb-3">{t('app.title')}</h1>
-                    <p className="card-text text-muted lead">
-                      {t('app.description')}
-                    </p>
-                    <div className="d-flex gap-2 flex-wrap mt-3">
-                      <span className="badge-custom badge-primary">{t('app.features.pdfSupport')}</span>
-                      <span className="badge-custom badge-info">{t('app.features.urlExtraction')}</span>
-                      <span className="badge-custom badge-success">{t('app.features.aiQa')}</span>
-                      <span className="badge-custom badge-warning">{t('app.features.multilingual')}</span>
-                    </div>
-                  </div>
-                </div>
-
                 {/* Prompt Visualization - AI Prompt 視覺化 */}
                 <PromptVisualization
                   sessionId={sessionId}
@@ -403,11 +418,13 @@ const App: React.FC = () => {
         onCancel={() => setShowRestartConfirm(false)}
       />
 
-      <footer className="bg-light text-center py-3 mt-auto border-top">
-        <small className="text-muted">
-          RAG Demo Chatbot | Phase 4: Document Upload | {new Date().getFullYear()}
-        </small>
-      </footer>
+      {/* About Project Modal */}
+      <AboutProjectModal
+        isOpen={showAboutModal}
+        onClose={() => setShowAboutModal(false)}
+      />
+
+
     </div>
   );
 };

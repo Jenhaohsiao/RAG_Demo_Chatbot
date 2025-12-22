@@ -2,8 +2,8 @@
 
 **專案名稱**: Multilingual RAG-Powered Chatbot  
 **分支**: `001-multilingual-rag-chatbot`  
-**最後更新**: 2025-12-21 16:15 UTC-5 (AI Prompt 視覺化功能完成)  
-**總任務數**: 118 + Phase 9.5 (Website Crawler) + Phase 9.6 (Resource Consumption UI) + Phase 9.7 (Prompt Visualization)
+**最後更新**: 2025-12-22 (UI重設計與Tooltip功能完成)  
+**總任務數**: 118 + Phase 9.5 (Website Crawler) + Phase 9.6 (Resource Consumption UI) + Phase 9.7 (Prompt Visualization) + Phase 9.8 (UI Redesign & Tooltips)
 
 ---
 
@@ -23,9 +23,10 @@
 | Phase 9.5 | 🆕 Website Crawler | ✅ Complete | 5/5 | ✅ Unit Tests | ⏳ Pending | ⏳ Pending |
 | Phase 9.6 | 🆕 Resource Consumption UI | ✅ Complete | 4/4 | ✅ Type Checking | ⏳ Pending | ⏳ 準備中 |
 | Phase 9.7 | 🆕 AI Prompt Visualization | ✅ Complete | 6/6 | ✅ API Testing | ⏳ Pending | ✅ Completed |
+| Phase 9.8 | 🆕 UI Redesign & Tooltips | ✅ Complete | 4/4 | ✅ Component Testing | ⏳ Pending | ✅ Completed |
 | Phase 10 | Deployment & Production | 📋 Planning | 0/15 | ⏳ Pending | ⏳ Pending | N/A |
 
-**總進度**: 103/103 MVP tasks + 5/5 Website Crawler + 4/4 Resource Consumption + 6/6 AI Prompt Visualization ✅  
+**總進度**: 103/103 MVP tasks + 5/5 Website Crawler + 4/4 Resource Consumption + 6/6 AI Prompt Visualization + 4/4 UI Redesign ✅  
 **Phase 10**: 15 tasks - 上線部署與生產準備 (規劃中)
 
 ## 🎯 系統狀態
@@ -41,13 +42,31 @@
 - ✅ **Metrics**: 實時性能監控
 - ✅ **🆕 資源消耗面板**: Token 消耗、爬蟲統計、時間追蹤
 - ✅ **🆕 AI Prompt 視覺化**: 系統透明度、實時 Prompt 顯示、憲法原則展示
+- ✅ **🆕 UI重設計**: 固定流程圖、About項目對話框、系統消息集成、Hover Tooltips
 
-### 🆕 AI Prompt 視覺化功能 (Phase 9.7) ✨ NEW
+### 🆕 AI Prompt 視覺化功能 (Phase 9.7) ✨ COMPLETE
 - ✅ **後端 Prompt API** (256 行代碼)
   - `/api/v1/prompt/system-prompts`: 系統 Prompt 模板
   - `/api/v1/prompt/current-session-prompt`: 當前會話 Prompt
   - RAG 模板、摘要模板、憲法原則
   - Prompt 變數說明與配置信息
+
+### 🆕 UI重設計與Tooltips (Phase 9.8) ✨ COMPLETE
+- ✅ **頁面重新設計** (FixedRagFlow.tsx - 203 行代碼)
+  - 固定流程圖位於頁面頂部
+  - RAG處理流程視覺化 (準備→上傳→審核→切割→嵌入→回應)
+  - 支援當前步驟高亮顯示和進度狀態
+- ✅ **About項目對話框** (AboutProjectModal.tsx)
+  - 項目目標、特色功能、技術堆疊展示
+  - 支援多語言和響應式設計
+- ✅ **系統消息集成** (Header.tsx)
+  - 系統消息顯示於header第二行
+  - 專業的排版和視覺層次
+- ✅ **智能Tooltips系統**
+  - 滑鼠懸停顯示詳細流程說明
+  - Tab鍵導航支援 (無障礙功能)
+  - 自適應定位 (下方顯示，避免覆蓋內容)
+  - 淡雅視覺設計 (不搶奪主要內容焦點)
 
 - ✅ **PromptVisualization 組件** (532 行代碼)
   - 三標籤界面: 當前 Prompt、系統模板、憲法原則
@@ -1744,3 +1763,75 @@ py -3.12 -m pytest tests/test_phase8.py -v --no-cov
   - http://localhost:6333 (Qdrant)
 -  �ݰ���: �ϥΪ̴��� (�N�b�s��ܮؤ��i��)
 
+
+---
+
+## Phase 9.8: UI Redesign & Interactive Tooltips - 完成 (4/4)
+
+### 新增功能 (開發日期 2025-12-22)
+
+**重點**: 頁面重新設計與使用者體驗優化，包括：
+- 固定流程圖顯示與互動式tooltips
+- About項目對話框實現
+- 系統消息整合至header
+- 無障礙功能與Tab導航支援
+
+### 前端更新
+
+#### FixedRagFlow 組件重構 (203 行)
+- 固定於頁面頂部的RAG流程圖
+- 6個處理階段視覺化: 準備上傳審核切割嵌入回應  
+- 智能Tooltips系統: 懸停顯示詳細說明，自適應定位
+- Tab鍵導航支援，符合無障礙標準
+- 響應式設計，支援各螢幕尺寸
+
+#### AboutProjectModal 實現 (225 行)
+- 完整項目資訊展示: 目標、特色、技術堆疊
+- 多語言支援 (8種語言)
+- Bootstrap Modal整合，響應式設計
+- 專業的視覺設計與信息架構
+
+#### Header 系統消息整合
+- 系統消息移至header第二行顯示
+- 優化的視覺層次與排版
+- 保持專業外觀與一致性
+
+### 開發歷程
+1. 頁面重新設計需求分析
+2. 固定流程圖架構設計
+3. Tooltips實現 (經多次迭代優化)
+4. JSX語法錯誤排除
+5. 樣式與定位優化
+
+### 技術實現
+- React Hooks: useState 管理tooltip狀態
+- TypeScript: 嚴格型別定義  
+- CSS-in-JS: 內聯樣式實現精確定位
+- 事件處理: mouseenter/mouseleave, focus/blur
+- 無障礙: aria-label, tabindex, keyboard navigation
+
+### Git 提交記錄
+1. feat: implement fixed RAG flow diagram with tooltips
+2. feat: add AboutProjectModal component  
+3. feat: integrate system messages in header
+4. fix: resolve JSX syntax errors and tooltip positioning
+5. style: optimize tooltip appearance and positioning
+
+### 測試完成 (2025-12-22)
+-  流程圖顯示正確
+-  Tooltips懸停功能  
+-  Tab鍵導航測試
+-  About對話框互動
+-  系統消息集成
+-  響應式設計驗證
+-  多語言支援測試
+- 準備: 用戶測試 (即將開始於新對話框)
+
+---
+
+**下一步開發重點**:
+- Phase 10: 部署與生產準備
+- 持續的用戶測試與反饋收集
+- 性能優化與安全性加固
+
+**項目狀態**: MVP功能完備，增強功能持續開發中 
