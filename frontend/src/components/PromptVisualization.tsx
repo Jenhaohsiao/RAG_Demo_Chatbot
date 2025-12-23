@@ -257,10 +257,18 @@ const PromptVisualization: React.FC<PromptVisualizationProps> = ({
           <div>
             {/* 核心參數 */}
             <div className="card row-mb-3 mb-3">
-              <div className="card-header bg-light" style={{ cursor: 'pointer' }} onClick={() => setIsCollapsed(!isCollapsed)}>
+              <div
+                className="card-header bg-light"
+                style={{ cursor: "pointer" }}
+                onClick={() => setIsCollapsed(!isCollapsed)}
+              >
                 <div className="d-flex justify-content-between align-items-center">
                   <h5 className="card-title mb-0">核心參數</h5>
-                  <i className={`bi ${isCollapsed ? 'bi-chevron-down' : 'bi-chevron-up'}`}></i>
+                  <i
+                    className={`bi ${
+                      isCollapsed ? "bi-chevron-down" : "bi-chevron-up"
+                    }`}
+                  ></i>
                 </div>
               </div>
               {!isCollapsed && (
@@ -332,10 +340,18 @@ const PromptVisualization: React.FC<PromptVisualizationProps> = ({
             {/* Prompt類型與風格 */}
 
             <div className="card row-mb-3 mb-3">
-              <div className="card-header bg-light" style={{ cursor: 'pointer' }} onClick={() => setIsStyleCollapsed(!isStyleCollapsed)}>
+              <div
+                className="card-header bg-light"
+                style={{ cursor: "pointer" }}
+                onClick={() => setIsStyleCollapsed(!isStyleCollapsed)}
+              >
                 <div className="d-flex justify-content-between align-items-center">
                   <h5 className="card-title mb-0">回應風格</h5>
-                  <i className={`bi ${isStyleCollapsed ? 'bi-chevron-down' : 'bi-chevron-up'}`}></i>
+                  <i
+                    className={`bi ${
+                      isStyleCollapsed ? "bi-chevron-down" : "bi-chevron-up"
+                    }`}
+                  ></i>
                 </div>
               </div>
               {!isStyleCollapsed && (
@@ -344,7 +360,10 @@ const PromptVisualization: React.FC<PromptVisualizationProps> = ({
                     <label className="form-label">Prompt類型</label>
                     <div>
                       {["rag", "general", "summary"].map((type) => (
-                        <div key={type} className="form-check form-check-inline">
+                        <div
+                          key={type}
+                          className="form-check form-check-inline"
+                        >
                           <input
                             className="form-check-input"
                             type="radio"
@@ -352,7 +371,10 @@ const PromptVisualization: React.FC<PromptVisualizationProps> = ({
                             value={type}
                             checked={parameters.prompt_type === type}
                             onChange={(e) =>
-                              handleParameterChange("prompt_type", e.target.value)
+                              handleParameterChange(
+                                "prompt_type",
+                                e.target.value
+                              )
                             }
                           />
                           <label className="form-check-label">
@@ -388,7 +410,10 @@ const PromptVisualization: React.FC<PromptVisualizationProps> = ({
                       className="form-select form-select-sm"
                       value={parameters.professional_level}
                       onChange={(e) =>
-                        handleParameterChange("professional_level", e.target.value)
+                        handleParameterChange(
+                          "professional_level",
+                          e.target.value
+                        )
                       }
                     >
                       <option value="casual">通俗</option>
@@ -403,7 +428,10 @@ const PromptVisualization: React.FC<PromptVisualizationProps> = ({
                       className="form-select form-select-sm"
                       value={parameters.creativity_level}
                       onChange={(e) =>
-                        handleParameterChange("creativity_level", e.target.value)
+                        handleParameterChange(
+                          "creativity_level",
+                          e.target.value
+                        )
                       }
                     >
                       <option value="conservative">保守</option>
@@ -417,39 +445,52 @@ const PromptVisualization: React.FC<PromptVisualizationProps> = ({
 
             {/* 檔案類型支援 */}
             <div className="card row-mb-3 mb-3">
-              <div className="card-header bg-light" style={{ cursor: 'pointer' }} onClick={() => setIsFileTypeCollapsed(!isFileTypeCollapsed)}>
+              <div
+                className="card-header bg-light"
+                style={{ cursor: "pointer" }}
+                onClick={() => setIsFileTypeCollapsed(!isFileTypeCollapsed)}
+              >
                 <div className="d-flex justify-content-between align-items-center">
                   <h5 className="card-title mb-0">支援檔案類型</h5>
-                  <i className={`bi ${isFileTypeCollapsed ? 'bi-chevron-down' : 'bi-chevron-up'}`}></i>
+                  <i
+                    className={`bi ${
+                      isFileTypeCollapsed ? "bi-chevron-down" : "bi-chevron-up"
+                    }`}
+                  ></i>
                 </div>
               </div>
               {!isFileTypeCollapsed && (
                 <div className="p-3 mt-2">
-                  {["pdf", "txt", "docx", "md", "csv", "xlsx"].map((fileType) => (
-                    <div key={fileType} className="form-check form-check-inline">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        checked={parameters.supported_file_types.includes(
-                          fileType
-                        )}
-                        onChange={(e) => {
-                          const updatedTypes = e.target.checked
-                            ? [...parameters.supported_file_types, fileType]
-                            : parameters.supported_file_types.filter(
-                                (t) => t !== fileType
-                              );
-                          handleParameterChange(
-                            "supported_file_types",
-                            updatedTypes
-                          );
-                        }}
-                      />
-                      <label className="form-check-label">
-                        {fileType.toUpperCase()}
-                      </label>
-                    </div>
-                  ))}
+                  {["pdf", "txt", "docx", "md", "csv", "xlsx"].map(
+                    (fileType) => (
+                      <div
+                        key={fileType}
+                        className="form-check form-check-inline"
+                      >
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          checked={parameters.supported_file_types.includes(
+                            fileType
+                          )}
+                          onChange={(e) => {
+                            const updatedTypes = e.target.checked
+                              ? [...parameters.supported_file_types, fileType]
+                              : parameters.supported_file_types.filter(
+                                  (t) => t !== fileType
+                                );
+                            handleParameterChange(
+                              "supported_file_types",
+                              updatedTypes
+                            );
+                          }}
+                        />
+                        <label className="form-check-label">
+                          {fileType.toUpperCase()}
+                        </label>
+                      </div>
+                    )
+                  )}
                 </div>
               )}
             </div>
@@ -458,10 +499,22 @@ const PromptVisualization: React.FC<PromptVisualizationProps> = ({
 
             {systemPrompts && systemPrompts.constitutional_principles && (
               <div className="card row-mb-3 mb-3">
-                <div className="card-header bg-light" style={{ cursor: 'pointer' }} onClick={() => setIsPrinciplesCollapsed(!isPrinciplesCollapsed)}>
+                <div
+                  className="card-header bg-light"
+                  style={{ cursor: "pointer" }}
+                  onClick={() =>
+                    setIsPrinciplesCollapsed(!isPrinciplesCollapsed)
+                  }
+                >
                   <div className="d-flex justify-content-between align-items-center">
                     <h5 className="card-title mb-0">啟用的安全原則</h5>
-                    <i className={`bi ${isPrinciplesCollapsed ? 'bi-chevron-down' : 'bi-chevron-up'}`}></i>
+                    <i
+                      className={`bi ${
+                        isPrinciplesCollapsed
+                          ? "bi-chevron-down"
+                          : "bi-chevron-up"
+                      }`}
+                    ></i>
                   </div>
                 </div>
                 {!isPrinciplesCollapsed && (
