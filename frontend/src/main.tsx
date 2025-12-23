@@ -1,45 +1,45 @@
-import React, { useState } from 'react';
-import ReactDOM from 'react-dom/client';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';
+import React, { useState } from "react";
+import ReactDOM from "react-dom/client";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap-icons/font/bootstrap-icons.css";
 
 // 確保Bootstrap JavaScript正確載入
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
-import './styles/badges.css';
-import './styles/rtl.css';
-import './styles/responsive.css';  // T094: Import responsive design utilities
-import './styles/hero.css';  // Hero section styles
-import './styles/fixed-flow.css';  // Fixed RAG flow styles
-import './styles/professional-header.css';  // Professional header styles
-import './styles/fixed-rag-flow.css';  // Fixed flow styles
-import './styles/custom-tooltip.css';  // Flow step styles (Bootstrap tooltip compatible)
-import './styles/two-column-layout.css';  // Two-column layout styles
-import './i18n/config';
-import { useTranslation } from 'react-i18next';
-import i18n from './i18n/config';
+import "./styles/badges.css";
+import "./styles/rtl.css";
+import "./styles/responsive.css"; // T094: Import responsive design utilities
+import "./styles/hero.css"; // Hero section styles
+import "./styles/fixed-flow.css"; // Fixed RAG flow styles
+import "./styles/professional-header.css"; // Professional header styles
+import "./styles/fixed-rag-flow.css"; // Fixed flow styles
+import "./styles/custom-tooltip.css"; // Flow step styles (Bootstrap tooltip compatible)
+import "./styles/two-column-layout.css"; // Two-column layout styles
+import "./i18n/config";
+import { useTranslation } from "react-i18next";
+import i18n from "./i18n/config";
 
-import Header from './components/Header';
-import UploadScreen from './components/UploadScreen';
-import ProcessingModal from './components/ProcessingModal';
-import ChatScreen from './components/ChatScreen';
-import SettingsModal from './components/SettingsModal';
-import ConfirmDialog from './components/ConfirmDialog';
-import ErrorBoundary from './components/ErrorBoundary';  // T093: Import Error Boundary
-import PromptVisualization from './components/PromptVisualization';
-import FixedRagFlow from './components/FixedRagFlow';
-import AboutProjectModal from './components/AboutProjectModal';
-import { useSession } from './hooks/useSession';
-import { useUpload } from './hooks/useUpload';
-import { submitQuery } from './services/chatService';
-import type { SupportedLanguage } from './hooks/useLanguage';
-import type { ChatResponse } from './types/chat';
+import Header from "./components/Header";
+import UploadScreen from "./components/UploadScreen";
+import ProcessingModal from "./components/ProcessingModal";
+import ChatScreen from "./components/ChatScreen";
+import SettingsModal from "./components/SettingsModal";
+import ConfirmDialog from "./components/ConfirmDialog";
+import ErrorBoundary from "./components/ErrorBoundary"; // T093: Import Error Boundary
+import PromptVisualization from "./components/PromptVisualization";
+import FixedRagFlow from "./components/FixedRagFlow";
+import AboutProjectModal from "./components/AboutProjectModal";
+import { useSession } from "./hooks/useSession";
+import { useUpload } from "./hooks/useUpload";
+import { submitQuery } from "./services/chatService";
+import type { SupportedLanguage } from "./hooks/useLanguage";
+import type { ChatResponse } from "./types/chat";
 
 /**
  * Main App Component
  * Phase 4: Document Upload Integration
  * T093: Wrapped with Error Boundary for error handling
- * 
+ *
  * Flow:
  * 1. Upload Screen - 初始畫面
  * 2. Processing Modal - 上傳/處理進度
@@ -55,7 +55,7 @@ const App: React.FC = () => {
     createSession,
     closeSession,
     restartSession,
-    updateLanguage
+    updateLanguage,
   } = useSession();
 
   const {
@@ -65,21 +65,21 @@ const App: React.FC = () => {
     handleUrlUpload,
     reset: resetUpload,
     isCompleted,
-    isFailed
-  } = useUpload(sessionId || '');
+    isFailed,
+  } = useUpload(sessionId || "");
 
   // Modal state
   const [showModal, setShowModal] = useState(false);
   const [chatPhase, setChatPhase] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [similarityThreshold, setSimilarityThreshold] = useState(0.5);
-  
+
   // T084-T085: Session control confirmation dialogs
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [showRestartConfirm, setShowRestartConfirm] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [systemMessage, setSystemMessage] = useState<{
-    type: 'error' | 'warning' | 'info' | 'success';
+    type: "error" | "warning" | "info" | "success";
     message: string;
   } | null>(null);
 
@@ -87,35 +87,40 @@ const App: React.FC = () => {
   React.useEffect(() => {
     const handleLanguageChanged = (lng: string) => {
       // RTL support for Arabic
-      const isRTL = lng === 'ar';
-      document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+      const isRTL = lng === "ar";
+      document.documentElement.dir = isRTL ? "rtl" : "ltr";
       document.documentElement.lang = lng;
-      
+
       // Also apply to body for some CSS properties
       if (isRTL) {
-        document.body.classList.add('rtl-layout');
+        document.body.classList.add("rtl-layout");
       } else {
-        document.body.classList.remove('rtl-layout');
+        document.body.classList.remove("rtl-layout");
       }
-      
-      console.log('[RTL] Language changed to:', lng, 'Direction:', isRTL ? 'rtl' : 'ltr');
+
+      console.log(
+        "[RTL] Language changed to:",
+        lng,
+        "Direction:",
+        isRTL ? "rtl" : "ltr"
+      );
     };
 
     // Initial setup based on current language
     handleLanguageChanged(i18n.language);
 
     // Listen for language changes
-    i18n.on('languageChanged', handleLanguageChanged);
+    i18n.on("languageChanged", handleLanguageChanged);
 
     return () => {
-      i18n.off('languageChanged', handleLanguageChanged);
+      i18n.off("languageChanged", handleLanguageChanged);
     };
   }, []);
 
   // 當 threshold 改變時重新創建 session（僅在沒有上傳文件時）
   const handleThresholdChange = async (newThreshold: number) => {
     setSimilarityThreshold(newThreshold);
-    
+
     // 只在沒有上傳文件時才重新創建 session
     if (sessionId && !uploadResponse) {
       await closeSession();
@@ -134,15 +139,15 @@ const App: React.FC = () => {
   React.useEffect(() => {
     if (error) {
       setSystemMessage({
-        type: 'error',
-        message: error
+        type: "error",
+        message: error,
       });
     } else if (isFailed && statusResponse?.error_message) {
       setSystemMessage({
-        type: 'error',
-        message: statusResponse.error_message
+        type: "error",
+        message: statusResponse.error_message,
       });
-    } else if (systemMessage?.type === 'error') {
+    } else if (systemMessage?.type === "error") {
       setSystemMessage(null);
     }
   }, [error, isFailed, statusResponse?.error_message, systemMessage?.type]);
@@ -161,34 +166,41 @@ const App: React.FC = () => {
 
   // Modal 確認按鈕
   const handleModalConfirm = async () => {
-    console.log('[handleModalConfirm] Called', { isFailed, isCompleted });
-    
+    console.log("[handleModalConfirm] Called", { isFailed, isCompleted });
+
     if (isFailed) {
       // 失敗時回到上傳畫面
-      console.log('[handleModalConfirm] Upload failed, resetting');
+      console.log("[handleModalConfirm] Upload failed, resetting");
       setShowModal(false);
       resetUpload();
     } else if (isCompleted) {
       // 直接進入聊天畫面，不需要等待狀態更新
       // 因為文件處理完成後，後端已經將狀態設置為 READY_FOR_CHAT
-      console.log('[handleModalConfirm] Upload completed, entering chat phase');
+      console.log("[handleModalConfirm] Upload completed, entering chat phase");
       setShowModal(false);
       setChatPhase(true);
     } else {
-      console.log('[handleModalConfirm] Unexpected state - not failed and not completed');
+      console.log(
+        "[handleModalConfirm] Unexpected state - not failed and not completed"
+      );
     }
   };
 
   const handleLanguageChange = async (newLanguage: SupportedLanguage) => {
     try {
-      console.log('[handleLanguageChange] Changing language to:', newLanguage, 'with sessionId:', sessionId);
-      
+      console.log(
+        "[handleLanguageChange] Changing language to:",
+        newLanguage,
+        "with sessionId:",
+        sessionId
+      );
+
       // T075: Pass sessionId for backend sync
       await updateLanguage(newLanguage, sessionId);
-      
-      console.log('[handleLanguageChange] Language change successful');
+
+      console.log("[handleLanguageChange] Language change successful");
     } catch (err) {
-      console.error('[handleLanguageChange] Error:', err);
+      console.error("[handleLanguageChange] Error:", err);
       // Error is already handled in useSession.updateLanguage
     }
   };
@@ -206,7 +218,7 @@ const App: React.FC = () => {
       setChatPhase(false);
       setShowLeaveConfirm(false);
     } catch (err) {
-      console.error('[handleConfirmLeave] Error:', err);
+      console.error("[handleConfirmLeave] Error:", err);
     }
   };
 
@@ -223,14 +235,17 @@ const App: React.FC = () => {
       setChatPhase(false);
       setShowRestartConfirm(false);
     } catch (err) {
-      console.error('[handleConfirmRestart] Error:', err);
+      console.error("[handleConfirmRestart] Error:", err);
     }
   };
 
-  const handleSettingsSave = async (threshold: number, customPrompt?: string) => {
+  const handleSettingsSave = async (
+    threshold: number,
+    customPrompt?: string
+  ) => {
     setSimilarityThreshold(threshold);
     setShowSettings(false);
-    
+
     // If session already exists, recreate it with new threshold and custom prompt
     if (sessionId) {
       await closeSession();
@@ -241,30 +256,31 @@ const App: React.FC = () => {
   // 取得處理階段文字
   const getProcessingStage = (): string => {
     if (isFailed) {
-      return t('processing.stage.failed', 'Processing Failed');
+      return t("processing.stage.failed", "Processing Failed");
     }
 
-    if (!statusResponse) return t('processing.stage.extracting', 'Extracting Text...');
+    if (!statusResponse)
+      return t("processing.stage.extracting", "Extracting Text...");
 
     const progress = statusResponse.processing_progress;
 
     if (progress === 100) {
-      return t('processing.stage.complete', 'Processing Complete');
+      return t("processing.stage.complete", "Processing Complete");
     }
 
     if (progress >= 75) {
-      return t('processing.stage.embedding', 'Embedding & Storing...');
+      return t("processing.stage.embedding", "Embedding & Storing...");
     }
 
     if (progress >= 50) {
-      return t('processing.stage.chunking', 'Chunking Text...');
+      return t("processing.stage.chunking", "Chunking Text...");
     }
 
     if (progress >= 25) {
-      return t('processing.stage.moderating', 'Checking Content Safety...');
+      return t("processing.stage.moderating", "Checking Content Safety...");
     }
 
-    return t('processing.stage.extracting', 'Extracting Text...');
+    return t("processing.stage.extracting", "Extracting Text...");
   };
 
   return (
@@ -280,11 +296,15 @@ const App: React.FC = () => {
       />
 
       {/* Fixed RAG Process Flow */}
-      <FixedRagFlow 
+      <FixedRagFlow
         currentStep={
-          chatPhase ? 'ready' :
-          isCompleted ? 'ready' :
-          uploadResponse ? 'processing' : 'prepare'
+          chatPhase
+            ? "ready"
+            : isCompleted
+            ? "ready"
+            : uploadResponse
+            ? "processing"
+            : "prepare"
         }
       />
 
@@ -298,7 +318,9 @@ const App: React.FC = () => {
                   <div className="spinner-border text-primary" role="status">
                     <span className="visually-hidden">Loading...</span>
                   </div>
-                  <p className="text-muted mt-3">Initializing your session...</p>
+                  <p className="text-muted mt-3">
+                    Initializing your session...
+                  </p>
                 </div>
               </div>
             </div>
@@ -308,12 +330,12 @@ const App: React.FC = () => {
           {sessionId && !chatPhase && (
             <>
               {/* Left Column: Parameters and Settings */}
-              <div className="col-lg-6 col-xl-5 mb-4">
-                <div className="card h-100 border-primary">
+              <div className="col-lg-6 col-xl-4 mb-4 ">
+                <div className="card h-100 border-secondary fixed-rag-flow">
                   <div className="card-header bg-light">
                     <h5 className="card-title mb-0">
                       <i className="bi bi-gear-fill text-primary me-2"></i>
-                      {t('parameters.title', '參數設定')}
+                      {t("parameters.title", "參數設定")}
                     </h5>
                   </div>
                   <div className="card-body">
@@ -323,70 +345,17 @@ const App: React.FC = () => {
                       currentLanguage="zh"
                       hasDocuments={!!uploadResponse}
                     />
-                    
-                    {/* 相似度閾值設定 */}
-                    <div className="threshold-section mt-4 pt-3 border-top">
-                      <div className="threshold-header mb-3">
-                        <h6 className="threshold-title mb-2">
-                          <i className="bi bi-sliders text-primary me-2"></i>
-                          {t('settings.threshold.label', '相似度閾值')}
-                        </h6>
-                        <span className={`badge bg-${(() => {
-                          if (similarityThreshold <= 0.5) return 'success';
-                          if (similarityThreshold <= 0.7) return 'warning';
-                          return 'danger';
-                        })()}`}>
-                          {(() => {
-                            if (similarityThreshold <= 0.5) return t('settings.threshold.lenient', '寬鬆');
-                            if (similarityThreshold <= 0.7) return t('settings.threshold.balanced', '平衡');
-                            return t('settings.threshold.strict', '嚴格');
-                          })()}
-                        </span>
-                      </div>
-                      
-                      <div className="threshold-slider-container">
-                        <input
-                          type="range"
-                          min="0.3"
-                          max="0.9"
-                          step="0.1"
-                          value={similarityThreshold}
-                          onChange={(e) => handleThresholdChange(parseFloat(e.target.value))}
-                          className="form-range"
-                          disabled={!!uploadResponse}
-                        />
-                        <div className="threshold-labels d-flex justify-content-between mt-2">
-                          <small className="text-muted">{t('settings.threshold.low', '寬鬆')}</small>
-                          <small className="fw-bold text-primary">{similarityThreshold.toFixed(1)}</small>
-                          <small className="text-muted">{t('settings.threshold.high', '嚴格')}</small>
-                        </div>
-                      </div>
-
-                      <small className="text-muted mt-2 d-block">
-                        {uploadResponse ? (
-                          <span className="text-warning">
-                            <i className="bi bi-exclamation-triangle me-1"></i>
-                            已上傳文件後無法調整閾值
-                          </span>
-                        ) : (
-                          <span>
-                            <i className="bi bi-info-circle me-1"></i>
-                            {t('settings.threshold.description', '控制RAG系統的嚴格程度，較高的值提供更精確但可能較少的答案。')}
-                          </span>
-                        )}
-                      </small>
-                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Right Column: Upload Interface */}
-              <div className="col-lg-6 col-xl-7 mb-4">
-                <div className="card h-100 border-info">
+              <div className="col-lg-6 col-xl-8 mb-4">
+                <div className="card h-100 border-secondary">
                   <div className="card-header bg-light">
                     <h5 className="card-title mb-0">
                       <i className="bi bi-cloud-upload-fill text-info me-2"></i>
-                      {t('upload.title', '資料上傳')}
+                      {t("upload.title", "資料上傳")}
                     </h5>
                   </div>
                   <div className="card-body">
@@ -407,7 +376,7 @@ const App: React.FC = () => {
           {sessionId && chatPhase && uploadResponse && statusResponse && (
             <div className="col-12">
               <>
-                {console.log('[App] ChatScreen props:', {
+                {console.log("[App] ChatScreen props:", {
                   sessionId,
                   documentSummary: statusResponse.summary,
                   chunkCount: statusResponse.chunk_count,
@@ -416,7 +385,7 @@ const App: React.FC = () => {
                   crawledPages: statusResponse.crawled_pages,
                   crawlDurationSeconds: statusResponse.crawl_duration_seconds,
                   avgTokensPerPage: statusResponse.avg_tokens_per_page,
-                  fullStatusResponse: statusResponse
+                  fullStatusResponse: statusResponse,
                 })}
                 <ChatScreen
                   sessionId={sessionId}
@@ -428,16 +397,21 @@ const App: React.FC = () => {
                   pagesCrawled={statusResponse.pages_crawled}
                   crawledPages={statusResponse.crawled_pages}
                   baseUrl={statusResponse.source_reference}
-
                   crawlDurationSeconds={statusResponse.crawl_duration_seconds}
                   avgTokensPerPage={statusResponse.avg_tokens_per_page}
                   totalTokenLimit={32000}
                   onSendQuery={async (query: string): Promise<ChatResponse> => {
                     // 標準化語言代碼：zh-TW -> zh, en-US -> en
-                    const normalizedLang = language.split('-')[0];
-                    console.log('[App] Sending query with language:', normalizedLang, '(original:', language, ')');
-                  return await submitQuery(sessionId, query, normalizedLang);
-                }}
+                    const normalizedLang = language.split("-")[0];
+                    console.log(
+                      "[App] Sending query with language:",
+                      normalizedLang,
+                      "(original:",
+                      language,
+                      ")"
+                    );
+                    return await submitQuery(sessionId, query, normalizedLang);
+                  }}
                 />
               </>
             </div>
@@ -450,7 +424,7 @@ const App: React.FC = () => {
         <ProcessingModal
           isOpen={showModal}
           sourceType={uploadResponse.source_type}
-          sourceReference={statusResponse.source_reference || 'Unknown'}
+          sourceReference={statusResponse.source_reference || "Unknown"}
           processingProgress={statusResponse.processing_progress}
           processingStage={getProcessingStage()}
           isError={isFailed}
@@ -475,10 +449,10 @@ const App: React.FC = () => {
 
       {/* T084: Leave Confirmation Dialog */}
       <ConfirmDialog
-        title={t('dialogs.leave.title')}
-        message={t('dialogs.leave.message')}
-        confirmText={t('buttons.leave')}
-        cancelText={t('buttons.cancel')}
+        title={t("dialogs.leave.title")}
+        message={t("dialogs.leave.message")}
+        confirmText={t("buttons.leave")}
+        cancelText={t("buttons.cancel")}
         isDangerous={true}
         isOpen={showLeaveConfirm}
         onConfirm={handleConfirmLeave}
@@ -487,10 +461,10 @@ const App: React.FC = () => {
 
       {/* T085: Restart Confirmation Dialog */}
       <ConfirmDialog
-        title={t('dialogs.restart.title')}
-        message={t('dialogs.restart.message')}
-        confirmText={t('buttons.restart')}
-        cancelText={t('buttons.cancel')}
+        title={t("dialogs.restart.title")}
+        message={t("dialogs.restart.message")}
+        confirmText={t("buttons.restart")}
+        cancelText={t("buttons.cancel")}
         isDangerous={false}
         isOpen={showRestartConfirm}
         onConfirm={handleConfirmRestart}
@@ -502,17 +476,16 @@ const App: React.FC = () => {
         isOpen={showAboutModal}
         onClose={() => setShowAboutModal(false)}
       />
-
-
     </div>
   );
 };
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <ErrorBoundary>  {/* T093: Wrap App with Error Boundary */}
+    <ErrorBoundary>
+      {" "}
+      {/* T093: Wrap App with Error Boundary */}
       <App />
     </ErrorBoundary>
-  </React.StrictMode>,
+  </React.StrictMode>
 );
-

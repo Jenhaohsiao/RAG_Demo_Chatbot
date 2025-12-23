@@ -41,7 +41,7 @@
     "sessionExpiresIn": "會話將在 ~30 分鐘後過期"
   },
   "parameters": {
-    "title": "參數設定"
+    "title": "Prompt 參數設定"
   },
   "messages": {
     "sessionCreated": "會話建立成功",
