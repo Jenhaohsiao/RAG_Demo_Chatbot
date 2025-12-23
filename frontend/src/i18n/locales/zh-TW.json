@@ -40,6 +40,9 @@
     "uploadStatus": "上傳狀態",
     "sessionExpiresIn": "會話將在 ~30 分鐘後過期"
   },
+  "parameters": {
+    "title": "參數設定"
+  },
   "messages": {
     "sessionCreated": "會話建立成功",
     "sessionExpired": "會話已過期",
@@ -93,11 +96,11 @@
     "invalidFormat": "格式無效"
   },
   "upload": {
-    "title": "上傳文件",
+    "title": "資料上傳",
     "subtitle": "上傳 PDF、文字檔或提供 URL 來開始",
     "tab": {
       "file": "檔案上傳",
-      "url": "單一 URL",
+      "url": "單一URL",
       "crawler": "網站爬蟲"
     },
     "mode": {
@@ -105,16 +108,16 @@
       "url": "網址"
     },
     "dropzone": {
-      "dragOrClick": "拖放檔案到此處，或點擊瀏覽",
-      "drop": "放開檔案",
+      "dragOrClick": "拖放檔案到此區域，或點擊進入",
+      "drop": "拖放檔案到此區域",
       "hint": "支援格式：PDF、TXT（最大 {{maxSize}}）"
     },
     "divider": "或",
     "url": {
       "label": "提供網址",
-      "placeholder": "輸入網址（http:// 或 https://）",
-      "submit": "抓取",
-      "hint": "我們將從網址中提取文字內容"
+      "placeholder": "輸入 URL (http:// 或 https://)",
+      "submit": "獲取",
+      "hint": "我們將從 URL 中提取文字內容"
     },
     "error": {
       "invalidFileType": "僅支援 PDF 和 TXT 檔案",

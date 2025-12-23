@@ -14,6 +14,7 @@ import './styles/fixed-flow.css';  // Fixed RAG flow styles
 import './styles/professional-header.css';  // Professional header styles
 import './styles/fixed-rag-flow.css';  // Fixed flow styles
 import './styles/custom-tooltip.css';  // Flow step styles (Bootstrap tooltip compatible)
+import './styles/two-column-layout.css';  // Two-column layout styles
 import './i18n/config';
 import { useTranslation } from 'react-i18next';
 import i18n from './i18n/config';
@@ -287,11 +288,11 @@ const App: React.FC = () => {
         }
       />
 
-      <main className="flex-grow-1 container mt-4">
+      <main className="flex-grow-1 container-fluid mt-4">
         <div className="row">
-          <div className="col-lg-12 mx-auto">
-            {/* Loading State */}
-            {isLoading && !sessionId && (
+          {/* Loading State */}
+          {isLoading && !sessionId && (
+            <div className="col-12">
               <div className="card text-center">
                 <div className="card-body py-5">
                   <div className="spinner-border text-primary" role="status">
@@ -300,33 +301,111 @@ const App: React.FC = () => {
                   <p className="text-muted mt-3">Initializing your session...</p>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Upload Screen - Initial State */}
-            {sessionId && !chatPhase && (
-              <div>
-                {/* Prompt Visualization - AI Prompt 視覺化 */}
-                <PromptVisualization
-                  sessionId={sessionId}
-                  currentLanguage="zh"
-                  hasDocuments={!!uploadResponse}
-                />
+          {/* Two-Column Layout for Upload Phase */}
+          {sessionId && !chatPhase && (
+            <>
+              {/* Left Column: Parameters and Settings */}
+              <div className="col-lg-6 col-xl-5 mb-4">
+                <div className="card h-100 border-primary">
+                  <div className="card-header bg-light">
+                    <h5 className="card-title mb-0">
+                      <i className="bi bi-gear-fill text-primary me-2"></i>
+                      {t('parameters.title', '參數設定')}
+                    </h5>
+                  </div>
+                  <div className="card-body">
+                    {/* Prompt Visualization - AI Prompt 視覺化 */}
+                    <PromptVisualization
+                      sessionId={sessionId}
+                      currentLanguage="zh"
+                      hasDocuments={!!uploadResponse}
+                    />
+                    
+                    {/* 相似度閾值設定 */}
+                    <div className="threshold-section mt-4 pt-3 border-top">
+                      <div className="threshold-header mb-3">
+                        <h6 className="threshold-title mb-2">
+                          <i className="bi bi-sliders text-primary me-2"></i>
+                          {t('settings.threshold.label', '相似度閾值')}
+                        </h6>
+                        <span className={`badge bg-${(() => {
+                          if (similarityThreshold <= 0.5) return 'success';
+                          if (similarityThreshold <= 0.7) return 'warning';
+                          return 'danger';
+                        })()}`}>
+                          {(() => {
+                            if (similarityThreshold <= 0.5) return t('settings.threshold.lenient', '寬鬆');
+                            if (similarityThreshold <= 0.7) return t('settings.threshold.balanced', '平衡');
+                            return t('settings.threshold.strict', '嚴格');
+                          })()}
+                        </span>
+                      </div>
+                      
+                      <div className="threshold-slider-container">
+                        <input
+                          type="range"
+                          min="0.3"
+                          max="0.9"
+                          step="0.1"
+                          value={similarityThreshold}
+                          onChange={(e) => handleThresholdChange(parseFloat(e.target.value))}
+                          className="form-range"
+                          disabled={!!uploadResponse}
+                        />
+                        <div className="threshold-labels d-flex justify-content-between mt-2">
+                          <small className="text-muted">{t('settings.threshold.low', '寬鬆')}</small>
+                          <small className="fw-bold text-primary">{similarityThreshold.toFixed(1)}</small>
+                          <small className="text-muted">{t('settings.threshold.high', '嚴格')}</small>
+                        </div>
+                      </div>
 
-                {/* Upload Screen */}
-                <UploadScreen
-                  sessionId={sessionId}
-                  onFileSelected={wrappedFileUpload}
-                  onUrlSubmitted={wrappedUrlUpload}
-                  disabled={false}
-                  similarityThreshold={similarityThreshold}
-                  onThresholdChange={handleThresholdChange}
-                  hasDocuments={!!uploadResponse}
-                />
+                      <small className="text-muted mt-2 d-block">
+                        {uploadResponse ? (
+                          <span className="text-warning">
+                            <i className="bi bi-exclamation-triangle me-1"></i>
+                            已上傳文件後無法調整閾值
+                          </span>
+                        ) : (
+                          <span>
+                            <i className="bi bi-info-circle me-1"></i>
+                            {t('settings.threshold.description', '控制RAG系統的嚴格程度，較高的值提供更精確但可能較少的答案。')}
+                          </span>
+                        )}
+                      </small>
+                    </div>
+                  </div>
+                </div>
               </div>
-            )}
 
-            {/* Chat Screen - After Upload Complete */}
-            {sessionId && chatPhase && uploadResponse && statusResponse && (
+              {/* Right Column: Upload Interface */}
+              <div className="col-lg-6 col-xl-7 mb-4">
+                <div className="card h-100 border-info">
+                  <div className="card-header bg-light">
+                    <h5 className="card-title mb-0">
+                      <i className="bi bi-cloud-upload-fill text-info me-2"></i>
+                      {t('upload.title', '資料上傳')}
+                    </h5>
+                  </div>
+                  <div className="card-body">
+                    {/* Upload Screen */}
+                    <UploadScreen
+                      sessionId={sessionId}
+                      onFileSelected={wrappedFileUpload}
+                      onUrlSubmitted={wrappedUrlUpload}
+                      disabled={false}
+                    />
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Chat Screen - After Upload Complete */}
+          {sessionId && chatPhase && uploadResponse && statusResponse && (
+            <div className="col-12">
               <>
                 {console.log('[App] ChatScreen props:', {
                   sessionId,
@@ -361,8 +440,8 @@ const App: React.FC = () => {
                 }}
                 />
               </>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </main>
 

@@ -3,7 +3,7 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, #7aa6d1 0%, #376491 100%);
   border-bottom: 2px solid #dee2e6;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }

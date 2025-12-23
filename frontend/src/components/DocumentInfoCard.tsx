@@ -3,9 +3,9 @@
  * 顯示上傳文檔的摘要和向量數據庫信息
  */
 
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { getSession } from '../services/sessionService';
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { getSession } from "../services/sessionService";
 
 interface DocumentInfoCardProps {
   sessionId: string;
@@ -39,12 +39,12 @@ export const DocumentInfoCard: React.FC<DocumentInfoCardProps> = ({
           vector_count: data.vector_count,
         });
       } catch (err) {
-        console.error('Failed to fetch session info:', err);
+        console.error("Failed to fetch session info:", err);
       }
     };
 
     fetchSessionInfo();
-    
+
     // 每 5 秒更新一次
     const interval = setInterval(fetchSessionInfo, 5000);
     return () => clearInterval(interval);
@@ -56,96 +56,35 @@ export const DocumentInfoCard: React.FC<DocumentInfoCardProps> = ({
   }
 
   // Debug: 檢查 props
-  console.log('[DocumentInfoCard] Props:', {
+  console.log("[DocumentInfoCard] Props:", {
     hasDocumentSummary: !!documentSummary,
     documentSummaryLength: documentSummary?.length,
     documentSummary: documentSummary?.substring(0, 100),
-    sessionInfo
+    sessionInfo,
   });
 
   return (
     <div className="card mb-3 border-primary">
       <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
         <div className="d-flex align-items-center">
-          <i className="bi bi-file-earmark-text me-2"></i>
-          <strong>{t('documentInfo.title', '文檔信息')}</strong>
+          <h5 className="p-0">
+            {" "}
+            <strong>{t("documentInfo.title", "資料分析摘要")}</strong>
+          </h5>
         </div>
         <button
-          className="btn btn-sm btn-outline-light"
+          className="btn btn-lg btn-outline-light"
           onClick={() => setIsExpanded(!isExpanded)}
-          style={{ border: 'none' }}
+          style={{ border: "none" }}
         >
-          <i className={`bi bi-chevron-${isExpanded ? 'up' : 'down'}`}></i>
+          <i className={`bi bi-chevron-${isExpanded ? "up" : "down"}`}></i>
         </button>
       </div>
-      
+
       {isExpanded && (
         <div className="card-body">
-          {/* Vector DB 信息 */}
-          {sessionInfo && (
-            <div className="row mb-3">
-              <div className="col-md-6">
-                <div className="d-flex align-items-center">
-                  <i className="bi bi-database-fill text-success me-2" style={{ fontSize: '1.5rem' }}></i>
-                  <div>
-                    <div className="text-muted small">{t('documentInfo.vectorsStored', 'Vector DB 向量數')}</div>
-                    <div className="fw-bold fs-5">{sessionInfo.vector_count} {t('documentInfo.vectors', '個向量')}</div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="d-flex align-items-center">
-                  <i className="bi bi-file-earmark-check text-info me-2" style={{ fontSize: '1.5rem' }}></i>
-                  <div>
-                    <div className="text-muted small">{t('documentInfo.documentsUploaded', '已上傳文檔數')}</div>
-                    <div className="fw-bold fs-5">{sessionInfo.document_count} {t('documentInfo.documents', '個文檔')}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 文檔詳細信息 */}
-          {(sourceReference || chunkCount) && (
-            <div className="row mb-3">
-              {sourceReference && (
-                <div className="col-md-6">
-                  <div className="text-muted small">{t('documentInfo.fileName', '文件名稱')}</div>
-                  <div className="text-truncate" title={sourceReference}>
-                    {sourceReference}
-                  </div>
-                </div>
-              )}
-              {chunkCount !== undefined && (
-                <div className="col-md-6">
-                  <div className="text-muted small">{t('documentInfo.chunks', '文本塊數')}</div>
-                  <div>{chunkCount} chunks</div>
-                </div>
-              )}
-            </div>
-          )}
-
           {/* 文檔摘要 */}
-          {documentSummary && (
-            <div>
-              <div className="text-muted small mb-2">
-                <i className="bi bi-card-text me-1"></i>
-                {t('documentInfo.summary', '文檔摘要')}
-              </div>
-              <div 
-                className="p-3 bg-light border-start border-3 border-info rounded"
-                style={{ 
-                  maxHeight: isExpanded ? 'none' : '100px',
-                  overflow: 'hidden',
-                  fontSize: '0.95rem',
-                  lineHeight: '1.6',
-                  whiteSpace: 'pre-wrap'
-                }}
-              >
-                {documentSummary}
-              </div>
-            </div>
-          )}
+          {documentSummary && <div className="bg">{documentSummary}</div>}
 
           {/* 狀態指示器 */}
           {sessionInfo && sessionInfo.vector_count > 0 && (
@@ -153,7 +92,10 @@ export const DocumentInfoCard: React.FC<DocumentInfoCardProps> = ({
               <div className="alert alert-success mb-0 py-2 d-flex align-items-center">
                 <i className="bi bi-check-circle-fill me-2"></i>
                 <small>
-                  {t('documentInfo.ready', '✓ 文檔已處理完成，向量數據已存入 Vector DB，可以開始提問')}
+                  {t(
+                    "documentInfo.ready",
+                    "✓ 文檔已處理完成，向量數據已存入 Vector DB，可以開始提問"
+                  )}
                 </small>
               </div>
             </div>

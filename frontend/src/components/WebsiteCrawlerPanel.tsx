@@ -83,7 +83,6 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
     <div className="website-crawler-panel">
       {/* 爬蟲表單 */}
       <div className="crawler-form">
-        <h3>{t('crawler.title', 'Website Crawler')}</h3>
         <p className="crawler-description">
           {t('crawler.description', 'Enter a website URL to automatically crawl and extract content')}
         </p>

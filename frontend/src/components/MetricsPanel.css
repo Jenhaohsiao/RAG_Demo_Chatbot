@@ -64,6 +64,75 @@
   align-items: center;
 }
 
+/* Vertical Grid Layout (for left sidebar display) */
+.metrics-panel-vertical {
+  background: white;
+  border: 1px solid #e1e8ed;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.metrics-panel-vertical .metrics-grid-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.metric-item-vertical {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.metric-item-vertical:last-child {
+  border-bottom: none;
+}
+
+.metric-item-vertical .metric-label {
+  font-size: 0.85rem;
+  color: #4a5568;
+  font-weight: 500;
+  flex: 1;
+}
+
+.metric-item-vertical .metric-value {
+  font-size: 0.9rem;
+  color: #2d3748;
+  font-weight: 600;
+  text-align: right;
+}
+
+.metric-item-vertical.metric-item-progress {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.metric-progress-vertical {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.metric-progress-vertical .progress-bar-container {
+  flex: 1;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-percent-vertical {
+  font-size: 0.8rem;
+  font-weight: 600;
+  min-width: 45px;
+  text-align: right;
+}
+
 .metrics-section {
   background: white;
   border-radius: 8px;

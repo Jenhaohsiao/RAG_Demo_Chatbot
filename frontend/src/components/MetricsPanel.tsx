@@ -75,36 +75,32 @@ export const MetricsPanel: React.FC<MetricsPanelProps> = ({
   }
 
   return (
-    <div className="metrics-panel metrics-panel-horizontal">
-      <div className="metrics-header">
-        <h3>{t('metrics.title') || 'Real-time Metrics'}</h3>
-      </div>
-
-      <div className="metrics-grid-horizontal">
+    <div className="metrics-panel metrics-panel-vertical">
+      <div className="metrics-grid-vertical">
         {/* Token Input */}
-        <div className="metric-item-compact">
-          <div className="metric-label">{t('metrics.tokenInput') || 'Input'}</div>
+        <div className="metric-item-vertical">
+          <div className="metric-label">{t('metrics.tokenInput') || '輸入Token'}</div>
           <div className="metric-value">{metrics.token_input.toLocaleString()}</div>
         </div>
 
         {/* Token Output */}
-        <div className="metric-item-compact">
-          <div className="metric-label">{t('metrics.tokenOutput') || 'Output'}</div>
+        <div className="metric-item-vertical">
+          <div className="metric-label">{t('metrics.tokenOutput') || '輸出Token'}</div>
           <div className="metric-value">{metrics.token_output.toLocaleString()}</div>
         </div>
 
         {/* Token Total */}
-        <div className="metric-item-compact">
-          <div className="metric-label">{t('metrics.tokenTotal') || 'Total'}</div>
+        <div className="metric-item-vertical">
+          <div className="metric-label">{t('metrics.tokenTotal') || '總Token'}</div>
           <div className="metric-value">
             {metrics.token_total.toLocaleString()} / {(metrics.token_limit / 1000).toFixed(0)}K
           </div>
         </div>
 
         {/* Token Percent with Progress Bar */}
-        <div className="metric-item-compact metric-item-progress">
-          <div className="metric-label">{t('metrics.tokenPercent') || 'Usage %'}</div>
-          <div className="metric-progress-compact">
+        <div className="metric-item-vertical metric-item-progress">
+          <div className="metric-label">{t('metrics.tokenPercent') || '使用率 %'}</div>
+          <div className="metric-progress-vertical">
             <div className="progress-bar-container">
               <div
                 className={`progress-bar ${getProgressBarColor(metrics.token_percent)}`}
@@ -113,22 +109,22 @@ export const MetricsPanel: React.FC<MetricsPanelProps> = ({
                 }}
               />
             </div>
-            <div className={`progress-percent-compact ${getProgressBarTextColor(metrics.token_percent)}`}>
+            <div className={`progress-percent-vertical ${getProgressBarTextColor(metrics.token_percent)}`}>
               {metrics.token_percent.toFixed(1)}%
             </div>
           </div>
         </div>
 
         {/* Context Tokens */}
-        <div className="metric-item-compact">
-          <div className="metric-label">{t('metrics.contextTokens') || 'Context'}</div>
+        <div className="metric-item-vertical">
+          <div className="metric-label">{t('metrics.contextTokens') || '上下文Token'}</div>
           <div className="metric-value">{metrics.context_tokens.toLocaleString()}</div>
         </div>
 
         {/* Context Percent with Progress Bar */}
-        <div className="metric-item-compact metric-item-progress">
-          <div className="metric-label">{t('metrics.contextPercent') || 'Ctx %'}</div>
-          <div className="metric-progress-compact">
+        <div className="metric-item-vertical metric-item-progress">
+          <div className="metric-label">{t('metrics.contextPercent') || '上下文 %'}</div>
+          <div className="metric-progress-vertical">
             <div className="progress-bar-container">
               <div
                 className={`progress-bar ${getProgressBarColor(metrics.context_percent)}`}
@@ -137,15 +133,15 @@ export const MetricsPanel: React.FC<MetricsPanelProps> = ({
                 }}
               />
             </div>
-            <div className={`progress-percent-compact ${getProgressBarTextColor(metrics.context_percent)}`}>
+            <div className={`progress-percent-vertical ${getProgressBarTextColor(metrics.context_percent)}`}>
               {metrics.context_percent.toFixed(1)}%
             </div>
           </div>
         </div>
 
         {/* Vector Count */}
-        <div className="metric-item-compact">
-          <div className="metric-label">{t('metrics.vectorCount') || 'Vectors'}</div>
+        <div className="metric-item-vertical">
+          <div className="metric-label">{t('metrics.vectorCount') || '向量數量'}</div>
           <div className="metric-value">{metrics.vector_count.toLocaleString()}</div>
         </div>
       </div>
@@ -156,7 +152,7 @@ export const MetricsPanel: React.FC<MetricsPanelProps> = ({
           <span className="warning-icon">⚠️</span>
           <span className="warning-text">
             {t('metrics.tokenWarning') ||
-              'Token usage is above 80%. Consider starting a new session.'}
+              'Token使用率超過80%，建議開始新的會話。'}
           </span>
         </div>
       )}
