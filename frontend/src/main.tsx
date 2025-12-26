@@ -20,17 +20,17 @@ import "./i18n/config";
 import { useTranslation } from "react-i18next";
 import i18n from "./i18n/config";
 
-import Header from "./components/Header";
-import UploadScreen from "./components/UploadScreen";
-import ProcessingModal from "./components/ProcessingModal";
-import ChatScreen from "./components/ChatScreen";
-import SettingsModal from "./components/SettingsModal";
-import ConfirmDialog from "./components/ConfirmDialog";
-import ErrorBoundary from "./components/ErrorBoundary"; // T093: Import Error Boundary
-import PromptVisualization from "./components/PromptVisualization";
-import FixedRagFlow from "./components/FixedRagFlow";
-import AboutProjectModal from "./components/AboutProjectModal";
-import WorkflowMain from "./components/WorkflowMain"; // New workflow integration
+import Header from "./components/Header/Header";
+import UploadScreen from "./components/UploadScreen/UploadScreen";
+import ProcessingModal from "./components/ProcessingModal/ProcessingModal";
+import ChatScreen from "./components/ChatScreen/ChatScreen";
+import SettingsModal from "./components/SettingsModal/SettingsModal";
+import ConfirmDialog from "./components/ConfirmDialog/ConfirmDialog";
+import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary"; // T093: Import Error Boundary
+import PromptVisualization from "./components/PromptVisualization/PromptVisualization";
+import FixedRagFlow from "./components/FixedRagFlow/FixedRagFlow";
+import AboutProjectModal from "./components/AboutProjectModal/AboutProjectModal";
+import WorkflowMain from "./components/WorkflowMain/WorkflowMain"; // New workflow integration
 import { useSession } from "./hooks/useSession";
 import { useUpload } from "./hooks/useUpload";
 import { submitQuery } from "./services/chatService";

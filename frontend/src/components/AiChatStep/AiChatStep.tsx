@@ -5,8 +5,8 @@
 
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import ChatScreen from "./ChatScreen";
-import { ResponseType } from "../types/chat";
+import ChatScreen from "../ChatScreen/ChatScreen";
+import { ResponseType } from "../../types/chat";
 
 export interface AiChatStepProps {
   sessionId?: string;

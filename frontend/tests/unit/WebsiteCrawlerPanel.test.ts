@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import WebsiteCrawlerPanel from '../components/WebsiteCrawlerPanel';
+import WebsiteCrawlerPanel from '../components/WebsiteCrawlerPanel/WebsiteCrawlerPanel';
 
 
 describe('WebsiteCrawlerPanel Component', () => {

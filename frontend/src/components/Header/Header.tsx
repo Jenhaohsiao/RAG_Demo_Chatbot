@@ -4,8 +4,8 @@
  */
 import React from "react";
 import { useTranslation } from "react-i18next";
-import type { SupportedLanguage } from "../hooks/useLanguage";
-import ToastMessage from "./ToastMessage";
+import type { SupportedLanguage } from "../../hooks/useLanguage";
+import ToastMessage from "../ToastMessage/ToastMessage";
 
 interface HeaderProps {
   sessionId: string | null;
@@ -92,6 +92,9 @@ export const Header: React.FC<HeaderProps> = ({
             >
               {t("app.title")}
             </h3>
+            <div className="small" style={{ opacity: 0.5 }}>
+              <h6 className="mb-0 mt-1">用視覺說明RAG運行的原理跟流程</h6>
+            </div>
           </a>
 
           {/* Right-side controls */}

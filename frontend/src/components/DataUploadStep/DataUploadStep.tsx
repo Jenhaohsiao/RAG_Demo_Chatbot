@@ -5,7 +5,7 @@
 
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import UploadScreen from "./UploadScreen";
+import UploadScreen from "../UploadScreen/UploadScreen";
 
 export interface DataUploadStepProps {
   parameters: {

@@ -12,8 +12,8 @@
 
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { validateUrl } from "../services/uploadService";
-import { CrawledPage } from "../services/uploadService";
+import { validateUrl } from "../../services/uploadService";
+import { CrawledPage } from "../../services/uploadService";
 import "./WebsiteCrawlerPanel.css";
 
 export interface WebsiteCrawlerPanelProps {

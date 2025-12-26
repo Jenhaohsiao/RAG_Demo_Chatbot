@@ -21,7 +21,6 @@
 .stepper-item {
   position: relative;
   text-align: center;
-  padding: 15px 10px;
   transition: all 0.3s ease;
   cursor: pointer;
   flex: 1;
@@ -36,7 +35,7 @@
 
 .stepper-item.disabled {
   opacity: 0.5;
-  pointer-events: none;
+  /* pointer-events: none; - 移除這個以允許顯示 toast */
 }
 
 .stepper-circle {
@@ -105,7 +104,7 @@
 /* 水平連接線樣式 */
 .stepper-connector {
   position: absolute;
-  top: 50px; /* 調整到圓圈中心 */
+  top: 30%; /* 調整到圓圈中心 */
   left: calc(100% - 20px);
   width: 40px; /* 連接線寬度 */
   height: 4px;

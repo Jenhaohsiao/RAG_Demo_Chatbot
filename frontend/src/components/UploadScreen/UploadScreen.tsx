@@ -9,14 +9,14 @@
 
 import React, { useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import "../styles/UploadScreen.css";
+import "../../styles/UploadScreen.css";
 import {
   validateFileType,
   validateFileSize,
   formatFileSize,
   uploadWebsite,
-} from "../services/uploadService";
-import WebsiteCrawlerPanel from "./WebsiteCrawlerPanel";
+} from "../../services/uploadService";
+import WebsiteCrawlerPanel from "../WebsiteCrawlerPanel/WebsiteCrawlerPanel";
 
 export interface UploadScreenProps {
   sessionId: string;

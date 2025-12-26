@@ -2,8 +2,8 @@
 
 **專案名稱**: Multilingual RAG-Powered Chatbot  
 **分支**: `001-multilingual-rag-chatbot`  
-**最後更新**: 2025-12-22 (UI重設計與Tooltip功能完成)  
-**總任務數**: 118 + Phase 9.5 (Website Crawler) + Phase 9.6 (Resource Consumption UI) + Phase 9.7 (Prompt Visualization) + Phase 9.8 (UI Redesign & Tooltips)
+**最後更新**: 2025-12-26 (Session Heartbeat 優化 + UI 流程圖調整 + 6步驟RAG工作流程實現 + UI布局優化 + 副標題文字調整)  
+**總任務數**: 118 + Phase 9.5 (Website Crawler) + Phase 9.6 (Resource Consumption UI) + Phase 9.7 (Prompt Visualization) + Phase 9.8 (UI Redesign & Tooltips) + Phase 10.1 (6-Step RAG Workflow)
 
 ---
 
@@ -24,10 +24,12 @@
 | Phase 9.6 | 🆕 Resource Consumption UI | ✅ Complete | 4/4 | ✅ Type Checking | ⏳ Pending | ⏳ 準備中 |
 | Phase 9.7 | 🆕 AI Prompt Visualization | ✅ Complete | 6/6 | ✅ API Testing | ⏳ Pending | ✅ Completed |
 | Phase 9.8 | 🆕 UI Redesign & Tooltips | ✅ Complete | 4/4 | ✅ Component Testing | ⏳ Pending | ✅ Completed |
+| Phase 10.1 | 🆕 6-Step RAG Workflow | 🔄 In Progress | 2/4 | ⏳ Pending | ⏳ Pending | ⏳ Pending |
 | Phase 10 | Deployment & Production | 📋 Planning | 0/15 | ⏳ Pending | ⏳ Pending | N/A |
 
-**總進度**: 103/103 MVP tasks + 5/5 Website Crawler + 4/4 Resource Consumption + 6/6 AI Prompt Visualization + 4/4 UI Redesign ✅  
-**Phase 10**: 15 tasks - 上線部署與生產準備 (規劃中)
+**總進度**: 103/103 MVP tasks + 5/5 Website Crawler + 4/4 Resource Consumption + 6/6 AI Prompt Visualization + 4/4 UI Redesign + 2/4 6-Step RAG Workflow 🔄  
+**Phase 10**: 15 tasks - 上線部署與生產準備 (規劃中)  
+**Phase 10.1**: 4 tasks - 6步驟RAG工作流程 (進行中)
 
 ## 🎯 系統狀態
 
@@ -43,8 +45,35 @@
 - ✅ **🆕 資源消耗面板**: Token 消耗、爬蟲統計、時間追蹤
 - ✅ **🆕 AI Prompt 視覺化**: 系統透明度、實時 Prompt 顯示、憲法原則展示
 - ✅ **🆕 UI重設計**: 固定流程圖、About項目對話框、系統消息集成、Hover Tooltips
+- 🔄 **🆕 6步驟RAG工作流程**: RAG配置、Prompt配置、資料上傳、內容審查、文字處理、AI對談
 
-### 🆕 AI Prompt 視覺化功能 (Phase 9.7) ✨ COMPLETE
+### 🆕 6步驟RAG工作流程 (Phase 10.1) 🔄 IN PROGRESS
+- 🔄 **WorkflowStepper 主控制器** 
+  - ✅ 6步驟流程導航 (RAG配置 → Prompt配置 → 資料上傳 → 內容審查 → 文字處理 → AI對談)
+  - ✅ 步驟驗證與進度控制
+  - ✅ 參數狀態管理與實時顯示
+  - ✅ Bootstrap Toast 通知系統
+  - ✅ 上傳驗證 (用戶必須完成檔案上傳或網站爬蟲才能進入下一步)
+
+- ✅ **RagConfigStep 組件** (步驟1: RAG參數配置)
+  - 8個配置卡片: 相似度閾值、上下文窗口、Top-K檢索、引用策略、重排策略、Chunk大小/最小/重疊
+  - 滑動條和下拉選單交互式配置
+  - 實時參數值顯示和驗證
+
+- ✅ **PromptConfigStep 組件** (步驟2: Prompt模板配置)
+  - 自定義Prompt模板編輯
+  - 模板預覽和驗證
+  - 支援多語言Prompt
+
+- 🔄 **DataUploadStep 組件** (步驟3: 資料上傳)
+  - ✅ 40%/60% 左右分割布局 (系統設定+檔案類型 | 上傳介面)
+  - ✅ 檔案上傳和網站爬蟲整合
+  - ✅ 上傳驗證和Toast警告提示
+
+- ⏳ **後續步驟實現中**:
+  - ContentReviewStep (步驟4: 內容審查)
+  - TextProcessingStep (步驟5: 文字處理)  
+  - AiChatStep (步驟6: AI對談)
 - ✅ **後端 Prompt API** (256 行代碼)
   - `/api/v1/prompt/system-prompts`: 系統 Prompt 模板
   - `/api/v1/prompt/current-session-prompt`: 當前會話 Prompt
@@ -144,8 +173,33 @@
 - 📋 **手動測試**: Docker 環境正常運作，系統穩定
 - ✅ **爬蟲測試**: 可自動化測試 (HTTP、token limits、domain boundary)
 
-### 🆕 最新進展 (2025-12-21 16:15 UTC-5)
-- ✅ **AI Prompt 視覺化完成**: 用戶要求將 Prompt 視覺化移至首頁
+### 🆕 最新進展 (2025-12-26 15:30 UTC-5)
+- ✅ **Session Heartbeat 優化完成**: 解決session過期後持續發送API請求的問題
+  - ✅ 修改 `useSession.ts` heartbeat錯誤處理邏輯
+  - ✅ 檢測404/410錯誤時自動調用 `stopHeartbeat()`
+  - ✅ 避免無效API調用，提升系統效能和網路資源使用
+  - ✅ 完整文檔: `docs/HEARTBEAT_OPTIMIZATION_REPORT.md`
+  
+- ✅ **UI流程圖優化**: 移除重複顯示和視覺干擾
+  - ✅ 刪除 FixedRagFlow 組件中的"流程"小標題
+  - ✅ 移除每個流程步驟的文字標題顯示
+  - ✅ 保持圖標和箭頭，讓界面更簡潔清晰
+  - ✅ 避免與下方詳細說明重複
+
+- ✅ **Header組件保留**: 恢復完整Header功能但移除視覺干擾
+  - ✅ 恢復應用標題、語言選擇器、重啟按鈕等核心功能
+  - ✅ 保留Session信息和系統消息顯示
+  - ✅ 維持專業界面布局和用戶體驗
+
+- ✅ **UI布局優化完成** (2025-12-26 16:00 UTC-5)
+  - ✅ 副標題位置調整: 將"適用 6 個簡單步驟建立您的智能問答系統"移動到主標題下方
+  - ✅ 工作流程標題優化: 縮小"RAG 工作流程"文字大小(h2→h5)並移除圖標
+  - ✅ 整體視覺層次改善: 主標題更突出，副標題適當縮小
+  - ✅ 符合用戶界面設計要求的視覺優化
+  - ✅ 副標題內容更新: 改為"用視覺說明RAG運行的原理跟流程"以更準確反映功能
+
+### 🆕 AI Prompt 視覺化功能 (Phase 9.7) ✨ COMPLETE
+### 🆕 上個版本進展 (2025-12-21 16:15 UTC-5)
   - ✅ 後端: 實現完整的 Prompt API (`/api/v1/prompt/*`)
   - ✅ 前端: 創建 PromptVisualization 組件 (532 行)
   - ✅ 集成: 從 ChatScreen 移動至 main.tsx 首頁
@@ -1834,4 +1888,101 @@ py -3.12 -m pytest tests/test_phase8.py -v --no-cov
 - 持續的用戶測試與反饋收集
 - 性能優化與安全性加固
 
-**項目狀態**: MVP功能完備，增強功能持續開發中 
+**項目狀態**: MVP功能完備，增強功能持續開發中
+
+---
+
+## 🔄 最新開發進度 (2025-12-26)
+
+### 🏗️ 組件資料夾重組與代碼優化 (Phase 10.2) ✅ COMPLETE
+- ✅ **組件結構重組** 
+  - 將所有 31 個 React 組件移到各自的子資料夾
+  - 每個組件有專屬資料夾，包含 .tsx 和相關 .css 檔案
+  - 清理刪除 16 個空資料夾和備份檔案
+
+- ✅ **Import 路徑修正**
+  - 修正所有組件間的 import 路徑（34+ 個檔案）
+  - 修正 CSS 樣式檔案引用路徑
+  - 修正 types、services、hooks 的相對路徑引用
+  - 確保 TypeScript 編譯無錯誤
+
+- ✅ **前端運行問題修復**
+  - 解決 UploadScreen.css 路徑問題
+  - 修正 AiChatStep 組件的 ChatScreen import
+  - 消除所有 Vite build 錯誤
+  - 前端成功啟動於 localhost:5175
+
+### 🎨 WorkflowStepper UI 優化 (Phase 10.3) ✅ COMPLETE
+- ✅ **圖標數字化**
+  - 將工作流程圖標替換為數字 1-6
+  - 保留已完成步驟的勾選圖標顯示
+
+- ✅ **互動式詳細說明系統**
+  - 每個步驟可點擊整個區域觸發 Bootstrap Toast
+  - 50-80 字的詳細步驟說明
+  - 6 個步驟的完整說明內容：
+    * RAG 參數配置：相似度閾值、檢索段落數等核心參數說明
+    * Prompt 配置：AI助手角色定位、回答風格設定
+    * 資料上傳：文檔上傳和網站爬取功能介紹
+    * 內容審核：安全檢查和隱私資料保護
+    * 文本切割向量嵌入：技術處理步驟說明
+    * AI 對談：問答功能和引用機制介紹
+
+- ✅ **Toast 組件優化**
+  - 移除右上角 X 關閉按鈕
+  - 新增底部"確定"按鈕關閉功能
+  - Toast 顯示位置：右上角固定位置
+  - 包含步驟標題和詳細說明
+
+- ✅ **完成狀態視覺化**
+  - 已完成步驟標題後方顯示綠色打勾圖標
+  - 使用 `bi-check-circle-fill` Bootstrap Icons
+  - 適當大小和間距調整
+
+- ✅ **交互體驗優化**
+  - 移除 disabled 步驟的 `pointer-events: none` 限制
+  - 所有步驟（1-6）均可點擊查看詳細說明
+  - 改善使用者學習和了解流程的體驗
+
+### 📁 代碼組織改善
+```
+組件重組前: 平面結構 (50+ 檔案在同一層)
+components/
+├── Header.tsx
+├── WorkflowStepper.tsx  
+├── MetricsPanel.tsx
+├── MetricsPanel.css
+└── ...
+
+組件重組後: 層次結構 (31 個子資料夾)
+components/
+├── Header/
+│   └── Header.tsx
+├── WorkflowStepper/
+│   ├── WorkflowStepper.tsx
+│   └── WorkflowStepper.css
+├── MetricsPanel/
+│   ├── MetricsPanel.tsx
+│   └── MetricsPanel.css
+└── ...
+```
+
+### 🔧 技術債務清理
+- ✅ 刪除未使用的備份檔案
+- ✅ 統一 import 路徑格式
+- ✅ 改善代碼可維護性
+- ✅ 提升開發者體驗
+
+### ⚡ 系統狀態
+- ✅ 前端正常運行 (localhost:5175)
+- ✅ 所有 TypeScript 編譯無錯誤
+- ✅ 組件結構清晰有序
+- ✅ WorkflowStepper 交互功能完整
+- ✅ 用戶體驗優化完成
+
+---
+
+**下一對話框準備重點**:
+- Phase 10.1: 完成剩餘 6步驟 RAG 工作流程組件
+- Phase 10: 部署與生產準備
+- 持續的用戶測試與反饋收集 

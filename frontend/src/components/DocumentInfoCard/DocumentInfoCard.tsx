@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getSession } from "../services/sessionService";
+import { getSession } from "../../services/sessionService";
 
 interface DocumentInfoCardProps {
   sessionId: string;

@@ -8,24 +8,24 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ChatMessage } from "./ChatMessage";
-import { ChatInput } from "./ChatInput";
-import { MetricsPanel } from "./MetricsPanel";
-import { DocumentInfoCard } from "./DocumentInfoCard";
-import ResourceConsumptionPanel from "./ResourceConsumptionPanel";
-import CrawledUrlsPanel from "./CrawledUrlsPanel";
+import { ChatMessage } from "../ChatMessage/ChatMessage";
+import { ChatInput } from "../ChatInput/ChatInput";
+import { MetricsPanel } from "../MetricsPanel/MetricsPanel";
+import { DocumentInfoCard } from "../DocumentInfoCard/DocumentInfoCard";
+import ResourceConsumptionPanel from "../ResourceConsumptionPanel/ResourceConsumptionPanel";
+import CrawledUrlsPanel from "../CrawledUrlsPanel/CrawledUrlsPanel";
 import {
   ChatRole,
   ResponseType,
   type ChatMessage as ChatMessageType,
   type ChatResponse,
-} from "../types/chat";
+} from "../../types/chat";
 import {
   getSessionMetrics,
   type SessionMetrics,
-} from "../services/metricsService";
-import { getSession } from "../services/sessionService";
-import { type CrawledPage } from "../services/uploadService";
+} from "../../services/metricsService";
+import { getSession } from "../../services/sessionService";
+import { type CrawledPage } from "../../services/uploadService";
 
 interface ChatScreenProps {
   sessionId: string;

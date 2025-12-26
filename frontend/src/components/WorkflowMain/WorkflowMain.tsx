@@ -5,9 +5,9 @@
 
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import WorkflowStepper from "./WorkflowStepper";
-import ChatScreen from "./ChatScreen";
-import { ResponseType } from "../types/chat";
+import WorkflowStepper from "../WorkflowStepper/WorkflowStepper";
+import ChatScreen from "../ChatScreen/ChatScreen";
+import { ResponseType } from "../../types/chat";
 
 export interface WorkflowMainProps {
   sessionId?: string;
@@ -175,12 +175,8 @@ const WorkflowMain: React.FC<WorkflowMainProps> = ({
       {/* 全屏幕寫度 */}
       <div className="w-100 px-3">
         {/* 標題 */}
-        <div className="mb-4 text-center">
-          <h2>
-            <i className="bi bi-diagram-3 me-2 text-primary"></i>
-            {t("workflow.title", "RAG 工作流程")}
-          </h2>
-          <p className="text-muted">遵循 6 個簡單步驟建立您的智能問答系統</p>
+        <div className="text-center">
+          <h5 className="mb-0">{t("workflow.title", "RAG 工作流程")}</h5>
         </div>
 
         {/* 工作流程步驟器 */}
