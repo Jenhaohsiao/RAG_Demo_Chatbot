@@ -75,7 +75,11 @@ export const closeSession = async (sessionId: string): Promise<void> => {
  * @returns New session details
  */
 export const restartSession = async (sessionId: string): Promise<SessionResponse> => {
-  const response = await api.post<SessionResponse>(`/session/${sessionId}/restart`);
+  const response = await api.post<SessionResponse>(`/session/${sessionId}/restart`, {}, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
   return response.data;
 };
 

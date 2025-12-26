@@ -45,6 +45,16 @@ export const useSession = (): UseSessionReturn => {
   const heartbeatTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   /**
+   * Stop heartbeat timer
+   */
+  const stopHeartbeat = useCallback(() => {
+    if (heartbeatTimerRef.current) {
+      clearInterval(heartbeatTimerRef.current);
+      heartbeatTimerRef.current = null;
+    }
+  }, []);
+
+  /**
    * Start heartbeat timer
    */
   const startHeartbeat = useCallback((currentSessionId: string) => {
@@ -61,20 +71,17 @@ export const useSession = (): UseSessionReturn => {
         console.log(`Heartbeat sent for session ${currentSessionId}`);
       } catch (err) {
         console.error('Heartbeat failed:', err);
-        setError('Failed to maintain session');
+        // 检查具体错误类型
+        if (err instanceof Error && (err.message.includes('404') || err.message.includes('410'))) {
+          setError('會話已過期，請重新開始');
+          // Session已過期，停止heartbeat timer
+          stopHeartbeat();
+        } else {
+          setError('無法維持會話連線，請檢查網路連線');
+        }
       }
     }, HEARTBEAT_INTERVAL);
-  }, []);
-
-  /**
-   * Stop heartbeat timer
-   */
-  const stopHeartbeat = useCallback(() => {
-    if (heartbeatTimerRef.current) {
-      clearInterval(heartbeatTimerRef.current);
-      heartbeatTimerRef.current = null;
-    }
-  }, []);
+  }, [stopHeartbeat]);
 
   /**
    * Create new session

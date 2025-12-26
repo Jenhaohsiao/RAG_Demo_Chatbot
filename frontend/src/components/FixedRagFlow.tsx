@@ -162,11 +162,6 @@ const FixedRagFlow: React.FC<FixedRagFlowProps> = ({
       )}
 
       <div className="fixed-rag-flow border-bottom p-3 ">
-        <div className="row mb-2">
-          <div className="col-12">
-            <h4 className="mb-0 text-dark fw-bold">流程</h4>
-          </div>
-        </div>
         <div className="row">
           <div className="col-12">
             <div className="row justify-content-center g-2">
@@ -205,16 +200,6 @@ const FixedRagFlow: React.FC<FixedRagFlowProps> = ({
                               style={{ fontSize: "1.2rem" }}
                             ></i>
                           )}
-                          <div
-                            className="step-title fw-bold"
-                            style={{
-                              fontSize: "0.9rem",
-                              color:
-                                isActive && !isCurrent ? "#198754" : undefined,
-                            }}
-                          >
-                            {step.titleZh}
-                          </div>
                         </div>
                       </button>
 

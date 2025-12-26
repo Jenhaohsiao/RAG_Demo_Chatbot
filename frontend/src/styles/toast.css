@@ -1,0 +1,92 @@
+/* Toast Message Styles */
+.toast {
+  --bs-toast-zindex: 9999;
+  --bs-toast-padding-x: 1rem;
+  --bs-toast-padding-y: 0.75rem;
+  --bs-toast-spacing: 0.25rem;
+  --bs-toast-max-width: 400px;
+  --bs-toast-font-size: 0.875rem;
+  --bs-toast-color: var(--bs-body-color);
+  --bs-toast-bg: rgba(255, 255, 255, 0.95);
+  --bs-toast-border-width: 1px;
+  --bs-toast-border-color: var(--bs-border-color-translucent);
+  --bs-toast-border-radius: 0.5rem;
+  --bs-toast-box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.toast.show {
+  display: block;
+  animation: slideInRight 0.3s ease-out;
+}
+
+.toast-header {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.toast-body {
+  word-wrap: break-word;
+}
+
+/* Toast 进入动画 */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Toast 退出动画 */
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* 不同类型的Toast颜色 */
+.toast.bg-danger .toast-header {
+  background-color: rgba(220, 53, 69, 0.1);
+  border-bottom-color: rgba(220, 53, 69, 0.2);
+}
+
+.toast.bg-warning .toast-header {
+  background-color: rgba(255, 193, 7, 0.1);
+  border-bottom-color: rgba(255, 193, 7, 0.2);
+}
+
+.toast.bg-info .toast-header {
+  background-color: rgba(13, 202, 240, 0.1);
+  border-bottom-color: rgba(13, 202, 240, 0.2);
+}
+
+.toast.bg-success .toast-header {
+  background-color: rgba(25, 135, 84, 0.1);
+  border-bottom-color: rgba(25, 135, 84, 0.2);
+}
+
+/* 确保Toast在移动设备上的响应式 */
+@media (max-width: 576px) {
+  .toast {
+    --bs-toast-max-width: calc(100vw - 2rem);
+    margin: 0 1rem;
+  }
+}
+
+/* 确保Toast在高DPI屏幕上的清晰度 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .toast {
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+  }
+}

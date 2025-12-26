@@ -1,0 +1,471 @@
+/* Workflow Stepper Styles */
+
+.workflow-stepper {
+  padding: 20px 0;
+  max-width: 100%;
+  width: 100%;
+  margin: 0;
+}
+
+.stepper-header {
+  position: relative;
+  width: 100%;
+}
+
+/* 水平排列的步驟項目 */
+.stepper-header .d-flex {
+  width: 100%;
+  gap: 0;
+}
+
+.stepper-item {
+  position: relative;
+  text-align: center;
+  padding: 15px 10px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  flex: 1;
+  min-width: 0; /* 允許彈性收縮 */
+}
+
+.stepper-item:hover:not(.disabled) {
+  transform: translateY(-3px);
+  background-color: rgba(13, 110, 253, 0.05);
+  border-radius: 8px;
+}
+
+.stepper-item.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.stepper-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 15px;
+  font-size: 24px;
+  font-weight: bold;
+  border: 3px solid transparent;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.stepper-item.active .stepper-circle {
+  border-color: #0d6efd;
+  box-shadow: 0 0 20px rgba(13, 110, 253, 0.4);
+  transform: scale(1.15);
+}
+
+.stepper-item.completed .stepper-circle {
+  background-color: #198754 !important;
+  border-color: #146c43;
+}
+
+/* 步驟文本樣式 */
+.stepper-text {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.stepper-title {
+  font-size: 13px;
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #495057;
+  line-height: 1.2;
+  min-height: 32px; /* 確保所有標題高度一致 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stepper-item.active .stepper-title {
+  color: #0d6efd;
+  font-weight: 700;
+}
+
+.stepper-item.completed .stepper-title {
+  color: #198754;
+}
+
+.stepper-description {
+  font-size: 10px;
+  line-height: 1.3;
+  color: #6c757d;
+  max-width: 100px;
+  margin: 0 auto;
+  min-height: 26px; /* 確保所有描述高度一致 */
+}
+
+/* 水平連接線樣式 */
+.stepper-connector {
+  position: absolute;
+  top: 50px; /* 調整到圓圈中心 */
+  left: calc(100% - 20px);
+  width: 40px; /* 連接線寬度 */
+  height: 4px;
+  z-index: 1;
+}
+
+.connector-line {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #dee2e6 0%, #dee2e6 100%);
+  border-radius: 2px;
+  position: relative;
+}
+
+.connector-line.completed {
+  background: linear-gradient(90deg, #198754 0%, #198754 100%);
+}
+
+/* 進度條樣式 */
+.progress {
+  height: 6px !important;
+  background-color: #e9ecef;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  transition: width 0.6s ease;
+  background: linear-gradient(90deg, #0d6efd 0%, #0056b3 100%);
+}
+
+/* 當前步驟資訊樣式 */
+.current-step-info {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 0;
+  padding: 25px 30px;
+  border-left: 5px solid #0d6efd;
+  box-shadow: none;
+  width: 100%;
+  margin: 20px 0;
+}
+
+/* 導航按鈕樣式 */
+.stepper-navigation {
+  border-top: 1px solid #dee2e6;
+  padding: 20px 30px;
+  margin: 20px 0 0 0;
+  width: 100%;
+  background: #f8f9fa;
+}
+
+.step-counter {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  color: #6c757d;
+}
+
+/* 步驟內容區域 */
+.step-content {
+  width: 100%;
+  max-width: 100%;
+  min-height: 400px;
+  background: #ffffff;
+  border-radius: 0;
+  padding: 30px 0;
+  margin: 0;
+  border: none;
+  box-shadow: none;
+}
+
+/* 響應式設計 */
+@media (max-width: 1200px) {
+  .stepper-title {
+    font-size: 12px;
+    min-height: 28px;
+  }
+  
+  .stepper-description {
+    font-size: 9px;
+    min-height: 22px;
+  }
+  
+  .stepper-circle {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 992px) {
+  .stepper-title {
+    font-size: 11px;
+    min-height: 24px;
+  }
+  
+  .stepper-description {
+    font-size: 8px;
+    min-height: 20px;
+    max-width: 80px;
+  }
+  
+  .stepper-circle {
+    width: 45px;
+    height: 45px;
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  .stepper-item {
+    padding: 10px 5px;
+  }
+}
+
+@media (max-width: 768px) {
+  .workflow-stepper {
+    padding: 15px 10px;
+  }
+  
+  .stepper-title {
+    font-size: 10px;
+    min-height: 20px;
+  }
+  
+  .stepper-description {
+    font-size: 7px;
+    min-height: 18px;
+    max-width: 70px;
+  }
+  
+  .stepper-circle {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+  
+  .stepper-connector {
+    top: 42px;
+    width: 30px;
+    height: 3px;
+  }
+  
+  .current-step-info {
+    padding: 20px 15px;
+  }
+  
+  .step-content {
+    padding: 20px 15px;
+    min-height: 300px;
+  }
+  
+  .stepper-navigation {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 576px) {
+  .stepper-header .d-flex {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
+  
+  .stepper-item {
+    min-width: 80px;
+    flex: 0 0 auto;
+  }
+  
+  .stepper-title {
+    font-size: 9px;
+    min-height: 18px;
+  }
+  
+  .stepper-description {
+    font-size: 6px;
+    min-height: 16px;
+    max-width: 60px;
+  }
+  
+  .stepper-circle {
+    width: 35px;
+    height: 35px;
+    font-size: 14px;
+  }
+}
+
+.step-counter {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  color: #6c757d;
+}
+
+/* RAG設置卡片樣式 */
+.rag-config-step .card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-width: 2px;
+}
+
+.rag-config-step .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.rag-config-step .card-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.rag-config-step .form-range {
+  height: 8px;
+}
+
+.rag-config-step .form-range::-webkit-slider-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.rag-config-step .form-range::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* 響應式卡片佈局調整 */
+@media (max-width: 1400px) {
+  .rag-config-step .col-xl-3 {
+    flex: 0 0 33.333%;
+  }
+}
+
+@media (max-width: 1200px) {
+  .rag-config-step .col-xl-3 {
+    flex: 0 0 50%;
+  }
+}
+
+@media (max-width: 768px) {
+  .rag-config-step .col-lg-4 {
+    flex: 0 0 100%;
+  }
+}
+
+/* 動畫效果 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rag-config-step .card {
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+.rag-config-step .card:nth-child(1) { animation-delay: 0.1s; }
+.rag-config-step .card:nth-child(2) { animation-delay: 0.2s; }
+.rag-config-step .card:nth-child(3) { animation-delay: 0.3s; }
+.rag-config-step .card:nth-child(4) { animation-delay: 0.4s; }
+.rag-config-step .card:nth-child(5) { animation-delay: 0.5s; }
+.rag-config-step .card:nth-child(6) { animation-delay: 0.6s; }
+.rag-config-step .card:nth-child(7) { animation-delay: 0.7s; }
+.rag-config-step .card:nth-child(8) { animation-delay: 0.8s; }
+
+/* Prompt設置卡片樣式 */
+.prompt-config-step .card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-width: 2px;
+}
+
+.prompt-config-step .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.prompt-config-step .card-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.prompt-config-step .card {
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+.prompt-config-step .card:nth-child(1) { animation-delay: 0.1s; }
+.prompt-config-step .card:nth-child(2) { animation-delay: 0.2s; }
+.prompt-config-step .card:nth-child(3) { animation-delay: 0.3s; }
+.prompt-config-step .card:nth-child(4) { animation-delay: 0.4s; }
+
+/* 動畫效果 */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.stepper-item.active .stepper-circle {
+  animation: pulse 2s infinite;
+}
+
+.progress-bar {
+  transition: width 0.5s ease-in-out;
+}
+
+/* 重點參數數據顯示樣式 */
+.key-params-summary {
+  background: rgba(13, 110, 253, 0.05);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(13, 110, 253, 0.1);
+  margin-top: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.key-params-summary .badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid rgba(108, 117, 125, 0.2);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.key-params-summary .badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.key-params-summary .badge.bg-primary {
+  border-color: rgba(13, 110, 253, 0.3);
+}
+
+.key-params-summary .badge.bg-success {
+  border-color: rgba(25, 135, 84, 0.3);
+}
+
+.key-params-summary .badge.bg-info {
+  border-color: rgba(13, 202, 240, 0.3);
+}
+
+.key-params-summary .badge.bg-warning {
+  border-color: rgba(255, 193, 7, 0.3);
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .key-params-summary {
+    padding: 6px 8px;
+  }
+  
+  .key-params-summary .badge {
+    font-size: 0.7rem;
+    margin-bottom: 2px !important;
+    margin-right: 4px !important;
+  }
+}

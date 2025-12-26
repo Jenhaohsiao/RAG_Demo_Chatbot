@@ -15,6 +15,7 @@ import "./styles/professional-header.css"; // Professional header styles
 import "./styles/fixed-rag-flow.css"; // Fixed flow styles
 import "./styles/custom-tooltip.css"; // Flow step styles (Bootstrap tooltip compatible)
 import "./styles/two-column-layout.css"; // Two-column layout styles
+import "./styles/toast.css"; // Toast message styles
 import "./i18n/config";
 import { useTranslation } from "react-i18next";
 import i18n from "./i18n/config";
@@ -29,6 +30,7 @@ import ErrorBoundary from "./components/ErrorBoundary"; // T093: Import Error Bo
 import PromptVisualization from "./components/PromptVisualization";
 import FixedRagFlow from "./components/FixedRagFlow";
 import AboutProjectModal from "./components/AboutProjectModal";
+import WorkflowMain from "./components/WorkflowMain"; // New workflow integration
 import { useSession } from "./hooks/useSession";
 import { useUpload } from "./hooks/useUpload";
 import { submitQuery } from "./services/chatService";
@@ -73,6 +75,13 @@ const App: React.FC = () => {
   const [chatPhase, setChatPhase] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [similarityThreshold, setSimilarityThreshold] = useState(0.5);
+  const [maxFileSizeMB, setMaxFileSizeMB] = useState(10);
+  const [supportedFileTypes, setSupportedFileTypes] = useState(["pdf", "txt"]);
+  const [crawlerMaxTokens, setCrawlerMaxTokens] = useState(100000);
+  const [crawlerMaxPages, setCrawlerMaxPages] = useState(10);
+  const [ragContextWindow, setRagContextWindow] = useState(5);
+  const [ragCitationStyle, setRagCitationStyle] = useState("numbered");
+  const [ragFallbackMode, setRagFallbackMode] = useState("flexible");
 
   // T084-T085: Session control confirmation dialogs
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
@@ -82,6 +91,7 @@ const App: React.FC = () => {
     type: "error" | "warning" | "info" | "success";
     message: string;
   } | null>(null);
+  const [isBlocked, setIsBlocked] = useState(false); // 阻止用户操作直到确认消息
 
   // T074: Setup RTL support for Arabic language
   React.useEffect(() => {
@@ -128,6 +138,39 @@ const App: React.FC = () => {
     }
   };
 
+  // 處理來自 PromptVisualization 的參數變更
+  const handleParameterChange = (parameter: string, value: any) => {
+    switch (parameter) {
+      case "similarity_threshold":
+        handleThresholdChange(value);
+        break;
+      case "max_file_size_mb":
+        setMaxFileSizeMB(value);
+        break;
+      case "supported_file_types":
+        setSupportedFileTypes(value);
+        break;
+      case "crawler_max_tokens":
+        setCrawlerMaxTokens(value);
+        break;
+      case "crawler_max_pages":
+        setCrawlerMaxPages(value);
+        break;
+      case "rag_context_window":
+        setRagContextWindow(value);
+        break;
+      case "rag_citation_style":
+        setRagCitationStyle(value);
+        break;
+      case "rag_fallback_mode":
+        setRagFallbackMode(value);
+        break;
+      default:
+        console.log(`RAG 參數變更: ${parameter} = ${value}`);
+        break;
+    }
+  };
+
   // Auto-create session on component mount
   React.useEffect(() => {
     if (!sessionId && !isLoading) {
@@ -142,13 +185,16 @@ const App: React.FC = () => {
         type: "error",
         message: error,
       });
+      setIsBlocked(true); // 阻止操作直到用户确认
     } else if (isFailed && statusResponse?.error_message) {
       setSystemMessage({
         type: "error",
         message: statusResponse.error_message,
       });
+      setIsBlocked(true); // 阻止操作直到用户确认
     } else if (systemMessage?.type === "error") {
       setSystemMessage(null);
+      setIsBlocked(false); // 清除阻止状态
     }
   }, [error, isFailed, statusResponse?.error_message, systemMessage?.type]);
 
@@ -204,7 +250,35 @@ const App: React.FC = () => {
       // Error is already handled in useSession.updateLanguage
     }
   };
+  // 处理系统消息确认
+  const handleDismissMessage = () => {
+    setSystemMessage(null);
+    setIsBlocked(false);
+  };
 
+  // 处理session错误时的重启
+  const handleRestartSession = async () => {
+    try {
+      setSystemMessage(null);
+      setIsBlocked(false);
+      await restartSession();
+      resetUpload();
+      setChatPhase(false);
+
+      // 显示成功提示
+      setSystemMessage({
+        type: "success",
+        message: "Session 更新成功！",
+      });
+    } catch (err) {
+      console.error("[handleRestartSession] Error:", err);
+      // 显示错误提示
+      setSystemMessage({
+        type: "error",
+        message: "Session 更新失敗，請稍後再試。",
+      });
+    }
+  };
   // T086: Leave button handler - shows confirmation dialog
   const handleLeaveClick = () => {
     setShowLeaveConfirm(true);
@@ -234,8 +308,19 @@ const App: React.FC = () => {
       resetUpload();
       setChatPhase(false);
       setShowRestartConfirm(false);
+
+      // 显示成功提示
+      setSystemMessage({
+        type: "success",
+        message: "Session 重新啟動成功！系統已重置為初始狀態。",
+      });
     } catch (err) {
       console.error("[handleConfirmRestart] Error:", err);
+      // 显示错误提示
+      setSystemMessage({
+        type: "error",
+        message: "Session 重新啟動失敗，請稍後再試。",
+      });
     }
   };
 
@@ -292,132 +377,45 @@ const App: React.FC = () => {
         onRestart={handleRestartClick}
         onAboutClick={() => setShowAboutModal(true)}
         systemMessage={systemMessage}
-        onDismissMessage={() => setSystemMessage(null)}
+        onDismissMessage={handleDismissMessage}
+        onRestartSession={handleRestartSession}
       />
 
-      {/* Fixed RAG Process Flow */}
-      <FixedRagFlow
-        currentStep={
-          chatPhase
-            ? "ready"
-            : isCompleted
-            ? "ready"
-            : uploadResponse
-            ? "processing"
-            : "prepare"
-        }
-      />
+      {/* Workflow Mode Content */}
+      <div
+        className={`w-100 ${isBlocked ? "position-relative" : ""}`}
+        style={{ minHeight: "calc(100vh - 80px)" }}
+      >
+        {/* 阻止遮罩层 */}
+        {isBlocked && (
+          <div
+            className="position-fixed"
+            style={{
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0, 0, 0, 0.3)",
+              zIndex: 9998,
+              cursor: "not-allowed",
+            }}
+          />
+        )}
 
-      <main className="flex-grow-1 container-fluid mt-4">
-        <div className="row">
-          {/* Loading State */}
-          {isLoading && !sessionId && (
-            <div className="col-12">
-              <div className="card text-center">
-                <div className="card-body py-5">
-                  <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                  <p className="text-muted mt-3">
-                    Initializing your session...
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Two-Column Layout for Upload Phase */}
-          {sessionId && !chatPhase && (
-            <>
-              {/* Left Column: Parameters and Settings */}
-              <div className="col-lg-6 col-xl-4 mb-4 ">
-                <div className="card h-100 border-secondary fixed-rag-flow">
-                  <div className="card-header bg-light">
-                    <h5 className="card-title mb-0">
-                      <i className="bi bi-gear-fill text-primary me-2"></i>
-                      {t("parameters.title", "參數設定")}
-                    </h5>
-                  </div>
-                  <div className="card-body">
-                    {/* Prompt Visualization - AI Prompt 視覺化 */}
-                    <PromptVisualization
-                      sessionId={sessionId}
-                      currentLanguage="zh"
-                      hasDocuments={!!uploadResponse}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Column: Upload Interface */}
-              <div className="col-lg-6 col-xl-8 mb-4">
-                <div className="card h-100 border-secondary">
-                  <div className="card-header bg-light">
-                    <h5 className="card-title mb-0">
-                      <i className="bi bi-cloud-upload-fill text-info me-2"></i>
-                      {t("upload.title", "資料上傳")}
-                    </h5>
-                  </div>
-                  <div className="card-body">
-                    {/* Upload Screen */}
-                    <UploadScreen
-                      sessionId={sessionId}
-                      onFileSelected={wrappedFileUpload}
-                      onUrlSubmitted={wrappedUrlUpload}
-                      disabled={false}
-                    />
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* Chat Screen - After Upload Complete */}
-          {sessionId && chatPhase && uploadResponse && statusResponse && (
-            <div className="col-12">
-              <>
-                {console.log("[App] ChatScreen props:", {
-                  sessionId,
-                  documentSummary: statusResponse.summary,
-                  chunkCount: statusResponse.chunk_count,
-                  tokensUsed: statusResponse.tokens_used,
-                  pagesCrawled: statusResponse.pages_crawled,
-                  crawledPages: statusResponse.crawled_pages,
-                  crawlDurationSeconds: statusResponse.crawl_duration_seconds,
-                  avgTokensPerPage: statusResponse.avg_tokens_per_page,
-                  fullStatusResponse: statusResponse,
-                })}
-                <ChatScreen
-                  sessionId={sessionId}
-                  documentSummary={statusResponse.summary}
-                  sourceReference={statusResponse.source_reference}
-                  sourceType={uploadResponse.source_type}
-                  chunkCount={statusResponse.chunk_count}
-                  tokensUsed={statusResponse.tokens_used}
-                  pagesCrawled={statusResponse.pages_crawled}
-                  crawledPages={statusResponse.crawled_pages}
-                  baseUrl={statusResponse.source_reference}
-                  crawlDurationSeconds={statusResponse.crawl_duration_seconds}
-                  avgTokensPerPage={statusResponse.avg_tokens_per_page}
-                  totalTokenLimit={32000}
-                  onSendQuery={async (query: string): Promise<ChatResponse> => {
-                    // 標準化語言代碼：zh-TW -> zh, en-US -> en
-                    const normalizedLang = language.split("-")[0];
-                    console.log(
-                      "[App] Sending query with language:",
-                      normalizedLang,
-                      "(original:",
-                      language,
-                      ")"
-                    );
-                    return await submitQuery(sessionId, query, normalizedLang);
-                  }}
-                />
-              </>
-            </div>
-          )}
-        </div>
-      </main>
+        <WorkflowMain
+          sessionId={sessionId}
+          onParameterChange={handleParameterChange}
+          onShowMessage={setSystemMessage}
+          similarityThreshold={similarityThreshold}
+          maxFileSizeMB={maxFileSizeMB}
+          supportedFileTypes={supportedFileTypes}
+          crawlerMaxTokens={crawlerMaxTokens}
+          crawlerMaxPages={crawlerMaxPages}
+          ragContextWindow={ragContextWindow}
+          ragCitationStyle={ragCitationStyle}
+          ragFallbackMode={ragFallbackMode}
+        />
+      </div>
 
       {/* Processing Modal */}
       {showModal && uploadResponse && statusResponse && (

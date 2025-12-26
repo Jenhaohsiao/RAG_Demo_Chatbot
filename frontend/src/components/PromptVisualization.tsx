@@ -47,7 +47,16 @@ interface PromptParameters {
   similarity_threshold: number;
   token_threshold: number;
   session_ttl_minutes: number;
-  prompt_type: "rag" | "general" | "summary";
+  max_file_size_mb: number;
+  crawler_max_tokens: number;
+  crawler_max_pages: number;
+  rag_context_window: number;
+  rag_citation_style: "numbered" | "inline" | "none";
+  rag_fallback_mode: "strict" | "flexible";
+  rag_top_k: number;
+  rag_chunk_size: number;
+  rag_chunk_overlap: number;
+  rag_min_chunk_length: number;
   response_style: "concise" | "standard" | "detailed";
   professional_level: "casual" | "professional" | "academic";
   creativity_level: "conservative" | "balanced" | "creative";
@@ -77,8 +86,17 @@ const PromptVisualization: React.FC<PromptVisualizationProps> = ({
     input_language: "auto",
     similarity_threshold: 0.7,
     token_threshold: 10000,
-    session_ttl_minutes: 60,
-    prompt_type: "rag",
+    session_ttl_minutes: 5,
+    max_file_size_mb: 10,
+    crawler_max_tokens: 100000,
+    crawler_max_pages: 10,
+    rag_context_window: 5,
+    rag_citation_style: "numbered",
+    rag_fallback_mode: "flexible",
+    rag_top_k: 8,
+    rag_chunk_size: 2000,
+    rag_chunk_overlap: 500,
+    rag_min_chunk_length: 100,
     response_style: "standard",
     professional_level: "professional",
     creativity_level: "balanced",
@@ -87,8 +105,9 @@ const PromptVisualization: React.FC<PromptVisualizationProps> = ({
   });
 
   // 折疊狀態管理
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isStyleCollapsed, setIsStyleCollapsed] = useState(true);
+  const [isRagCollapsed, setIsRagCollapsed] = useState(false);
+  const [isResponseCollapsed, setIsResponseCollapsed] = useState(true);
+  const [isSystemCollapsed, setIsSystemCollapsed] = useState(true);
   const [isFileTypeCollapsed, setIsFileTypeCollapsed] = useState(true);
   const [isPrinciplesCollapsed, setIsPrinciplesCollapsed] = useState(true);
 
@@ -255,23 +274,26 @@ const PromptVisualization: React.FC<PromptVisualizationProps> = ({
 
         {!loading && !error && (
           <div>
-            {/* 核心參數 */}
+            {/* RAG 設定 */}
             <div className="card row-mb-3 mb-3">
               <div
                 className="card-header bg-light"
                 style={{ cursor: "pointer" }}
-                onClick={() => setIsCollapsed(!isCollapsed)}
+                onClick={() => setIsRagCollapsed(!isRagCollapsed)}
               >
                 <div className="d-flex justify-content-between align-items-center">
-                  <h5 className="card-title mb-0">核心參數</h5>
+                  <h5 className="card-title mb-0">
+                    <i className="bi bi-search me-2"></i>
+                    RAG 設定
+                  </h5>
                   <i
                     className={`bi ${
-                      isCollapsed ? "bi-chevron-down" : "bi-chevron-up"
+                      isRagCollapsed ? "bi-chevron-down" : "bi-chevron-up"
                     }`}
                   ></i>
                 </div>
               </div>
-              {!isCollapsed && (
+              {!isRagCollapsed && (
                 <>
                   <div className="p-3 mt-2">
                     <label className="form-label">
@@ -292,8 +314,200 @@ const PromptVisualization: React.FC<PromptVisualizationProps> = ({
                         )
                       }
                     />
+                    <div className="d-flex justify-content-between small text-muted">
+                      <span>0.1 (寬鬆)</span>
+                      <span>0.9 (精確)</span>
+                    </div>
                   </div>
 
+                  <div className="p-3 mt-2">
+                    <label className="form-label">
+                      上下文節段數量<small> (每次查詢使用)</small>:{" "}
+                      {parameters.rag_context_window}
+                    </label>
+                    <input
+                      type="range"
+                      className="form-range"
+                      min="1"
+                      max="10"
+                      step="1"
+                      value={parameters.rag_context_window}
+                      onChange={(e) =>
+                        handleParameterChange(
+                          "rag_context_window",
+                          parseInt(e.target.value)
+                        )
+                      }
+                    />
+                    <div className="d-flex justify-content-between small text-muted">
+                      <span>1個</span>
+                      <span>10個</span>
+                    </div>
+                  </div>
+
+                  <div className="p-3 mt-2">
+                    <label className="form-label">引用格式</label>
+                    <select
+                      className="form-select form-select-sm"
+                      value={parameters.rag_citation_style}
+                      onChange={(e) =>
+                        handleParameterChange(
+                          "rag_citation_style",
+                          e.target.value
+                        )
+                      }
+                    >
+                      <option value="numbered">
+                        編號引用 (文檔1, 文檔2...)
+                      </option>
+                      <option value="inline">內嵌引用 (根據文檔...)</option>
+                      <option value="none">不顯示引用</option>
+                    </select>
+                  </div>
+
+                  <div className="p-3 mt-2">
+                    <label className="form-label">回應模式</label>
+                    <select
+                      className="form-select form-select-sm"
+                      value={parameters.rag_fallback_mode}
+                      onChange={(e) =>
+                        handleParameterChange(
+                          "rag_fallback_mode",
+                          e.target.value
+                        )
+                      }
+                    >
+                      <option value="strict">嚴格模式 (僅基於文檔回答)</option>
+                      <option value="flexible">
+                        彈性模式 (允許一般知識補充)
+                      </option>
+                    </select>
+                  </div>
+
+                  <div className="p-3 mt-2">
+                    <label className="form-label">
+                      Top-K 檢索數量<small> (候選段落數)</small>:{" "}
+                      {parameters.rag_top_k}
+                    </label>
+                    <input
+                      type="range"
+                      className="form-range"
+                      min="3"
+                      max="20"
+                      step="1"
+                      value={parameters.rag_top_k}
+                      onChange={(e) =>
+                        handleParameterChange(
+                          "rag_top_k",
+                          parseInt(e.target.value)
+                        )
+                      }
+                    />
+                    <div className="d-flex justify-content-between small text-muted">
+                      <span>3個 (精確)</span>
+                      <span>20個 (寬鬆)</span>
+                    </div>
+                  </div>
+
+                  <div className="p-3 mt-2">
+                    <label className="form-label">
+                      Chunk 大小<small> (文檔分割單位)</small>:{" "}
+                      {parameters.rag_chunk_size} 字元
+                    </label>
+                    <input
+                      type="range"
+                      className="form-range"
+                      min="1000"
+                      max="4000"
+                      step="200"
+                      value={parameters.rag_chunk_size}
+                      onChange={(e) =>
+                        handleParameterChange(
+                          "rag_chunk_size",
+                          parseInt(e.target.value)
+                        )
+                      }
+                    />
+                    <div className="d-flex justify-content-between small text-muted">
+                      <span>1K (細粒度)</span>
+                      <span>4K (完整性)</span>
+                    </div>
+                  </div>
+
+                  <div className="p-3 mt-2">
+                    <label className="form-label">
+                      Chunk 重疊大小<small> (保持上下文連續性)</small>:{" "}
+                      {parameters.rag_chunk_overlap} 字元
+                    </label>
+                    <input
+                      type="range"
+                      className="form-range"
+                      min="100"
+                      max="800"
+                      step="50"
+                      value={parameters.rag_chunk_overlap}
+                      onChange={(e) =>
+                        handleParameterChange(
+                          "rag_chunk_overlap",
+                          parseInt(e.target.value)
+                        )
+                      }
+                    />
+                    <div className="d-flex justify-content-between small text-muted">
+                      <span>100 (5%)</span>
+                      <span>800 (20%)</span>
+                    </div>
+                  </div>
+
+                  <div className="p-3 mt-2">
+                    <label className="form-label">
+                      最小 Chunk 長度<small> (過濾過短段落)</small>:{" "}
+                      {parameters.rag_min_chunk_length} 字元
+                    </label>
+                    <input
+                      type="range"
+                      className="form-range"
+                      min="30"
+                      max="300"
+                      step="10"
+                      value={parameters.rag_min_chunk_length}
+                      onChange={(e) =>
+                        handleParameterChange(
+                          "rag_min_chunk_length",
+                          parseInt(e.target.value)
+                        )
+                      }
+                    />
+                    <div className="d-flex justify-content-between small text-muted">
+                      <span>30 (寬鬆)</span>
+                      <span>300 (嚴格)</span>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Prompt 設定 */}
+            <div className="card row-mb-3 mb-3">
+              <div
+                className="card-header bg-light"
+                style={{ cursor: "pointer" }}
+                onClick={() => setIsResponseCollapsed(!isResponseCollapsed)}
+              >
+                <div className="d-flex justify-content-between align-items-center">
+                  <h5 className="card-title mb-0">
+                    <i className="bi bi-chat-left-text me-2"></i>
+                    Prompt 設定
+                  </h5>
+                  <i
+                    className={`bi ${
+                      isResponseCollapsed ? "bi-chevron-down" : "bi-chevron-up"
+                    }`}
+                  ></i>
+                </div>
+              </div>
+              {!isResponseCollapsed && (
+                <>
                   <div className="p-3 mt-2">
                     <label className="form-label">
                       Token限制<small> (回應長度上限)</small>:{" "}
@@ -313,79 +527,9 @@ const PromptVisualization: React.FC<PromptVisualizationProps> = ({
                         )
                       }
                     />
-                  </div>
-
-                  <div className="p-3 mt-2">
-                    <label className="form-label">Session存活時間</label>
-                    <select
-                      className="form-select form-select-sm"
-                      value={parameters.session_ttl_minutes}
-                      onChange={(e) =>
-                        handleParameterChange(
-                          "session_ttl_minutes",
-                          parseInt(e.target.value)
-                        )
-                      }
-                    >
-                      <option value={5}>5分鐘</option>
-                      <option value={10}>10分鐘</option>
-                      <option value={20}>20分鐘</option>
-                      <option value={30}>30分鐘</option>
-                    </select>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Prompt類型與風格 */}
-
-            <div className="card row-mb-3 mb-3">
-              <div
-                className="card-header bg-light"
-                style={{ cursor: "pointer" }}
-                onClick={() => setIsStyleCollapsed(!isStyleCollapsed)}
-              >
-                <div className="d-flex justify-content-between align-items-center">
-                  <h5 className="card-title mb-0">回應風格</h5>
-                  <i
-                    className={`bi ${
-                      isStyleCollapsed ? "bi-chevron-down" : "bi-chevron-up"
-                    }`}
-                  ></i>
-                </div>
-              </div>
-              {!isStyleCollapsed && (
-                <>
-                  <div className="p-3 mt-2">
-                    <label className="form-label">Prompt類型</label>
-                    <div>
-                      {["rag", "general", "summary"].map((type) => (
-                        <div
-                          key={type}
-                          className="form-check form-check-inline"
-                        >
-                          <input
-                            className="form-check-input"
-                            type="radio"
-                            name="prompt_type"
-                            value={type}
-                            checked={parameters.prompt_type === type}
-                            onChange={(e) =>
-                              handleParameterChange(
-                                "prompt_type",
-                                e.target.value
-                              )
-                            }
-                          />
-                          <label className="form-check-label">
-                            {type === "rag"
-                              ? "RAG"
-                              : type === "general"
-                              ? "一般"
-                              : "摘要"}
-                          </label>
-                        </div>
-                      ))}
+                    <div className="d-flex justify-content-between small text-muted">
+                      <span>1K</span>
+                      <span>10K</span>
                     </div>
                   </div>
 
@@ -443,6 +587,124 @@ const PromptVisualization: React.FC<PromptVisualizationProps> = ({
               )}
             </div>
 
+            {/* 其它設定 */}
+            <div className="card row-mb-3 mb-3">
+              <div
+                className="card-header bg-light"
+                style={{ cursor: "pointer" }}
+                onClick={() => setIsSystemCollapsed(!isSystemCollapsed)}
+              >
+                <div className="d-flex justify-content-between align-items-center">
+                  <h5 className="card-title mb-0">
+                    <i className="bi bi-gear me-2"></i>
+                    其它設定
+                  </h5>
+                  <i
+                    className={`bi ${
+                      isSystemCollapsed ? "bi-chevron-down" : "bi-chevron-up"
+                    }`}
+                  ></i>
+                </div>
+              </div>
+              {!isSystemCollapsed && (
+                <>
+                  <div className="p-3 mt-2">
+                    <label className="form-label">Session存活時間</label>
+                    <select
+                      className="form-select form-select-sm"
+                      value={parameters.session_ttl_minutes}
+                      onChange={(e) =>
+                        handleParameterChange(
+                          "session_ttl_minutes",
+                          parseInt(e.target.value)
+                        )
+                      }
+                    >
+                      <option value={5}>5分鐘</option>
+                      <option value={10}>10分鐘</option>
+                      <option value={20}>20分鐘</option>
+                      <option value={30}>30分鐘</option>
+                    </select>
+                  </div>
+
+                  <div className="p-3 mt-2">
+                    <label className="form-label">
+                      檔案大小限制<small> (上傳檔案)</small>:{" "}
+                      {parameters.max_file_size_mb} MB
+                    </label>
+                    <input
+                      type="range"
+                      className="form-range"
+                      min="1"
+                      max="10"
+                      step="1"
+                      value={parameters.max_file_size_mb}
+                      onChange={(e) =>
+                        handleParameterChange(
+                          "max_file_size_mb",
+                          parseInt(e.target.value)
+                        )
+                      }
+                    />
+                    <div className="d-flex justify-content-between small text-muted">
+                      <span>1MB</span>
+                      <span>10MB</span>
+                    </div>
+                  </div>
+
+                  <div className="p-3 mt-2">
+                    <label className="form-label">
+                      網站爬蟲最大 Token<small> (爬取內容)</small>:{" "}
+                      {parameters.crawler_max_tokens.toLocaleString()}
+                    </label>
+                    <input
+                      type="range"
+                      className="form-range"
+                      min="1000"
+                      max="200000"
+                      step="1000"
+                      value={parameters.crawler_max_tokens}
+                      onChange={(e) =>
+                        handleParameterChange(
+                          "crawler_max_tokens",
+                          parseInt(e.target.value)
+                        )
+                      }
+                    />
+                    <div className="d-flex justify-content-between small text-muted">
+                      <span>1K</span>
+                      <span>200K</span>
+                    </div>
+                  </div>
+
+                  <div className="p-3 mt-2">
+                    <label className="form-label">
+                      網站爬蟲最大頁面數<small> (爬取範圍)</small>:{" "}
+                      {parameters.crawler_max_pages}
+                    </label>
+                    <input
+                      type="range"
+                      className="form-range"
+                      min="1"
+                      max="30"
+                      step="1"
+                      value={parameters.crawler_max_pages}
+                      onChange={(e) =>
+                        handleParameterChange(
+                          "crawler_max_pages",
+                          parseInt(e.target.value)
+                        )
+                      }
+                    />
+                    <div className="d-flex justify-content-between small text-muted">
+                      <span>1</span>
+                      <span>30</span>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
             {/* 檔案類型支援 */}
             <div className="card row-mb-3 mb-3">
               <div
@@ -494,62 +756,6 @@ const PromptVisualization: React.FC<PromptVisualizationProps> = ({
                 </div>
               )}
             </div>
-
-            {/* 憲法原則選擇 */}
-
-            {systemPrompts && systemPrompts.constitutional_principles && (
-              <div className="card row-mb-3 mb-3">
-                <div
-                  className="card-header bg-light"
-                  style={{ cursor: "pointer" }}
-                  onClick={() =>
-                    setIsPrinciplesCollapsed(!isPrinciplesCollapsed)
-                  }
-                >
-                  <div className="d-flex justify-content-between align-items-center">
-                    <h5 className="card-title mb-0">啟用的安全原則</h5>
-                    <i
-                      className={`bi ${
-                        isPrinciplesCollapsed
-                          ? "bi-chevron-down"
-                          : "bi-chevron-up"
-                      }`}
-                    ></i>
-                  </div>
-                </div>
-                {!isPrinciplesCollapsed && (
-                  <div className="p-3 mt-2">
-                    {systemPrompts.constitutional_principles
-                      .slice(0, 5)
-                      .map((principle, index) => (
-                        <div key={index} className="form-check">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            checked={parameters.enabled_principles.includes(
-                              principle
-                            )}
-                            onChange={(e) => {
-                              const updatedPrinciples = e.target.checked
-                                ? [...parameters.enabled_principles, principle]
-                                : parameters.enabled_principles.filter(
-                                    (p) => p !== principle
-                                  );
-                              handleParameterChange(
-                                "enabled_principles",
-                                updatedPrinciples
-                              );
-                            }}
-                          />
-                          <label className="form-check-label">
-                            {principle.substring(0, 50)}...
-                          </label>
-                        </div>
-                      ))}
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         )}
       </div>

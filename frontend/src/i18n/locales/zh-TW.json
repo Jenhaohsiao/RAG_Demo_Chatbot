@@ -41,7 +41,80 @@
     "sessionExpiresIn": "會話將在 ~30 分鐘後過期"
   },
   "parameters": {
-    "title": "Prompt 參數設定"
+    "title": "參數設定"
+  },
+  "workflow": {
+    "title": "RAG 工作流程",
+    "step": "步驟",
+    "of": "共",
+    "previous": "上一步",
+    "next": "下一步",
+    "complete": "完成",
+    "steps": {
+      "ragConfig": {
+        "title": "RAG 設定",
+        "description": "配置檢索增強生成參數",
+        "complete": "完成 RAG 設定"
+      },
+      "promptConfig": {
+        "title": "Prompt 設定",
+        "description": "設定AI回應風格和創意度",
+        "complete": "完成 Prompt 設定"
+      },
+      "dataUpload": {
+        "title": "資訊上傳",
+        "description": "上傳文件和系統設定",
+        "systemSettings": "系統設定",
+        "fileTypes": "檔案類型",
+        "uploadData": "上傳資料",
+        "sessionTtl": "Session存活時間",
+        "fileSizeLimit": "檔案大小限制",
+        "crawlerMaxTokens": "網站爬蟲最大 Token",
+        "crawlerMaxPages": "網站爬蟲最大頁面數",
+        "supportedTypes": "支援檔案類型",
+        "uploadConfig": "當前上傳配置摘要"
+      },
+      "contentReview": {
+        "title": "內容審核",
+        "description": "安全性檢查和內容審查",
+        "documentList": "上傳的文件列表",
+        "preview": "內容預覽與審核",
+        "approve": "核准此文件",
+        "reject": "拒絕此文件",
+        "approveAll": "全部核准",
+        "rejectAll": "全部拒絕",
+        "pending": "待審核",
+        "approved": "已核准",
+        "rejected": "已拒絕",
+        "statistics": "審核統計",
+        "completeReview": "完成內容審核"
+      },
+      "textProcessing": {
+        "title": "文本切割 向量嵌入",
+        "description": "分塊處理並生成向量",
+        "settings": "文本處理設定",
+        "chunkSize": "文本分塊大小",
+        "chunkOverlap": "分塊重疊",
+        "overallProgress": "整體處理進度",
+        "startProcessing": "開始文本處理",
+        "jobStatus": "處理作業狀態",
+        "chunking": "切塊中",
+        "embedding": "嵌入中",
+        "completed": "已完成",
+        "processingComplete": "文本處理完成！"
+      },
+      "aiChat": {
+        "title": "AI 對談",
+        "description": "開始智能問答對話",
+        "systemReady": "RAG 系統準備就緒！",
+        "readyDescription": "您的文件已完成處理，AI助手已準備好為您提供基於文檔內容的智能問答服務。",
+        "currentConfig": "當前 RAG 配置",
+        "usageGuide": "使用指南",
+        "exampleQuestions": "示例問題",
+        "startChat": "開始 AI 對談",
+        "systemInfo": "系統資訊"
+      }
+    }
   },
   "messages": {
     "sessionCreated": "會話建立成功",

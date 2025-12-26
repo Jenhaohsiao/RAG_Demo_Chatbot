@@ -1,9 +1,6 @@
 /* Two-column Layout for Upload Screen */
 
-.upload-screen-compact {
-  padding: 0;
-}
-
+ 
 .upload-area {
   border: 2px dashed #dee2e6;
   border-radius: 8px;
