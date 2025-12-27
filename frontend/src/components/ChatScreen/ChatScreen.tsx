@@ -181,16 +181,6 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
         />
       )} */}
 
-      {/* 文檔摘要區域 - 全頁寬度 */}
-      <div className="document-summary-full-width">
-        <DocumentInfoCard
-          sessionId={sessionId}
-          documentSummary={documentSummary}
-          sourceReference={sourceReference}
-          chunkCount={chunkCount}
-        />
-      </div>
-
       {/* 新的兩欄布局 */}
       <div className="row chat-main-content">
         {/* 左欄：文檔資訊和實時指標 */}

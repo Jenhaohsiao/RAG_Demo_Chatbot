@@ -2,7 +2,7 @@
 
 **專案名稱**: Multilingual RAG-Powered Chatbot  
 **分支**: `001-multilingual-rag-chatbot`  
-**最後更新**: 2025-12-26 (Session Heartbeat 優化 + UI 流程圖調整 + 6步驟RAG工作流程實現 + UI布局優化 + 副標題文字調整)  
+**最後更新**: 2025-12-27 (UI交互优化 + 错误对话框修复 + 6步骤工作流程调试 + ContentReviewStep简化)  
 **總任務數**: 118 + Phase 9.5 (Website Crawler) + Phase 9.6 (Resource Consumption UI) + Phase 9.7 (Prompt Visualization) + Phase 9.8 (UI Redesign & Tooltips) + Phase 10.1 (6-Step RAG Workflow)
 
 ---
@@ -24,10 +24,10 @@
 | Phase 9.6 | 🆕 Resource Consumption UI | ✅ Complete | 4/4 | ✅ Type Checking | ⏳ Pending | ⏳ 準備中 |
 | Phase 9.7 | 🆕 AI Prompt Visualization | ✅ Complete | 6/6 | ✅ API Testing | ⏳ Pending | ✅ Completed |
 | Phase 9.8 | 🆕 UI Redesign & Tooltips | ✅ Complete | 4/4 | ✅ Component Testing | ⏳ Pending | ✅ Completed |
-| Phase 10.1 | 🆕 6-Step RAG Workflow | 🔄 In Progress | 2/4 | ⏳ Pending | ⏳ Pending | ⏳ Pending |
+| Phase 10.1 | 🆕 6-Step RAG Workflow | 🔄 In Progress | 3/4 | ⏳ Pending | ⏳ Pending | ⏳ Pending |
 | Phase 10 | Deployment & Production | 📋 Planning | 0/15 | ⏳ Pending | ⏳ Pending | N/A |
 
-**總進度**: 103/103 MVP tasks + 5/5 Website Crawler + 4/4 Resource Consumption + 6/6 AI Prompt Visualization + 4/4 UI Redesign + 2/4 6-Step RAG Workflow 🔄  
+**總進度**: 103/103 MVP tasks + 5/5 Website Crawler + 4/4 Resource Consumption + 6/6 AI Prompt Visualization + 4/4 UI Redesign + 3/4 6-Step RAG Workflow 🔄  
 **Phase 10**: 15 tasks - 上線部署與生產準備 (規劃中)  
 **Phase 10.1**: 4 tasks - 6步驟RAG工作流程 (進行中)
 
@@ -70,10 +70,18 @@
   - ✅ 檔案上傳和網站爬蟲整合
   - ✅ 上傳驗證和Toast警告提示
 
-- ⏳ **後續步驟實現中**:
-  - ContentReviewStep (步驟4: 內容審查)
-  - TextProcessingStep (步驟5: 文字處理)  
-  - AiChatStep (步驟6: AI對談)
+- 🔄 **ContentReviewStep 组件** (步骤4: 内容审查)
+  - ✅ 移除了静态测试数据，改为动态审查进度
+  - ✅ 简化了组件结构，移除模态对话框
+  - ✅ 改为内联进度显示，提升用户体验
+  - ✅ 保持与上传验证的集成
+
+- 🔄 **步骤6流程图调试中**:
+  - ✅ 添加调试代码和控制台日志
+  - ✅ 实现完整的6步骤流程图结构
+  - 🔄 正在调试渲染显示问题
+  - ⏳ TextProcessingStep (步骤5: 文字处理) 
+  - ⏳ AiChatStep (步骤6: AI对談)
 - ✅ **後端 Prompt API** (256 行代碼)
   - `/api/v1/prompt/system-prompts`: 系統 Prompt 模板
   - `/api/v1/prompt/current-session-prompt`: 當前會話 Prompt
@@ -1913,6 +1921,28 @@ py -3.12 -m pytest tests/test_phase8.py -v --no-cov
   - 前端成功啟動於 localhost:5175
 
 ### 🎨 WorkflowStepper UI 優化 (Phase 10.3) ✅ COMPLETE
+
+### 🔧 UI交互优化与错误处理 (Phase 10.4) ✅ COMPLETE
+- ✅ **错误对话框按钮逻辑优化**
+  - 修改ToastMessage组件，添加showExtraButtonOnly属性
+  - 对于Session错误（"會話已過期"或"無法維持會話"），只显示"更新Session"按钮
+  - 移除对话框中的"确定"按钮，提升用户体验
+  - 保留其他类型错误的原有按钮逻辑
+
+- ✅ **ContentReviewStep组件简化**
+  - 移除了静态测试数据和模态对话框
+  - 简化为内联动态进度显示
+  - 改善工作流程的流畅性
+
+- 🔄 **步骤6流程图渲染调试**
+  - 添加调试标记和控制台日志
+  - 实现完整的6步骤圆形流程图结构
+  - 正在解决流程图不可见的渲染问题
+
+- ✅ **代码质量改进**
+  - 统一错误处理逻辑
+  - 改善组件间的状态管理
+  - 优化用户交互反馈机制
 - ✅ **圖標數字化**
   - 將工作流程圖標替換為數字 1-6
   - 保留已完成步驟的勾選圖標顯示
@@ -1983,6 +2013,6 @@ components/
 ---
 
 **下一對話框準備重點**:
-- Phase 10.1: 完成剩餘 6步驟 RAG 工作流程組件
+- Phase 10.1: 解决步骤6流程图渲染问题，完成剩餘 6步驟 RAG 工作流程组件
 - Phase 10: 部署與生產準備
 - 持續的用戶測試與反饋收集 

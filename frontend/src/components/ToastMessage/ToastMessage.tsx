@@ -5,6 +5,7 @@ interface ToastMessageProps {
   message: string;
   onDismiss: () => void;
   showConfirmButton?: boolean;
+  showExtraButtonOnly?: boolean;
   extraButton?: {
     text: string;
     onClick: () => void;
@@ -17,16 +18,36 @@ const ToastMessage: React.FC<ToastMessageProps> = ({
   message,
   onDismiss,
   showConfirmButton = true,
+  showExtraButtonOnly = false,
   extraButton,
 }) => {
   const [show, setShow] = useState(true);
+
+  // 如果沒有確定按鈕，自動在3秒後關閉
+  useEffect(() => {
+    if (!showConfirmButton) {
+      const timer = setTimeout(() => {
+        handleConfirm();
+      }, 3000); // 3秒後自動關閉
+
+      return () => clearTimeout(timer);
+    }
+  }, [showConfirmButton]);
+
+  const handleConfirm = () => {
+    setShow(false);
+    // 延迟调用 onDismiss，让动画完成
+    setTimeout(() => {
+      onDismiss();
+    }, 150);
+  };
 
   const getBootstrapClass = () => {
     switch (type) {
       case "error":
         return "bg-danger text-white";
       case "warning":
-        return "bg-warning text-dark";
+        return "bg-warning text-white"; // 改為白色文字
       case "info":
         return "bg-info text-white";
       case "success":
@@ -49,14 +70,6 @@ const ToastMessage: React.FC<ToastMessageProps> = ({
       default:
         return "bi-info-circle-fill";
     }
-  };
-
-  const handleConfirm = () => {
-    setShow(false);
-    // 延迟调用 onDismiss，让动画完成
-    setTimeout(() => {
-      onDismiss();
-    }, 150);
   };
 
   const handleClose = () => {
@@ -103,7 +116,7 @@ const ToastMessage: React.FC<ToastMessageProps> = ({
           <div className="d-flex align-items-start">
             <div className="flex-grow-1">{message}</div>
           </div>
-          {showConfirmButton && (
+          {(showConfirmButton || showExtraButtonOnly) && (
             <div className="mt-3 d-flex gap-2 justify-content-end">
               {extraButton && (
                 <button
@@ -112,7 +125,7 @@ const ToastMessage: React.FC<ToastMessageProps> = ({
                     extraButton.className ||
                     `btn btn-sm ${
                       type === "warning"
-                        ? "btn-outline-dark"
+                        ? "btn-outline-light" // 警告類型也使用淺色輪廓按鈕
                         : "btn-outline-light"
                     }`
                   }
@@ -121,15 +134,17 @@ const ToastMessage: React.FC<ToastMessageProps> = ({
                   {extraButton.text}
                 </button>
               )}
-              <button
-                type="button"
-                className={`btn btn-sm ${
-                  type === "warning" ? "btn-dark" : "btn-light"
-                }`}
-                onClick={handleConfirm}
-              >
-                確定
-              </button>
+              {showConfirmButton && !showExtraButtonOnly && (
+                <button
+                  type="button"
+                  className={`btn btn-sm ${
+                    type === "warning" ? "btn-light" : "btn-light" // 統一使用淺色按鈕
+                  }`}
+                  onClick={handleConfirm}
+                >
+                  確定
+                </button>
+              )}
             </div>
           )}
         </div>

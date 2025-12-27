@@ -43,6 +43,10 @@ const WorkflowMain: React.FC<WorkflowMainProps> = ({
   const [currentStep, setCurrentStep] = useState(1);
   const [workflowComplete, setWorkflowComplete] = useState(false);
 
+  // 添加documents和crawledUrls狀態
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [crawledUrls, setCrawledUrls] = useState<any[]>([]);
+
   // 整合所有參數到一個狀態中
   const [parameters, setParameters] = useState({
     // RAG 參數 (Step 1)
@@ -120,22 +124,12 @@ const WorkflowMain: React.FC<WorkflowMainProps> = ({
   if (workflowComplete && currentStep === 6) {
     return (
       <div className="workflow-main">
-        {/* 可選的頭部導航 */}
-        <div className="d-flex justify-content-between align-items-center mb-3">
+        {/* 聊天界面 - 移除返回工作流程按鈕 */}
+        <div className="mb-3">
           <h4 className="mb-0">
             <i className="bi bi-chat-dots me-2"></i>
             {t("workflow.steps.aiChat.title", "AI 對談")}
           </h4>
-          <button
-            className="btn btn-outline-secondary btn-sm"
-            onClick={() => {
-              setWorkflowComplete(false);
-              setCurrentStep(1);
-            }}
-          >
-            <i className="bi bi-arrow-left me-1"></i>
-            返回工作流程
-          </button>
         </div>
 
         {/* 聊天界面 */}
@@ -187,6 +181,10 @@ const WorkflowMain: React.FC<WorkflowMainProps> = ({
           parameters={parameters}
           onParameterChange={handleParameterChange}
           onShowMessage={onShowMessage}
+          documents={documents}
+          crawledUrls={crawledUrls}
+          onDocumentsUpdate={setDocuments}
+          onCrawledUrlsUpdate={setCrawledUrls}
         />
 
         {/* 調試資訊 (開發時可用) */}

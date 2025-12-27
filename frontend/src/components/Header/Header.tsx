@@ -180,7 +180,25 @@ export const Header: React.FC<HeaderProps> = ({
           type={systemMessage.type}
           message={systemMessage.message}
           onDismiss={onDismissMessage}
-          showConfirmButton={true}
+          showConfirmButton={
+            // Session錯誤只顯示更新Session按鈕，不顯示確定按鈕
+            !(
+              systemMessage.type === "error" &&
+              (systemMessage.message.includes("會話已過期") ||
+                systemMessage.message.includes("無法維持會話"))
+            ) &&
+            // Session更新成功的消息不需要確定按鈕
+            !(
+              systemMessage.type === "success" &&
+              systemMessage.message.includes("Session 更新成功")
+            )
+          }
+          showExtraButtonOnly={
+            // Session錯誤只顯示更新Session按鈕
+            systemMessage.type === "error" &&
+            (systemMessage.message.includes("會話已過期") ||
+              systemMessage.message.includes("無法維持會話"))
+          }
           extraButton={
             systemMessage.type === "error" &&
             (systemMessage.message.includes("會話已過期") ||

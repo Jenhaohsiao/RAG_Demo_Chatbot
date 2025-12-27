@@ -1,11 +1,18 @@
 import React, { useState } from "react";
 import "./WorkflowStepper.css";
+import "../../styles/fixed-rag-flow.css";
 import RagConfigStep from "../RagConfigStep/RagConfigStep";
 import PromptConfigStep from "../PromptConfigStep/PromptConfigStep";
 import DataUploadStep from "../DataUploadStep/DataUploadStep";
 import ContentReviewStep from "../ContentReviewStep/ContentReviewStep";
 import TextProcessingStep from "../TextProcessingStep/TextProcessingStep";
 import AiChatStep from "../AiChatStep/AiChatStep";
+import FixedRagFlow from "../FixedRagFlow/FixedRagFlow";
+import {
+  uploadFile,
+  uploadUrl,
+  uploadWebsite,
+} from "../../services/uploadService";
 
 interface WorkflowStepperProps {
   currentStep: number;
@@ -15,6 +22,8 @@ interface WorkflowStepperProps {
   sessionId?: string;
   documents?: any[];
   crawledUrls?: any[];
+  onDocumentsUpdate?: (documents: any[]) => void;
+  onCrawledUrlsUpdate?: (urls: any[]) => void;
   onShowMessage?: (message: {
     type: "error" | "warning" | "info" | "success";
     message: string;
@@ -29,6 +38,8 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   sessionId,
   documents = [],
   crawledUrls = [],
+  onDocumentsUpdate,
+  onCrawledUrlsUpdate,
   onShowMessage,
 }) => {
   const [showToast, setShowToast] = useState(false);
@@ -42,6 +53,12 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     5: false,
     6: false,
   });
+
+  // 添加審核狀態管理
+  const [reviewPassed, setReviewPassed] = useState(false);
+
+  // 添加文本處理狀態管理
+  const [textProcessingCompleted, setTextProcessingCompleted] = useState(false);
 
   const steps = [
     {
@@ -70,7 +87,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       title: "資料上傳",
       icon: "bi-cloud-upload",
       description: "上傳文檔或爬取網站資料",
-      color: "success",
+      color: "orange",
       detailMessage:
         "支援多種格式文檔上傳（PDF、Word、TXT等）或網站內容爬取。系統會自動提取文本內容，這些資料將作為AI回答問題的知識庫基礎。",
     },
@@ -90,7 +107,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       title: "文本切割 向量嵌入",
       icon: "bi-diagram-3",
       description: "分塊處理並生成向量",
-      color: "secondary",
+      color: "purple",
       detailMessage:
         "將文檔內容切分成適當大小的段落，並轉換為高維向量表示。這個過程讓AI能夠理解和檢索相關內容，是實現精準問答的關鍵技術步驟。",
     },
@@ -100,7 +117,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       title: "AI 對談",
       icon: "bi-robot",
       description: "開始智能問答對話",
-      color: "dark",
+      color: "indigo",
       detailMessage:
         "基於您上傳的知識庫開始問答對話。AI會根據問題檢索相關內容並給出準確回答，同時提供資料來源引用，確保答案的可信度和可追溯性。",
     },
@@ -177,6 +194,14 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       const hasCrawledUrls = crawledUrls && crawledUrls.length > 0;
       return hasDocuments || hasCrawledUrls;
     }
+    if (currentStep === 4) {
+      // 步骤4：内容审核 - 需要所有审核项目都通过
+      return reviewPassed;
+    }
+    if (currentStep === 5) {
+      // 步骤5：文本处理 - 需要文本切割和向量化完成
+      return textProcessingCompleted;
+    }
     // 其他步骤暂时允许继续
     return true;
   };
@@ -189,6 +214,19 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
         type: "warning",
         message: "請先上傳檔案或設定網站爬蟲，然後才能進入下一步。",
       });
+      return;
+    }
+    if (currentStep === 5 && !canProceedToNextStep()) {
+      // 顯示Toast提醒
+      onShowMessage?.({
+        type: "warning",
+        message: "請先完成文本切割和向量化處理，然後才能進入下一步。",
+      });
+      return;
+    }
+    // 如果從步驟3進入步驟4，直接進入下一步
+    if (currentStep === 3) {
+      onStepChange(currentStep + 1);
       return;
     }
     // 继续到下一步
@@ -208,6 +246,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   };
 
   const renderStepContent = () => {
+    console.log("Current step rendering:", currentStep); // 添加调试日志
     switch (currentStep) {
       case 1:
         return (
@@ -231,14 +270,128 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             parameters={parameters}
             onParameterChange={onParameterChange!}
             sessionId={sessionId}
-            onFileUpload={(file) => {
-              console.log("Document uploaded:", file);
+            onFileUpload={async (file) => {
+              try {
+                console.log("Starting file upload:", file.name);
+                onShowMessage?.({
+                  type: "info",
+                  message: `正在上傳檔案: ${file.name}...`,
+                });
+
+                const response = await uploadFile(sessionId!, file);
+                console.log("File upload successful:", response);
+
+                // 更新documents狀態
+                const newDoc = {
+                  filename: file.name,
+                  size: file.size,
+                  uploadTime: new Date().toISOString(),
+                  type: "file",
+                  chunks: response.chunk_count || 0,
+                  preview: response.preview || "文件內容預覽...",
+                };
+                onDocumentsUpdate?.([...documents, newDoc]);
+
+                onShowMessage?.({
+                  type: "success",
+                  message: `檔案 ${file.name} 上傳成功！`,
+                });
+
+                // 檔案上傳完成，用戶需手動進入下一步
+              } catch (error) {
+                console.error("File upload failed:", error);
+                onShowMessage?.({
+                  type: "error",
+                  message: `檔案上傳失敗: ${
+                    error instanceof Error ? error.message : "未知錯誤"
+                  }`,
+                });
+              }
             }}
-            onUrlUpload={(url) => {
-              console.log("URL uploaded:", url);
+            onUrlUpload={async (url) => {
+              try {
+                console.log("Starting URL upload:", url);
+                onShowMessage?.({
+                  type: "info",
+                  message: `正在處理URL: ${url}...`,
+                });
+
+                const response = await uploadUrl(sessionId!, url);
+                console.log("URL upload successful:", response);
+
+                // 更新documents狀態
+                const newDoc = {
+                  filename: url,
+                  size: response.content_size || 0,
+                  uploadTime: new Date().toISOString(),
+                  type: "url",
+                  chunks: response.chunk_count || 0,
+                  preview: response.preview || "URL內容預覽...",
+                };
+                onDocumentsUpdate?.([...documents, newDoc]);
+
+                onShowMessage?.({
+                  type: "success",
+                  message: `URL ${url} 處理成功！`,
+                });
+
+                // URL處理完成，用戶需手動進入下一步
+              } catch (error) {
+                console.error("URL upload failed:", error);
+                onShowMessage?.({
+                  type: "error",
+                  message: `URL處理失敗: ${
+                    error instanceof Error ? error.message : "未知錯誤"
+                  }`,
+                });
+              }
             }}
-            onCrawlerUpload={(url, maxTokens, maxPages) => {
-              console.log("Crawler upload:", { url, maxTokens, maxPages });
+            onCrawlerUpload={async (url, maxTokens, maxPages) => {
+              try {
+                console.log("Starting crawler upload:", {
+                  url,
+                  maxTokens,
+                  maxPages,
+                });
+                onShowMessage?.({
+                  type: "info",
+                  message: `正在爬取網站: ${url}...`,
+                });
+
+                const response = await uploadWebsite(
+                  sessionId!,
+                  url,
+                  maxTokens,
+                  maxPages
+                );
+                console.log("Website crawl successful:", response);
+
+                // 更新crawledUrls狀態
+                const newUrl = {
+                  url: url,
+                  content_size: response.content_size || 0,
+                  crawl_time: new Date().toISOString(),
+                  chunks: response.chunk_count || 0,
+                  summary: response.summary || "網站內容摘要...",
+                  pages_found: response.pages_found || 1,
+                };
+                onCrawledUrlsUpdate?.([...crawledUrls, newUrl]);
+
+                onShowMessage?.({
+                  type: "success",
+                  message: `網站 ${url} 爬取成功，共處理 ${response.pages_found} 個頁面！`,
+                });
+
+                // 網站爬取完成，用戶需手動進入下一步
+              } catch (error) {
+                console.error("Website crawl failed:", error);
+                onShowMessage?.({
+                  type: "error",
+                  message: `網站爬取失敗: ${
+                    error instanceof Error ? error.message : "未知錯誤"
+                  }`,
+                });
+              }
             }}
           />
         );
@@ -247,6 +400,9 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           <ContentReviewStep
             sessionId={sessionId}
             onReviewComplete={() => handleStepComplete(4)}
+            onReviewStatusChange={setReviewPassed}
+            documents={documents}
+            crawledUrls={crawledUrls}
           />
         );
       case 5:
@@ -255,13 +411,189 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             parameters={parameters}
             onParameterChange={onParameterChange!}
             sessionId={sessionId}
-            onProcessingComplete={() => handleStepComplete(5)}
+            documents={documents}
+            crawledUrls={crawledUrls}
+            onProcessingComplete={() => {
+              // 更新狀態並標記步驟完成
+              console.log(
+                "TextProcessing completed, marking step 5 as complete"
+              );
+              setTextProcessingCompleted(true);
+              setStepCompletion((prev) => ({ ...prev, 5: true }));
+            }}
+            onProcessingStatusChange={setTextProcessingCompleted}
           />
         );
       case 6:
-        return <AiChatStep sessionId={sessionId} parameters={parameters} />;
+        console.log("Rendering case 6"); // 添加调试日志
+        return (
+          <>
+            {/* 测试标识 - 确保这个case被执行 */}
+            <div
+              style={{
+                backgroundColor: "red",
+                color: "white",
+                padding: "20px",
+                fontSize: "24px",
+                textAlign: "center",
+              }}
+            >
+              THIS IS STEP 6 - FLOW DIAGRAM SHOULD BE HERE
+            </div>
+
+            {/* RAG 流程圖 - 6個步驟展示 */}
+            <div
+              className="mb-4 p-4"
+              style={{
+                backgroundColor: "#f8f9fa",
+                border: "2px solid #007bff",
+                borderRadius: "12px",
+              }}
+            >
+              <div className="text-center mb-3">
+                <h5 className="text-primary mb-0">
+                  <i className="bi bi-diagram-3 me-2"></i>
+                  RAG 智能問答系統流程
+                </h5>
+                <small className="text-muted">完整的6步驟處理流程</small>
+              </div>
+              <div className="row justify-content-center">
+                <div className="col-auto">
+                  <div
+                    className="d-flex align-items-center gap-3"
+                    style={{ flexWrap: "wrap", justifyContent: "center" }}
+                  >
+                    {/* 步驟1 */}
+                    <div className="d-flex flex-column align-items-center">
+                      <div
+                        className="rounded-circle bg-success text-white d-flex align-items-center justify-content-center shadow-sm"
+                        style={{
+                          width: "50px",
+                          height: "50px",
+                          fontSize: "18px",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        ✓
+                      </div>
+                      <small className="mt-2 text-center fw-bold">
+                        RAG配置
+                      </small>
+                      <small className="text-success">已完成</small>
+                    </div>
+                    <div className="text-primary fs-4">→</div>
+
+                    {/* 步驟2 */}
+                    <div className="d-flex flex-column align-items-center">
+                      <div
+                        className="rounded-circle bg-success text-white d-flex align-items-center justify-content-center shadow-sm"
+                        style={{
+                          width: "50px",
+                          height: "50px",
+                          fontSize: "18px",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        ✓
+                      </div>
+                      <small className="mt-2 text-center fw-bold">
+                        Prompt配置
+                      </small>
+                      <small className="text-success">已完成</small>
+                    </div>
+                    <div className="text-primary fs-4">→</div>
+
+                    {/* 步驟3 */}
+                    <div className="d-flex flex-column align-items-center">
+                      <div
+                        className="rounded-circle bg-success text-white d-flex align-items-center justify-content-center shadow-sm"
+                        style={{
+                          width: "50px",
+                          height: "50px",
+                          fontSize: "18px",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        ✓
+                      </div>
+                      <small className="mt-2 text-center fw-bold">
+                        資料上傳
+                      </small>
+                      <small className="text-success">已完成</small>
+                    </div>
+                    <div className="text-primary fs-4">→</div>
+
+                    {/* 步驟4 */}
+                    <div className="d-flex flex-column align-items-center">
+                      <div
+                        className="rounded-circle bg-success text-white d-flex align-items-center justify-content-center shadow-sm"
+                        style={{
+                          width: "50px",
+                          height: "50px",
+                          fontSize: "18px",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        ✓
+                      </div>
+                      <small className="mt-2 text-center fw-bold">
+                        內容審核
+                      </small>
+                      <small className="text-success">已完成</small>
+                    </div>
+                    <div className="text-primary fs-4">→</div>
+
+                    {/* 步驟5 */}
+                    <div className="d-flex flex-column align-items-center">
+                      <div
+                        className="rounded-circle bg-success text-white d-flex align-items-center justify-content-center shadow-sm"
+                        style={{
+                          width: "50px",
+                          height: "50px",
+                          fontSize: "18px",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        ✓
+                      </div>
+                      <small className="mt-2 text-center fw-bold">
+                        文本處理
+                      </small>
+                      <small className="text-success">已完成</small>
+                    </div>
+                    <div className="text-primary fs-4">→</div>
+
+                    {/* 步驟6 - 當前步驟 */}
+                    <div className="d-flex flex-column align-items-center">
+                      <div
+                        className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center shadow-lg"
+                        style={{
+                          width: "60px",
+                          height: "60px",
+                          fontSize: "20px",
+                          fontWeight: "bold",
+                          animation: "pulse 2s infinite",
+                        }}
+                      >
+                        🤖
+                      </div>
+                      <small className="mt-2 text-center fw-bold text-primary">
+                        AI對談
+                      </small>
+                      <small className="text-primary">進行中</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* AI 聊天界面 */}
+            <AiChatStep sessionId={sessionId} parameters={parameters} />
+          </>
+        );
       default:
-        return <div>Invalid step</div>;
+        console.log("Invalid step:", currentStep);
+        return <div>Invalid step: {currentStep}</div>;
     }
   };
 
@@ -285,31 +617,27 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
               >
                 {/* 步驟圓圈和圖示 */}
                 <div
-                  className={`stepper-circle bg-${step.color} ${
-                    isStepActive(step.id)
-                      ? "text-white"
-                      : isStepCompleted(step.id)
-                      ? "text-white"
-                      : "text-muted"
-                  }`}
+                  className={`stepper-circle ${
+                    isStepCompleted(step.id)
+                      ? "step-completed"
+                      : isStepActive(step.id)
+                      ? "step-active"
+                      : "step-inactive"
+                  } text-white`}
                 >
-                  {isStepCompleted(step.id) ? (
-                    <i className="bi bi-check-lg"></i>
-                  ) : (
-                    <span className="fw-bold">{step.id}</span>
-                  )}
+                  <span className="fw-bold">{step.id}</span>
                 </div>
 
                 {/* 步驟文本 */}
                 <div className="stepper-text mt-2">
                   <div className="stepper-title d-flex align-items-center justify-content-center">
-                    <span>{step.title}</span>
                     {isStepCompleted(step.id) && (
                       <i
-                        className="bi bi-check-circle-fill text-success ms-1"
-                        style={{ fontSize: "0.8rem" }}
+                        className="bi bi-check-circle-fill text-success me-1"
+                        style={{ fontSize: "0.9rem" }}
                       ></i>
                     )}
+                    <span>{step.title}</span>
                   </div>
                 </div>
 
@@ -327,20 +655,6 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             </div>
           ))}
         </div>
-      </div>
-
-      {/* 進度條 */}
-      <div className="progress mb-4" style={{ height: "8px" }}>
-        <div
-          className="progress-bar bg-primary"
-          role="progressbar"
-          style={{
-            width: `${((currentStep - 1) / (steps.length - 1)) * 100}%`,
-          }}
-          aria-valuenow={currentStep}
-          aria-valuemin={1}
-          aria-valuemax={steps.length}
-        ></div>
       </div>
 
       {/* 當前步驟資訊與導航按鈕同一行 */}

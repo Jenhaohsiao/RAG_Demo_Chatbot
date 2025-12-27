@@ -468,3 +468,62 @@
     margin-right: 4px !important;
   }
 }
+
+/* 自定義步驟顏色 */
+.bg-orange {
+  background-color: #ff7849 !important;
+}
+
+.bg-purple {
+  background-color: #6f42c1 !important;
+}
+
+.bg-indigo {
+  background-color: #6610f2 !important;
+}
+
+/* 統一步驟狀態顏色 */
+.step-inactive {
+  background-color: #6c757d !important; /* 灰色背景 - 未執行 */
+}
+
+.step-active {
+  background-color: #ffc107 !important; /* 黃色背景 - 執行中 */
+  border: 3px solid #b8860b !important; /* 深黃/棕色邊框 */
+}
+
+.step-completed {
+  background-color: #0d6efd !important; /* 藍色背景 - 執行完畢 */
+}
+
+/* 數字文字樣式 - 白字灰色外框 */
+.stepper-circle span {
+  color: white !important;
+  text-shadow: 
+    -1px -1px 0 #6c757d,
+    1px -1px 0 #6c757d,
+    -1px 1px 0 #6c757d,
+    1px 1px 0 #6c757d !important;
+}
+
+/* 執行中標題文字顏色 */
+.stepper-item.active .stepper-title span {
+  color: #b8860b !important; /* 深黃/棕色 */
+  font-weight: 600 !important;
+}
+
+/* 脈衝動畫 - 用於當前步驟 */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.7);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(13, 110, 253, 0.2);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+  }
+}

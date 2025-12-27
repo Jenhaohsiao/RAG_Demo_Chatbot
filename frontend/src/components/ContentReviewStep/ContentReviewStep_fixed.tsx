@@ -34,14 +34,14 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
 }) => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
-  
+
   // 添加審核進度狀態
   const [reviewProgress, setReviewProgress] = useState({
     currentItem: "",
     completed: [] as string[],
     failed: [] as string[],
     isCompleted: false,
-    isRunning: false
+    isRunning: false,
   });
   const [hasStartedReview, setHasStartedReview] = useState(false);
 
@@ -53,12 +53,12 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
       completed: [],
       failed: [],
       isCompleted: false,
-      isRunning: true
+      isRunning: true,
     });
 
     const reviewItems = [
       "檢查文件格式完整性",
-      "掃描惡意軟體", 
+      "掃描惡意軟體",
       "檢測敏感內容",
       "驗證文檔結構",
       "分析內容品質",
@@ -85,13 +85,13 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
     }
 
     // 完成審核
-    setReviewProgress((prev) => ({ 
-      ...prev, 
+    setReviewProgress((prev) => ({
+      ...prev,
       isCompleted: true,
       isRunning: false,
-      currentItem: ""
+      currentItem: "",
     }));
-    
+
     // 通知父組件審核完成
     onReviewStatusChange?.(true);
     onReviewComplete?.();
@@ -169,12 +169,15 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                   {reviewProgress.currentItem || "準備開始審核..."}
                 </span>
               </div>
-              <div className="progress mb-3" style={{ height: '8px' }}>
+              <div className="progress mb-3" style={{ height: "8px" }}>
                 <div
                   className="progress-bar progress-bar-striped progress-bar-animated"
                   style={{
                     width: `${
-                      ((reviewProgress.completed.length + reviewProgress.failed.length) / 6) * 100
+                      ((reviewProgress.completed.length +
+                        reviewProgress.failed.length) /
+                        6) *
+                      100
                     }%`,
                   }}
                 />
@@ -219,9 +222,10 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
           <div className="card-body">
             <div className="alert alert-success mb-3">
               <i className="bi bi-check-circle-fill me-2"></i>
-              <strong>審核完成！</strong> 所有上傳的內容已通過安全檢查，可以進入下一步。
+              <strong>審核完成！</strong>{" "}
+              所有上傳的內容已通過安全檢查，可以進入下一步。
             </div>
-            
+
             <div className="row text-center">
               <div className="col-6">
                 <span className="badge bg-success fs-6 me-2">
@@ -236,10 +240,13 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                 <span>項目未通過</span>
               </div>
             </div>
-            
+
             <div className="row mt-3">
               {reviewProgress.completed.map((item, index) => (
-                <div key={`summary-completed-${index}`} className="col-md-6 mb-2">
+                <div
+                  key={`summary-completed-${index}`}
+                  className="col-md-6 mb-2"
+                >
                   <div className="d-flex align-items-center">
                     <i className="bi bi-check-circle-fill text-success me-2"></i>
                     <small>{item}</small>

@@ -14,6 +14,9 @@ export interface TextProcessingStepProps {
   onParameterChange: (parameter: string, value: any) => void;
   sessionId?: string;
   onProcessingComplete?: () => void;
+  onProcessingStatusChange?: (isCompleted: boolean) => void;
+  documents?: any[];
+  crawledUrls?: any[];
 }
 
 interface ProcessingJob {
@@ -33,6 +36,9 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
   onParameterChange,
   sessionId,
   onProcessingComplete,
+  onProcessingStatusChange,
+  documents = [],
+  crawledUrls = [],
 }) => {
   const { t } = useTranslation();
   const [jobs, setJobs] = useState<ProcessingJob[]>([]);
@@ -40,12 +46,12 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
-  // 模擬載入處理作業
+  // 載入處理作業，當文檔或URL變化時重新加載
   useEffect(() => {
-    if (sessionId) {
+    if (sessionId && (documents.length > 0 || crawledUrls.length > 0)) {
       loadProcessingJobs();
     }
-  }, [sessionId]);
+  }, [sessionId, documents, crawledUrls]);
 
   // 計算整體進度
   useEffect(() => {
@@ -57,36 +63,42 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
       const allCompleted = jobs.every((job) => job.status === "completed");
       const anyError = jobs.some((job) => job.status === "error");
 
+      // 通知父組件狀態變化
+      onProcessingStatusChange?.(allCompleted && !anyError && jobs.length > 0);
+
       if (allCompleted && !anyError) {
         onProcessingComplete?.();
       }
+    } else {
+      // 沒有作業時設置為未完成
+      onProcessingStatusChange?.(false);
     }
-  }, [jobs, onProcessingComplete]);
+  }, [jobs, onProcessingComplete, onProcessingStatusChange]);
 
   const loadProcessingJobs = async () => {
-    // 模擬API調用
-    setTimeout(() => {
-      setJobs([
-        {
-          id: "1",
-          filename: "sample-document.pdf",
-          status: "pending",
-          progress: 0,
-          chunks: 0,
-          totalChunks: 15,
-          startTime: new Date().toISOString(),
-        },
-        {
-          id: "2",
-          filename: "website-content",
-          status: "pending",
-          progress: 0,
-          chunks: 0,
-          totalChunks: 8,
-          startTime: new Date().toISOString(),
-        },
-      ]);
-    }, 500);
+    // 使用實際上傳的文檔數據
+    const jobsFromDocuments = documents.map((doc, index) => ({
+      id: `doc-${doc.id || index}`,
+      filename: doc.name || doc.filename || `document-${index + 1}`,
+      status: "pending" as const,
+      progress: 0,
+      chunks: 0,
+      totalChunks: Math.floor(Math.random() * 20) + 10, // 模擬預估分塊數
+      startTime: new Date().toISOString(),
+    }));
+
+    const jobsFromUrls = crawledUrls.map((url, index) => ({
+      id: `url-${url.id || index}`,
+      filename: url.title || url.url || `website-${index + 1}`,
+      status: "pending" as const,
+      progress: 0,
+      chunks: 0,
+      totalChunks: Math.floor(Math.random() * 15) + 5, // 模擬預估分塊數
+      startTime: new Date().toISOString(),
+    }));
+
+    const allJobs = [...jobsFromDocuments, ...jobsFromUrls];
+    setJobs(allJobs);
   };
 
   const startProcessing = async () => {

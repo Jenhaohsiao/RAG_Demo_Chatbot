@@ -6,7 +6,9 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import ChatScreen from "../ChatScreen/ChatScreen";
+import FixedRagFlow from "../FixedRagFlow/FixedRagFlow";
 import { ResponseType } from "../../types/chat";
+import "../../styles/fixed-rag-flow.css";
 
 export interface AiChatStepProps {
   sessionId?: string;
