@@ -16,6 +16,7 @@ export interface WorkflowMainProps {
     type: "error" | "warning" | "info" | "success";
     message: string;
   }) => void; // 從 main.tsx 傳入的現有參數
+  onResetWorkflow?: boolean; // 新增：重置工作流程的信號
   similarityThreshold?: number;
   maxFileSizeMB?: number;
   supportedFileTypes?: string[];
@@ -30,6 +31,7 @@ const WorkflowMain: React.FC<WorkflowMainProps> = ({
   sessionId,
   onParameterChange,
   onShowMessage,
+  onResetWorkflow = false,
   similarityThreshold = 0.5,
   maxFileSizeMB = 10,
   supportedFileTypes = ["pdf", "txt"],
@@ -100,6 +102,31 @@ const WorkflowMain: React.FC<WorkflowMainProps> = ({
     ragCitationStyle,
     ragFallbackMode,
   ]);
+
+  // 監聽 sessionId 變化，重新開始時重置工作流程狀態
+  useEffect(() => {
+    if (sessionId) {
+      // Session ID 變化時重置工作流程到第一步
+      console.log(
+        "[WorkflowMain] SessionId changed, resetting workflow to step 1"
+      );
+      setCurrentStep(1);
+      setWorkflowComplete(false);
+      setDocuments([]);
+      setCrawledUrls([]);
+    }
+  }, [sessionId]);
+
+  // 監聽重置工作流程信號
+  useEffect(() => {
+    if (onResetWorkflow) {
+      console.log("[WorkflowMain] Reset workflow signal received");
+      setCurrentStep(1);
+      setWorkflowComplete(false);
+      setDocuments([]);
+      setCrawledUrls([]);
+    }
+  }, [onResetWorkflow]);
 
   const handleParameterChange = (parameter: string, value: any) => {
     setParameters((prev) => ({

@@ -1,32 +1,59 @@
 # RAG Demo Chatbot - 故障排除指南
 
-這份文檔記錄了系統運作過程中遇到的問題及其解決方案，以便日後參考。
+這份文檔記錄了系統運作過程中常見問題及其解決方案。
 
-## 🚨 伺服器自動關閉問題
+## 🚀 快速診斷命令
 
-**日期**: 2025-12-15  
-**問題等級**: 高 - 系統無法正常運作  
-
-### 問題描述
-FastAPI 後端服務器在接收任何 HTTP 請求時會立即自動關閉，無論是簡單的健康檢查端點還是複雜的 API 端點。
-
-### 症狀表現
-- ✅ 服務器可以正常啟動
-- ✅ 顯示 "Application startup complete" 訊息
-- ❌ 第一個 HTTP 請求後服務器立即關閉
-- ❌ 日誌中沒有明顯的錯誤訊息
-- ❌ 即使是最簡單的 FastAPI 應用也會出現相同問題
-
-### 測試案例
-```python
-# 最簡測試 - 同樣會自動關閉
-from fastapi import FastAPI
-app = FastAPI()
-
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+```powershell
+# 檢查系統狀態
+docker ps  # 查看容器運行狀態
+curl http://localhost:8000/health  # 檢查後端健康狀態
+netstat -ano | findstr :5175  # 檢查前端端口
+netstat -ano | findstr :8000  # 檢查後端端口
+netstat -ano | findstr :6333  # 檢查Qdrant端口
 ```
+
+## 🔧 常見問題解決
+
+### 1. Docker容器未運行
+**症狀**: 訪問 http://localhost:8000/health 失敗
+```powershell
+# 解決方案
+docker-compose up -d
+docker ps  # 確認容器運行
+```
+
+### 2. 前端無法啟動
+**症狀**: npm run dev 失敗或端口衝突
+```powershell
+# 清除並重新安裝依賴
+cd frontend
+rm -r node_modules
+npm install
+npm run dev
+```
+
+### 3. 內容審核不工作
+**症狀**: "檢測敏感內容" 項目卡住
+- 檢查瀏覽器控制台 (F12) 是否有API錯誤
+- 確認後端有 Gemini API 密鑰配置
+- 查看後端日誌: `docker logs rag-chatbot-backend`
+
+### 4. Qdrant連接失敗
+**症狀**: 後端啟動時向量數據庫錯誤
+```powershell
+# 重置Qdrant數據
+docker-compose down -v
+docker-compose up -d qdrant
+# 等待30秒後啟動後端
+docker-compose up -d backend
+```
+
+### 5. API金鑰問題
+**症狀**: Gemini API調用失敗
+- 檢查 `backend/.env` 中的 `GOOGLE_API_KEY`
+- 確認API金鑰有效並有足夠額度
+- 重啟後端容器: `docker-compose restart backend`
 
 ### 根本原因
 **環境兼容性問題**: Python 3.12 與 uvicorn/FastAPI 在 Windows 環境下的兼容性問題導致服務器在處理請求時異常終止。

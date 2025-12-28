@@ -90,22 +90,31 @@
   }
 }
 
-/* 確保所有 Toast 文字都是白色 */
-.toast .toast-header,
-.toast .toast-body {
+/* 確保深色背景的 Toast 文字是白色 */
+.toast.bg-danger .toast-header,
+.toast.bg-danger .toast-body,
+.toast.bg-info .toast-header,
+.toast.bg-info .toast-body,
+.toast.bg-success .toast-header,
+.toast.bg-success .toast-body,
+.toast.bg-secondary .toast-header,
+.toast.bg-secondary .toast-body {
   color: white !important;
 }
 
-.toast .toast-header strong {
+.toast.bg-danger .toast-header strong,
+.toast.bg-info .toast-header strong,
+.toast.bg-success .toast-header strong,
+.toast.bg-secondary .toast-header strong {
   color: white !important;
 }
 
-/* 警告類型的 toast 也保持白色文字 */
+/* 淺色背景的 toast 使用深色文字 */
 .toast.bg-warning .toast-header,
 .toast.bg-warning .toast-body {
-  color: white !important;
+  color: #212529 !important; /* Bootstrap 的 text-dark 顏色 */
 }
 
 .toast.bg-warning .toast-header strong {
-  color: white !important;
+  color: #212529 !important;
 }

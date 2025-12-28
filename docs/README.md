@@ -10,22 +10,26 @@
 
 | 文檔 | 用途 | 適用對象 |
 |------|------|----------|
-| [🚀 快速開始](#快速開始) | 5分鐘啟動完整系統 | 所有用戶 |
-| [⚙️ 環境設置](#環境設置) | 詳細設置說明 | 開發者 |
-| [📊 功能說明](#功能說明) | Metrics Dashboard 指南 | 用戶 |
-| [🔧 故障排除](#故障排除) | 常見問題解決 | 所有用戶 |
-| [📈 進度追蹤](#進度追蹤) | 專案開發進度 | 項目管理 |
+| [🚀 快速開始](QUICK_START_GUIDE.md) | 5分鐘啟動完整系統 | 所有用戶 |
+| [📈 項目進度](PROGRESS.md) | 功能完成狀態與系統概覽 | 項目管理 |
+| [🔧 故障排除](TROUBLESHOOTING_GUIDE.md) | 常見問題解決 | 所有用戶 |
+| [👥 用戶測試](USER_TESTING_SETUP.md) | 測試環境設置 | 測試人員 |
+| [🛡️ 內容審核測試](CONTENT_MODERATION_TEST_GUIDE.md) | 安全功能測試指南 | 開發者 |
+| [🕷️ 網站爬蟲功能](WEBSITE_CRAWLER_FEATURE.md) | 網站爬蟲完整指南 | 開發者 |
+| [📊 相似度閾值](SIMILARITY_THRESHOLD_FEATURE.md) | RAG精度控制功能 | 開發者 |
+| [📋 工作流程指南](WORKFLOW_STEPPER_GUIDE.md) | 6步驟RAG流程說明 | 用戶 |
 
 ---
 
 ## 🚀 快速開始
 
-### 1️⃣ 啟動 Qdrant (如果未運行)
+### 1️⃣ 啟動系統 (如果未運行)
 ```powershell
 cd C:\Projects\AI_projects\RAG_Demo_Chatbot
-docker-compose up -d qdrant
-docker ps | findstr qdrant  # 驗證運行中
+docker-compose up -d  # 啟動所有服務
+docker ps  # 驗證容器運行中
 ```
+**系統需求**: Python 3.14, Docker, Node.js
 
 ### 2️⃣ 設定 API Key
 在 `backend/.env` 中設定：
@@ -33,20 +37,20 @@ docker ps | findstr qdrant  # 驗證運行中
 GOOGLE_API_KEY=your_gemini_api_key_here
 ```
 
-### 3️⃣ 啟動後端 (終端 1)
+### 3️⃣ 檢查後端狀態
 ```powershell
-cd backend
-py -3.12 -m uvicorn src.main:app --host 127.0.0.1 --port 8000
+# 後端已在 Docker 中運行
+docker ps  # 確認 rag-chatbot-backend 和 rag-chatbot-qdrant 運行中
+curl http://localhost:8000/health  # 檢查健康狀態
 ```
-✅ 看到 "Application startup complete" → 後端已啟動
+✅ 看到 `{"status":"healthy"}` → 後端正常運行
 
-### 4️⃣ 啟動前端 (終端 2)
+### 4️⃣ 啟動前端 (終端)
 ```powershell
 cd frontend
-npm install  # 第一次需要
 npm run dev
 ```
-✅ 看到 "Local: http://localhost:5173" → 前端已啟動
+✅ 看到 "Local: http://localhost:5175" → 前端已啟動
 
 ### 5️⃣ 開始使用
 - 瀏覽器打開: **http://localhost:5173**

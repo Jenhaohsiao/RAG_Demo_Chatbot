@@ -57,9 +57,18 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
   // 添加審核狀態管理
   const [reviewPassed, setReviewPassed] = useState(false);
+  const [shouldStartReview, setShouldStartReview] = useState(false);
 
   // 添加文本處理狀態管理
   const [textProcessingCompleted, setTextProcessingCompleted] = useState(false);
+
+  // 監聽步驟變化，重置相關狀態
+  React.useEffect(() => {
+    if (currentStep !== 4) {
+      setShouldStartReview(false);
+      setReviewPassed(false); // 重置審核通過狀態
+    }
+  }, [currentStep]);
 
   const steps = [
     {
@@ -240,7 +249,12 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       [stepId]: true,
     }));
 
-    // 自動跳轉到下一步
+    // 步驟4（內容審核）完成後不自動跳轉，等待用戶手動點擊"下一步"
+    if (stepId === 4) {
+      return; // 不自動跳轉，讓用戶手動控制
+    }
+
+    // 其他步驟自動跳轉到下一步
     if (stepId < steps.length) {
       onStepChange(stepId + 1);
     }
@@ -404,6 +418,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             onReviewStatusChange={setReviewPassed}
             documents={documents}
             crawledUrls={crawledUrls}
+            shouldStartReview={shouldStartReview}
           />
         );
       case 5:
@@ -513,7 +528,41 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             </div>
 
             {/* 中间重点数据显示 */}
-            <div className="text-center mx-3 workflow-stepper-progress-center"></div>
+            <div className="text-center mx-3 workflow-stepper-progress-center">
+              {/* 步驟4專用：內容審核執行按鈕 */}
+              {currentStep === 4 && !shouldStartReview && !reviewPassed && (
+                <button
+                  className="btn btn-warning btn-lg"
+                  onClick={() => {
+                    console.log("Starting review process...");
+                    setShouldStartReview(true);
+                  }}
+                  disabled={documents.length === 0 && crawledUrls.length === 0}
+                >
+                  <i className="bi bi-shield-check me-2"></i>
+                  開始內容審核
+                </button>
+              )}
+              {/* 步驟4：審核進行中顯示 */}
+              {currentStep === 4 && shouldStartReview && !reviewPassed && (
+                <div className="d-flex align-items-center text-warning">
+                  <div
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                  >
+                    <span className="visually-hidden">審核中...</span>
+                  </div>
+                  <span className="fw-bold">內容審核中...</span>
+                </div>
+              )}
+              {/* 步驟4：審核完成顯示 */}
+              {currentStep === 4 && reviewPassed && (
+                <div className="d-flex align-items-center text-success">
+                  <i className="bi bi-check-circle-fill me-2"></i>
+                  <span className="fw-bold">審核完成，可以進入下一步</span>
+                </div>
+              )}
+            </div>
 
             {/* 右侧导航按钮 - 40% */}
             <div className="d-flex align-items-center justify-content-end workflow-stepper-navigation">

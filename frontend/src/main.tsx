@@ -93,6 +93,8 @@ const App: React.FC = () => {
     message: string;
   } | null>(null);
   const [isBlocked, setIsBlocked] = useState(false); // 阻止用户操作直到确认消息
+  const lastErrorRef = React.useRef<string | null>(null);
+  const [workflowReset, setWorkflowReset] = useState(false); // 工作流程重置信號
 
   // T074: Setup RTL support for Arabic language
   React.useEffect(() => {
@@ -181,23 +183,38 @@ const App: React.FC = () => {
 
   // Handle error messages from session and upload
   React.useEffect(() => {
+    let currentError: string | null = null;
+
     if (error) {
-      setSystemMessage({
-        type: "error",
-        message: error,
-      });
-      setIsBlocked(true); // 阻止操作直到用户确认
+      currentError = error;
     } else if (isFailed && statusResponse?.error_message) {
+      currentError = statusResponse.error_message;
+    }
+
+    if (currentError && lastErrorRef.current !== currentError) {
+      // 新錯誤，設置系統消息
+      lastErrorRef.current = currentError;
       setSystemMessage({
         type: "error",
-        message: statusResponse.error_message,
+        message: currentError,
       });
-      setIsBlocked(true); // 阻止操作直到用户确认
-    } else if (systemMessage?.type === "error") {
+      setIsBlocked(true);
+    } else if (
+      !currentError &&
+      lastErrorRef.current &&
+      systemMessage?.type === "error"
+    ) {
+      // 錯誤已清除，清理狀態
+      lastErrorRef.current = null;
       setSystemMessage(null);
-      setIsBlocked(false); // 清除阻止状态
+      setIsBlocked(false);
     }
-  }, [error, isFailed, statusResponse?.error_message, systemMessage?.type]);
+  }, [
+    error,
+    isFailed,
+    statusResponse?.error_message,
+    // 移除 systemMessage 依賴，避免循環觸發
+  ]);
 
   // 上傳檔案時顯示 modal
   const wrappedFileUpload = async (file: File) => {
@@ -310,6 +327,10 @@ const App: React.FC = () => {
       setChatPhase(false);
       setShowRestartConfirm(false);
 
+      // 觸發工作流程重置
+      setWorkflowReset(true);
+      setTimeout(() => setWorkflowReset(false), 100); // 重置信號
+
       // 显示成功提示
       setSystemMessage({
         type: "success",
@@ -397,6 +418,7 @@ const App: React.FC = () => {
           sessionId={sessionId}
           onParameterChange={handleParameterChange}
           onShowMessage={setSystemMessage}
+          onResetWorkflow={workflowReset}
           similarityThreshold={similarityThreshold}
           maxFileSizeMB={maxFileSizeMB}
           supportedFileTypes={supportedFileTypes}

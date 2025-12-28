@@ -102,12 +102,11 @@ export const Header: React.FC<HeaderProps> = ({
             {/* About Project Button */}
             {onAboutClick && (
               <button
-                className="btn btn-sm btn-outline-light"
+                className="btn btn-sm btn-outline-light border "
                 type="button"
                 onClick={onAboutClick}
                 title="關於本專案"
               >
-                <i className="bi bi-info-circle me-1"></i>
                 <span className="d-none d-sm-inline">關於本專案</span>
               </button>
             )}
@@ -116,7 +115,7 @@ export const Header: React.FC<HeaderProps> = ({
             {sessionId && onRestart && (
               <button
                 type="button"
-                className="btn btn-sm btn-outline-light"
+                className="btn btn-sm btn-outline-light border"
                 onClick={onRestart}
                 title={t("buttons.restart")}
               >

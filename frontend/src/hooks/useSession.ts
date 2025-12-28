@@ -43,6 +43,7 @@ export const useSession = (): UseSessionReturn => {
   const [error, setError] = useState<string | null>(null);
   
   const heartbeatTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const errorSetRef = useRef<boolean>(false); // 追蹤錯誤是否已設置
 
   /**
    * Stop heartbeat timer
@@ -68,16 +69,27 @@ export const useSession = (): UseSessionReturn => {
       try {
         const response = await sessionService.heartbeat(currentSessionId);
         setExpiresAt(new Date(response.expires_at));
+        // 清除錯誤狀態（如果heartbeat成功）
+        if (error) {
+          setError(null);
+          errorSetRef.current = false; // 重置錯誤標誌
+        }
         console.log(`Heartbeat sent for session ${currentSessionId}`);
       } catch (err) {
         console.error('Heartbeat failed:', err);
-        // 检查具体错误类型
-        if (err instanceof Error && (err.message.includes('404') || err.message.includes('410'))) {
-          setError('會話已過期，請重新開始');
-          // Session已過期，停止heartbeat timer
-          stopHeartbeat();
-        } else {
-          setError('無法維持會話連線，請檢查網路連線');
+        // 检查具体错误类型，但只設置一次錯誤
+        if (!errorSetRef.current) {
+          if (err instanceof Error && (err.message.includes('404') || err.message.includes('410'))) {
+            const errorMsg = '會話已過期，請重新開始';
+            setError(errorMsg);
+            errorSetRef.current = true; // 標記錯誤已設置
+            // Session已過期，停止heartbeat timer
+            stopHeartbeat();
+          } else {
+            const errorMsg = '無法維持會話連線，請檢查網路連線';
+            setError(errorMsg);
+            errorSetRef.current = true; // 標記錯誤已設置
+          }
         }
       }
     }, HEARTBEAT_INTERVAL);
@@ -89,6 +101,7 @@ export const useSession = (): UseSessionReturn => {
   const createSession = useCallback(async (similarityThreshold: number = 0.5, customPrompt?: string) => {
     setIsLoading(true);
     setError(null);
+    errorSetRef.current = false; // 重置錯誤標誌
 
     try {
       const response = await sessionService.createSession(language, similarityThreshold, customPrompt);

@@ -269,6 +269,23 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+.summary-text.translation-note {
+  background: #f7fafc;
+  border-left: 4px solid #ed8936;
+  position: relative;
+}
+
+.summary-text.translation-note::before {
+  content: '';
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 20px;
+  height: 2px;
+  background: #ed8936;
+  margin-bottom: 8px;
+}
+
 .summary-meta {
   text-align: right;
   margin-top: 8px;

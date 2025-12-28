@@ -1,26 +1,101 @@
-# 🚀 Quick Start Guide - UploadedDocumentInfo Feature
+# 🚀 RAG 演示聊天機器人 - Quick Start Guide
 
-## 功能概述
+## 系統資訊
+
+### 環境要求
+- **Python**: 3.14 (使用 `py` 命令)
+- **Node.js**: Latest (用於前端開發)
+- **Docker**: 用於 Qdrant 向量數據庫和後端容器化
+- **Gemini API**: 用於內容審核和 AI 對話
+
+### 端口配置
+- **前端**: http://localhost:5175/ (Vite 開發服務器)
+- **後端**: http://localhost:8000/ (FastAPI，Docker 容器內)
+- **Qdrant**: localhost:6333-6334 (向量數據庫，Docker 容器內)
+
+## 🔧 系統啟動指南
+
+### 1. 檢查系統狀態
+```powershell
+# 檢查 Docker 容器運行狀態
+docker ps
+# 應該看到 rag-chatbot-backend 和 rag-chatbot-qdrant 容器
+
+# 檢查後端健康狀態
+curl http://localhost:8000/health
+# 期望回應: {"status":"healthy","gemini_model":"gemini-2.0-flash-exp","qdrant_mode":"docker","session_ttl_minutes":30}
+```
+
+### 2. 啟動系統 (如果容器未運行)
+```powershell
+# 啟動所有服務 (從項目根目錄)
+cd c:\Projects\AI_projects\RAG_Demo_Chatbot
+docker-compose up -d
+
+# 或者分別啟動
+docker-compose up -d qdrant  # 先啟動數據庫
+docker-compose up -d backend  # 再啟動後端
+```
+
+### 3. 啟動前端開發服務器
+```powershell
+# 在新的 PowerShell 終端
+cd c:\Projects\AI_projects\RAG_Demo_Chatbot\frontend
+npm run dev
+# 訪問: http://localhost:5175/
+```
+
+### 4. 停止系統
+```powershell
+# 停止所有 Docker 容器
+docker-compose down
+
+# 停止前端 (在前端終端按 Ctrl+C)
+```
+
+## 🧪 測試與檢查
+
+### 健康檢查命令
+```powershell
+# 1. 檢查 Docker 容器狀態
+docker ps
+docker logs rag-chatbot-backend  # 檢查後端日誌
+docker logs rag-chatbot-qdrant   # 檢查數據庫日誌
+
+# 2. 測試後端 API
+curl http://localhost:8000/health
+curl http://localhost:8000/docs  # API 文檔
+
+# 3. 檢查前端構建
+cd frontend
+npm run build  # 確保無構建錯誤
+
+# 4. 檢查 Qdrant 連接
+curl http://localhost:6333/collections  # 直接測試 Qdrant
+```
+
+### 故障排除
+```powershell
+# Python 版本問題
+py --version  # 應該顯示 Python 3.14
+
+# 端口衝突檢查
+netstat -ano | findstr :8000   # 檢查後端端口
+netstat -ano | findstr :5175   # 檢查前端端口
+netstat -ano | findstr :6333   # 檢查 Qdrant 端口
+
+# 重置 Docker 環境
+docker-compose down -v  # 刪除數據卷
+docker-compose up -d    # 重新啟動
+```
+
+## UploadedDocumentInfo 功能概述
 
 新增的 **UploadedDocumentInfo** 功能讓用戶在聊天界面中清晰看到每次文檔上傳的統計信息：
 
 - 📦 **Chunks** - 文本分塊數量
 - ⚡ **Tokens Used** - 文檔消耗的 token 數  
 - 🌐 **Pages Crawled** - 網站爬蟲提取的頁面數
-
-## 快速開始
-
-### 1. 運行應用
-
-```bash
-# 後端（已運行）
-docker ps  # 確認 Qdrant 和後端容器運行中
-
-# 前端
-cd frontend
-npm run dev
-# 訪問: http://localhost:5174/
-```
 
 ### 2. 使用方法
 

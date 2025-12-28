@@ -23,16 +23,28 @@ const ToastMessage: React.FC<ToastMessageProps> = ({
   extraButton,
 }) => {
   const [show, setShow] = useState(true);
-  const [animated, setAnimated] = useState(false);
+  const [animationState, setAnimationState] = useState<
+    "initial" | "animating" | "static"
+  >("initial");
 
-  // 組件掛載後觸發動畫
+  // 組件掛載後觸發動畫，但只執行一次
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setAnimated(true);
-    }, 50); // 短暫延遲確保DOM已渲染
+    if (animationState === "initial") {
+      const timer = setTimeout(() => {
+        setAnimationState("animating");
+      }, 50); // 短暫延遲確保DOM已渲染
 
-    return () => clearTimeout(timer);
-  }, []);
+      // 動畫完成後設為靜態狀態
+      const animationTimer = setTimeout(() => {
+        setAnimationState("static");
+      }, 400); // 300ms動畫 + 100ms緩衝
+
+      return () => {
+        clearTimeout(timer);
+        clearTimeout(animationTimer);
+      };
+    }
+  }, []); // 空依賴陣列，確保只執行一次
 
   // 如果沒有確定按鈕，自動在3秒後關閉
   useEffect(() => {
@@ -58,7 +70,7 @@ const ToastMessage: React.FC<ToastMessageProps> = ({
       case "error":
         return "bg-danger text-white";
       case "warning":
-        return "bg-warning text-white"; // 改為白色文字
+        return "bg-warning text-dark"; // 使用深色文字，適合黃色背景
       case "info":
         return "bg-info text-white";
       case "success":
@@ -98,7 +110,11 @@ const ToastMessage: React.FC<ToastMessageProps> = ({
     <div className="toast-container">
       <div
         className={`toast show ${getBootstrapClass()} ${
-          animated ? "toast-animated" : ""
+          animationState === "animating"
+            ? "toast-animated"
+            : animationState === "static"
+            ? "toast-static"
+            : ""
         }`}
         role="alert"
       >
@@ -132,7 +148,7 @@ const ToastMessage: React.FC<ToastMessageProps> = ({
                     extraButton.className ||
                     `btn btn-sm ${
                       type === "warning"
-                        ? "btn-outline-light" // 警告類型也使用淺色輪廓按鈕
+                        ? "btn-outline-dark" // 警告類型使用深色輪廓按鈕
                         : "btn-outline-light"
                     }`
                   }
@@ -145,7 +161,7 @@ const ToastMessage: React.FC<ToastMessageProps> = ({
                 <button
                   type="button"
                   className={`btn btn-sm ${
-                    type === "warning" ? "btn-light" : "btn-light" // 統一使用淺色按鈕
+                    type === "warning" ? "btn-dark" : "btn-light" // 警告類型使用深色按鈕
                   }`}
                   onClick={handleConfirm}
                 >

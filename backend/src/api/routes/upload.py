@@ -837,3 +837,64 @@ async def list_documents(session_id: UUID):
         ))
     
     return results
+
+
+# 內容審核API
+class ContentModerationRequest(BaseModel):
+    content: str
+    source_reference: str = "user_input"
+
+class ContentModerationResponse(BaseModel):
+    status: str
+    is_approved: bool
+    blocked_categories: list[str]
+    reason: str | None = None
+
+@router.post("/{session_id}/moderate", response_model=ContentModerationResponse)
+async def moderate_content(
+    session_id: UUID,
+    request: ContentModerationRequest
+):
+    """
+    檢查內容是否包含不當材料（色情、暴力、仇恨言論等）
+    使用Gemini Safety API進行實時內容審核
+    """
+    logger.info(f"Content moderation request for session {session_id}")
+    
+    try:
+        # 檢查session是否存在
+        if not session_manager.session_exists(session_id):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Session {session_id} not found"
+            )
+        
+        # 執行內容審核
+        if settings.enable_content_moderation:
+            mod_result = moderator.check_content_safety(
+                request.content,
+                request.source_reference
+            )
+            
+            return ContentModerationResponse(
+                status=mod_result.status.value,
+                is_approved=mod_result.is_approved,
+                blocked_categories=mod_result.blocked_categories,
+                reason=mod_result.reason
+            )
+        else:
+            # 如果關閉內容審核，默認通過
+            logger.warning("Content moderation is disabled, approving content by default")
+            return ContentModerationResponse(
+                status="APPROVED",
+                is_approved=True,
+                blocked_categories=[],
+                reason=None
+            )
+            
+    except Exception as e:
+        logger.error(f"Content moderation failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Content moderation failed: {str(e)}"
+        )

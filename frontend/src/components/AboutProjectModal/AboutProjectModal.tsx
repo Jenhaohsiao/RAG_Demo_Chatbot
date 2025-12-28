@@ -2,8 +2,8 @@
  * About Project Modal Component
  * 顯示專案目標和特色的對話框
  */
-import React from 'react';
-import { useTranslation } from 'react-i18next';
+import React from "react";
+import { useTranslation } from "react-i18next";
 
 interface AboutProjectModalProps {
   isOpen: boolean;
@@ -16,24 +16,32 @@ interface AboutProjectModalProps {
  */
 const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
   isOpen,
-  onClose
+  onClose,
 }) => {
   const { t } = useTranslation();
 
   if (!isOpen) return null;
 
   return (
-    <div className="modal show d-block" tabIndex={-1} role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-      <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+    <div
+      className="modal show d-block"
+      tabIndex={-1}
+      role="dialog"
+      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+    >
+      <div
+        className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"
+        role="document"
+      >
         <div className="modal-content">
           <div className="modal-header bg-primary text-white">
             <h5 className="modal-title">
               <i className="bi bi-info-circle me-2"></i>
               關於本專案
             </h5>
-            <button 
-              type="button" 
-              className="btn-close btn-close-white" 
+            <button
+              type="button"
+              className="btn-close btn-close-white"
               onClick={onClose}
               aria-label="Close"
             ></button>
@@ -48,7 +56,8 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
               <div className="card border-primary border-opacity-25">
                 <div className="card-body">
                   <p className="card-text mb-3">
-                    打造一個<strong>多語言RAG對話機器人系統</strong>，展示完整的AI工程實踐與現代化架構設計。
+                    打造一個<strong>多語言RAG對話機器人系統</strong>
+                    ，展示完整的AI工程實踐與現代化架構設計。
                   </p>
                   <ul className="list-unstyled">
                     <li className="mb-2">
@@ -158,6 +167,51 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
                 </div>
                 <div className="col-auto">
                   <span className="badge bg-dark">Bootstrap 5</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Session 系統配置 */}
+            <div className="mb-4">
+              <h6 className="text-info mb-3">
+                <i className="bi bi-gear me-2"></i>
+                Session 系統配置
+              </h6>
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <div className="config-item border rounded p-3">
+                    <div className="d-flex align-items-center mb-2">
+                      <div className="config-icon text-info me-3">
+                        <i className="bi bi-clock fs-4"></i>
+                      </div>
+                      <h6 className="mb-0">Session 存活時間</h6>
+                    </div>
+                    <p className="text-muted small mb-2">
+                      系統預設 30 分鐘自動清理無活動的會話，確保資源有效利用
+                    </p>
+                    <div className="badge bg-info-subtle text-info">
+                      <i className="bi bi-info-circle me-1"></i>
+                      30 分鐘 TTL
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <div className="config-item border rounded p-3">
+                    <div className="d-flex align-items-center mb-2">
+                      <div className="config-icon text-warning me-3">
+                        <i className="bi bi-database fs-4"></i>
+                      </div>
+                      <h6 className="mb-0">集合隔離</h6>
+                    </div>
+                    <p className="text-muted small mb-2">
+                      每個 Session 獨立的 Qdrant
+                      向量資料庫集合，確保資料隱私安全
+                    </p>
+                    <div className="badge bg-warning-subtle text-warning">
+                      <i className="bi bi-shield-check me-1"></i>
+                      完全隔離
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

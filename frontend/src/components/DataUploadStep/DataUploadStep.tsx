@@ -80,29 +80,6 @@ const DataUploadStep: React.FC<DataUploadStepProps> = ({
                   </h5>
                 </div>
                 <div className="card-body">
-                  {/* Session存活時間 */}
-                  <div className="mb-4">
-                    <label className="form-label">Session存活時間</label>
-                    <select
-                      className="form-select"
-                      value={parameters.session_ttl_minutes}
-                      onChange={(e) =>
-                        onParameterChange(
-                          "session_ttl_minutes",
-                          parseInt(e.target.value)
-                        )
-                      }
-                    >
-                      <option value={5}>5分鐘</option>
-                      <option value={10}>10分鐘</option>
-                      <option value={20}>20分鐘</option>
-                      <option value={30}>30分鐘</option>
-                    </select>
-                    <div className="form-text">
-                      會話閒置超過此時間將自動過期
-                    </div>
-                  </div>
-
                   {/* 檔案大小限制 */}
                   <div className="mb-4">
                     <label className="form-label">

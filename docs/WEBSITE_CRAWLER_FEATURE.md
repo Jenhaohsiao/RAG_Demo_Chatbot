@@ -1,4 +1,4 @@
-# Website Crawler Feature Implementation
+# Website Crawler Feature - Complete Guide
 
 ## Overview
 
@@ -11,6 +11,31 @@ The Website Crawler feature allows users to automatically crawl entire websites,
 - 📊 **URL Visibility**: Shows all crawled URLs with per-page token counts
 - 🛡️ **Error Handling**: Graceful handling of timeouts, redirects, and network errors
 - 🚫 **Content Moderation**: All crawled content goes through safety moderation
+
+---
+
+## Testing Guide
+
+### Backend Tests
+```bash
+cd backend
+pytest tests/test_web_crawler.py -v
+```
+
+### Frontend Testing
+1. 進入 "Website Crawler" 標籤
+2. 輸入測試 URL (例如: https://example.com)
+3. 調整 Token 限制滑塊
+4. 點擊 "Start Crawl"
+5. 觀察爬取進度和 URL 發現
+
+### Expected Results
+- ✅ 只爬取同域名的頁面
+- ✅ Token 計算準確 (1 token ≈ 3 characters)
+- ✅ 顯示所有發現的 URL
+- ✅ 遵守 Token 限制
+
+---
 
 ## Architecture
 

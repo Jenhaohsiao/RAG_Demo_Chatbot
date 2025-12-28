@@ -11,16 +11,48 @@ Build a production-ready multilingual RAG-powered chatbot for AI Engineer portfo
 
 ## Technical Context
 
-**Language/Version**: Python 3.11+ (backend), TypeScript 5.x (frontend)
+**Language/Version**: Python 3.14 (backend), TypeScript 5.x (frontend)
+
+**System Architecture**:
+- **Frontend**: React 18+ with TypeScript 5, Vite 5+ (localhost:5175)
+- **Backend**: FastAPI (localhost:8000, Docker containerized)
+- **Vector Database**: Qdrant (localhost:6333-6334, Docker containerized)
+- **AI Services**: Gemini 2.0 Flash (LLM + Embedding + Safety API)
+
+**System Commands**:
+```powershell
+# 檢查系統狀態
+docker ps  # 檢查容器運行狀態
+curl http://localhost:8000/health  # 檢查後端健康狀態
+
+# 啟動系統
+docker-compose up -d  # 啟動所有服務
+cd frontend && npm run dev  # 啟動前端開發服務器
+
+# Python 環境
+py --version  # Python 3.14
+py run_server.py  # 手動啟動後端 (不推薦，使用 Docker)
+
+# 測試命令
+npm run build  # 前端構建測試
+pytest  # 後端測試 (在 backend/ 目錄下)
+docker logs rag-chatbot-backend  # 檢查後端日誌
+docker logs rag-chatbot-qdrant  # 檢查數據庫日誌
+```
 
 **Primary Dependencies**:
-- **Backend**: FastAPI 0.104+, qdrant-client, google-generativeai, PyPDF2, beautifulsoup4, python-dotenv, APScheduler
+- **Backend**: FastAPI 0.104+, qdrant-client, google-generativeai (gemini-2.0-flash), PyPDF2, beautifulsoup4, python-dotenv, APScheduler
 - **Frontend**: React 18+, Vite 5+, Bootstrap 5+, axios, react-i18next
 
 **Storage**: 
-- **Vector Database**: Qdrant Vector Database (embedded/Docker for dev/test) + Qdrant Cloud (1GB free tier for production)
-- **Session State**: In-memory (FastAPI application state) with scheduled cleanup
+- **Vector Database**: Qdrant Vector Database (Docker for development) + Qdrant Cloud (1GB free tier for production)
+- **Session State**: In-memory (FastAPI application state) with 30-minute TTL and automated cleanup
 - **No persistent user data** (ephemeral by constitutional requirement)
+
+**Security & Content Moderation**:
+- **Gemini Safety API**: BLOCK_MEDIUM_AND_ABOVE for all harm categories (HARASSMENT, HATE_SPEECH, SEXUALLY_EXPLICIT, DANGEROUS_CONTENT)
+- **Content Review**: 6-step process including real-time content moderation
+- **Session Management**: Auto-cleanup with 30-minute TTL
 
 **Testing**: 
 - **Backend**: pytest, pytest-asyncio, pytest-cov, httpx (for FastAPI testing)
