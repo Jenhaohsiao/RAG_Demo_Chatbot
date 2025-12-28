@@ -1,6 +1,6 @@
 /* Toast Message Styles */
 .toast {
-  --bs-toast-zindex: 9999;
+  --bs-toast-zindex: 10000;
   --bs-toast-padding-x: 1rem;
   --bs-toast-padding-y: 0.75rem;
   --bs-toast-spacing: 0.25rem;
@@ -19,7 +19,6 @@
 
 .toast.show {
   display: block;
-  animation: slideInRight 0.3s ease-out;
 }
 
 .toast-header {

@@ -114,14 +114,16 @@ const WorkflowMain: React.FC<WorkflowMainProps> = ({
   const handleStepChange = (step: number) => {
     setCurrentStep(step);
 
-    // 如果到達最後一步，標記工作流程完成
-    if (step === 6) {
-      setWorkflowComplete(true);
-    }
+    // 不要在步驟6自動標記為完成，讓用戶在WorkflowStepper中體驗第6步
+    // 移除自動跳轉到分離ChatScreen的邏輯
+    // if (step === 6) {
+    //   setWorkflowComplete(true);
+    // }
   };
 
+  // 暫時停用自動跳轉到分離ChatScreen的邏輯，讓第6步在WorkflowStepper中顯示
   // 如果工作流程完成且在最後一步，顯示聊天界面
-  if (workflowComplete && currentStep === 6) {
+  if (false && workflowComplete && currentStep === 6) {
     return (
       <div className="workflow-main">
         {/* 聊天界面 - 移除返回工作流程按鈕 */}

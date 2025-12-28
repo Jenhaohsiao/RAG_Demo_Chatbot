@@ -7,9 +7,51 @@
   margin: 0;
 }
 
+/* Inline style replacements */
+.workflow-stepper-step-circle {
+  cursor: pointer;
+}
+
+.workflow-stepper-check-icon {
+  font-size: 0.9rem;
+}
+
+.workflow-stepper-progress-container {
+  width: 60%;
+}
+
+.workflow-stepper-progress-center {
+  min-width: 250px;
+}
+
+.workflow-stepper-navigation {
+  width: 40%;
+}
+
 .stepper-header {
   position: relative;
   width: 100%;
+}
+
+/* AI Chat Step Container */
+.ai-chat-step-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.ai-chat-content {
+  flex: 1;
+  overflow-y: auto; 
+}
+
+/* Sticky flow diagram for step 6 */
+.stepper-header.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 /* 水平排列的步驟項目 */
@@ -138,13 +180,12 @@
 
 /* 當前步驟資訊樣式 */
 .current-step-info {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, #b7c8eb 0%, #ffffff 100%);
   border-radius: 0;
-  padding: 25px 30px;
+  padding: 10px 10px;
   border-left: 5px solid #0d6efd;
   box-shadow: none;
-  width: 100%;
-  margin: 20px 0;
+  width: 100%; 
 }
 
 /* 導航按鈕樣式 */
@@ -247,11 +288,7 @@
     width: 30px;
     height: 3px;
   }
-  
-  .current-step-info {
-    padding: 20px 15px;
-  }
-  
+
   .step-content {
     padding: 20px 15px;
     min-height: 300px;
@@ -416,59 +453,7 @@
 .progress-bar {
   transition: width 0.5s ease-in-out;
 }
-
-/* 重點參數數據顯示樣式 */
-.key-params-summary {
-  background: rgba(13, 110, 253, 0.05);
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(13, 110, 253, 0.1);
-  margin-top: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.key-params-summary .badge {
-  font-size: 0.75rem;
-  font-weight: 500;
-  border: 1px solid rgba(108, 117, 125, 0.2);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease;
-}
-
-.key-params-summary .badge:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-}
-
-.key-params-summary .badge.bg-primary {
-  border-color: rgba(13, 110, 253, 0.3);
-}
-
-.key-params-summary .badge.bg-success {
-  border-color: rgba(25, 135, 84, 0.3);
-}
-
-.key-params-summary .badge.bg-info {
-  border-color: rgba(13, 202, 240, 0.3);
-}
-
-.key-params-summary .badge.bg-warning {
-  border-color: rgba(255, 193, 7, 0.3);
-}
-
-/* 響應式設計 */
-@media (max-width: 768px) {
-  .key-params-summary {
-    padding: 6px 8px;
-  }
   
-  .key-params-summary .badge {
-    font-size: 0.7rem;
-    margin-bottom: 2px !important;
-    margin-right: 4px !important;
-  }
-}
-
 /* 自定義步驟顏色 */
 .bg-orange {
   background-color: #ff7849 !important;

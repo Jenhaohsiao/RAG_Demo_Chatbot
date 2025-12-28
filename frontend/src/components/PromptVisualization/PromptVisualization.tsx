@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import "./PromptVisualization.css";
 
 interface SystemPrompts {
   rag_prompt_template: string;
@@ -277,8 +278,7 @@ const PromptVisualization: React.FC<PromptVisualizationProps> = ({
             {/* RAG 設定 */}
             <div className="card row-mb-3 mb-3">
               <div
-                className="card-header bg-light"
-                style={{ cursor: "pointer" }}
+                className="card-header bg-light prompt-viz-card-header-clickable"
                 onClick={() => setIsRagCollapsed(!isRagCollapsed)}
               >
                 <div className="d-flex justify-content-between align-items-center">
@@ -590,8 +590,7 @@ const PromptVisualization: React.FC<PromptVisualizationProps> = ({
             {/* 其它設定 */}
             <div className="card row-mb-3 mb-3">
               <div
-                className="card-header bg-light"
-                style={{ cursor: "pointer" }}
+                className="card-header bg-light prompt-viz-card-header-clickable"
                 onClick={() => setIsSystemCollapsed(!isSystemCollapsed)}
               >
                 <div className="d-flex justify-content-between align-items-center">
@@ -708,8 +707,7 @@ const PromptVisualization: React.FC<PromptVisualizationProps> = ({
             {/* 檔案類型支援 */}
             <div className="card row-mb-3 mb-3">
               <div
-                className="card-header bg-light"
-                style={{ cursor: "pointer" }}
+                className="card-header bg-light prompt-viz-card-header-clickable"
                 onClick={() => setIsFileTypeCollapsed(!isFileTypeCollapsed)}
               >
                 <div className="d-flex justify-content-between align-items-center">

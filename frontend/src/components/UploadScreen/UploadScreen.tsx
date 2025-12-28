@@ -10,6 +10,7 @@
 import React, { useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "../../styles/UploadScreen.css";
+import "./UploadScreen.css";
 import {
   validateFileType,
   validateFileSize,
@@ -268,7 +269,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
             accept={getAcceptAttribute()}
             onChange={handleFileInputChange}
             disabled={disabled}
-            style={{ display: "none" }}
+            className="upload-screen-hidden-input"
           />
 
           <div className="container">

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import "./ToastMessage.css";
 
 interface ToastMessageProps {
   type: "error" | "warning" | "info" | "success";
@@ -22,6 +23,16 @@ const ToastMessage: React.FC<ToastMessageProps> = ({
   extraButton,
 }) => {
   const [show, setShow] = useState(true);
+  const [animated, setAnimated] = useState(false);
+
+  // 組件掛載後觸發動畫
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAnimated(true);
+    }, 50); // 短暫延遲確保DOM已渲染
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // 如果沒有確定按鈕，自動在3秒後關閉
   useEffect(() => {
@@ -79,22 +90,18 @@ const ToastMessage: React.FC<ToastMessageProps> = ({
   };
 
   // Toast 定位样式
-  const toastContainerStyle: React.CSSProperties = {
-    position: "fixed",
-    top: "20px",
-    right: "20px",
-    zIndex: 9999,
-    maxWidth: "400px",
-    width: "100%",
-  };
-
   if (!show) {
     return null;
   }
 
   return (
-    <div style={toastContainerStyle}>
-      <div className={`toast show ${getBootstrapClass()}`} role="alert">
+    <div className="toast-container">
+      <div
+        className={`toast show ${getBootstrapClass()} ${
+          animated ? "toast-animated" : ""
+        }`}
+        role="alert"
+      >
         <div className="toast-header">
           <i className={`bi ${getIcon()} me-2`}></i>
           <strong className="me-auto">

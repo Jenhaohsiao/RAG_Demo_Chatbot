@@ -1,0 +1,14 @@
+/* main.tsx specific styles */
+.main-content-container {
+  min-height: calc(100vh - 80px);
+}
+
+.main-blocking-overlay {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 9998;
+  cursor: not-allowed;
+}

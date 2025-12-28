@@ -26,6 +26,7 @@ import {
 } from "../../services/metricsService";
 import { getSession } from "../../services/sessionService";
 import { type CrawledPage } from "../../services/uploadService";
+import "./ChatScreen.css";
 
 interface ChatScreenProps {
   sessionId: string;
@@ -70,6 +71,9 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
     document_count: number;
     vector_count: number;
   } | null>(null);
+  const [sessionExpiredNotified, setSessionExpiredNotified] = useState(false);
+  const [metricsErrorCount, setMetricsErrorCount] = useState(0);
+  const [sessionErrorCount, setSessionErrorCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // 自動滾動到最新訊息
@@ -83,43 +87,120 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
 
   // 定期更新 metrics
   useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    let errorCount = 0;
+
     const updateMetrics = async () => {
+      // 如果連續失敗超過3次，停止輪詢
+      if (errorCount >= 3) {
+        console.warn("Metrics API failed too many times, stopping polling");
+        if (interval) {
+          clearInterval(interval);
+          interval = null;
+        }
+        return;
+      }
+
       try {
         const data = await getSessionMetrics(sessionId);
         setMetrics(data);
-      } catch (err) {
+        // 成功時重置錯誤計數
+        errorCount = 0;
+        setMetricsErrorCount(0);
+        // 成功獲取metrics時，清除錯誤狀態但不重置session過期通知
+        if (error && !error.includes("Session已過期")) {
+          setError(null);
+        }
+      } catch (err: any) {
         console.error("Failed to update metrics:", err);
+        errorCount++;
+        setMetricsErrorCount(errorCount);
+        // 檢查是否為Session過期錯誤，且尚未通知過
+        if (
+          !sessionExpiredNotified &&
+          (err.status === 401 || err.status === 403)
+        ) {
+          setError("Session已過期，請重新登入或刷新頁面");
+          setSessionExpiredNotified(true);
+        }
       }
     };
 
     // 初始載入
     updateMetrics();
 
-    // 每隔 3 秒更新一次
-    const interval = setInterval(updateMetrics, 3000);
+    // 設置低頻率輪詢：30秒一次
+    interval = setInterval(updateMetrics, 30000);
 
-    return () => clearInterval(interval);
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
   }, [sessionId]);
 
   // 獲取 session 信息（document_count, vector_count）
   useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    let errorCount = 0;
+
     const fetchSessionInfo = async () => {
+      // 如果連續失敗超過3次，停止輪詢
+      if (errorCount >= 3) {
+        console.warn("Session API failed too many times, stopping polling");
+        if (interval) {
+          clearInterval(interval);
+          interval = null;
+        }
+        return;
+      }
+
       try {
         const data = await getSession(sessionId);
         setSessionInfo({
           document_count: data.document_count,
           vector_count: data.vector_count,
         });
-      } catch (err) {
+        // 成功時重置錯誤計數
+        errorCount = 0;
+        setSessionErrorCount(0);
+        // 成功獲取session信息時，清除錯誤狀態但不重置session過期通知
+        if (error && !error.includes("Session已過期")) {
+          setError(null);
+        }
+      } catch (err: any) {
         console.error("Failed to fetch session info:", err);
+        errorCount++;
+        setSessionErrorCount(errorCount);
+        // 檢查是否為Session過期錯誤，且尚未通知過
+        if (
+          !sessionExpiredNotified &&
+          (err.status === 401 || err.status === 403)
+        ) {
+          setError("Session已過期，請重新登入或刷新頁面");
+          setSessionExpiredNotified(true);
+        }
       }
     };
 
     fetchSessionInfo();
 
-    // 每 5 秒更新一次
-    const interval = setInterval(fetchSessionInfo, 5000);
-    return () => clearInterval(interval);
+    // 設置低頻率輪詢：60秒一次
+    interval = setInterval(fetchSessionInfo, 60000);
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [sessionId]);
+
+  // 重置Session過期通知狀態和錯誤計數器（當sessionId改變時）
+  useEffect(() => {
+    setSessionExpiredNotified(false);
+    setError(null);
+    setMetricsErrorCount(0);
+    setSessionErrorCount(0);
   }, [sessionId]);
 
   const handleSendMessage = async (content: string) => {
@@ -162,7 +243,16 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
       const updatedMetrics = await getSessionMetrics(sessionId);
       setMetrics(updatedMetrics);
     } catch (err: any) {
-      setError(err.response?.data?.detail || t("chat.error.sendFailed"));
+      // 檢查是否為Session過期錯誤
+      if (
+        !sessionExpiredNotified &&
+        (err.status === 401 || err.status === 403)
+      ) {
+        setError("Session已過期，請重新登入或刷新頁面");
+        setSessionExpiredNotified(true);
+      } else if (!sessionExpiredNotified) {
+        setError(err.response?.data?.detail || t("chat.error.sendFailed"));
+      }
       console.error("Query failed:", err);
     } finally {
       setIsLoading(false);
@@ -171,135 +261,29 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
 
   return (
     <div className="chat-screen">
-      {/* Metrics Dashboard - Consolidated into MetricsPanel below */}
-      {/* MetricsDashboard hidden - metrics consolidated into single MetricsPanel for compact display */}
-      {/* {showMetrics && metrics && (
-        <MetricsDashboard
-          sessionId={sessionId}
-          metrics={metrics}
-          onMetricsUpdate={setMetrics}
-        />
-      )} */}
-
-      {/* 新的兩欄布局 */}
-      <div className="row chat-main-content">
-        {/* 左欄：文檔資訊和實時指標 */}
-        <div className="col-md-4 left-panel">
-          {/* 文檔資訊區域 */}
-          <div className="info-section">
-            <h4 className="section-title">文檔資訊</h4>
-
-            {/* Vector DB 信息 */}
-            {sessionInfo && (
-              <div className="row mb-3">
-                <div className=" col-md-6 align-items-center">
-                  <i
-                    className="bi bi-database-fill text-success me-2"
-                    style={{ fontSize: "1.5rem" }}
-                  ></i>
-                  <div>
-                    <div className="text-muted small">
-                      {t("documentInfo.vectorsStored", "Vector DB 向量數")}
-                    </div>
-                    <div className="fw-bold fs-6">
-                      {sessionInfo.vector_count}{" "}
-                      {t("documentInfo.vectors", "個向量")}
-                    </div>
-                  </div>
-                </div>
-                <div className="col-md-6 align-items-center">
-                  <i
-                    className="bi bi-file-earmark-check text-info me-2"
-                    style={{ fontSize: "1.5rem" }}
-                  ></i>
-                  <div>
-                    <div className="text-muted small">
-                      {t("documentInfo.documentsUploaded", "已上傳文檔數")}
-                    </div>
-                    <div className="fw-bold fs-6">
-                      {sessionInfo.document_count}{" "}
-                      {t("documentInfo.documents", "個文檔")}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* 文檔詳細信息 */}
-            {(sourceReference || chunkCount) && (
-              <div className="row mb-3">
-                {sourceReference && (
-                  <div className=" col-md-6 align-items-center">
-                    <div className="text-muted small">
-                      {t("documentInfo.fileName", "文件名稱")}
-                    </div>
-                    <div className="text-truncate" title={sourceReference}>
-                      {sourceReference}
-                    </div>
-                  </div>
-                )}
-                {chunkCount !== undefined && (
-                  <div className=" col-md-6 align-items-center">
-                    <div className="text-muted small">
-                      {t("documentInfo.chunks", "文本塊數")}
-                    </div>
-                    <div>{chunkCount} chunks</div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Resource Consumption Panel - 顯示資源消耗 (Token, 時間等) */}
-            {(documentSummary || chunkCount || sourceReference) && (
-              <ResourceConsumptionPanel
-                sourceType={sourceType}
-                tokensUsed={tokensUsed || 0}
-                chunkCount={chunkCount || 0}
-                processingTimeMs={0}
-                crawlDurationSeconds={crawlDurationSeconds || 0}
-                avgTokensPerPage={avgTokensPerPage || 0}
-                totalTokenLimit={totalTokenLimit || 32000}
-              />
-            )}
-
-            {/* Crawled URLs Panel - 顯示爬蟲結果的 URL 列表 */}
-            {((crawledPages && crawledPages.length > 0) ||
-              (sourceType === "URL" && pagesCrawled && pagesCrawled > 0)) && (
-              <CrawledUrlsPanel
-                pages={crawledPages || []}
-                baseUrl={baseUrl || sourceReference || ""}
-                totalPages={pagesCrawled || crawledPages?.length || 0}
-                totalTokens={tokensUsed || 0}
-              />
-            )}
-          </div>
-
-          {/* 實時指標區域 */}
-          <div className="metrics-section">
-            <h5 className="section-title">⏱️ 實時指標</h5>
-            {metrics && (
-              <MetricsPanel
-                metrics={{
-                  token_input: metrics.total_input_tokens || 0,
-                  token_output: metrics.total_output_tokens || 0,
-                  token_total: metrics.total_tokens || 0,
-                  token_limit: metrics.token_warning_threshold || 32000,
-                  token_percent:
-                    ((metrics.total_tokens || 0) /
-                      (metrics.token_warning_threshold || 32000)) *
-                    100,
-                  context_tokens: metrics.avg_chunks_retrieved * 500 || 0,
-                  context_percent:
-                    ((metrics.avg_chunks_retrieved * 500 || 0) / 8000) * 100,
-                  vector_count: metrics.avg_chunks_retrieved || 0,
-                }}
-              />
-            )}
+      {/* 文件摘要區域 */}
+      {documentSummary && (
+        <div className="document-summary-header">
+          <div className="document-summary-content">
+            <h5 className="summary-title">
+              <i className="bi bi-file-text me-2"></i>
+              文件摘要
+            </h5>
+            <div className="summary-text">{documentSummary}</div>
+            <div className="summary-meta">
+              <small className="text-muted">
+                <i className="bi bi-robot me-1"></i>
+                由AI分析生成 •{sourceType && ` ${sourceType} • `}
+                {chunkCount && `${chunkCount} 個文本段落 • `}
+                {tokensUsed && `${tokensUsed.toLocaleString()} Tokens`}
+              </small>
+            </div>
           </div>
         </div>
+      )}
 
-        {/* 右欄：互動專區 */}
-        <div className="col-md-8 right-panel">
+      <div className="row chat-main-content">
+        <div className="col-md-12 right-panel">
           <div className="interaction-area">
             <h5 className="section-title">💬 互動專區</h5>
 
@@ -349,240 +333,6 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .chat-screen {
-          display: flex;
-          flex-direction: column;
-          height: 100%;
-          background: white;
-        }
-
-        .chat-header {
-          padding: 20px;
-          border-bottom: 1px solid #e1e8ed;
-          background: white;
-        }
-
-        .chat-header-content {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 1rem;
-        }
-
-        .chat-header h2 {
-          margin: 0 0 8px 0;
-          font-size: 24px;
-          color: #2d3748;
-        }
-
-        .chat-subtitle {
-          margin: 0;
-          font-size: 14px;
-          color: #718096;
-        }
-
-        .metrics-toggle-btn {
-          padding: 0.5rem 1rem;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-          border: none;
-          border-radius: 6px;
-          cursor: pointer;
-          font-size: 0.9rem;
-          font-weight: 600;
-          transition: all 0.2s ease;
-          white-space: nowrap;
-          height: fit-content;
-        }
-
-        .chat-main-content {
-          flex: 1;
-          overflow: hidden;
-        }
-
-        .document-summary-full-width {
-          background: #f8f9fa;
-          border-bottom: 1px solid #e1e8ed;
-          margin-bottom: 1rem;
-        }
-
-        .document-summary-full-width .section-title {
-          color: #2d3748;
-          font-weight: 600;
-          margin-bottom: 1rem;
-          padding-bottom: 0.5rem;
-          border-bottom: 2px solid #e1e8ed;
-        }
-
-        .left-panel {
-          background: #f8f9fa;
-          border-right: 1px solid #e1e8ed;
-          height: 100vh;
-          overflow-y: auto;
-          padding: 1rem;
-        }
-
-        .right-panel {
-          height: 100vh;
-          display: flex;
-          flex-direction: column;
-          padding: 1rem;
-        }
-
-        .document-summary-section {
-          margin-bottom: 1.5rem;
-        }
-
-        .section-title {
-          color: #2d3748;
-          font-weight: 600;
-          margin-bottom: 1rem;
-          padding-bottom: 0.5rem;
-          border-bottom: 2px solid #e1e8ed;
-        }
-
-        .subsection-title {
-          color: #4a5568;
-          font-weight: 500;
-          margin-bottom: 0.75rem;
-          font-size: 1rem;
-        }
-
-        .info-section {
-          margin-bottom: 2rem;
-        }
-
-        .metrics-section {
-          margin-bottom: 1rem;
-        }
-
-        .interaction-area {
-          display: flex;
-          flex-direction: column;
-          height: 100%;
-        }
-
-        .chat-area {
-          flex: 1;
-          overflow: hidden;
-          margin-bottom: 1rem;
-        }
-
-        .input-area {
-          background: #f0f7ff;
-          padding: 1rem;
-          border-radius: 8px;
-          border: 1px solid #bee3f8;
-        }
-
-        .messages-container {
-          height: calc(100vh - 250px);
-          overflow-y: auto;
-          padding: 1rem;
-          border: 1px solid #e1e8ed;
-          border-radius: 8px;
-          background: white;
-        }
-
-        .metrics-toggle-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-
-        .metrics-toggle-btn:active {
-          transform: translateY(0);
-        }
-
-        .document-summary-container {
-          padding: 20px;
-          background: #f9fafb;
-          border-bottom: 1px solid #e1e8ed;
-          max-height: 300px;
-          overflow-y: auto;
-        }
-
-        .document-info {
-          margin: 0;
-        }
-
-        .document-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        .document-filename {
-          margin: 0;
-          font-weight: 600;
-          font-size: 15px;
-          color: #2d3748;
-          word-break: break-word;
-        }
-
-        .document-description {
-          line-height: 1.6;
-          font-size: 14px;
-          color: #4a5568;
-        }
-
-        .messages-container {
-          flex: 1;
-          overflow-y: auto;
-          padding: 20px;
-          background: #f9fafb;
-        }
-
-        .empty-state {
-          text-align: center;
-          padding: 60px 20px;
-          color: #718096;
-        }
-
-        .empty-state p {
-          margin: 0 0 12px 0;
-          font-size: 16px;
-        }
-
-        .empty-hint {
-          font-size: 14px;
-          opacity: 0.8;
-        }
-
-        .loading-indicator {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 16px;
-          background: #edf2f7;
-          border-radius: 8px;
-          margin-bottom: 16px;
-        }
-
-        .spinner {
-          width: 20px;
-          height: 20px;
-          border: 3px solid #e2e8f0;
-          border-top-color: #4299e1;
-          border-radius: 50%;
-          animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-          to {
-            transform: rotate(360deg);
-          }
-        }
-
-        .error-banner {
-          padding: 12px 16px;
-          background: #fff5f5;
-          border-left: 4px solid #fc8181;
-          color: #742a2a;
-          font-size: 14px;
-        }
-      `}</style>
     </div>
   );
 };

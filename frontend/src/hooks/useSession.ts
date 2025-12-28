@@ -20,7 +20,7 @@ interface UseSessionReturn {
   createSession: (similarityThreshold?: number, customPrompt?: string) => Promise<void>;
   closeSession: () => Promise<void>;
   restartSession: () => Promise<void>;
-  updateLanguage: (newLanguage: string, passedSessionId?: string | null) => Promise<void>;
+  updateLanguage: (newLanguage: 'en' | 'zh-TW' | 'zh-CN' | 'ko' | 'es' | 'ja' | 'ar' | 'fr', passedSessionId?: string | null) => Promise<void>;
 }
 
 /**
@@ -178,7 +178,7 @@ export const useSession = (): UseSessionReturn => {
    * @param newLanguage Language code to update to
    * @param passedSessionId Optional sessionId to use (allows parent to pass current session)
    */
-  const updateLanguage = useCallback(async (newLanguage: string, passedSessionId?: string | null) => {
+  const updateLanguage = useCallback(async (newLanguage: 'en' | 'zh-TW' | 'zh-CN' | 'ko' | 'es' | 'ja' | 'ar' | 'fr', passedSessionId?: string | null) => {
     // Use passed sessionId if available, otherwise use state sessionId
     const targetSessionId = passedSessionId !== undefined ? passedSessionId : sessionId;
 

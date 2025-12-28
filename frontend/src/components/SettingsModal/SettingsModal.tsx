@@ -2,8 +2,8 @@
  * Settings Modal Component
  * 相似度閾值設定對話框
  */
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface SettingsModalProps {
   show: boolean;
@@ -18,7 +18,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   onConfirm,
   onCancel,
   defaultThreshold = 0.5,
-  defaultCustomPrompt = ''
+  defaultCustomPrompt = "",
 }) => {
   const { t } = useTranslation();
   const [threshold, setThreshold] = useState(defaultThreshold);
@@ -32,33 +32,39 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   const getThresholdLabel = (value: number): string => {
-    if (value >= 0.7) return t('settings.threshold.strict');
-    if (value >= 0.5) return t('settings.threshold.balanced');
-    return t('settings.threshold.lenient');
+    if (value >= 0.7) return t("settings.threshold.strict");
+    if (value >= 0.5) return t("settings.threshold.balanced");
+    return t("settings.threshold.lenient");
   };
 
   const getThresholdColor = (value: number): string => {
-    if (value >= 0.7) return 'danger';
-    if (value >= 0.5) return 'warning';
-    return 'success';
+    if (value >= 0.7) return "danger";
+    if (value >= 0.5) return "warning";
+    return "success";
   };
 
   return (
-    <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+    <div className="modal show d-block settings-modal-backdrop">
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
           <div className="modal-header">
             <h5 className="modal-title">
               <i className="bi bi-sliders me-2"></i>
-              {t('settings.title')}
+              {t("settings.title")}
             </h5>
-            <button type="button" className="btn-close" onClick={onCancel}></button>
+            <button
+              type="button"
+              className="btn-close"
+              onClick={onCancel}
+            ></button>
           </div>
           <div className="modal-body">
             <div className="mb-4">
               <label className="form-label fw-bold">
-                {t('settings.threshold.label')}
-                <span className={`badge bg-${getThresholdColor(threshold)} ms-2`}>
+                {t("settings.threshold.label")}
+                <span
+                  className={`badge bg-${getThresholdColor(threshold)} ms-2`}
+                >
                   {getThresholdLabel(threshold)}
                 </span>
               </label>
@@ -72,29 +78,36 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 onChange={(e) => setThreshold(parseFloat(e.target.value))}
               />
               <div className="d-flex justify-content-between text-muted small">
-                <span>{t('settings.threshold.low')} (0.3)</span>
-                <span className="fw-bold text-primary">{threshold.toFixed(1)}</span>
-                <span>{t('settings.threshold.high')} (0.9)</span>
+                <span>{t("settings.threshold.low")} (0.3)</span>
+                <span className="fw-bold text-primary">
+                  {threshold.toFixed(1)}
+                </span>
+                <span>{t("settings.threshold.high")} (0.9)</span>
               </div>
             </div>
 
             <div className="alert alert-info small">
               <i className="bi bi-info-circle me-2"></i>
-              {t('settings.threshold.description')}
+              {t("settings.threshold.description")}
             </div>
 
             <div className="card bg-light">
               <div className="card-body">
-                <h6 className="card-subtitle mb-2">{t('settings.threshold.recommendations')}</h6>
+                <h6 className="card-subtitle mb-2">
+                  {t("settings.threshold.recommendations")}
+                </h6>
                 <ul className="small mb-0">
                   <li>
-                    <strong>0.3-0.4:</strong> {t('settings.threshold.rec_lenient')}
+                    <strong>0.3-0.4:</strong>{" "}
+                    {t("settings.threshold.rec_lenient")}
                   </li>
                   <li>
-                    <strong>0.5-0.6:</strong> {t('settings.threshold.rec_balanced')}
+                    <strong>0.5-0.6:</strong>{" "}
+                    {t("settings.threshold.rec_balanced")}
                   </li>
                   <li>
-                    <strong>0.7-0.9:</strong> {t('settings.threshold.rec_strict')}
+                    <strong>0.7-0.9:</strong>{" "}
+                    {t("settings.threshold.rec_strict")}
                   </li>
                 </ul>
               </div>
@@ -107,25 +120,38 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                   <i className="bi bi-chat-left-text me-2"></i>
                   Custom Prompt Template
                 </span>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="btn btn-sm btn-outline-info"
                   onClick={() => setShowPromptHelp(!showPromptHelp)}
                 >
-                  <i className={`bi bi-${showPromptHelp ? 'eye-slash' : 'question-circle'}`}></i>
+                  <i
+                    className={`bi bi-${
+                      showPromptHelp ? "eye-slash" : "question-circle"
+                    }`}
+                  ></i>
                 </button>
               </label>
-              
+
               {showPromptHelp && (
                 <div className="alert alert-info small mb-2">
                   <strong>Available Variables:</strong>
                   <ul className="mb-0 mt-1">
-                    <li><code>{'{{language}}'}</code> - Response language (中文, English, etc.)</li>
-                    <li><code>{'{{context}}'}</code> - Retrieved document chunks</li>
-                    <li><code>{'{{query}}'}</code> - User's question</li>
+                    <li>
+                      <code>{"{{language}}"}</code> - Response language (中文,
+                      English, etc.)
+                    </li>
+                    <li>
+                      <code>{"{{context}}"}</code> - Retrieved document chunks
+                    </li>
+                    <li>
+                      <code>{"{{query}}"}</code> - User's question
+                    </li>
                   </ul>
                   <div className="mt-2">
-                    <strong>Tips:</strong> Leave empty to use default prompt. Custom prompt is great for demos to show prompt engineering skills!
+                    <strong>Tips:</strong> Leave empty to use default prompt.
+                    Custom prompt is great for demos to show prompt engineering
+                    skills!
                   </div>
                 </div>
               )}
@@ -135,10 +161,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 rows={6}
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
-                placeholder={t('settings.customPrompt.placeholder')}
-                style={{ fontSize: '0.85rem' }}
+                placeholder={t("settings.customPrompt.placeholder")}
+                style={{ fontSize: "0.85rem" }}
               />
-              
+
               {customPrompt && (
                 <div className="mt-2 d-flex justify-content-between align-items-center">
                   <small className="text-muted">
@@ -147,7 +173,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                   <button
                     type="button"
                     className="btn btn-sm btn-outline-secondary"
-                    onClick={() => setCustomPrompt('')}
+                    onClick={() => setCustomPrompt("")}
                   >
                     <i className="bi bi-arrow-counterclockwise me-1"></i>
                     Reset to Default
@@ -157,11 +183,19 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           </div>
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onCancel}>
-              {t('common.cancel')}
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={onCancel}
+            >
+              {t("common.cancel")}
             </button>
-            <button type="button" className="btn btn-primary" onClick={handleConfirm}>
-              {t('common.confirm')}
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleConfirm}
+            >
+              {t("common.confirm")}
             </button>
           </div>
         </div>

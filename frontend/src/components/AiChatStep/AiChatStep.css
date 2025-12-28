@@ -1,0 +1,9 @@
+/* AiChatStep specific styles */
+.ai-chat-step-container {
+  min-height: 400px;
+}
+
+.ai-chat-step-spinner {
+  width: 3rem;
+  height: 3rem;
+}

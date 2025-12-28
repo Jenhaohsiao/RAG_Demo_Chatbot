@@ -1,0 +1,4 @@
+/* PromptVisualization specific styles */
+.prompt-viz-card-header-clickable {
+  cursor: pointer;
+}

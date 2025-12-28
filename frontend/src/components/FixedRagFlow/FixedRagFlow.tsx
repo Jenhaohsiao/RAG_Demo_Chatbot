@@ -190,7 +190,15 @@ const FixedRagFlow: React.FC<FixedRagFlowProps> = ({
                         onMouseEnter={(e) => handleMouseEnter(e, step)}
                         onMouseLeave={handleMouseLeave}
                         tabIndex={0}
-                        onFocus={(e) => handleMouseEnter(e, step)}
+                        onFocus={(e) => {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          setTooltip({
+                            visible: true,
+                            content: step.tooltip,
+                            x: rect.left + rect.width / 2,
+                            y: rect.bottom + 10,
+                          });
+                        }}
                         onBlur={handleMouseLeave}
                       >
                         <div className="step-content d-flex align-items-center">

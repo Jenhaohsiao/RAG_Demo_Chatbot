@@ -1,0 +1,30 @@
+/* ToastMessage Component Styles */
+
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  max-width: 400px;
+  width: 100%;
+  pointer-events: auto;
+}
+
+.toast {
+  /* Base toast styles without animation */
+}
+
+.toast.toast-animated {
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

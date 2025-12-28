@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import "./TextProcessingStep.css";
 
 export interface TextProcessingStepProps {
   parameters: {
@@ -291,7 +292,7 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
             <span className="fw-bold">{overallProgress.toFixed(1)}%</span>
           </div>
 
-          <div className="progress mb-3" style={{ height: "10px" }}>
+          <div className="progress mb-3 text-processing-progress-main">
             <div
               className="progress-bar"
               role="progressbar"
@@ -375,7 +376,7 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
               </div>
 
               {/* 進度條 */}
-              <div className="progress mb-2" style={{ height: "8px" }}>
+              <div className="progress mb-2 text-processing-progress-job">
                 <div
                   className={`progress-bar ${
                     job.status === "error"

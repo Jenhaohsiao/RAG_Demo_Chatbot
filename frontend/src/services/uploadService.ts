@@ -21,6 +21,9 @@ export interface UploadResponse {
   upload_timestamp: string;
   extraction_status: ExtractionStatus;
   moderation_status: ModerationStatus;
+  chunk_count?: number;
+  content_size?: number;
+  preview?: string;
 }
 
 /**
@@ -82,6 +85,8 @@ export interface WebsiteUploadResponse extends UploadResponse {
   total_tokens: number;
   crawl_status: string;  // pending, crawling, completed, token_limit_reached, page_limit_reached
   crawled_pages: CrawledPage[];
+  content_size?: number;
+  summary?: string;
 }
 
 /**

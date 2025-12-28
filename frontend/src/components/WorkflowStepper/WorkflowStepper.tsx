@@ -7,6 +7,7 @@ import DataUploadStep from "../DataUploadStep/DataUploadStep";
 import ContentReviewStep from "../ContentReviewStep/ContentReviewStep";
 import TextProcessingStep from "../TextProcessingStep/TextProcessingStep";
 import AiChatStep from "../AiChatStep/AiChatStep";
+// import TestStep6 from "../TestStep6/TestStep6"; // 測試組件已替換為正式組件
 import FixedRagFlow from "../FixedRagFlow/FixedRagFlow";
 import {
   uploadFile,
@@ -425,171 +426,16 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           />
         );
       case 6:
-        console.log("Rendering case 6"); // 添加调试日志
+        console.log(
+          "Rendering case 6 - AI Chat with flow diagram (PRODUCTION MODE)"
+        );
         return (
-          <>
-            {/* 测试标识 - 确保这个case被执行 */}
-            <div
-              style={{
-                backgroundColor: "red",
-                color: "white",
-                padding: "20px",
-                fontSize: "24px",
-                textAlign: "center",
-              }}
-            >
-              THIS IS STEP 6 - FLOW DIAGRAM SHOULD BE HERE
+          <div className="ai-chat-step-container">
+            {/* AI 聊天界面 - 剩餘空間 - 使用正式組件 */}
+            <div className="ai-chat-content">
+              <AiChatStep sessionId={sessionId} parameters={parameters} />
             </div>
-
-            {/* RAG 流程圖 - 6個步驟展示 */}
-            <div
-              className="mb-4 p-4"
-              style={{
-                backgroundColor: "#f8f9fa",
-                border: "2px solid #007bff",
-                borderRadius: "12px",
-              }}
-            >
-              <div className="text-center mb-3">
-                <h5 className="text-primary mb-0">
-                  <i className="bi bi-diagram-3 me-2"></i>
-                  RAG 智能問答系統流程
-                </h5>
-                <small className="text-muted">完整的6步驟處理流程</small>
-              </div>
-              <div className="row justify-content-center">
-                <div className="col-auto">
-                  <div
-                    className="d-flex align-items-center gap-3"
-                    style={{ flexWrap: "wrap", justifyContent: "center" }}
-                  >
-                    {/* 步驟1 */}
-                    <div className="d-flex flex-column align-items-center">
-                      <div
-                        className="rounded-circle bg-success text-white d-flex align-items-center justify-content-center shadow-sm"
-                        style={{
-                          width: "50px",
-                          height: "50px",
-                          fontSize: "18px",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        ✓
-                      </div>
-                      <small className="mt-2 text-center fw-bold">
-                        RAG配置
-                      </small>
-                      <small className="text-success">已完成</small>
-                    </div>
-                    <div className="text-primary fs-4">→</div>
-
-                    {/* 步驟2 */}
-                    <div className="d-flex flex-column align-items-center">
-                      <div
-                        className="rounded-circle bg-success text-white d-flex align-items-center justify-content-center shadow-sm"
-                        style={{
-                          width: "50px",
-                          height: "50px",
-                          fontSize: "18px",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        ✓
-                      </div>
-                      <small className="mt-2 text-center fw-bold">
-                        Prompt配置
-                      </small>
-                      <small className="text-success">已完成</small>
-                    </div>
-                    <div className="text-primary fs-4">→</div>
-
-                    {/* 步驟3 */}
-                    <div className="d-flex flex-column align-items-center">
-                      <div
-                        className="rounded-circle bg-success text-white d-flex align-items-center justify-content-center shadow-sm"
-                        style={{
-                          width: "50px",
-                          height: "50px",
-                          fontSize: "18px",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        ✓
-                      </div>
-                      <small className="mt-2 text-center fw-bold">
-                        資料上傳
-                      </small>
-                      <small className="text-success">已完成</small>
-                    </div>
-                    <div className="text-primary fs-4">→</div>
-
-                    {/* 步驟4 */}
-                    <div className="d-flex flex-column align-items-center">
-                      <div
-                        className="rounded-circle bg-success text-white d-flex align-items-center justify-content-center shadow-sm"
-                        style={{
-                          width: "50px",
-                          height: "50px",
-                          fontSize: "18px",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        ✓
-                      </div>
-                      <small className="mt-2 text-center fw-bold">
-                        內容審核
-                      </small>
-                      <small className="text-success">已完成</small>
-                    </div>
-                    <div className="text-primary fs-4">→</div>
-
-                    {/* 步驟5 */}
-                    <div className="d-flex flex-column align-items-center">
-                      <div
-                        className="rounded-circle bg-success text-white d-flex align-items-center justify-content-center shadow-sm"
-                        style={{
-                          width: "50px",
-                          height: "50px",
-                          fontSize: "18px",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        ✓
-                      </div>
-                      <small className="mt-2 text-center fw-bold">
-                        文本處理
-                      </small>
-                      <small className="text-success">已完成</small>
-                    </div>
-                    <div className="text-primary fs-4">→</div>
-
-                    {/* 步驟6 - 當前步驟 */}
-                    <div className="d-flex flex-column align-items-center">
-                      <div
-                        className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center shadow-lg"
-                        style={{
-                          width: "60px",
-                          height: "60px",
-                          fontSize: "20px",
-                          fontWeight: "bold",
-                          animation: "pulse 2s infinite",
-                        }}
-                      >
-                        🤖
-                      </div>
-                      <small className="mt-2 text-center fw-bold text-primary">
-                        AI對談
-                      </small>
-                      <small className="text-primary">進行中</small>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* AI 聊天界面 */}
-            <AiChatStep sessionId={sessionId} parameters={parameters} />
-          </>
+          </div>
         );
       default:
         console.log("Invalid step:", currentStep);
@@ -609,11 +455,8 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                   isStepActive(step.id) ? "active" : ""
                 } ${isStepCompleted(step.id) ? "completed" : ""} ${
                   isStepDisabled(step.id) ? "disabled" : ""
-                }`}
+                } workflow-stepper-step-circle`}
                 onClick={() => handleInfoClick(step, {} as React.MouseEvent)}
-                style={{
-                  cursor: "pointer",
-                }}
               >
                 {/* 步驟圓圈和圖示 */}
                 <div
@@ -632,10 +475,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                 <div className="stepper-text mt-2">
                   <div className="stepper-title d-flex align-items-center justify-content-center">
                     {isStepCompleted(step.id) && (
-                      <i
-                        className="bi bi-check-circle-fill text-success me-1"
-                        style={{ fontSize: "0.9rem" }}
-                      ></i>
+                      <i className="bi bi-check-circle-fill text-success me-1 workflow-stepper-check-icon"></i>
                     )}
                     <span>{step.title}</span>
                   </div>
@@ -659,10 +499,10 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
       {/* 當前步驟資訊與導航按鈕同一行 */}
       <div className="w-100">
-        <div className="current-step-info">
+        <div className="current-step-info mb-2">
           <div className="d-flex align-items-center justify-content-between">
             {/* 左側步驟信息 - 60% */}
-            <div className="d-flex align-items-center" style={{ width: "60%" }}>
+            <div className="d-flex align-items-center workflow-stepper-progress-container">
               <div className="badge bg-primary me-3">步驟 {currentStep}</div>
               <div className="flex-grow-1">
                 <h4 className="mb-0">{steps[currentStep - 1].title}</h4>
@@ -673,145 +513,10 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             </div>
 
             {/* 中间重点数据显示 */}
-            <div className="text-center mx-3" style={{ minWidth: "250px" }}>
-              {currentStep === 1 && (
-                <div className="key-params-summary">
-                  <div className="mb-1">
-                    <span className="badge bg-primary text-white me-2">
-                      相似度: {parameters?.similarity_threshold || 0.5}
-                    </span>
-                    <span className="badge bg-success text-white me-2">
-                      Top-K: {parameters?.rag_top_k || 5}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="badge bg-info text-white me-2">
-                      块大小: {parameters?.chunk_max_size || 1000}
-                    </span>
-                    <span className="badge bg-warning text-white">
-                      上下文: {parameters?.rag_context_window || 5}
-                    </span>
-                  </div>
-                </div>
-              )}
-              {currentStep === 2 && (
-                <div className="key-params-summary">
-                  <div className="mb-1">
-                    <span className="badge bg-primary text-white me-2">
-                      Token: {parameters?.token_threshold || 4000}
-                    </span>
-                    <span className="badge bg-success text-white me-2">
-                      風格: {getResponseStyleText(parameters?.response_style)}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="badge bg-info text-white me-2">
-                      專業:{" "}
-                      {getProfessionalLevelText(parameters?.professional_level)}
-                    </span>
-                    <span className="badge bg-warning text-white">
-                      創意:{" "}
-                      {getCreativityLevelText(parameters?.creativity_level)}
-                    </span>
-                  </div>
-                </div>
-              )}
-              {currentStep === 3 && (
-                <div className="key-params-summary">
-                  <div className="mb-1">
-                    <span
-                      className={`badge ${
-                        (documents?.length || 0) > 0
-                          ? "bg-success"
-                          : "bg-secondary"
-                      } text-white me-2`}
-                    >
-                      文檔: {documents?.length || 0}
-                    </span>
-                    <span
-                      className={`badge ${
-                        (crawledUrls?.length || 0) > 0
-                          ? "bg-success"
-                          : "bg-secondary"
-                      } text-white me-2`}
-                    >
-                      網頁: {crawledUrls?.length || 0}
-                    </span>
-                  </div>
-                  <div>
-                    <span
-                      className={`badge ${
-                        canProceedToNextStep() ? "bg-success" : "bg-warning"
-                      } text-white`}
-                    >
-                      {canProceedToNextStep() ? "可繼續" : "需上傳內容"}
-                    </span>
-                  </div>
-                </div>
-              )}
-              {currentStep === 4 && (
-                <div className="key-params-summary">
-                  <div className="mb-1">
-                    <span className="badge bg-primary text-white me-2">
-                      已審核:{" "}
-                      {documents?.filter((doc) => doc.reviewed)?.length || 0}
-                    </span>
-                    <span className="badge bg-success text-white me-2">
-                      總數: {documents?.length || 0}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="badge bg-info text-white">
-                      狀態:{" "}
-                      {(documents?.filter((doc) => doc.reviewed)?.length ||
-                        0) === (documents?.length || 0) && documents?.length
-                        ? "完成"
-                        : "進行中"}
-                    </span>
-                  </div>
-                </div>
-              )}
-              {currentStep === 5 && (
-                <div className="key-params-summary">
-                  <div className="mb-1">
-                    <span className="badge bg-primary text-white me-2">
-                      向量化: 啟用
-                    </span>
-                    <span className="badge bg-success text-white me-2">
-                      嵌入: 準備中
-                    </span>
-                  </div>
-                  <div>
-                    <span className="badge bg-info text-white">
-                      狀態: 等待處理
-                    </span>
-                  </div>
-                </div>
-              )}
-              {currentStep === 6 && (
-                <div className="key-params-summary">
-                  <div className="mb-1">
-                    <span className="badge bg-primary text-white me-2">
-                      模式: RAG增強
-                    </span>
-                    <span className="badge bg-success text-white me-2">
-                      引擎: 活躍
-                    </span>
-                  </div>
-                  <div>
-                    <span className="badge bg-info text-white">
-                      狀態: 準備對話
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
+            <div className="text-center mx-3 workflow-stepper-progress-center"></div>
 
             {/* 右侧导航按钮 - 40% */}
-            <div
-              className="d-flex align-items-center justify-content-end"
-              style={{ width: "40%" }}
-            >
+            <div className="d-flex align-items-center justify-content-end workflow-stepper-navigation">
               {currentStep > 1 && (
                 <button
                   className="btn btn-outline-secondary me-2"
@@ -844,11 +549,9 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
       {/* 步驟內容區域 - 全寬度 */}
       <div className="w-100">
-        <div className="step-content mb-4">
-          <div className="container-fluid">
-            <div className="row">
-              <div className="col-12">{renderStepContent()}</div>
-            </div>
+        <div className="container-fluid">
+          <div className="row">
+            <div className="col-12">{renderStepContent()}</div>
           </div>
         </div>
       </div>

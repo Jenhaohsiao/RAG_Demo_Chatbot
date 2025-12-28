@@ -6,7 +6,7 @@
  */
 import { useState, useCallback, useEffect } from 'react';
 import sessionService from '../services/sessionService';
-import chatService from '../services/chatService';
+import { submitQuery, getChatHistory } from '../services/chatService';
 
 export interface Metrics {
   token_input: number;

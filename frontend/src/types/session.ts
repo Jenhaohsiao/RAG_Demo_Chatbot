@@ -34,6 +34,18 @@ export interface SessionResponse {
   language: 'en' | 'zh-TW' | 'zh-CN' | 'ko' | 'es' | 'ja' | 'ar' | 'fr';
   similarity_threshold: number; // RAG similarity threshold (0.0-1.0)
   custom_prompt?: string; // Optional custom prompt template
+  document_count?: number;
+  vector_count?: number;
+  metrics?: {
+    token_input: number;
+    token_output: number;
+    token_total: number;
+    token_limit: number;
+    token_percent: number;
+    context_tokens: number;
+    context_percent: number;
+    vector_count: number;
+  };
 }
 
 export interface SessionWithMetrics extends SessionResponse {

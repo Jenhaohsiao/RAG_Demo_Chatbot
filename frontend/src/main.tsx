@@ -16,6 +16,7 @@ import "./styles/fixed-rag-flow.css"; // Fixed flow styles
 import "./styles/custom-tooltip.css"; // Flow step styles (Bootstrap tooltip compatible)
 import "./styles/two-column-layout.css"; // Two-column layout styles
 import "./styles/toast.css"; // Toast message styles
+import "./main.css";
 import "./i18n/config";
 import { useTranslation } from "react-i18next";
 import i18n from "./i18n/config";
@@ -383,23 +384,13 @@ const App: React.FC = () => {
 
       {/* Workflow Mode Content */}
       <div
-        className={`w-100 ${isBlocked ? "position-relative" : ""}`}
-        style={{ minHeight: "calc(100vh - 80px)" }}
+        className={`w-100 main-content-container ${
+          isBlocked ? "position-relative" : ""
+        }`}
       >
         {/* 阻止遮罩层 */}
         {isBlocked && (
-          <div
-            className="position-fixed"
-            style={{
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: "rgba(0, 0, 0, 0.3)",
-              zIndex: 9998,
-              cursor: "not-allowed",
-            }}
-          />
+          <div className="position-fixed main-blocking-overlay"></div>
         )}
 
         <WorkflowMain
