@@ -843,6 +843,7 @@ async def list_documents(session_id: UUID):
 class ContentModerationRequest(BaseModel):
     content: str
     source_reference: str = "user_input"
+    academic_mode: bool = False
 
 class ContentModerationResponse(BaseModel):
     status: str
@@ -863,17 +864,19 @@ async def moderate_content(
     
     try:
         # 檢查session是否存在
-        if not session_manager.session_exists(session_id):
+        session = session_manager.get_session(session_id)
+        if not session:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Session {session_id} not found"
+                detail=f"Session {session_id} not found or expired"
             )
         
         # 執行內容審核
         if settings.enable_content_moderation:
             mod_result = moderator.check_content_safety(
                 request.content,
-                request.source_reference
+                request.source_reference,
+                academic_mode=request.academic_mode
             )
             
             return ContentModerationResponse(

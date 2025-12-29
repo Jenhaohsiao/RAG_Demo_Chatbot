@@ -1,14 +1,17 @@
 /**
  * useSession Hook
- * Manages session lifecycle with automatic heartbeat
+ * Manages session lifecycle with automatic heartbeat and activity monitoring
  */
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import sessionService from '../services/sessionService';
+import { useUserActivity } from './useUserActivity';
 import type { SessionState, SessionResponse } from '../types/session';
 
-// Heartbeat interval: 5 minutes (session TTL is 30 minutes)
+// Heartbeat interval: 5 minutes (session TTL is 20 minutes)
 const HEARTBEAT_INTERVAL = 5 * 60 * 1000;
+// Activity-based heartbeat: 1 minute throttle
+const ACTIVITY_THROTTLE = 60 * 1000;
 
 interface UseSessionReturn {
   sessionId: string | null;
@@ -17,20 +20,16 @@ interface UseSessionReturn {
   language: string;
   isLoading: boolean;
   error: string | null;
+  isSessionExpired: boolean;
   createSession: (similarityThreshold?: number, customPrompt?: string) => Promise<void>;
   closeSession: () => Promise<void>;
   restartSession: () => Promise<void>;
   updateLanguage: (newLanguage: 'en' | 'zh-TW' | 'zh-CN' | 'ko' | 'es' | 'ja' | 'ar' | 'fr', passedSessionId?: string | null) => Promise<void>;
+  setOnSessionExpired: (callback: (() => void) | undefined) => void;
 }
 
 /**
  * Custom hook for session management
- * 
- * Features:
- * - Create/close/restart session
- * - Automatic heartbeat every 5 minutes
- * - Language update synchronization
- * - Session state tracking
  */
 export const useSession = (): UseSessionReturn => {
   const { i18n } = useTranslation();
@@ -41,9 +40,29 @@ export const useSession = (): UseSessionReturn => {
   const [language, setLanguage] = useState<string>(i18n.language);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSessionExpired, setIsSessionExpired] = useState<boolean>(false);
   
   const heartbeatTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const errorSetRef = useRef<boolean>(false); // 追蹤錯誤是否已設置
+  const errorSetRef = useRef<boolean>(false);
+  const expirationCheckRef = useRef<NodeJS.Timeout | null>(null);
+  const onSessionExpiredRef = useRef<(() => void) | undefined>(undefined);
+  
+  /**
+   * Set callback for session expiration
+   */
+  const setOnSessionExpired = useCallback((callback: (() => void) | undefined) => {
+    onSessionExpiredRef.current = callback;
+  }, []);
+  
+  /**
+   * Stop expiration check timer
+   */
+  const stopExpirationCheck = useCallback(() => {
+    if (expirationCheckRef.current) {
+      clearTimeout(expirationCheckRef.current);
+      expirationCheckRef.current = null;
+    }
+  }, []);
 
   /**
    * Stop heartbeat timer
@@ -53,47 +72,112 @@ export const useSession = (): UseSessionReturn => {
       clearInterval(heartbeatTimerRef.current);
       heartbeatTimerRef.current = null;
     }
-  }, []);
+    stopExpirationCheck();
+  }, [stopExpirationCheck]);
+  
+  /**
+   * Handle session expiration
+   */
+  const handleSessionExpiration = useCallback(() => {
+    console.log('Session expired, triggering cleanup');
+    setIsSessionExpired(true);
+    stopHeartbeat();
+    
+    // 重置所有session狀態
+    setSessionId(null);
+    setSessionState(null);
+    setExpiresAt(null);
+    
+    // 觸發回調
+    if (onSessionExpiredRef.current) {
+      onSessionExpiredRef.current();
+    }
+  }, [stopHeartbeat]);
+
+  /**
+   * Start expiration check timer
+   */
+  const startExpirationCheck = useCallback((expirationTime: Date) => {
+    stopExpirationCheck();
+    
+    const timeUntilExpiration = expirationTime.getTime() - Date.now();
+    
+    if (timeUntilExpiration > 0) {
+      expirationCheckRef.current = setTimeout(() => {
+        handleSessionExpiration();
+      }, timeUntilExpiration);
+      
+      console.log(`Session will expire at ${expirationTime.toISOString()}`);
+    } else {
+      handleSessionExpiration();
+    }
+  }, [stopExpirationCheck, handleSessionExpiration]);
+  
+  /**
+   * Trigger heartbeat immediately (for user activity)
+   */
+  const triggerHeartbeat = useCallback(async () => {
+    if (!sessionId) return;
+    
+    try {
+      const response = await sessionService.heartbeat(sessionId);
+      const newExpiresAt = new Date(response.expires_at);
+      setExpiresAt(newExpiresAt);
+      startExpirationCheck(newExpiresAt);
+      
+      if (error) {
+        setError(null);
+        errorSetRef.current = false;
+      }
+      console.log(`Activity-triggered heartbeat sent for session ${sessionId}`);
+    } catch (err) {
+      console.error('Activity heartbeat failed:', err);
+      if (err instanceof Error && (err.message.includes('404') || err.message.includes('410'))) {
+        handleSessionExpiration();
+      }
+    }
+  }, [sessionId, error, handleSessionExpiration, startExpirationCheck]);
+  
+  // 監聽用戶活動並觸發heartbeat
+  useUserActivity({
+    onActivity: triggerHeartbeat,
+    throttleTime: ACTIVITY_THROTTLE
+  });
 
   /**
    * Start heartbeat timer
    */
   const startHeartbeat = useCallback((currentSessionId: string) => {
-    // Clear existing timer
     if (heartbeatTimerRef.current) {
       clearInterval(heartbeatTimerRef.current);
     }
 
-    // Start new timer
     heartbeatTimerRef.current = setInterval(async () => {
       try {
         const response = await sessionService.heartbeat(currentSessionId);
-        setExpiresAt(new Date(response.expires_at));
-        // 清除錯誤狀態（如果heartbeat成功）
+        const newExpiresAt = new Date(response.expires_at);
+        setExpiresAt(newExpiresAt);
+        startExpirationCheck(newExpiresAt);
+        
         if (error) {
           setError(null);
-          errorSetRef.current = false; // 重置錯誤標誌
+          errorSetRef.current = false;
         }
         console.log(`Heartbeat sent for session ${currentSessionId}`);
       } catch (err) {
         console.error('Heartbeat failed:', err);
-        // 检查具体错误类型，但只設置一次錯誤
         if (!errorSetRef.current) {
           if (err instanceof Error && (err.message.includes('404') || err.message.includes('410'))) {
-            const errorMsg = '會話已過期，請重新開始';
-            setError(errorMsg);
-            errorSetRef.current = true; // 標記錯誤已設置
-            // Session已過期，停止heartbeat timer
-            stopHeartbeat();
+            handleSessionExpiration();
           } else {
             const errorMsg = '無法維持會話連線，請檢查網路連線';
             setError(errorMsg);
-            errorSetRef.current = true; // 標記錯誤已設置
+            errorSetRef.current = true;
           }
         }
       }
     }, HEARTBEAT_INTERVAL);
-  }, [stopHeartbeat]);
+  }, [error, handleSessionExpiration, startExpirationCheck]);
 
   /**
    * Create new session
@@ -101,18 +185,20 @@ export const useSession = (): UseSessionReturn => {
   const createSession = useCallback(async (similarityThreshold: number = 0.5, customPrompt?: string) => {
     setIsLoading(true);
     setError(null);
-    errorSetRef.current = false; // 重置錯誤標誌
+    setIsSessionExpired(false);
+    errorSetRef.current = false;
 
     try {
       const response = await sessionService.createSession(language, similarityThreshold, customPrompt);
       
       setSessionId(response.session_id);
       setSessionState(response.state);
-      setExpiresAt(new Date(response.expires_at));
+      const newExpiresAt = new Date(response.expires_at);
+      setExpiresAt(newExpiresAt);
       setLanguage(response.language);
       
-      // Start heartbeat
       startHeartbeat(response.session_id);
+      startExpirationCheck(newExpiresAt);
       
       console.log('Session created:', response.session_id);
     } catch (err: any) {
@@ -121,7 +207,7 @@ export const useSession = (): UseSessionReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, [language, startHeartbeat]);
+  }, [language, startHeartbeat, startExpirationCheck]);
 
   /**
    * Close current session
@@ -134,11 +220,8 @@ export const useSession = (): UseSessionReturn => {
 
     try {
       await sessionService.closeSession(sessionId);
-      
-      // Stop heartbeat
       stopHeartbeat();
       
-      // Reset state
       setSessionId(null);
       setSessionState(null);
       setExpiresAt(null);
@@ -153,11 +236,10 @@ export const useSession = (): UseSessionReturn => {
   }, [sessionId, stopHeartbeat]);
 
   /**
-   * Restart session (close current, create new)
+   * Restart session
    */
   const restartSession = useCallback(async () => {
     if (!sessionId) {
-      // No existing session, just create new one
       await createSession();
       return;
     }
@@ -173,7 +255,6 @@ export const useSession = (): UseSessionReturn => {
       setExpiresAt(new Date(response.expires_at));
       setLanguage(response.language);
       
-      // Restart heartbeat with new session ID
       startHeartbeat(response.session_id);
       
       console.log('Session restarted:', response.session_id);
@@ -187,16 +268,11 @@ export const useSession = (): UseSessionReturn => {
 
   /**
    * Update session language
-   * T075: Language change handler with backend sync
-   * @param newLanguage Language code to update to
-   * @param passedSessionId Optional sessionId to use (allows parent to pass current session)
    */
   const updateLanguage = useCallback(async (newLanguage: 'en' | 'zh-TW' | 'zh-CN' | 'ko' | 'es' | 'ja' | 'ar' | 'fr', passedSessionId?: string | null) => {
-    // Use passed sessionId if available, otherwise use state sessionId
     const targetSessionId = passedSessionId !== undefined ? passedSessionId : sessionId;
 
     if (!targetSessionId) {
-      // No session yet, just update local state
       console.log('[updateLanguage] No session ID, updating local state only');
       setLanguage(newLanguage);
       i18n.changeLanguage(newLanguage);
@@ -219,7 +295,7 @@ export const useSession = (): UseSessionReturn => {
       const errorMsg = err.message || 'Failed to update language';
       setError(errorMsg);
       console.error('[updateLanguage] Error:', errorMsg);
-      throw err; // Re-throw for caller to handle
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -241,10 +317,12 @@ export const useSession = (): UseSessionReturn => {
     language,
     isLoading,
     error,
+    isSessionExpired,
     createSession,
     closeSession,
     restartSession,
-    updateLanguage
+    updateLanguage,
+    setOnSessionExpired
   };
 };
 

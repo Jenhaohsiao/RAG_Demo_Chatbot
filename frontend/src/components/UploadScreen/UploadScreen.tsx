@@ -28,6 +28,9 @@ export interface UploadScreenProps {
   crawlerMaxTokens?: number;
   crawlerMaxPages?: number;
   disabled?: boolean;
+  hasUploadedContent?: boolean; // 新增：是否已有上傳內容
+  uploadedFiles?: any[]; // 新增：已上傳文件列表
+  crawledUrls?: any[]; // 新增：已爬取URL列表
 }
 
 const UploadScreen: React.FC<UploadScreenProps> = ({
@@ -39,6 +42,9 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
   crawlerMaxTokens = 100000,
   crawlerMaxPages = 10,
   disabled = false,
+  hasUploadedContent = false,
+  uploadedFiles = [],
+  crawledUrls = [],
 }) => {
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
@@ -226,85 +232,196 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
         </div>
       )}
 
-      {/* Upload tabs */}
-      <ul className="nav nav-tabs mb-3">
-        <li className="nav-item">
-          <button
-            className={`nav-link text-start  ${
-              activeTab === "file" ? "active" : ""
-            }`}
-            onClick={() => setActiveTab("file")}
-            disabled={disabled}
-          >
-            <i className="bi bi-file-earmark-arrow-up me-2"></i>
-            {t("upload.tab.file", "檔案上傳")}
-          </button>
-        </li>
-        <li className="nav-item">
-          <button
-            className={`nav-link text-start ${
-              activeTab === "crawler" ? "active" : ""
-            }`}
-            onClick={() => setActiveTab("crawler")}
-            disabled={disabled}
-          >
-            <i className="bi bi-globe me-2"></i>
-            {t("upload.tab.crawler", "網站爬蟲")}
-          </button>
-        </li>
-      </ul>
-
-      {/* Main upload area */}
-      {activeTab === "file" && (
-        <div
-          onDragEnter={handleDragEnter}
-          onDragLeave={handleDragLeave}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onClick={handleBrowseClick}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept={getAcceptAttribute()}
-            onChange={handleFileInputChange}
-            disabled={disabled}
-            className="upload-screen-hidden-input"
-          />
-
-          <div className="container">
-            <div className="dropzone-icon-large">
-              <i className="bi bi-cloud-upload-fill text-primary"></i>
-            </div>
-            <p className="mb-2">
-              {isDragging
-                ? t("upload.dropzone.drop", "拖放檔案到此區域")
-                : t(
-                    "upload.dropzone.dragOrClick",
-                    "拖放檔案到此區域，或點擊進入"
-                  )}
+      {/* 如果已有上傳內容，顯示結果摘要 */}
+      {hasUploadedContent && (
+        <div className="upload-results-summary">
+          <div className="alert alert-success mb-4" role="alert">
+            <h6 className="alert-heading mb-3">
+              <i className="bi bi-check-circle-fill me-2"></i>
+              資料上傳完成
+            </h6>
+            <p className="mb-0 small">
+              已成功上傳內容，您可以進入下一步驟進行內容審核。如需重新上傳，請重新啟動會話。
             </p>
-            <small className="text-muted">{getSupportedFormatsText()}</small>
           </div>
+
+          {/* 文件上傳結果 */}
+          {uploadedFiles.length > 0 && (
+            <div className="card mb-3">
+              <div className="card-header bg-light">
+                <h6 className="mb-0">
+                  <i className="bi bi-file-earmark-check me-2"></i>
+                  已上傳文件 ({uploadedFiles.length})
+                </h6>
+              </div>
+              <div className="card-body">
+                <div className="list-group list-group-flush">
+                  {uploadedFiles.map((file, index) => (
+                    <div key={index} className="list-group-item px-0 py-2">
+                      <div className="d-flex justify-content-between align-items-start">
+                        <div className="flex-grow-1">
+                          <div className="fw-medium text-truncate">
+                            {file.filename}
+                          </div>
+                          <small className="text-muted">
+                            {formatFileSize(file.size)} •{" "}
+                            {new Date(file.uploadTime).toLocaleString()}
+                          </small>
+                        </div>
+                        <span className="badge bg-success ms-2">
+                          <i className="bi bi-check me-1"></i>
+                          {file.chunks || 0} chunks
+                        </span>
+                      </div>
+                      {file.preview && file.preview !== "文件內容預覽..." && (
+                        <div className="mt-2">
+                          <small className="text-muted">
+                            <strong>預覽：</strong>
+                            {file.preview.substring(0, 100)}
+                            {file.preview.length > 100 ? "..." : ""}
+                          </small>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 網站爬蟲結果 */}
+          {crawledUrls.length > 0 && (
+            <div className="card">
+              <div className="card-header bg-light">
+                <h6 className="mb-0">
+                  <i className="bi bi-globe-americas me-2"></i>
+                  已爬取網站 ({crawledUrls.length})
+                </h6>
+              </div>
+              <div className="card-body">
+                <div className="list-group list-group-flush">
+                  {crawledUrls.map((site, index) => (
+                    <div key={index} className="list-group-item px-0 py-2">
+                      <div className="d-flex justify-content-between align-items-start">
+                        <div className="flex-grow-1">
+                          <div className="fw-medium text-truncate">
+                            {site.url}
+                          </div>
+                          <small className="text-muted">
+                            {formatFileSize(site.content_size)} •{" "}
+                            {site.pages_found || 1} 頁面 •{" "}
+                            {new Date(site.crawl_time).toLocaleString()}
+                          </small>
+                        </div>
+                        <span className="badge bg-info ms-2">
+                          <i className="bi bi-check me-1"></i>
+                          {site.chunks || 0} chunks
+                        </span>
+                      </div>
+                      {site.summary && site.summary !== "網站內容摘要..." && (
+                        <div className="mt-2">
+                          <small className="text-muted">
+                            <strong>摘要：</strong>
+                            {site.summary.substring(0, 150)}
+                            {site.summary.length > 150 ? "..." : ""}
+                          </small>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Website crawler tab */}
-      {activeTab === "crawler" && (
-        <div className="container">
-          <div className="dropzone-icon-large">
-            <i className="bi bi-globe text-success"></i>
-          </div>
-          <WebsiteCrawlerPanel
-            onCrawl={handleCrawlerSubmit}
-            isLoading={crawlerLoading}
-            error={crawlerError}
-            crawlResults={crawlerResults}
-            maxTokens={crawlerMaxTokens}
-            maxPages={crawlerMaxPages}
-            disabled={disabled}
-          />
-        </div>
+      {/* 如果沒有上傳內容，顯示上傳界面 */}
+      {!hasUploadedContent && (
+        <>
+          {/* Upload tabs */}
+          <ul className="nav nav-tabs mb-3">
+            <li className="nav-item">
+              <button
+                className={`nav-link text-start  ${
+                  activeTab === "file" ? "active" : ""
+                }`}
+                onClick={() => setActiveTab("file")}
+                disabled={disabled}
+              >
+                <i className="bi bi-file-earmark-arrow-up me-2"></i>
+                {t("upload.tab.file", "檔案上傳")}
+              </button>
+            </li>
+            <li className="nav-item">
+              <button
+                className={`nav-link text-start ${
+                  activeTab === "crawler" ? "active" : ""
+                }`}
+                onClick={() => setActiveTab("crawler")}
+                disabled={disabled}
+              >
+                <i className="bi bi-globe me-2"></i>
+                {t("upload.tab.crawler", "網站爬蟲")}
+              </button>
+            </li>
+          </ul>
+
+          {/* Main upload area */}
+          {activeTab === "file" && (
+            <div
+              onDragEnter={handleDragEnter}
+              onDragLeave={handleDragLeave}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              onClick={handleBrowseClick}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept={getAcceptAttribute()}
+                onChange={handleFileInputChange}
+                disabled={disabled}
+                className="upload-screen-hidden-input"
+              />
+
+              <div className="container">
+                <div className="dropzone-icon-large">
+                  <i className="bi bi-cloud-upload-fill text-primary"></i>
+                </div>
+                <p className="mb-2">
+                  {isDragging
+                    ? t("upload.dropzone.drop", "拖放檔案到此區域")
+                    : t(
+                        "upload.dropzone.dragOrClick",
+                        "拖放檔案到此區域，或點擊進入"
+                      )}
+                </p>
+                <small className="text-muted">
+                  {getSupportedFormatsText()}
+                </small>
+              </div>
+            </div>
+          )}
+
+          {/* Website crawler tab */}
+          {activeTab === "crawler" && (
+            <div className="container">
+              <div className="dropzone-icon-large">
+                <i className="bi bi-globe text-success"></i>
+              </div>
+              <WebsiteCrawlerPanel
+                onCrawl={handleCrawlerSubmit}
+                isLoading={crawlerLoading}
+                error={crawlerError}
+                crawlResults={crawlerResults}
+                maxTokens={crawlerMaxTokens}
+                maxPages={crawlerMaxPages}
+                disabled={disabled}
+              />
+            </div>
+          )}
+        </>
       )}
     </div>
   );

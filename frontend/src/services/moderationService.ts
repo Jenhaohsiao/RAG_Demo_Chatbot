@@ -10,6 +10,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000
 export interface ContentModerationRequest {
   content: string;
   source_reference?: string;
+  academic_mode?: boolean; // 新增學術模式參數
 }
 
 export interface ContentModerationResponse {
@@ -32,13 +33,14 @@ export const moderateContent = async (
   request: ContentModerationRequest
 ): Promise<ContentModerationResponse> => {
   try {
-    console.log(`[ModerationService] Checking content safety for ${request.source_reference}`);
+    console.log(`[ModerationService] Checking content safety for ${request.source_reference}${request.academic_mode ? ' (Academic Mode)' : ''}`);
     
     const response = await axios.post<ContentModerationResponse>(
       `${API_BASE_URL}/api/upload/${sessionId}/moderate`,
       {
         content: request.content,
-        source_reference: request.source_reference || 'user_input'
+        source_reference: request.source_reference || 'user_input',
+        academic_mode: request.academic_mode || false
       }
     );
 
@@ -63,13 +65,17 @@ export const moderateContent = async (
  */
 export const moderateMultipleContent = async (
   sessionId: string,
-  contents: Array<{ content: string; source_reference: string }>
+  contents: Array<{ content: string; source_reference: string }>,
+  academicMode: boolean = false
 ): Promise<Array<ContentModerationResponse & { source_reference: string }>> => {
   const results: Array<ContentModerationResponse & { source_reference: string }> = [];
   
   for (const item of contents) {
     try {
-      const result = await moderateContent(sessionId, item);
+      const result = await moderateContent(sessionId, {
+        ...item,
+        academic_mode: academicMode
+      });
       results.push({
         ...result,
         source_reference: item.source_reference

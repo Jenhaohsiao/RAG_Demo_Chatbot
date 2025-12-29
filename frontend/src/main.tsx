@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import ReactDOM from "react-dom/client";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -32,8 +32,10 @@ import PromptVisualization from "./components/PromptVisualization/PromptVisualiz
 import FixedRagFlow from "./components/FixedRagFlow/FixedRagFlow";
 import AboutProjectModal from "./components/AboutProjectModal/AboutProjectModal";
 import WorkflowMain from "./components/WorkflowMain/WorkflowMain"; // New workflow integration
+import ToastMessage from "./components/ToastMessage/ToastMessage";
 import { useSession } from "./hooks/useSession";
 import { useUpload } from "./hooks/useUpload";
+import { useToast } from "./hooks/useToast";
 import { submitQuery } from "./services/chatService";
 import type { SupportedLanguage } from "./hooks/useLanguage";
 import type { ChatResponse } from "./types/chat";
@@ -50,16 +52,21 @@ import type { ChatResponse } from "./types/chat";
  */
 const App: React.FC = () => {
   const { t } = useTranslation();
+  const [currentStep, setCurrentStep] = useState(1); // 新增當前步驟狀態
+  const { toasts, showToast, dismissToast } = useToast();
+
   const {
     sessionId,
     language,
     isLoading,
     error,
+    isSessionExpired,
     createSession,
     closeSession,
     restartSession,
     updateLanguage,
-  } = useSession();
+    setOnSessionExpired,
+  } = useSession(); // 先初始化session，稍後設置callback
 
   const {
     uploadResponse,
@@ -70,6 +77,30 @@ const App: React.FC = () => {
     isCompleted,
     isFailed,
   } = useUpload(sessionId || "");
+
+  /**
+   * Handle session expiration
+   */
+  const handleSessionExpiration = useCallback(() => {
+    // 顯示toast通知
+    showToast({
+      type: "error",
+      message: "會話已過期，將重新開始整個流程",
+      duration: 4000,
+    });
+
+    // 重置所有狀態到第一步
+    setCurrentStep(1);
+    setChatPhase(false);
+    resetUpload();
+
+    console.log("Session expired, reset to step 1");
+  }, [showToast, resetUpload]);
+
+  // 設置session過期回調
+  React.useEffect(() => {
+    setOnSessionExpired(handleSessionExpiration);
+  }, [handleSessionExpiration, setOnSessionExpired]);
 
   // Modal state
   const [showModal, setShowModal] = useState(false);
@@ -487,6 +518,19 @@ const App: React.FC = () => {
         isOpen={showAboutModal}
         onClose={() => setShowAboutModal(false)}
       />
+
+      {/* Toast Messages */}
+      <div className="position-fixed top-0 end-0 p-3" style={{ zIndex: 9999 }}>
+        {toasts.map((toast) => (
+          <ToastMessage
+            key={toast.id}
+            type={toast.type}
+            message={toast.message}
+            onDismiss={() => dismissToast(toast.id)}
+            showConfirmButton={false}
+          />
+        ))}
+      </div>
     </div>
   );
 };

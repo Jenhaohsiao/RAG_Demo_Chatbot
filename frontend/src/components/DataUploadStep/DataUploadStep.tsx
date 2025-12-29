@@ -20,6 +20,8 @@ export interface DataUploadStepProps {
   onFileUpload?: (file: File) => void;
   onUrlUpload?: (url: string) => void;
   onCrawlerUpload?: (url: string, maxTokens: number, maxPages: number) => void;
+  documents?: any[]; // 新增：已上傳文件列表
+  crawledUrls?: any[]; // 新增：已爬取URL列表
 }
 
 const DataUploadStep: React.FC<DataUploadStepProps> = ({
@@ -29,11 +31,23 @@ const DataUploadStep: React.FC<DataUploadStepProps> = ({
   onFileUpload,
   onUrlUpload,
   onCrawlerUpload,
+  documents = [],
+  crawledUrls = [],
 }) => {
   const { t } = useTranslation();
   const [activeLeftTab, setActiveLeftTab] = useState<"system" | "files">(
     "system"
   );
+
+  // 檢查是否有上傳內容
+  const hasUploadedContent =
+    (documents && documents.length > 0) ||
+    (crawledUrls && crawledUrls.length > 0);
+
+  console.log("[DataUploadStep] hasUploadedContent:", hasUploadedContent, {
+    documents: documents?.length || 0,
+    crawledUrls: crawledUrls?.length || 0,
+  });
 
   return (
     <div className="data-upload-step">
@@ -270,6 +284,9 @@ const DataUploadStep: React.FC<DataUploadStepProps> = ({
                   supportedFileTypes={parameters.supported_file_types}
                   crawlerMaxTokens={parameters.crawler_max_tokens}
                   crawlerMaxPages={parameters.crawler_max_pages}
+                  hasUploadedContent={hasUploadedContent}
+                  uploadedFiles={documents}
+                  crawledUrls={crawledUrls}
                 />
               )}
             </div>
@@ -281,37 +298,68 @@ const DataUploadStep: React.FC<DataUploadStepProps> = ({
       <div className="mt-4 p-3 bg-light rounded">
         <h6 className="mb-3">
           <i className="bi bi-info-circle me-2"></i>
-          當前上傳配置摘要
+          {hasUploadedContent ? "上傳內容摘要" : "當前上傳配置摘要"}
         </h6>
-        <div className="row">
-          <div className="col-6 col-md-3">
-            <small>
-              <strong>Session時長:</strong> {parameters.session_ttl_minutes}分鐘
-            </small>
+        {hasUploadedContent ? (
+          // 顯示上傳內容統計
+          <div className="row">
+            <div className="col-6 col-md-3">
+              <small>
+                <strong>上傳文件:</strong> {documents.length} 個
+              </small>
+            </div>
+            <div className="col-6 col-md-3">
+              <small>
+                <strong>爬取網站:</strong> {crawledUrls.length} 個
+              </small>
+            </div>
+            <div className="col-6 col-md-3">
+              <small>
+                <strong>總文檔塊:</strong>{" "}
+                {documents.reduce((sum, doc) => sum + (doc.chunks || 0), 0) +
+                  crawledUrls.reduce((sum, url) => sum + (url.chunks || 0), 0)}
+              </small>
+            </div>
+            <div className="col-6 col-md-3">
+              <small>
+                <strong>狀態:</strong>
+                <span className="text-success ms-1">✓ 準備審核</span>
+              </small>
+            </div>
           </div>
-          <div className="col-6 col-md-3">
-            <small>
-              <strong>檔案大小:</strong> 最大{parameters.max_file_size_mb}MB
-            </small>
+        ) : (
+          // 顯示配置參數
+          <div className="row">
+            <div className="col-6 col-md-3">
+              <small>
+                <strong>Session時長:</strong> {parameters.session_ttl_minutes}
+                分鐘
+              </small>
+            </div>
+            <div className="col-6 col-md-3">
+              <small>
+                <strong>檔案大小:</strong> 最大{parameters.max_file_size_mb}MB
+              </small>
+            </div>
+            <div className="col-6 col-md-3">
+              <small>
+                <strong>爬蟲Token:</strong>{" "}
+                {(parameters.crawler_max_tokens / 1000).toFixed(0)}K
+              </small>
+            </div>
+            <div className="col-6 col-md-3">
+              <small>
+                <strong>爬蟲頁數:</strong> {parameters.crawler_max_pages}頁
+              </small>
+            </div>
+            <div className="col-12 mt-2">
+              <small>
+                <strong>支援格式:</strong>{" "}
+                {parameters.supported_file_types.join(", ").toUpperCase()}
+              </small>
+            </div>
           </div>
-          <div className="col-6 col-md-3">
-            <small>
-              <strong>爬蟲Token:</strong>{" "}
-              {(parameters.crawler_max_tokens / 1000).toFixed(0)}K
-            </small>
-          </div>
-          <div className="col-6 col-md-3">
-            <small>
-              <strong>爬蟲頁數:</strong> {parameters.crawler_max_pages}頁
-            </small>
-          </div>
-          <div className="col-12 mt-2">
-            <small>
-              <strong>支援格式:</strong>{" "}
-              {parameters.supported_file_types.join(", ").toUpperCase()}
-            </small>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
