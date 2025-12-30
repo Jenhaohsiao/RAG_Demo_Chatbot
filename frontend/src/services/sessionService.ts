@@ -57,7 +57,15 @@ export const getSessionWithMetrics = async (sessionId: string): Promise<SessionW
  * @returns Updated session details
  */
 export const heartbeat = async (sessionId: string): Promise<SessionResponse> => {
-  const response = await api.post<SessionResponse>(`/session/${sessionId}/heartbeat`);
+  const response = await api.post<SessionResponse>(
+    `/session/${sessionId}/heartbeat`,
+    {}, // 空的 body
+    {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+  );
   return response.data;
 };
 

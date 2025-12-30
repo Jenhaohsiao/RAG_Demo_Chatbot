@@ -12,7 +12,7 @@
 
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { validateUrl } from "../../services/uploadService";
+import { validateUrl, normalizeUrl } from "../../services/uploadService";
 import { CrawledPage } from "../../services/uploadService";
 import "./WebsiteCrawlerPanel.css";
 
@@ -53,13 +53,16 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
       return;
     }
 
-    if (!validateUrl(url)) {
+    // 規範化 URL - 自動添加協議前綴
+    const normalizedUrl = normalizeUrl(url);
+
+    if (!validateUrl(normalizedUrl)) {
       setLocalError(t("crawler.error.invalidUrl", "Please enter a valid URL"));
       return;
     }
 
-    // 呼叫父組件回調，使用從 props 傳入的參數
-    onCrawl(url, maxTokens, maxPages);
+    // 呼叫父組件回調，使用規範化後的 URL
+    onCrawl(normalizedUrl, maxTokens, maxPages);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

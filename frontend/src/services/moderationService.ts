@@ -36,7 +36,7 @@ export const moderateContent = async (
     console.log(`[ModerationService] Checking content safety for ${request.source_reference}${request.academic_mode ? ' (Academic Mode)' : ''}`);
     
     const response = await axios.post<ContentModerationResponse>(
-      `${API_BASE_URL}/api/upload/${sessionId}/moderate`,
+      `${API_BASE_URL}/api/v1/upload/${sessionId}/moderate`,
       {
         content: request.content,
         source_reference: request.source_reference || 'user_input',

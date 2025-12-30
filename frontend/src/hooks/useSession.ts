@@ -146,12 +146,21 @@ export const useSession = (): UseSessionReturn => {
 
   /**
    * Start heartbeat timer
+   * 
+   * ⚠️ 已禁用自動定時器 - 只通過用戶活動觸發 heartbeat
+   * 原因：如果用戶沒有操作，會話應該在20分鐘後自然過期
+   * 如需恢復自動 heartbeat，取消下方代碼的註釋
    */
   const startHeartbeat = useCallback((currentSessionId: string) => {
+    // 清除舊的定時器（如果存在）
     if (heartbeatTimerRef.current) {
       clearInterval(heartbeatTimerRef.current);
+      heartbeatTimerRef.current = null;
     }
 
+    // ⛔ 禁用自動定時器 - 用戶無操作時應讓會話自然過期
+    // 如需恢復，取消下方代碼的註釋：
+    /*
     heartbeatTimerRef.current = setInterval(async () => {
       try {
         const response = await sessionService.heartbeat(currentSessionId);
@@ -163,7 +172,7 @@ export const useSession = (): UseSessionReturn => {
           setError(null);
           errorSetRef.current = false;
         }
-        console.log(`Heartbeat sent for session ${currentSessionId}`);
+        console.log(`Auto heartbeat sent for session ${currentSessionId}`);
       } catch (err) {
         console.error('Heartbeat failed:', err);
         if (!errorSetRef.current) {
@@ -177,6 +186,9 @@ export const useSession = (): UseSessionReturn => {
         }
       }
     }, HEARTBEAT_INTERVAL);
+    */
+    
+    console.log(`Heartbeat timer disabled - only user activity will trigger heartbeat for session ${currentSessionId}`);
   }, [error, handleSessionExpiration, startExpirationCheck]);
 
   /**

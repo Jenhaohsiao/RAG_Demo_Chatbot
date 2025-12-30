@@ -16,6 +16,7 @@ export interface ContentReviewStepProps {
   documents?: DocumentInfo[]; // 從父組件接收documents
   crawledUrls?: any[]; // 從父組件接收crawledUrls
   shouldStartReview?: boolean; // 外部控制是否開始審核
+  onLoadingChange?: (isLoading: boolean, message?: string) => void; // 通知父組件 loading 狀態
 }
 
 interface DocumentInfo {
@@ -36,6 +37,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
   documents: propDocuments = [], // 從props接收
   crawledUrls = [], // 從props接收
   shouldStartReview = false, // 從props接收
+  onLoadingChange,
 }) => {
   const { t } = useTranslation();
   const { showToast } = useToast();
@@ -86,6 +88,11 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
       return;
     }
 
+    // 通知父組件開始 loading
+    if (onLoadingChange) {
+      onLoadingChange(true, "正在進行內容審核...");
+    }
+
     setHasStartedReview(true);
     setReviewProgress({
       currentItem: "",
@@ -133,22 +140,12 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
         let failureReason = "";
 
         // 檢查每個審核項目
-        if (i === 0 || i === 3 || i === 4 || i === 5) {
-          // 檢查文件格式完整性、驗證文檔結構、分析內容品質、檢查版權限制 - 簡單檢查
+        if (i === 0 || i === 1 || i === 3 || i === 4 || i === 5) {
+          // 檢查文件格式完整性、掃描惡意軟體、驗證文檔結構、分析內容品質、檢查版權限制 - 基本檢查總是通過
           console.log(`[ContentReview] Processing basic check: ${item}`);
           await new Promise((resolve) => setTimeout(resolve, 1500));
-          passed = Math.random() > 0.05; // 95%通過率
-          if (!passed) {
-            failureReason = `${item} 檢查失敗`;
-          }
-        } else if (i === 1) {
-          // 掃描惡意軟體 - 簡單檢查
-          console.log(`[ContentReview] Processing malware scan: ${item}`);
-          await new Promise((resolve) => setTimeout(resolve, 1800));
-          passed = Math.random() > 0.02; // 98%通過率
-          if (!passed) {
-            failureReason = `${item} 檢查失敗`;
-          }
+          // ✅ 基本檢查總是通過，避免隨機失敗
+          passed = true;
         } else if (i === 2) {
           // 檢測有害內容 - 只阻擋真正有害的內容
           console.log(
@@ -208,24 +205,29 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                 "[ContentReview] Content moderation failed:",
                 error
               );
-              // 審核失敗時默認通過，避免誤攔
+              // ⚠️ API 調用失敗 - 將錯誤記錄但不阻擋用戶
+              // 這避免了因網絡問題或 API 錯誤而阻止合法內容
               passed = true;
+              const errorMsg =
+                error instanceof Error ? error.message : String(error);
+              console.warn(
+                `[ContentReview] Moderation API error (defaulting to PASS): ${errorMsg}`
+              );
               console.log(
                 "[ContentReview] Moderation error, defaulting to PASS to avoid false blocks"
               );
+
+              // 顯示警告但不阻止繼續
+              showToast({
+                type: "warning",
+                message: "內容審核服務暫時無法使用，已跳過此檢查",
+                duration: 3000,
+              });
             }
           } else {
             // 沒有內容需要審核，直接通過
             console.log("[ContentReview] No content to moderate, passing");
             await new Promise((resolve) => setTimeout(resolve, 1500));
-          }
-        } else {
-          // 其他檢查項目（模擬）
-          console.log(`[ContentReview] Processing additional check: ${item}`);
-          await new Promise((resolve) => setTimeout(resolve, 1800));
-          passed = Math.random() > 0.1; // 90%通過率
-          if (!passed) {
-            failureReason = `${item} 檢查失敗`;
           }
         }
 
@@ -283,6 +285,11 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
         console.log(`[ContentReview] Can proceed:`, canProceed);
         console.log(`[ContentReview] Failed items:`, prev.failed);
 
+        // 通知父組件結束 loading
+        if (onLoadingChange) {
+          onLoadingChange(false);
+        }
+
         onReviewStatusChange?.(canProceed);
         if (canProceed) {
           onReviewComplete?.();
@@ -294,6 +301,12 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
       });
     } catch (error) {
       console.error("Review process failed:", error);
+
+      // 通知父組件結束 loading（錯誤情況）
+      if (onLoadingChange) {
+        onLoadingChange(false);
+      }
+
       setReviewProgress((prev) => ({
         ...prev,
         isCompleted: true,
@@ -317,15 +330,26 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
       shouldStartReview,
       hasStartedReview,
       isRunning: reviewProgress.isRunning,
+      sessionId,
       willTrigger:
-        shouldStartReview && !hasStartedReview && !reviewProgress.isRunning,
+        shouldStartReview &&
+        !hasStartedReview &&
+        !reviewProgress.isRunning &&
+        sessionId,
     });
 
-    if (shouldStartReview && !hasStartedReview && !reviewProgress.isRunning) {
+    // 添加 sessionId 檢查，避免在沒有 sessionId 時執行
+    // 使用 ref 來追蹤是否已經開始審核，避免重複執行
+    if (
+      shouldStartReview &&
+      !hasStartedReview &&
+      !reviewProgress.isRunning &&
+      sessionId
+    ) {
       console.log("shouldStartReview triggered, starting review process...");
       startReviewProcess();
     }
-  }, [shouldStartReview, hasStartedReview, reviewProgress.isRunning]);
+  }, [shouldStartReview]); // 只依賴外部觸發信號，避免因內部狀態變化導致重複執行
 
   // 轉換props數據為組件需要的格式
   const documents = React.useMemo(() => {

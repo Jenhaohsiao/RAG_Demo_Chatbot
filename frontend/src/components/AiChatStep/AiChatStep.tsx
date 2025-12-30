@@ -156,8 +156,8 @@ const AiChatStep: React.FC<AiChatStepProps> = ({ sessionId, parameters }) => {
             tokensUsed={documentInfo.tokensUsed}
             onSendQuery={async (query: string) => {
               try {
-                // 調用真實的聊天服務
-                return await submitQuery(sessionId, query);
+                // 調用真實的聊天服務，傳遞當前語言
+                return await submitQuery(sessionId, query, i18n.language);
               } catch (error) {
                 console.error("Failed to submit query:", error);
                 // 如果真實API失敗，返回錯誤回應而不是模擬回應

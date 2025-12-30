@@ -18,6 +18,7 @@ export interface TextProcessingStepProps {
   onProcessingStatusChange?: (isCompleted: boolean) => void;
   documents?: any[];
   crawledUrls?: any[];
+  onLoadingChange?: (isLoading: boolean, message?: string) => void; // 通知父組件 loading 狀態
 }
 
 interface ProcessingJob {
@@ -40,6 +41,7 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
   onProcessingStatusChange,
   documents = [],
   crawledUrls = [],
+  onLoadingChange,
 }) => {
   const { t } = useTranslation();
   const [jobs, setJobs] = useState<ProcessingJob[]>([]);
@@ -105,6 +107,11 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
   const startProcessing = async () => {
     setIsProcessing(true);
 
+    // 通知父組件開始 loading
+    if (onLoadingChange) {
+      onLoadingChange(true, "正在進行文本處理...");
+    }
+
     // 模擬處理過程
     for (let i = 0; i < jobs.length; i++) {
       const job = jobs[i];
@@ -161,6 +168,11 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
     }
 
     setIsProcessing(false);
+
+    // 通知父組件結束 loading
+    if (onLoadingChange) {
+      onLoadingChange(false);
+    }
   };
 
   const getStatusIcon = (status: string) => {
@@ -205,6 +217,36 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
 
   return (
     <div className="text-processing-step">
+      {/* 開始處理按鈕 - 固定在最頂部 */}
+      <div className="text-center mb-4">
+        {jobs.length === 0 ? (
+          <button className="btn btn-success btn-lg" disabled>
+            <i className="bi bi-play me-2"></i>
+            開始文本處理
+          </button>
+        ) : !isProcessing && jobs.some((j) => j.status === "pending") ? (
+          <button className="btn btn-success btn-lg" onClick={startProcessing}>
+            <i className="bi bi-play me-2"></i>
+            開始文本處理
+          </button>
+        ) : isProcessing ? (
+          <button className="btn btn-secondary btn-lg" disabled>
+            <div
+              className="spinner-border spinner-border-sm me-2"
+              role="status"
+            >
+              <span className="visually-hidden">Loading...</span>
+            </div>
+            處理中...
+          </button>
+        ) : (
+          <button className="btn btn-success btn-lg" disabled>
+            <i className="bi bi-check-circle me-2"></i>
+            處理完成
+          </button>
+        )}
+      </div>
+
       {/* 處理設定 */}
       <div className="card mb-4">
         <div className="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
@@ -330,27 +372,6 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
               </div>
               <div className="small text-muted">已完成</div>
             </div>
-          </div>
-
-          {/* 開始處理按鈕 */}
-          <div className="text-center mt-3">
-            {!isProcessing && jobs.some((j) => j.status === "pending") && (
-              <button className="btn btn-success" onClick={startProcessing}>
-                <i className="bi bi-play me-2"></i>
-                開始文本處理
-              </button>
-            )}
-            {isProcessing && (
-              <button className="btn btn-secondary" disabled>
-                <div
-                  className="spinner-border spinner-border-sm me-2"
-                  role="status"
-                >
-                  <span className="visually-hidden">Loading...</span>
-                </div>
-                處理中...
-              </button>
-            )}
           </div>
         </div>
       </div>

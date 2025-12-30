@@ -7,6 +7,7 @@ import DataUploadStep from "../DataUploadStep/DataUploadStep";
 import ContentReviewStep from "../ContentReviewStep/ContentReviewStep";
 import TextProcessingStep from "../TextProcessingStep/TextProcessingStep";
 import AiChatStep from "../AiChatStep/AiChatStep";
+import LoadingOverlay from "../LoadingOverlay/LoadingOverlay";
 // import TestStep6 from "../TestStep6/TestStep6"; // 測試組件已替換為正式組件
 import FixedRagFlow from "../FixedRagFlow/FixedRagFlow";
 import {
@@ -47,6 +48,10 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   const [showToast, setShowToast] = useState(false);
   const [toastContent, setToastContent] = useState({ title: "", message: "" });
 
+  // 全局 Loading 狀態
+  const [isGlobalLoading, setIsGlobalLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("處理中，請稍候...");
+
   const [stepCompletion, setStepCompletion] = useState({
     1: false,
     2: false,
@@ -60,7 +65,8 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   const pollDocumentStatus = async (
     documentId: string,
     docItem: any,
-    identifier: string
+    identifier: string,
+    onComplete?: () => void
   ) => {
     try {
       console.log(`[WorkflowStepper] 開始輪詢文檔狀態`, {
@@ -229,8 +235,13 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           } 個文字段落。`,
         });
       }
+
+      // 輪詢完成，調用回調
+      onComplete?.();
     } catch (error) {
       console.error(`[WorkflowStepper] 文檔狀態輪詢失敗:`, error);
+      // 錯誤時也要調用回調
+      onComplete?.();
       onShowMessage?.({
         type: "error",
         message: `${
@@ -244,9 +255,10 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   const pollFileStatus = async (
     documentId: string,
     docItem: any,
-    filename: string
+    filename: string,
+    onComplete?: () => void
   ) => {
-    return pollDocumentStatus(documentId, docItem, filename);
+    return pollDocumentStatus(documentId, docItem, filename, onComplete);
   };
 
   // 添加審核狀態管理
@@ -360,9 +372,17 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     },
   ];
 
-  const isStepCompleted = (stepId: number) =>
-    stepCompletion[stepId as keyof typeof stepCompletion] ||
-    stepId < currentStep;
+  const isStepCompleted = (stepId: number) => {
+    // 如果步驟已明確標記為完成，則返回 true
+    if (stepCompletion[stepId as keyof typeof stepCompletion]) {
+      return true;
+    }
+    // 如果當前步驟大於這個步驟，說明已經被訪問過，視為完成
+    if (stepId < currentStep) {
+      return true;
+    }
+    return false;
+  };
   const isStepActive = (stepId: number) => stepId === currentStep;
   const isStepDisabled = (stepId: number) => stepId > currentStep + 1; // 只允許下一步
 
@@ -471,22 +491,49 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     onStepChange(currentStep - 1);
   };
   const handleNextStepClick = () => {
+    // 檢查是否正在處理中
+    if (isGlobalLoading) {
+      onShowMessage?.({
+        type: "info",
+        message: "資料處理中，請稍候...",
+      });
+      return;
+    }
+
+    // 檢查是否已到達最後一步
+    if (currentStep === steps.length) {
+      return;
+    }
+
+    // 檢查步驟3是否可以進入下一步
     if (currentStep === 3 && !canProceedToNextStep()) {
-      // 显示Toast提醒
       onShowMessage?.({
         type: "warning",
         message: "請先上傳檔案或設定網站爬蟲，然後才能進入下一步。",
       });
       return;
     }
+
+    // 檢查步驟4是否可以進入下一步
+    if (currentStep === 4 && !canProceedToNextStep()) {
+      if (!reviewPassed) {
+        onShowMessage?.({
+          type: "warning",
+          message: "請先完成內容審核並通過檢查，然後才能進入下一步。",
+        });
+      }
+      return;
+    }
+
+    // 檢查步驟5是否可以進入下一步
     if (currentStep === 5 && !canProceedToNextStep()) {
-      // 顯示Toast提醒
       onShowMessage?.({
         type: "warning",
         message: "請先完成文本切割和向量化處理，然後才能進入下一步。",
       });
       return;
     }
+
     // 如果從步驟3進入步驟4，直接進入下一步
     if (currentStep === 3) {
       onStepChange(currentStep + 1);
@@ -543,10 +590,9 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             onFileUpload={async (file) => {
               try {
                 console.log("Starting file upload:", file.name);
-                onShowMessage?.({
-                  type: "info",
-                  message: `正在上傳檔案: ${file.name}...`,
-                });
+                // 顯示全局 Loading
+                setIsGlobalLoading(true);
+                setLoadingMessage(`正在上傳檔案: ${file.name}...`);
 
                 const response = await uploadFile(sessionId!, file);
                 console.log("File upload successful:", response);
@@ -564,11 +610,15 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                 onDocumentsUpdate?.([...documents, newDoc]);
 
                 // 開始輪詢文檔狀態以獲取最終的 chunks 數量（成功訊息將在輪詢完成後顯示）
-                pollFileStatus(response.document_id, newDoc, file.name);
+                pollFileStatus(response.document_id, newDoc, file.name, () => {
+                  // 輪詢完成後隱藏全局 Loading
+                  setIsGlobalLoading(false);
+                });
 
                 // 檔案上傳完成，用戶需手動進入下一步
               } catch (error) {
                 console.error("File upload failed:", error);
+                setIsGlobalLoading(false);
                 onShowMessage?.({
                   type: "error",
                   message: `檔案上傳失敗: ${
@@ -580,10 +630,9 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             onUrlUpload={async (url) => {
               try {
                 console.log("Starting URL upload:", url);
-                onShowMessage?.({
-                  type: "info",
-                  message: `正在處理URL: ${url}...`,
-                });
+                // 顯示全局 Loading
+                setIsGlobalLoading(true);
+                setLoadingMessage(`正在處理URL: ${url}...`);
 
                 const response = await uploadUrl(sessionId!, url);
                 console.log("URL upload successful:", response);
@@ -601,11 +650,15 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                 onDocumentsUpdate?.([...documents, newDoc]);
 
                 // 開始輪詢文檔狀態以獲取最終的 chunks 數量（成功訊息將在輪詢完成後顯示）
-                pollDocumentStatus(response.document_id, newDoc, url);
+                pollDocumentStatus(response.document_id, newDoc, url, () => {
+                  // 輪詢完成後隱藏全局 Loading
+                  setIsGlobalLoading(false);
+                });
 
                 // URL處理完成，用戶需手動進入下一步
               } catch (error) {
                 console.error("URL upload failed:", error);
+                setIsGlobalLoading(false);
                 onShowMessage?.({
                   type: "error",
                   message: `URL處理失敗: ${
@@ -621,10 +674,9 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                   maxTokens,
                   maxPages,
                 });
-                onShowMessage?.({
-                  type: "info",
-                  message: `正在爬取網站: ${url}...`,
-                });
+                // 顯示全局 Loading
+                setIsGlobalLoading(true);
+                setLoadingMessage(`正在爬取網站: ${url}...`);
 
                 const response = await uploadWebsite(
                   sessionId!,
@@ -645,6 +697,9 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                 };
                 onCrawledUrlsUpdate?.([...crawledUrls, newUrl]);
 
+                // 隱藏全局 Loading
+                setIsGlobalLoading(false);
+
                 onShowMessage?.({
                   type: "success",
                   message: `網站 ${url} 爬取成功，共處理 ${response.pages_found} 個頁面！`,
@@ -653,6 +708,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                 // 網站爬取完成，用戶需手動進入下一步
               } catch (error) {
                 console.error("Website crawl failed:", error);
+                setIsGlobalLoading(false);
                 onShowMessage?.({
                   type: "error",
                   message: `網站爬取失敗: ${
@@ -679,6 +735,12 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                 setShouldStartReview(false);
               }
             }}
+            onLoadingChange={(isLoading, message) => {
+              setIsGlobalLoading(isLoading);
+              if (message) {
+                setLoadingMessage(message);
+              }
+            }}
             documents={documents}
             crawledUrls={crawledUrls}
             shouldStartReview={shouldStartReview}
@@ -701,6 +763,12 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
               setStepCompletion((prev) => ({ ...prev, 5: true }));
             }}
             onProcessingStatusChange={setTextProcessingCompleted}
+            onLoadingChange={(isLoading, message) => {
+              setIsGlobalLoading(isLoading);
+              if (message) {
+                setLoadingMessage(message);
+              }
+            }}
           />
         );
       case 6:
@@ -846,16 +914,21 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                 </small>
               </div>
 
-              <button
-                className="btn btn-primary"
-                onClick={handleNextStepClick}
-                disabled={
-                  currentStep === steps.length || !canProceedToNextStep()
-                }
-              >
-                下一步
-                <i className="bi bi-chevron-right ms-1"></i>
-              </button>
+              {/* 流程6不顯示下一步按鈕 */}
+              {currentStep < steps.length && (
+                <button
+                  className="btn btn-primary"
+                  onClick={handleNextStepClick}
+                  disabled={
+                    currentStep === steps.length ||
+                    !canProceedToNextStep() ||
+                    isGlobalLoading
+                  }
+                >
+                  下一步
+                  <i className="bi bi-chevron-right ms-1"></i>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -896,6 +969,9 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           </div>
         </div>
       </div>
+
+      {/* 全局 Loading Overlay */}
+      <LoadingOverlay isVisible={isGlobalLoading} message={loadingMessage} />
     </div>
   );
 };

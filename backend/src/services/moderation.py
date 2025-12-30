@@ -124,17 +124,28 @@ class ModerationService:
             )
         
         try:
-            logger.info(f"Checking content safety for '{source_reference}' ({len(text)} characters) - only blocking truly harmful content")
+            logger.info(f"Checking content safety for '{source_reference}' ({len(text)} characters) - blocking harmful and explicit content")
             
-            # 只檢查明顯有害的內容，跳過所有其他檢查
+            # 🔥 STEP 1: 檢查 URL 本身是否為已知的成人網站
+            url_check_result = self._check_url_domain(source_reference)
+            if url_check_result.is_blocked:
+                logger.warning(f"URL blocked for '{source_reference}': {url_check_result.reason}")
+                return url_check_result
+            
+            # 🔥 STEP 2: 檢查內容是否包含明確的色情/成人關鍵字
+            explicit_check = self._check_explicit_keywords(text, source_reference)
+            if explicit_check.is_blocked:
+                logger.warning(f"Explicit content blocked for '{source_reference}': {explicit_check.reason}")
+                return explicit_check
+            
+            # 🔥 STEP 3: 檢查極端有害內容（暴力、仇恨、危險內容）
             harmful_result = self._check_only_harmful_content(text)
             if harmful_result.is_blocked:
-                logger.warning(f"Content blocked for '{source_reference}': {harmful_result.reason}")
+                logger.warning(f"Harmful content blocked for '{source_reference}': {harmful_result.reason}")
                 return harmful_result
             
-            
-            # 內容通過檢查 - 默認批准所有非明顯有害的內容
-            logger.info(f"Content approved for '{source_reference}' - no harmful content detected")
+            # 內容通過所有檢查
+            logger.info(f"Content approved for '{source_reference}' - no harmful or explicit content detected")
             return ModerationResult(
                 status=ModerationStatus.APPROVED,
                 blocked_categories=[],
@@ -150,6 +161,111 @@ class ModerationService:
                 blocked_categories=[],
                 reason=None
             )
+    
+    def _check_url_domain(self, source_reference: str) -> ModerationResult:
+        """
+        檢查 URL 域名是否為已知的成人/色情網站
+        
+        Args:
+            source_reference: 內容來源（可能包含 URL）
+            
+        Returns:
+            ModerationResult: 審核結果
+        """
+        from urllib.parse import urlparse
+        
+        source_lower = source_reference.lower()
+        
+        # 已知的成人網站域名關鍵字
+        adult_domains = [
+            "xvideos", "pornhub", "xnxx", "redtube", "youporn", 
+            "porn", "xxx", "sex", "adult", "erotic", "hentai",
+            "xhamster", "spankbang", "tube8", "xtube", "beeg",
+            "av", "色情", "成人", "18禁", "限制級"
+        ]
+        
+        # 檢查 URL 中是否包含成人網站關鍵字
+        for domain_keyword in adult_domains:
+            if domain_keyword in source_lower:
+                reason = f"檢測到成人網站 URL: 包含 '{domain_keyword}'"
+                logger.warning(f"Adult domain detected: {reason}")
+                return ModerationResult(
+                    status=ModerationStatus.BLOCKED,
+                    blocked_categories=["SEXUALLY_EXPLICIT_URL"],
+                    reason=reason
+                )
+        
+        # 通過檢查
+        return ModerationResult(
+            status=ModerationStatus.APPROVED,
+            blocked_categories=[],
+            reason=None
+        )
+    
+    def _check_explicit_keywords(self, text: str, source_reference: str) -> ModerationResult:
+        """
+        檢查內容是否包含明確的色情/成人關鍵字
+        這個檢查比 _check_only_harmful_content 更全面
+        
+        Args:
+            text: 要檢查的文字內容
+            source_reference: 內容來源參考
+            
+        Returns:
+            ModerationResult: 審核結果
+        """
+        content_lower = text.lower()
+        
+        # 明確的色情/成人內容關鍵字（英文）- 使用更靈活的匹配
+        explicit_keywords_en = [
+            "porn", "xxx", "nude photo", "adult video", 
+            "sex video", "erotic", "pornograph",
+            "live cam", "cam girl", "webcam sex",
+            "strip club", "escort service", "prostitution"
+        ]
+        
+        # 明確的色情/成人內容關鍵字（中文）
+        explicit_keywords_zh = [
+            "色情", "成人影片", "A片", "AV女優", "裸照",
+            "成人直播", "色情直播", "援交", "性服務",
+            "情色網站", "成人網站", "黃片", "毛片"
+        ]
+        
+        all_keywords = explicit_keywords_en + explicit_keywords_zh
+        found_keywords = []
+        
+        for keyword in all_keywords:
+            if keyword in content_lower:
+                found_keywords.append(keyword)
+        
+        # 如果找到多個關鍵字，更確定是成人內容
+        if len(found_keywords) >= 2:
+            reason = f"檢測到明確的成人內容關鍵字: {', '.join(found_keywords[:3])}"
+            logger.warning(f"Explicit content detected: {reason}")
+            return ModerationResult(
+                status=ModerationStatus.BLOCKED,
+                blocked_categories=["SEXUALLY_EXPLICIT"],
+                reason=reason
+            )
+        
+        # 如果只找到一個關鍵字，檢查是否在標題、meta標籤等重要位置
+        if len(found_keywords) == 1:
+            # 檢查是否在前 500 個字符中（通常是標題、描述等）
+            if found_keywords[0] in content_lower[:500]:
+                reason = f"在頁面重要位置檢測到成人內容關鍵字: {found_keywords[0]}"
+                logger.warning(f"Explicit keyword in important position: {reason}")
+                return ModerationResult(
+                    status=ModerationStatus.BLOCKED,
+                    blocked_categories=["SEXUALLY_EXPLICIT"],
+                    reason=reason
+                )
+        
+        # 通過檢查
+        return ModerationResult(
+            status=ModerationStatus.APPROVED,
+            blocked_categories=[],
+            reason=None
+        )
     
     def _check_only_harmful_content(self, text: str) -> ModerationResult:
         """
@@ -252,42 +368,6 @@ class ModerationService:
                     high_risk.append(category_name)
         
         return high_risk
-    
-    def _contains_explicit_content(self, text: str) -> bool:
-        """
-        預檢：檢查文本是否包含明顯的不當內容關鍵字
-        
-        Args:
-            text: 要檢查的文本內容
-            
-        Returns:
-            bool: 如果包含不當內容關鍵字則返回 True
-        """
-        # 轉換為小寫進行檢查
-        text_lower = text.lower()
-        
-        # 常見的明確不當內容關鍵字（英文）- 移除可能在學術材料中出現的詞彙
-        explicit_keywords = [
-            "porn", "xxx", "nude photos", "adult videos", "erotic stories", 
-            "fetish", "bdsm", "masturbation videos", "cam girl", "onlyfans",
-            "prostitution services", "escort services", "strip club"
-        ]
-        
-        # 中文明確不當內容關鍵字 - 更精確的匹配
-        chinese_keywords = [
-            "色情網站", "A片下載", "AV女優", "黃片免費", "裸照分享", 
-            "援交服務", "性服務價格", "脫衣直播", "成人直播"
-        ]
-        
-        # 檢查是否包含任何關鍵字
-        all_keywords = explicit_keywords + chinese_keywords
-        
-        for keyword in all_keywords:
-            if keyword in text_lower:
-                logger.warning(f"Explicit keyword detected: {keyword}")
-                return True
-        
-        return False
 
 
 # 便利函數：快速檢查內容安全性

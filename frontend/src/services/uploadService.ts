@@ -11,6 +11,24 @@ import api from './api';
 import { SourceType, ExtractionStatus, ModerationStatus } from '../types/document';
 
 /**
+ * 規範化 URL - 自動添加協議前綴
+ * 
+ * @param url - 用戶輸入的 URL
+ * @returns 包含協議的完整 URL
+ */
+export const normalizeUrl = (url: string): string => {
+  const trimmed = url.trim();
+  
+  // 如果已經有協議，直接返回
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+  
+  // 自動添加 https:// 前綴
+  return `https://${trimmed}`;
+};
+
+/**
  * 上傳回應（202 Accepted）
  */
 export interface UploadResponse {
@@ -153,10 +171,13 @@ export const uploadWebsite = async (
   maxTokens: number = 100000,
   maxPages: number = 100
 ): Promise<WebsiteUploadResponse> => {
+  // 規範化 URL - 自動添加協議前綴
+  const normalizedUrl = normalizeUrl(url);
+  
   const response = await api.post<WebsiteUploadResponse>(
     `/upload/${sessionId}/website`,
     {
-      url,
+      url: normalizedUrl,
       max_tokens: maxTokens,
       max_pages: maxPages,
     }
