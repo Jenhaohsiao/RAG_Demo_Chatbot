@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./ToastMessage.css";
+import "./ToastMessage.scss";
 
 interface ToastMessageProps {
   type: "error" | "warning" | "info" | "success";

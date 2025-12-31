@@ -27,7 +27,7 @@ import {
 } from "../../services/metricsService";
 import { getSession } from "../../services/sessionService";
 import { type CrawledPage } from "../../services/uploadService";
-import "./ChatScreen.css";
+import "./ChatScreen.scss";
 
 // 檢測文本是否主要為英文
 const isEnglishText = (text: string): boolean => {

@@ -1,0 +1,596 @@
+/**
+ * Utility Classes
+ * 通用工具類 - 常用的原子類
+ */
+
+@import "./variables";
+@import "./mixins";
+
+// ========================================
+// Layout Utilities
+// ========================================
+
+.flex-center {
+  @include flex-center;
+}
+
+.flex-between {
+  @include flex-between;
+}
+
+.flex-column {
+  @include flex-column;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.full-height {
+  height: 100%;
+}
+
+.full-screen {
+  min-height: 100vh;
+}
+
+// ========================================
+// Spacing Utilities
+// ========================================
+
+// Margin utilities
+@each $size,
+  $value
+    in (
+      "0": $spacing-0,
+      "1": $spacing-1,
+      "2": $spacing-2,
+      "3": $spacing-3,
+      "4": $spacing-4,
+      "5": $spacing-5,
+      "6": $spacing-6,
+      "8": $spacing-8,
+      "10": $spacing-10,
+      "12": $spacing-12
+    )
+{
+  .m-#{$size} {
+    margin: $value;
+  }
+  .mt-#{$size} {
+    margin-top: $value;
+  }
+  .mr-#{$size} {
+    margin-right: $value;
+  }
+  .mb-#{$size} {
+    margin-bottom: $value;
+  }
+  .ml-#{$size} {
+    margin-left: $value;
+  }
+  .mx-#{$size} {
+    margin-left: $value;
+    margin-right: $value;
+  }
+  .my-#{$size} {
+    margin-top: $value;
+    margin-bottom: $value;
+  }
+}
+
+// Padding utilities
+@each $size,
+  $value
+    in (
+      "0": $spacing-0,
+      "1": $spacing-1,
+      "2": $spacing-2,
+      "3": $spacing-3,
+      "4": $spacing-4,
+      "5": $spacing-5,
+      "6": $spacing-6,
+      "8": $spacing-8,
+      "10": $spacing-10,
+      "12": $spacing-12
+    )
+{
+  .p-#{$size} {
+    padding: $value;
+  }
+  .pt-#{$size} {
+    padding-top: $value;
+  }
+  .pr-#{$size} {
+    padding-right: $value;
+  }
+  .pb-#{$size} {
+    padding-bottom: $value;
+  }
+  .pl-#{$size} {
+    padding-left: $value;
+  }
+  .px-#{$size} {
+    padding-left: $value;
+    padding-right: $value;
+  }
+  .py-#{$size} {
+    padding-top: $value;
+    padding-bottom: $value;
+  }
+}
+
+// ========================================
+// Text Utilities
+// ========================================
+
+.text-truncate {
+  @include text-truncate;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-uppercase {
+  text-transform: uppercase;
+}
+
+.text-lowercase {
+  text-transform: lowercase;
+}
+
+.text-capitalize {
+  text-transform: capitalize;
+}
+
+// Font Sizes
+.text-xs {
+  font-size: $font-size-xs;
+}
+.text-sm {
+  font-size: $font-size-sm;
+}
+.text-base {
+  font-size: $font-size-base;
+}
+.text-md {
+  font-size: $font-size-md;
+}
+.text-lg {
+  font-size: $font-size-lg;
+}
+.text-xl {
+  font-size: $font-size-xl;
+}
+.text-2xl {
+  font-size: $font-size-2xl;
+}
+
+// Font Weights
+.font-normal {
+  font-weight: $font-weight-normal;
+}
+.font-medium {
+  font-weight: $font-weight-medium;
+}
+.font-semibold {
+  font-weight: $font-weight-semibold;
+}
+.font-bold {
+  font-weight: $font-weight-bold;
+}
+
+// Line Heights
+.leading-tight {
+  line-height: $line-height-tight;
+}
+.leading-normal {
+  line-height: $line-height-normal;
+}
+.leading-relaxed {
+  line-height: $line-height-relaxed;
+}
+.leading-loose {
+  line-height: $line-height-loose;
+}
+
+// ========================================
+// Color Utilities
+// ========================================
+
+// Text Colors
+.text-primary {
+  color: $color-primary;
+}
+.text-secondary {
+  color: $color-secondary;
+}
+.text-success {
+  color: $color-success;
+}
+.text-warning {
+  color: $color-warning;
+}
+.text-danger {
+  color: $color-danger;
+}
+.text-info {
+  color: $color-info;
+}
+.text-muted {
+  color: $color-gray-500;
+}
+.text-white {
+  color: $color-white;
+}
+.text-dark {
+  color: $color-gray-900;
+}
+
+// Background Colors
+.bg-primary {
+  background-color: $color-primary;
+}
+.bg-primary-light {
+  background-color: $color-primary-light;
+}
+.bg-secondary {
+  background-color: $color-secondary;
+}
+.bg-success {
+  background-color: $color-success;
+}
+.bg-warning {
+  background-color: $color-warning;
+}
+.bg-danger {
+  background-color: $color-danger;
+}
+.bg-info {
+  background-color: $color-info;
+}
+.bg-light {
+  background-color: $bg-light;
+}
+.bg-dark {
+  background-color: $bg-dark;
+}
+.bg-white {
+  background-color: $color-white;
+}
+
+// ========================================
+// Border Utilities
+// ========================================
+
+.border {
+  border: 1px solid $color-gray-200;
+}
+
+.border-primary {
+  border-color: $color-primary;
+}
+.border-success {
+  border-color: $color-success;
+}
+.border-warning {
+  border-color: $color-warning;
+}
+.border-danger {
+  border-color: $color-danger;
+}
+.border-info {
+  border-color: $color-info;
+}
+
+.border-0 {
+  border: 0;
+}
+.border-top {
+  border-top: 1px solid $color-gray-200;
+}
+.border-bottom {
+  border-bottom: 1px solid $color-gray-200;
+}
+.border-left {
+  border-left: 1px solid $color-gray-200;
+}
+.border-right {
+  border-right: 1px solid $color-gray-200;
+}
+
+// Border Radius
+.rounded-none {
+  border-radius: 0;
+}
+.rounded-sm {
+  border-radius: $border-radius-sm;
+}
+.rounded {
+  border-radius: $border-radius;
+}
+.rounded-md {
+  border-radius: $border-radius-md;
+}
+.rounded-lg {
+  border-radius: $border-radius-lg;
+}
+.rounded-full {
+  border-radius: $border-radius-full;
+}
+
+// ========================================
+// Shadow Utilities
+// ========================================
+
+.shadow-none {
+  box-shadow: none;
+}
+.shadow-sm {
+  box-shadow: $shadow-sm;
+}
+.shadow {
+  box-shadow: $shadow;
+}
+.shadow-md {
+  box-shadow: $shadow-md;
+}
+.shadow-lg {
+  box-shadow: $shadow-lg;
+}
+.shadow-xl {
+  box-shadow: $shadow-xl;
+}
+
+// ========================================
+// Display Utilities
+// ========================================
+
+.d-none {
+  display: none;
+}
+.d-block {
+  display: block;
+}
+.d-inline {
+  display: inline;
+}
+.d-inline-block {
+  display: inline-block;
+}
+.d-flex {
+  display: flex;
+}
+.d-inline-flex {
+  display: inline-flex;
+}
+.d-grid {
+  display: grid;
+}
+
+// ========================================
+// Position Utilities
+// ========================================
+
+.position-relative {
+  position: relative;
+}
+.position-absolute {
+  position: absolute;
+}
+.position-fixed {
+  position: fixed;
+}
+.position-sticky {
+  position: sticky;
+}
+
+// ========================================
+// Overflow Utilities
+// ========================================
+
+.overflow-auto {
+  overflow: auto;
+}
+.overflow-hidden {
+  overflow: hidden;
+}
+.overflow-visible {
+  overflow: visible;
+}
+.overflow-scroll {
+  overflow: scroll;
+}
+
+.overflow-x-auto {
+  overflow-x: auto;
+}
+.overflow-y-auto {
+  overflow-y: auto;
+}
+
+// Smooth Scroll
+.scroll-smooth {
+  @include smooth-scroll;
+}
+
+// ========================================
+// Cursor Utilities
+// ========================================
+
+.cursor-pointer {
+  cursor: pointer;
+}
+.cursor-not-allowed {
+  cursor: not-allowed;
+}
+.cursor-default {
+  cursor: default;
+}
+
+// ========================================
+// Visibility Utilities
+// ========================================
+
+.visible {
+  visibility: visible;
+}
+.invisible {
+  visibility: hidden;
+}
+
+// ========================================
+// Interaction Utilities
+// ========================================
+
+.hover-lift {
+  @include hover-lift;
+}
+
+.focus-visible {
+  @include focus-visible;
+}
+
+.no-select {
+  user-select: none;
+}
+
+// ========================================
+// Animation Utilities
+// ========================================
+
+.fade-in {
+  @include fade-in;
+}
+
+.slide-in-right {
+  @include slide-in-right;
+}
+
+.slide-in-up {
+  @include slide-in-up;
+}
+
+.spinner {
+  @include spinner;
+}
+
+// ========================================
+// Card Component
+// ========================================
+
+.card-base {
+  @include card;
+}
+
+.card-hover {
+  @include card;
+  @include hover-lift;
+}
+
+// ========================================
+// Button Utilities
+// ========================================
+
+.btn-reset {
+  @include button-reset;
+}
+
+// ========================================
+// Overlay
+// ========================================
+
+.overlay {
+  @include overlay;
+}
+
+.overlay-light {
+  @include overlay(0.1);
+}
+
+// ========================================
+// Gap Utilities (for flexbox/grid)
+// ========================================
+
+.gap-1 {
+  gap: $spacing-1;
+}
+.gap-2 {
+  gap: $spacing-2;
+}
+.gap-3 {
+  gap: $spacing-3;
+}
+.gap-4 {
+  gap: $spacing-4;
+}
+.gap-5 {
+  gap: $spacing-5;
+}
+.gap-6 {
+  gap: $spacing-6;
+}
+.gap-8 {
+  gap: $spacing-8;
+}
+
+// ========================================
+// Responsive Display Utilities
+// ========================================
+
+@include respond-to("sm") {
+  .d-sm-none {
+    display: none;
+  }
+  .d-sm-block {
+    display: block;
+  }
+  .d-sm-flex {
+    display: flex;
+  }
+}
+
+@include respond-to("md") {
+  .d-md-none {
+    display: none;
+  }
+  .d-md-block {
+    display: block;
+  }
+  .d-md-flex {
+    display: flex;
+  }
+}
+
+@include respond-to("lg") {
+  .d-lg-none {
+    display: none;
+  }
+  .d-lg-block {
+    display: block;
+  }
+  .d-lg-flex {
+    display: flex;
+  }
+}
+
+@include respond-to("xl") {
+  .d-xl-none {
+    display: none;
+  }
+  .d-xl-block {
+    display: block;
+  }
+  .d-xl-flex {
+    display: flex;
+  }
+}

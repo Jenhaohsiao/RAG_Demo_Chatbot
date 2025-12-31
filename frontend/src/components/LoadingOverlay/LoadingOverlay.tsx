@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import "./LoadingOverlay.css";
+import "./LoadingOverlay.scss";
 
 export interface LoadingOverlayProps {
   isVisible: boolean;

@@ -1,0 +1,68 @@
+/**
+ * Professional Header Styles
+ * 專業頭部樣式
+ */
+
+@import "./variables";
+@import "./mixins";
+
+.navbar-dark {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+  box-shadow: 0 2px 10px rgba($color-black, 0.15);
+
+  .navbar-brand h4 {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 20px rgba(52, 152, 219, 0.3);
+  }
+}
+
+/* Session info styling */
+.session-info code {
+  background: rgba(52, 152, 219, 0.2);
+  border: 1px solid rgba(52, 152, 219, 0.3);
+  border-radius: $border-radius-sm;
+  padding: 2px 6px;
+}
+
+/* Button hover effects */
+.btn-outline-light {
+  border-color: rgba($color-white, 0.3);
+  color: rgba($color-white, 0.9);
+  transition: all $transition-base;
+
+  &:hover {
+    background: rgba($color-white, 0.25) !important;
+    border-color: rgba($color-white, 0.6) !important;
+    color: $color-white !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba($color-black, 0.2);
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 0.2rem rgba($color-white, 0.25);
+  }
+}
+
+/* Dropdown styling */
+.dropdown-menu {
+  background: rgba(44, 62, 80, 0.95);
+  border: 1px solid rgba($color-white, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.dropdown-item {
+  color: #ecf0f1 !important;
+
+  &:hover {
+    background: rgba(52, 152, 219, 0.2);
+    color: $color-white !important;
+  }
+
+  &.active {
+    background: rgba(52, 152, 219, 0.4);
+    color: $color-white !important;
+  }
+}

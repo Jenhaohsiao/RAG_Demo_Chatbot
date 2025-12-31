@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import "./WorkflowStepper.css";
-import "../../styles/fixed-rag-flow.css";
+import "./WorkflowStepper.scss";
 import RagConfigStep from "../RagConfigStep/RagConfigStep";
 import PromptConfigStep from "../PromptConfigStep/PromptConfigStep";
 import DataUploadStep from "../DataUploadStep/DataUploadStep";
@@ -790,7 +789,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   };
 
   return (
-    <div className="workflow-stepper w-100">
+    <div className="workflow-stepper w-100 xs:p-0">
       {/* 步驟指示器 - 水平排列 */}
       <div className="stepper-header">
         <div className="d-flex justify-content-between align-items-center px-2">

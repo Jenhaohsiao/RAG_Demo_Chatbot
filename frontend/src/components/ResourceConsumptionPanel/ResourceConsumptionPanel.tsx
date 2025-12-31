@@ -11,7 +11,7 @@
 
 import React from "react";
 import { useTranslation } from "react-i18next";
-import "./ResourceConsumptionPanel.css";
+import "./ResourceConsumptionPanel.scss";
 
 export interface ResourceConsumptionPanelProps {
   sourceType?: string;

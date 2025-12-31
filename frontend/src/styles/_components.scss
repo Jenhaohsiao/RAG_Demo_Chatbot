@@ -1,0 +1,415 @@
+/**
+ * Components Styles
+ * 整合所有組件樣式（hero, toast, upload, two-column-layout等）
+ */
+
+@import "./variables";
+@import "./mixins";
+
+// ========================================
+// Hero Section
+// ========================================
+.hero-section {
+  padding: $spacing-12 0 $spacing-16;
+  background: linear-gradient(135deg, $color-gray-50 0%, #e9ecef 100%);
+  border-radius: $border-radius-lg;
+  margin-bottom: $spacing-8;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background: linear-gradient(
+      135deg,
+      rgba($color-primary, 0.1) 0%,
+      rgba($color-secondary, 0.05) 100%
+    );
+    border-radius: 50%;
+    transform: translate(50%, -50%);
+  }
+}
+
+.hero-badge {
+  @include flex-center;
+  gap: $spacing-2;
+  background: linear-gradient(135deg, $color-primary, #6610f2);
+  color: $color-white;
+  padding: $spacing-2 $spacing-4;
+  border-radius: 2rem;
+  font-size: 0.9rem;
+  font-weight: $font-weight-medium;
+  box-shadow: 0 4px 15px rgba($color-primary, 0.3);
+}
+
+.hero-title {
+  font-size: $font-size-4xl;
+  font-weight: $font-weight-bold;
+  color: $color-gray-900;
+  line-height: $line-height-tight;
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, $color-primary, #6610f2, #d63384);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-description {
+  font-size: $font-size-lg;
+  color: $color-secondary;
+  line-height: $line-height-relaxed;
+  max-width: 500px;
+}
+
+.tech-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-3;
+}
+
+.tech-item {
+  background: rgba($color-white, 0.8);
+  color: $color-gray-700;
+  padding: 0.4rem 0.8rem;
+  border-radius: $border-radius-lg;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  border: 1px solid rgba($color-primary, 0.2);
+  transition: all $transition-base;
+
+  &:hover {
+    background: $color-primary;
+    color: $color-white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba($color-primary, 0.3);
+  }
+}
+
+// ========================================
+// RAG Flow Diagram
+// ========================================
+.rag-flow-diagram {
+  background: $color-white;
+  padding: $spacing-8 $spacing-6;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-xl;
+  position: relative;
+}
+
+.flow-step {
+  @include flex-center;
+  gap: $spacing-4;
+  padding: $spacing-4;
+  border-radius: $border-radius-md;
+  background: $bg-light;
+  border: 2px solid transparent;
+  transition: all $transition-base;
+  margin-bottom: $spacing-2;
+}
+
+// ========================================
+// Toast Messages
+// ========================================
+.toast {
+  --bs-toast-zindex: #{$z-index-toast};
+  --bs-toast-padding-x: #{$spacing-4};
+  --bs-toast-padding-y: #{$spacing-3};
+  --bs-toast-max-width: 400px;
+  --bs-toast-font-size: #{$font-size-sm};
+  --bs-toast-bg: rgba(#{$color-white}, 0.95);
+  --bs-toast-border-radius: #{$border-radius};
+  --bs-toast-box-shadow: #{$shadow-lg};
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  &.show {
+    display: block;
+  }
+}
+
+.toast-header {
+  background-color: rgba($color-white, 0.1);
+  border-bottom: 1px solid rgba($color-white, 0.2);
+}
+
+.toast-body {
+  word-wrap: break-word;
+}
+
+// ========================================
+// Upload Area
+// ========================================
+.upload-area {
+  border: 2px dashed $color-gray-300;
+  border-radius: $border-radius;
+  transition: border-color $transition-base;
+  min-height: 200px;
+  @include flex-center;
+
+  &:hover {
+    border-color: $color-primary;
+  }
+}
+
+.dropzone {
+  width: 100%;
+  height: 100%;
+  @include flex-column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-8;
+}
+
+.upload-container {
+  border: 2px dashed $color-gray-300;
+  border-radius: $border-radius-md;
+  background-color: $bg-light;
+  padding: $spacing-10 $spacing-6;
+  transition: all $transition-base;
+  margin-bottom: $spacing-6;
+
+  &.dragging {
+    border-color: $color-primary;
+    background-color: $color-primary-light;
+  }
+}
+
+.upload-tabs {
+  display: flex;
+  gap: $spacing-3;
+  margin-bottom: $spacing-6;
+  border-bottom: 2px solid $color-gray-200;
+}
+
+.tab-button {
+  padding: $spacing-3 $spacing-5;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  color: $color-gray-600;
+  cursor: pointer;
+  transition: all $transition-fast;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    color: $color-gray-800;
+    border-bottom-color: $color-gray-400;
+  }
+
+  &.active {
+    color: $color-primary;
+    border-bottom-color: $color-primary;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// ========================================
+// Two Column Layout
+// ========================================
+.crawler-area {
+  padding: 0;
+  border: none;
+  background-color: transparent;
+}
+
+.threshold-section {
+  padding: $spacing-4;
+  background-color: $bg-light;
+  border-radius: $border-radius;
+  border: 1px solid $color-gray-200;
+}
+
+.threshold-header {
+  @include flex-between;
+}
+
+.prompt-visualization-compact {
+  padding: 0;
+}
+
+.prompt-content-compact {
+  overflow-y: auto;
+  @include smooth-scroll;
+}
+
+.prompt-preview {
+  font-family: $font-family-monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+// ========================================
+// Flow Diagrams
+// ========================================
+.fixed-rag-flow {
+  position: sticky;
+  top: 0;
+  z-index: $z-index-sticky;
+  background: linear-gradient(135deg, #7aa6d1 0%, #376491 100%);
+  border-bottom: 2px solid $color-gray-200;
+  box-shadow: $shadow-md;
+}
+
+.flow-container {
+  overflow-x: auto;
+  padding: $spacing-2 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.flow-step-item {
+  transition: all $transition-base;
+  white-space: nowrap;
+  font-size: $font-size-sm;
+  box-shadow: $shadow-sm;
+  cursor: help;
+  position: relative;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: $shadow-md;
+  }
+
+  .step-icon {
+    flex-shrink: 0;
+  }
+
+  .step-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .step-title {
+    line-height: $line-height-tight;
+    margin: 0;
+  }
+
+  .step-desc {
+    line-height: 1.1;
+    margin: 0;
+    opacity: 0.8;
+  }
+}
+
+.flow-arrow {
+  font-size: $font-size-lg;
+  @include flex-center;
+  transition: color $transition-base;
+}
+
+// ========================================
+// Custom Tooltip
+// ========================================
+.tooltiptext {
+  visibility: hidden;
+  width: 300px;
+  background-color: $color-black;
+  color: $color-white;
+  text-align: left;
+  padding: $spacing-2 $spacing-3;
+  border-radius: $border-radius-sm;
+  position: absolute;
+  z-index: $z-index-tooltip;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -150px;
+  opacity: 0;
+  transition: opacity $transition-base, visibility $transition-base;
+  font-size: $font-size-base;
+  line-height: $line-height-normal;
+  word-wrap: break-word;
+  box-shadow: $shadow-lg;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: $color-black transparent transparent transparent;
+  }
+}
+
+.flow-step-item:hover .tooltiptext,
+.flow-step-item:focus .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
+// ========================================
+// Responsive Adjustments
+// ========================================
+@include respond-to("md") {
+  .upload-area {
+    min-height: 150px;
+  }
+
+  .dropzone {
+    padding: $spacing-4;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .card-body {
+    padding: $spacing-3;
+  }
+
+  .upload-area {
+    min-height: 120px;
+  }
+
+  .flow-step-item {
+    min-width: 100px;
+    font-size: $font-size-xs;
+
+    .step-desc {
+      display: none;
+    }
+  }
+
+  .flow-arrow {
+    font-size: $font-size-md;
+    margin: 0 $spacing-2;
+  }
+}
+
+@media (max-width: 576px) {
+  .fixed-rag-flow {
+    padding: $spacing-2 0;
+  }
+
+  .flow-step-item {
+    min-width: 80px;
+    padding: $spacing-1 $spacing-2;
+  }
+
+  .flow-arrow {
+    margin: 0 $spacing-1;
+  }
+
+  .tooltiptext {
+    width: 200px;
+    margin-left: -100px;
+    font-size: $font-size-sm;
+    padding: $spacing-1 $spacing-2;
+  }
+}

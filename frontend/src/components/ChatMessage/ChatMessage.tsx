@@ -5,7 +5,7 @@
 
 import React from "react";
 import { useTranslation } from "react-i18next";
-import "./ChatMessage.css";
+import "./ChatMessage.scss";
 import {
   ChatRole,
   ResponseType,

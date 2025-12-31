@@ -1,3 +1,6 @@
+@import "../../styles/variables";
+@import "../../styles/mixins";
+
 /**
  * Loading Overlay Styles
  * 全局等候轉動圖示樣式
@@ -10,18 +13,16 @@
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.3);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
+  @include flex-center;
+  z-index: $z-index-modal;
 }
 
 .loading-overlay-content {
   text-align: center;
-  background-color: white;
-  padding: 2rem 3rem;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  background-color: $color-white;
+  padding: $spacing-8 $spacing-12;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-xl;
 }
 
 .loading-spinner {
@@ -31,7 +32,7 @@
 }
 
 .loading-message {
-  font-size: 1rem;
-  color: #333;
-  font-weight: 500;
+  font-size: $font-size-base;
+  color: $color-text;
+  font-weight: $font-weight-medium;
 }

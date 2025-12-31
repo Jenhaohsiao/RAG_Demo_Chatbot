@@ -14,7 +14,7 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { validateUrl, normalizeUrl } from "../../services/uploadService";
 import { CrawledPage } from "../../services/uploadService";
-import "./WebsiteCrawlerPanel.css";
+import "./WebsiteCrawlerPanel.scss";
 
 export interface WebsiteCrawlerPanelProps {
   onCrawl: (url: string, maxTokens: number, maxPages: number) => void;

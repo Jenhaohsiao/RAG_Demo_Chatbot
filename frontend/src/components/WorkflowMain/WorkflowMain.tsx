@@ -196,7 +196,7 @@ const WorkflowMain: React.FC<WorkflowMainProps> = ({
   return (
     <div className="workflow-main w-100 py-4">
       {/* 全屏幕寫度 */}
-      <div className="w-100 px-3">
+      <div className="w-100 ">
         {/* 標題 */}
         <div className="text-center">
           <h5 className="mb-0">{t("workflow.title", "RAG 工作流程")}</h5>

@@ -9,8 +9,7 @@
 
 import React, { useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import "../../styles/UploadScreen.css";
-import "./UploadScreen.css";
+import "./UploadScreen.scss";
 import {
   validateFileType,
   validateFileSize,

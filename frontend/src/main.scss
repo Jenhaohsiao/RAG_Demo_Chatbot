@@ -1,0 +1,499 @@
+/**
+ * Global Styles - Main Entry Point
+ * 全局樣式主入口檔案
+ */
+
+// Import global partials
+@import "./styles/variables";
+@import "./styles/mixins";
+@import "./styles/utilities";
+
+// ========================================
+// Global Base Styles
+// ========================================
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: $font-family-base;
+  font-size: $font-size-base;
+  line-height: $line-height-normal;
+  color: $color-gray-900;
+  background-color: $color-white;
+}
+
+// ========================================
+// Main Layout Styles
+// ========================================
+
+.main-content-container {
+  min-height: calc(100vh - 80px);
+}
+
+.main-blocking-overlay {
+  @include fixed-full;
+  background-color: $bg-overlay;
+  z-index: $z-index-modal-backdrop - 1; // 9998
+  cursor: not-allowed;
+}
+
+// ========================================
+// Common Component Patterns
+// ========================================
+
+// Message Containers
+.message-container {
+  margin-bottom: $spacing-4;
+  padding: $message-padding;
+  border-radius: $message-border-radius;
+
+  &.user {
+    background: $message-user-bg;
+    margin-left: 20%;
+  }
+
+  &.assistant {
+    background: $message-assistant-bg;
+    margin-right: 20%;
+  }
+}
+
+.message-header {
+  @include flex-between;
+  margin-bottom: $spacing-2;
+}
+
+.message-role {
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-sm;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.message-time {
+  font-size: $font-size-xs;
+  color: $color-gray-500;
+}
+
+.message-content {
+  font-size: $font-size-base;
+  line-height: $line-height-relaxed;
+  color: $color-gray-800;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+
+  &.cannot-answer {
+    color: $color-danger-dark;
+    font-style: italic;
+  }
+}
+
+// Cards
+.card {
+  @include card;
+
+  &.card-hover {
+    @include hover-lift;
+  }
+
+  &.border-primary {
+    border-color: $color-primary;
+  }
+
+  &.border-info {
+    border-color: $color-info;
+  }
+
+  &.border-success {
+    border-color: $color-success;
+  }
+
+  &.border-warning {
+    border-color: $color-warning;
+  }
+
+  &.border-danger {
+    border-color: $color-danger;
+  }
+}
+
+.card-header {
+  padding: $spacing-3;
+  border-bottom: 1px solid $card-border-color;
+
+  &.bg-primary {
+    background-color: $color-primary;
+    color: $color-white;
+    border-bottom: none;
+  }
+
+  &.bg-info {
+    background-color: $color-info;
+    color: $color-white;
+    border-bottom: none;
+  }
+
+  &.bg-dark {
+    background-color: $bg-dark;
+    color: $color-white;
+    border-bottom: none;
+  }
+}
+
+.card-body {
+  padding: $card-padding;
+}
+
+.card-title {
+  margin: 0;
+  font-weight: $font-weight-semibold;
+}
+
+// Alerts
+.alert {
+  padding: $spacing-3 $spacing-4;
+  border-radius: $border-radius;
+  margin-bottom: $spacing-4;
+
+  &.alert-warning {
+    background-color: $color-warning-light;
+    border: 1px solid $color-warning;
+    color: $color-warning-dark;
+  }
+
+  &.alert-danger {
+    background-color: $color-danger-light;
+    border: 1px solid $color-danger;
+    color: $color-danger-dark;
+  }
+
+  &.alert-info {
+    background-color: $color-info-light;
+    border: 1px solid $color-info;
+    color: $color-info-dark;
+  }
+
+  &.alert-success {
+    background-color: $color-success-light;
+    border: 1px solid $color-success;
+    color: $color-success-dark;
+  }
+}
+
+// Badges
+.badge {
+  display: inline-block;
+  padding: $spacing-1 $spacing-2;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: $border-radius-sm;
+
+  &.bg-primary {
+    background-color: $color-primary;
+    color: $color-white;
+  }
+
+  &.bg-success {
+    background-color: $color-success;
+    color: $color-white;
+  }
+
+  &.bg-warning {
+    background-color: $color-warning;
+    color: $color-gray-900;
+  }
+}
+
+// Buttons (extending Bootstrap)
+.btn {
+  padding: $btn-padding-y $btn-padding-x;
+  border-radius: $btn-border-radius;
+  font-weight: $font-weight-medium;
+  transition: all $transition-base;
+  cursor: pointer;
+  border: 1px solid transparent;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  &.btn-icon {
+    @include flex-center;
+    gap: $spacing-2;
+  }
+}
+
+// Form Elements
+.form-label {
+  margin-bottom: $spacing-2;
+  font-weight: $font-weight-medium;
+  font-size: $font-size-sm;
+  color: $color-gray-700;
+}
+
+.form-control,
+.form-select {
+  padding: $input-padding-y $input-padding-x;
+  border: 1px solid $input-border-color;
+  border-radius: $input-border-radius;
+  transition: border-color $transition-base, box-shadow $transition-base;
+
+  &:focus {
+    border-color: $color-primary;
+    box-shadow: 0 0 0 0.2rem rgba($color-primary, 0.25);
+    outline: none;
+  }
+
+  &.error {
+    border-color: $color-danger;
+  }
+}
+
+.form-range {
+  &::-webkit-slider-thumb {
+    background: $color-primary;
+  }
+
+  &::-moz-range-thumb {
+    background: $color-primary;
+  }
+}
+
+// Loading Spinner
+.spinner-border {
+  @include spinner;
+}
+
+// Toast Container
+.toast-container {
+  position: fixed;
+  top: $spacing-5;
+  right: $spacing-5;
+  z-index: $z-index-toast;
+  max-width: 400px;
+  width: 100%;
+  pointer-events: auto;
+}
+
+.toast {
+  background: $color-white;
+  border-radius: $border-radius;
+  box-shadow: $shadow-lg;
+  margin-bottom: $spacing-3;
+
+  &.toast-animated {
+    @include slide-in-right;
+  }
+
+  &.toast-static {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.toast-header {
+  @include flex-between;
+  padding: $spacing-3;
+  border-bottom: 1px solid $color-gray-200;
+  font-weight: $font-weight-semibold;
+}
+
+.toast-body {
+  padding: $spacing-3;
+}
+
+// Modal
+.modal-backdrop {
+  @include overlay;
+}
+
+// Upload Area
+.upload-area {
+  border: 2px dashed $color-gray-300;
+  border-radius: $border-radius;
+  transition: border-color $transition-base;
+  min-height: 200px;
+  @include flex-center;
+
+  &:hover {
+    border-color: $color-primary;
+  }
+}
+
+.dropzone {
+  width: 100%;
+  height: 100%;
+  @include flex-column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-8;
+}
+
+// Error Message
+.error-message {
+  color: $color-danger;
+  font-size: $font-size-sm;
+  margin-top: $spacing-2;
+}
+
+// Loading Overlay
+.loading-overlay {
+  @include fixed-full;
+  @include flex-center;
+  background-color: $bg-overlay;
+  z-index: $z-index-loading;
+}
+
+.loading-overlay-content {
+  text-align: center;
+  background-color: $color-white;
+  padding: $spacing-8 $spacing-12;
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-xl;
+}
+
+.loading-spinner {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-width: 0.3rem;
+}
+
+.loading-message {
+  font-size: $font-size-md;
+  color: $color-gray-800;
+  font-weight: $font-weight-medium;
+}
+
+// ========================================
+// Responsive Adjustments
+// ========================================
+
+@include respond-to("md") {
+  .message-container {
+    &.user {
+      margin-left: 15%;
+    }
+
+    &.assistant {
+      margin-right: 15%;
+    }
+  }
+}
+
+@include respond-to("sm") {
+  .message-container {
+    &.user,
+    &.assistant {
+      margin-left: 0;
+      margin-right: 0;
+    }
+  }
+
+  .toast-container {
+    max-width: calc(100% - #{$spacing-8});
+    right: $spacing-4;
+    top: $spacing-4;
+  }
+
+  .upload-area {
+    min-height: 150px;
+  }
+
+  .dropzone {
+    padding: $spacing-4;
+  }
+}
+
+// ========================================
+// Helper Classes for Common Patterns
+// ========================================
+
+// Icon with text spacing
+.icon-text {
+  @include flex-center;
+  gap: $spacing-2;
+}
+
+// Stat display
+.stat {
+  @include flex-column;
+  gap: $spacing-1;
+}
+
+.stat-label {
+  font-size: $font-size-sm;
+  color: $color-gray-500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-gray-900;
+}
+
+// Section divider
+.section-divider {
+  height: 1px;
+  background-color: $color-gray-200;
+  margin: $spacing-6 0;
+}
+
+// Empty state
+.empty-state {
+  @include flex-column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-12;
+  text-align: center;
+  color: $color-gray-500;
+
+  .empty-state-icon {
+    font-size: $font-size-4xl;
+    margin-bottom: $spacing-4;
+  }
+
+  .empty-state-text {
+    font-size: $font-size-lg;
+    margin-bottom: $spacing-2;
+  }
+
+  .empty-state-description {
+    font-size: $font-size-sm;
+    color: $color-gray-400;
+  }
+}
+
+// ========================================
+// Print Styles
+// ========================================
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: $color-white;
+  }
+
+  .message-container {
+    page-break-inside: avoid;
+  }
+}

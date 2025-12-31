@@ -11,8 +11,7 @@ import FixedRagFlow from "../FixedRagFlow/FixedRagFlow";
 import { ResponseType } from "../../types/chat";
 import { listDocuments } from "../../services/uploadService";
 import { submitQuery } from "../../services/chatService";
-import "../../styles/fixed-rag-flow.css";
-import "./AiChatStep.css";
+import "./AiChatStep.scss";
 
 export interface AiChatStepProps {
   sessionId?: string;

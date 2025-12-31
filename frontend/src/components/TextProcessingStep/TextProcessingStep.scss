@@ -1,4 +1,5 @@
-/* TextProcessingStep specific styles */
+@import "../../styles/variables";
+
 .text-processing-progress-main {
   height: 10px;
 }
@@ -8,5 +9,5 @@
 }
 
 .text-processing-progress-width-dynamic {
-  /* This class will have dynamic width set via JavaScript */
+  /* Dynamic width set via JavaScript */
 }

@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import "./PromptVisualization.css";
+import "./PromptVisualization.scss";
 
 interface SystemPrompts {
   rag_prompt_template: string;

@@ -6,17 +6,10 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 // 確保Bootstrap JavaScript正確載入
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
-import "./styles/badges.css";
-import "./styles/rtl.css";
-import "./styles/responsive.css"; // T094: Import responsive design utilities
-import "./styles/hero.css"; // Hero section styles
-import "./styles/fixed-flow.css"; // Fixed RAG flow styles
-import "./styles/professional-header.css"; // Professional header styles
-import "./styles/fixed-rag-flow.css"; // Fixed flow styles
-import "./styles/custom-tooltip.css"; // Flow step styles (Bootstrap tooltip compatible)
-import "./styles/two-column-layout.css"; // Two-column layout styles
-import "./styles/toast.css"; // Toast message styles
-import "./main.css";
+// 導入統一的SCSS樣式系統
+// 包含全局變數、mixins、工具類和既有CSS檔案
+import "./styles/index.scss";
+import "./main.scss"; // 主樣式檔案（已轉換為SCSS）
 import "./i18n/config";
 import { useTranslation } from "react-i18next";
 import i18n from "./i18n/config";
@@ -436,7 +429,7 @@ const App: React.FC = () => {
 
       {/* Workflow Mode Content */}
       <div
-        className={`w-100 main-content-container ${
+        className={`container main-content-container xs:m-0 p-0${
           isBlocked ? "position-relative" : ""
         }`}
       >

@@ -1,9 +1,9 @@
-/* SettingsModal Component Styles */
+@import "../../styles/variables";
 
 .settings-modal-backdrop {
   background-color: rgba(0, 0, 0, 0.5);
 }
 
 .settings-threshold-help {
-  font-size: 0.85rem;
+  font-size: $font-size-sm;
 }

@@ -7,7 +7,7 @@
 
 import React, { useState, KeyboardEvent } from "react";
 import { useTranslation } from "react-i18next";
-import "./ChatInput.css";
+import "./ChatInput.scss";
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;

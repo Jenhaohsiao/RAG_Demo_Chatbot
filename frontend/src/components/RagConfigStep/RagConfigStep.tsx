@@ -1,5 +1,4 @@
-﻿import React from 'react';
-
+﻿import React from "react";
 interface RagConfigStepProps {
   parameters: {
     similarity_threshold: number;
@@ -19,7 +18,7 @@ interface RagConfigStepProps {
 const RagConfigStep: React.FC<RagConfigStepProps> = ({
   parameters,
   onParameterChange,
-  onComplete
+  onComplete,
 }) => {
   return (
     <div className="rag-config-step">
@@ -29,9 +28,7 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
         <div className="col-lg-4 col-xl-3">
           <div className="card h-100 border-primary">
             <div className="card-header bg-primary text-white">
-              <h6 className="card-title mb-0">
-                相似度閾值
-              </h6>
+              <h6 className="card-title mb-0">相似度閾值</h6>
             </div>
             <div className="card-body">
               <div className="mb-3">
@@ -68,14 +65,15 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
         <div className="col-lg-4 col-xl-3">
           <div className="card h-100 border-primary">
             <div className="card-header bg-primary text-white">
-              <h6 className="card-title mb-0">
-                上段數
-              </h6>
+              <h6 className="card-title mb-0">上段數</h6>
             </div>
             <div className="card-body">
               <div className="mb-3">
                 <label className="form-label small">
-                  每次檢索數量: <span className="text-primary fw-bold">{parameters.rag_context_window}</span>
+                  每次檢索數量:{" "}
+                  <span className="text-primary fw-bold">
+                    {parameters.rag_context_window}
+                  </span>
                 </label>
                 <input
                   type="range"
@@ -104,9 +102,7 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
         <div className="col-lg-4 col-xl-3">
           <div className="card h-100 border-primary">
             <div className="card-header bg-primary text-white">
-              <h6 className="card-title mb-0">
-                引用策略
-              </h6>
+              <h6 className="card-title mb-0">引用策略</h6>
             </div>
             <div className="card-body">
               <select
@@ -128,9 +124,7 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
         <div className="col-lg-4 col-xl-3">
           <div className="card h-100 border-primary">
             <div className="card-header bg-primary text-white">
-              <h6 className="card-title mb-0">
-                重排策略
-              </h6>
+              <h6 className="card-title mb-0">重排策略</h6>
             </div>
             <div className="card-body">
               <select
@@ -151,14 +145,15 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
         <div className="col-lg-4 col-xl-3">
           <div className="card h-100 border-primary">
             <div className="card-header bg-primary text-white">
-              <h6 className="card-title mb-0">
-                Top-K檢索
-              </h6>
+              <h6 className="card-title mb-0">Top-K檢索</h6>
             </div>
             <div className="card-body">
               <div className="mb-3">
                 <label className="form-label small">
-                  檢索段落 <span className="text-secondary fw-bold">{parameters.rag_top_k}</span>
+                  檢索段落{" "}
+                  <span className="text-secondary fw-bold">
+                    {parameters.rag_top_k}
+                  </span>
                 </label>
                 <input
                   type="range"
@@ -184,14 +179,16 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
         <div className="col-lg-4 col-xl-3">
           <div className="card h-100 border-primary">
             <div className="card-header bg-primary text-white">
-              <h6 className="card-title mb-0">
-                Chunk大小
-              </h6>
+              <h6 className="card-title mb-0">Chunk大小</h6>
             </div>
             <div className="card-body">
               <div className="mb-3">
                 <label className="form-label small">
-                  最大: <span className="text-danger">{parameters.chunk_max_size}</span> 字
+                  最大:{" "}
+                  <span className="text-danger">
+                    {parameters.chunk_max_size}
+                  </span>{" "}
+                  字
                 </label>
                 <input
                   type="range"
@@ -201,7 +198,10 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
                   step="500"
                   value={parameters.chunk_max_size}
                   onChange={(e) =>
-                    onParameterChange("chunk_max_size", parseInt(e.target.value))
+                    onParameterChange(
+                      "chunk_max_size",
+                      parseInt(e.target.value)
+                    )
                   }
                 />
                 <div className="d-flex justify-content-between small text-muted">
@@ -217,14 +217,16 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
         <div className="col-lg-4 col-xl-3">
           <div className="card h-100 border-primary">
             <div className="card-header bg-primary text-white">
-              <h6 className="card-title mb-0">
-                Chunk最小
-              </h6>
+              <h6 className="card-title mb-0">Chunk最小</h6>
             </div>
             <div className="card-body">
               <div className="mb-3">
                 <label className="form-label small">
-                  最小: <span className="text-warning">{parameters.chunk_min_size}</span> 字
+                  最小:{" "}
+                  <span className="text-warning">
+                    {parameters.chunk_min_size}
+                  </span>{" "}
+                  字
                 </label>
                 <input
                   type="range"
@@ -234,7 +236,10 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
                   step="100"
                   value={parameters.chunk_min_size}
                   onChange={(e) =>
-                    onParameterChange("chunk_min_size", parseInt(e.target.value))
+                    onParameterChange(
+                      "chunk_min_size",
+                      parseInt(e.target.value)
+                    )
                   }
                 />
                 <div className="d-flex justify-content-between small text-muted">
@@ -250,14 +255,16 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
         <div className="col-lg-4 col-xl-3">
           <div className="card h-100 border-primary">
             <div className="card-header bg-primary text-white">
-              <h6 className="card-title mb-0">
-                Chunk重疊
-              </h6>
+              <h6 className="card-title mb-0">Chunk重疊</h6>
             </div>
             <div className="card-body">
               <div className="mb-3">
                 <label className="form-label small">
-                  重疊段落數: <span className="text-info">{parameters.chunk_overlap_size}</span> 字
+                  重疊段落數:{" "}
+                  <span className="text-info">
+                    {parameters.chunk_overlap_size}
+                  </span>{" "}
+                  字
                 </label>
                 <input
                   type="range"
@@ -267,7 +274,10 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
                   step="50"
                   value={parameters.chunk_overlap_size}
                   onChange={(e) =>
-                    onParameterChange("chunk_overlap_size", parseInt(e.target.value))
+                    onParameterChange(
+                      "chunk_overlap_size",
+                      parseInt(e.target.value)
+                    )
                   }
                 />
                 <div className="d-flex justify-content-between small text-muted">
