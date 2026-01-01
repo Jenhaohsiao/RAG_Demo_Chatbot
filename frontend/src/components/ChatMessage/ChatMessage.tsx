@@ -29,7 +29,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     <div className={`message-container ${isUser ? "user" : "assistant"}`}>
       <div className="message-header">
         <span className="message-role">
-          {isUser ? t("chat.message.you") : t("chat.message.assistant")}
+          {isUser ? t("chat.messages.you") : t("chat.messages.assistant")}
         </span>
         <span className="message-time">
           {new Date(message.timestamp).toLocaleTimeString()}

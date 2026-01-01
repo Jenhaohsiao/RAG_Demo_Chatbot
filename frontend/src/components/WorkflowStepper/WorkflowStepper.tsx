@@ -264,16 +264,44 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   const [reviewPassed, setReviewPassed] = useState(false);
   const [shouldStartReview, setShouldStartReview] = useState(false);
 
+  // 保存審核結果，用於返回流程4時恢復狀態
+  const [savedReviewResults, setSavedReviewResults] = useState<{
+    completed: string[];
+    failed: string[];
+  } | null>(null);
+
   // 添加文本處理狀態管理
   const [textProcessingCompleted, setTextProcessingCompleted] = useState(false);
+  const [shouldStartProcessing, setShouldStartProcessing] = useState(false);
 
-  // 監聽步驟變化，重置相關狀態
+  // 保存文本處理結果，用於返回流程5時恢復狀態
+  const [savedProcessingResults, setSavedProcessingResults] =
+    useState<any>(null);
+
+  // 保存聊天記錄，用於返回流程6時恢復狀態
+  const [savedChatMessages, setSavedChatMessages] = useState<any[]>([]);
+
+  // 計算流程1、2是否應該被禁用
+  // 只要流程3有上傳資料（documents 或 crawledUrls 不為空），就禁用流程1、2的配置
+  const shouldDisableConfigSteps = React.useMemo(() => {
+    const hasDocuments = documents && documents.length > 0;
+    const hasCrawledUrls = crawledUrls && crawledUrls.length > 0;
+    return hasDocuments || hasCrawledUrls;
+  }, [documents, crawledUrls]);
+
+  // 監聽步驟變化
+  // 注意：不再重置審核和處理狀態，保持已完成的狀態
   React.useEffect(() => {
-    if (currentStep !== 4) {
-      setShouldStartReview(false);
-      setReviewPassed(false); // 重置審核通過狀態
+    // 只在進入步驟時啟動對應操作，但不重置已完成的狀態
+    if (currentStep === 4 && !reviewPassed) {
+      // 進入步驟4但尚未完成審核時，可能需要開始審核
+      // 注意：shouldStartReview 由按鈕控制，不自動啟動
     }
-  }, [currentStep]);
+    if (currentStep === 5 && !textProcessingCompleted) {
+      // 進入步驟5但尚未完成處理時，可能需要開始處理
+      // 注意：shouldStartProcessing 由按鈕控制，不自動啟動
+    }
+  }, [currentStep, reviewPassed, textProcessingCompleted]);
 
   // 監聽審核完成狀態，重置shouldStartReview
   React.useEffect(() => {
@@ -464,29 +492,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
   // 處理上一步點擊
   const handlePreviousStepClick = () => {
-    // 如果在步驟4且審核失敗，需要清除上傳數據
-    if (currentStep === 4 && !reviewPassed) {
-      // 清除上傳數據
-      onDocumentsUpdate?.([]);
-      onCrawledUrlsUpdate?.([]);
-
-      // 重置審核狀態
-      setReviewPassed(false);
-      setShouldStartReview(false);
-
-      // 提示用戶需要重新上傳
-      onShowMessage?.({
-        type: "warning",
-        message:
-          "審核失敗，已清除上傳內容。請重新上傳符合規範的檔案或網站內容。",
-      });
-
-      // 回到步驟3
-      onStepChange(3);
-      return;
-    }
-
-    // 普通的上一步邏輯
+    // 直接回到上一步，保持所有已上傳的資料不變
     onStepChange(currentStep - 1);
   };
   const handleNextStepClick = () => {
@@ -560,7 +566,13 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   };
 
   const renderStepContent = () => {
-    console.log("Current step rendering:", currentStep); // 添加调试日志
+    console.log(
+      "Current step rendering:",
+      currentStep,
+      "shouldDisableConfigSteps:",
+      shouldDisableConfigSteps
+    );
+
     switch (currentStep) {
       case 1:
         return (
@@ -568,6 +580,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             parameters={parameters}
             onParameterChange={onParameterChange!}
             onComplete={() => handleStepComplete(1)}
+            disabled={shouldDisableConfigSteps}
           />
         );
       case 2:
@@ -576,6 +589,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             parameters={parameters}
             onParameterChange={onParameterChange!}
             onComplete={() => handleStepComplete(2)}
+            disabled={shouldDisableConfigSteps}
           />
         );
       case 3:
@@ -743,6 +757,8 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             documents={documents}
             crawledUrls={crawledUrls}
             shouldStartReview={shouldStartReview}
+            savedReviewResults={savedReviewResults}
+            onSaveReviewResults={setSavedReviewResults}
           />
         );
       case 5:
@@ -753,6 +769,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             sessionId={sessionId}
             documents={documents}
             crawledUrls={crawledUrls}
+            shouldStartProcessing={shouldStartProcessing}
             onProcessingComplete={() => {
               // 更新狀態並標記步驟完成
               console.log(
@@ -768,6 +785,8 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                 setLoadingMessage(message);
               }
             }}
+            savedProcessingResults={savedProcessingResults}
+            onSaveProcessingResults={setSavedProcessingResults}
           />
         );
       case 6:
@@ -778,7 +797,12 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           <div className="ai-chat-step-container">
             {/* AI 聊天界面 - 剩餘空間 - 使用正式組件 */}
             <div className="ai-chat-content">
-              <AiChatStep sessionId={sessionId} parameters={parameters} />
+              <AiChatStep
+                sessionId={sessionId}
+                parameters={parameters}
+                savedChatMessages={savedChatMessages}
+                onSaveChatMessages={setSavedChatMessages}
+              />
             </div>
           </div>
         );
@@ -890,6 +914,46 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                 <div className="d-flex align-items-center text-success">
                   <i className="bi bi-check-circle-fill me-2"></i>
                   <span className="fw-bold">審核完成，可以進入下一步</span>
+                </div>
+              )}
+
+              {/* 步驟5專用：文本處理執行按鈕 */}
+              {currentStep === 5 &&
+                !shouldStartProcessing &&
+                !textProcessingCompleted && (
+                  <button
+                    className="btn btn-success btn-lg"
+                    onClick={() => {
+                      console.log("Starting text processing...");
+                      setShouldStartProcessing(true);
+                    }}
+                    disabled={
+                      documents.length === 0 && crawledUrls.length === 0
+                    }
+                  >
+                    <i className="bi bi-play me-2"></i>
+                    開始文本處理
+                  </button>
+                )}
+              {/* 步驟5：處理進行中顯示 */}
+              {currentStep === 5 &&
+                shouldStartProcessing &&
+                !textProcessingCompleted && (
+                  <div className="d-flex align-items-center text-primary">
+                    <div
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                    >
+                      <span className="visually-hidden">處理中...</span>
+                    </div>
+                    <span className="fw-bold">文本處理中...</span>
+                  </div>
+                )}
+              {/* 步驟5：處理完成顯示 */}
+              {currentStep === 5 && textProcessingCompleted && (
+                <div className="d-flex align-items-center text-success">
+                  <i className="bi bi-check-circle-fill me-2"></i>
+                  <span className="fw-bold">處理完成，可以進入下一步</span>
                 </div>
               )}
             </div>

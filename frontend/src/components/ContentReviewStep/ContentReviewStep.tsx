@@ -17,6 +17,11 @@ export interface ContentReviewStepProps {
   crawledUrls?: any[]; // 從父組件接收crawledUrls
   shouldStartReview?: boolean; // 外部控制是否開始審核
   onLoadingChange?: (isLoading: boolean, message?: string) => void; // 通知父組件 loading 狀態
+  savedReviewResults?: { completed: string[]; failed: string[] } | null; // 保存的審核結果
+  onSaveReviewResults?: (results: {
+    completed: string[];
+    failed: string[];
+  }) => void; // 保存審核結果回調
 }
 
 interface DocumentInfo {
@@ -38,6 +43,8 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
   crawledUrls = [], // 從props接收
   shouldStartReview = false, // 從props接收
   onLoadingChange,
+  savedReviewResults, // 保存的審核結果
+  onSaveReviewResults, // 保存審核結果回調
 }) => {
   const { t } = useTranslation();
   const { showToast } = useToast();
@@ -45,15 +52,38 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
   const [retryCount, setRetryCount] = useState(0);
   const [showRetryOption, setShowRetryOption] = useState(false);
 
-  // 添加審核進度狀態
-  const [reviewProgress, setReviewProgress] = useState({
-    currentItem: "",
-    completed: [] as string[],
-    failed: [] as string[],
-    isCompleted: false,
-    isRunning: false,
+  // 添加審核進度狀態 - 如果有保存的結果，使用保存的結果初始化
+  const [reviewProgress, setReviewProgress] = useState(() => {
+    if (
+      savedReviewResults &&
+      (savedReviewResults.completed.length > 0 ||
+        savedReviewResults.failed.length > 0)
+    ) {
+      return {
+        currentItem: "",
+        completed: savedReviewResults.completed,
+        failed: savedReviewResults.failed,
+        isCompleted: true,
+        isRunning: false,
+      };
+    }
+    return {
+      currentItem: "",
+      completed: [] as string[],
+      failed: [] as string[],
+      isCompleted: false,
+      isRunning: false,
+    };
   });
-  const [hasStartedReview, setHasStartedReview] = useState(false);
+
+  // 根據是否有保存的結果來初始化 hasStartedReview
+  const [hasStartedReview, setHasStartedReview] = useState(() => {
+    return (
+      savedReviewResults &&
+      (savedReviewResults.completed.length > 0 ||
+        savedReviewResults.failed.length > 0)
+    );
+  });
 
   // 重試處理
   const handleRetry = async () => {
@@ -279,6 +309,12 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
 
         console.log(`[ContentReview] Final state:`, finalState);
 
+        // 保存審核結果到父組件
+        onSaveReviewResults?.({
+          completed: finalState.completed,
+          failed: finalState.failed,
+        });
+
         // 通知父組件審核完成
         // 🚨 安全準則：如果有任何審核失敗項目，必須阻止用戶繼續
         const canProceed = prev.failed.length === 0;
@@ -293,8 +329,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
         onReviewStatusChange?.(canProceed);
         if (canProceed) {
           onReviewComplete?.();
-          // 重置審核開始狀態
-          setHasStartedReview(false);
+          // 不再重置 hasStartedReview，保持為 true 以便返回時顯示結果
         }
 
         return finalState;

@@ -30,6 +30,7 @@ export interface UploadScreenProps {
   hasUploadedContent?: boolean; // 新增：是否已有上傳內容
   uploadedFiles?: any[]; // 新增：已上傳文件列表
   crawledUrls?: any[]; // 新增：已爬取URL列表
+  onTabChange?: (tab: "file" | "crawler") => void; // 新增：tab 切換回調
 }
 
 const UploadScreen: React.FC<UploadScreenProps> = ({
@@ -44,6 +45,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
   hasUploadedContent = false,
   uploadedFiles = [],
   crawledUrls = [],
+  onTabChange,
 }) => {
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
@@ -345,7 +347,10 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                 className={`nav-link text-start  ${
                   activeTab === "file" ? "active" : ""
                 }`}
-                onClick={() => setActiveTab("file")}
+                onClick={() => {
+                  setActiveTab("file");
+                  onTabChange?.("file");
+                }}
                 disabled={disabled}
               >
                 <i className="bi bi-file-earmark-arrow-up me-2"></i>
@@ -357,7 +362,10 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                 className={`nav-link text-start ${
                   activeTab === "crawler" ? "active" : ""
                 }`}
-                onClick={() => setActiveTab("crawler")}
+                onClick={() => {
+                  setActiveTab("crawler");
+                  onTabChange?.("crawler");
+                }}
                 disabled={disabled}
               >
                 <i className="bi bi-globe me-2"></i>
@@ -369,6 +377,9 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
           {/* Main upload area */}
           {activeTab === "file" && (
             <div
+              className={`file-upload-dropzone ${
+                isDragging ? "dragging" : ""
+              } ${disabled ? "disabled" : ""}`}
               onDragEnter={handleDragEnter}
               onDragLeave={handleDragLeave}
               onDragOver={handleDragOver}
@@ -384,7 +395,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                 className="upload-screen-hidden-input"
               />
 
-              <div className="container">
+              <div className="dropzone-content">
                 <div className="dropzone-icon-large">
                   <i className="bi bi-cloud-upload-fill text-primary"></i>
                 </div>

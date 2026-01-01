@@ -13,28 +13,51 @@ interface RagConfigStepProps {
   };
   onParameterChange: (key: string, value: any) => void;
   onComplete?: () => void;
+  disabled?: boolean; // 當流程3完成後，禁用所有配置
 }
 
 const RagConfigStep: React.FC<RagConfigStepProps> = ({
   parameters,
   onParameterChange,
   onComplete,
+  disabled = false,
 }) => {
   return (
-    <div className="rag-config-step">
+    <div className={`rag-config-step ${disabled ? "disabled-step" : ""}`}>
+      {/* 禁用狀態提示 */}
+      {disabled && (
+        <div className="alert alert-info mb-3">
+          <i className="bi bi-info-circle me-2"></i>
+          資料已上傳處理，RAG 參數配置已鎖定，無法修改。
+        </div>
+      )}
       {/* 設定項目卡片網格 */}
       <div className="row g-3">
         {/* 相似度閾值卡片 */}
         <div className="col-lg-4 col-xl-3">
-          <div className="card h-100 border-primary">
-            <div className="card-header bg-primary text-white">
+          <div
+            className={`card h-100 ${
+              disabled ? "border-secondary" : "border-primary"
+            }`}
+          >
+            <div
+              className={`card-header ${
+                disabled ? "bg-secondary" : "bg-primary"
+              } text-white`}
+            >
               <h6 className="card-title mb-0">相似度閾值</h6>
             </div>
             <div className="card-body">
               <div className="mb-3">
                 <label className="form-label small">
                   檢索精確度{" "}
-                  <span className="text-primary fw-bold">
+                  <span
+                    className={
+                      disabled
+                        ? "text-secondary fw-bold"
+                        : "text-primary fw-bold"
+                    }
+                  >
                     {parameters.similarity_threshold}
                   </span>
                 </label>
@@ -45,6 +68,7 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
                   max="0.9"
                   step="0.1"
                   value={parameters.similarity_threshold}
+                  disabled={disabled}
                   onChange={(e) =>
                     onParameterChange(
                       "similarity_threshold",
@@ -63,15 +87,29 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
 
         {/* 上段數卡片 */}
         <div className="col-lg-4 col-xl-3">
-          <div className="card h-100 border-primary">
-            <div className="card-header bg-primary text-white">
+          <div
+            className={`card h-100 ${
+              disabled ? "border-secondary" : "border-primary"
+            }`}
+          >
+            <div
+              className={`card-header ${
+                disabled ? "bg-secondary" : "bg-primary"
+              } text-white`}
+            >
               <h6 className="card-title mb-0">上段數</h6>
             </div>
             <div className="card-body">
               <div className="mb-3">
                 <label className="form-label small">
                   每次檢索數量:{" "}
-                  <span className="text-primary fw-bold">
+                  <span
+                    className={
+                      disabled
+                        ? "text-secondary fw-bold"
+                        : "text-primary fw-bold"
+                    }
+                  >
                     {parameters.rag_context_window}
                   </span>
                 </label>
@@ -82,6 +120,7 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
                   max="10"
                   step="1"
                   value={parameters.rag_context_window}
+                  disabled={disabled}
                   onChange={(e) =>
                     onParameterChange(
                       "rag_context_window",
@@ -100,14 +139,23 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
 
         {/* 引用策略卡片 */}
         <div className="col-lg-4 col-xl-3">
-          <div className="card h-100 border-primary">
-            <div className="card-header bg-primary text-white">
+          <div
+            className={`card h-100 ${
+              disabled ? "border-secondary" : "border-primary"
+            }`}
+          >
+            <div
+              className={`card-header ${
+                disabled ? "bg-secondary" : "bg-primary"
+              } text-white`}
+            >
               <h6 className="card-title mb-0">引用策略</h6>
             </div>
             <div className="card-body">
               <select
                 className="form-select"
                 value={parameters.rag_citation_style}
+                disabled={disabled}
                 onChange={(e) =>
                   onParameterChange("rag_citation_style", e.target.value)
                 }
@@ -122,14 +170,23 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
 
         {/* 重排策略卡片 */}
         <div className="col-lg-4 col-xl-3">
-          <div className="card h-100 border-primary">
-            <div className="card-header bg-primary text-white">
+          <div
+            className={`card h-100 ${
+              disabled ? "border-secondary" : "border-primary"
+            }`}
+          >
+            <div
+              className={`card-header ${
+                disabled ? "bg-secondary" : "bg-primary"
+              } text-white`}
+            >
               <h6 className="card-title mb-0">重排策略</h6>
             </div>
             <div className="card-body">
               <select
                 className="form-select"
                 value={parameters.rag_fallback_mode}
+                disabled={disabled}
                 onChange={(e) =>
                   onParameterChange("rag_fallback_mode", e.target.value)
                 }
@@ -143,8 +200,16 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
 
         {/* Top-K檢索卡片 */}
         <div className="col-lg-4 col-xl-3">
-          <div className="card h-100 border-primary">
-            <div className="card-header bg-primary text-white">
+          <div
+            className={`card h-100 ${
+              disabled ? "border-secondary" : "border-primary"
+            }`}
+          >
+            <div
+              className={`card-header ${
+                disabled ? "bg-secondary" : "bg-primary"
+              } text-white`}
+            >
               <h6 className="card-title mb-0">Top-K檢索</h6>
             </div>
             <div className="card-body">
@@ -162,6 +227,7 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
                   max="20"
                   step="1"
                   value={parameters.rag_top_k}
+                  disabled={disabled}
                   onChange={(e) =>
                     onParameterChange("rag_top_k", parseInt(e.target.value))
                   }
@@ -177,15 +243,23 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
 
         {/* Chunk大小卡片 */}
         <div className="col-lg-4 col-xl-3">
-          <div className="card h-100 border-primary">
-            <div className="card-header bg-primary text-white">
+          <div
+            className={`card h-100 ${
+              disabled ? "border-secondary" : "border-primary"
+            }`}
+          >
+            <div
+              className={`card-header ${
+                disabled ? "bg-secondary" : "bg-primary"
+              } text-white`}
+            >
               <h6 className="card-title mb-0">Chunk大小</h6>
             </div>
             <div className="card-body">
               <div className="mb-3">
                 <label className="form-label small">
                   最大:{" "}
-                  <span className="text-danger">
+                  <span className={disabled ? "text-secondary" : "text-danger"}>
                     {parameters.chunk_max_size}
                   </span>{" "}
                   字
@@ -197,6 +271,7 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
                   max="4000"
                   step="500"
                   value={parameters.chunk_max_size}
+                  disabled={disabled}
                   onChange={(e) =>
                     onParameterChange(
                       "chunk_max_size",
@@ -215,15 +290,25 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
 
         {/* Chunk最小值卡片 */}
         <div className="col-lg-4 col-xl-3">
-          <div className="card h-100 border-primary">
-            <div className="card-header bg-primary text-white">
+          <div
+            className={`card h-100 ${
+              disabled ? "border-secondary" : "border-primary"
+            }`}
+          >
+            <div
+              className={`card-header ${
+                disabled ? "bg-secondary" : "bg-primary"
+              } text-white`}
+            >
               <h6 className="card-title mb-0">Chunk最小</h6>
             </div>
             <div className="card-body">
               <div className="mb-3">
                 <label className="form-label small">
                   最小:{" "}
-                  <span className="text-warning">
+                  <span
+                    className={disabled ? "text-secondary" : "text-warning"}
+                  >
                     {parameters.chunk_min_size}
                   </span>{" "}
                   字
@@ -235,6 +320,7 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
                   max="1000"
                   step="100"
                   value={parameters.chunk_min_size}
+                  disabled={disabled}
                   onChange={(e) =>
                     onParameterChange(
                       "chunk_min_size",
@@ -253,15 +339,23 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
 
         {/* Chunk重疊卡片 */}
         <div className="col-lg-4 col-xl-3">
-          <div className="card h-100 border-primary">
-            <div className="card-header bg-primary text-white">
+          <div
+            className={`card h-100 ${
+              disabled ? "border-secondary" : "border-primary"
+            }`}
+          >
+            <div
+              className={`card-header ${
+                disabled ? "bg-secondary" : "bg-primary"
+              } text-white`}
+            >
               <h6 className="card-title mb-0">Chunk重疊</h6>
             </div>
             <div className="card-body">
               <div className="mb-3">
                 <label className="form-label small">
                   重疊段落數:{" "}
-                  <span className="text-info">
+                  <span className={disabled ? "text-secondary" : "text-info"}>
                     {parameters.chunk_overlap_size}
                   </span>{" "}
                   字
@@ -273,6 +367,7 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
                   max="500"
                   step="50"
                   value={parameters.chunk_overlap_size}
+                  disabled={disabled}
                   onChange={(e) =>
                     onParameterChange(
                       "chunk_overlap_size",

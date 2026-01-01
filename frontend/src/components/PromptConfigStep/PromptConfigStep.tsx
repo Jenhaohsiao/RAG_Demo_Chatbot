@@ -15,30 +15,51 @@ export interface PromptConfigStepProps {
   };
   onParameterChange: (parameter: string, value: any) => void;
   onComplete?: () => void;
+  disabled?: boolean; // 當流程3完成後，禁用所有配置
 }
 
 const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
   parameters,
   onParameterChange,
   onComplete,
+  disabled = false,
 }) => {
   const { t } = useTranslation();
 
   return (
-    <div className="prompt-config-step">
+    <div className={`prompt-config-step ${disabled ? "disabled-step" : ""}`}>
+      {/* 禁用狀態提示 */}
+      {disabled && (
+        <div className="alert alert-info mb-3">
+          <i className="bi bi-info-circle me-2"></i>
+          資料已上傳處理，Prompt 配置已鎖定，無法修改。
+        </div>
+      )}
       {/* 設定項目卡片網格 */}
       <div className="row g-3">
         {/* Token限制卡片 */}
         <div className="col-lg-4 col-xl-3">
-          <div className="card h-100 border-info">
-            <div className="card-header bg-info text-white">
+          <div
+            className={`card h-100 ${
+              disabled ? "border-secondary" : "border-info"
+            }`}
+          >
+            <div
+              className={`card-header ${
+                disabled ? "bg-secondary" : "bg-info"
+              } text-white`}
+            >
               <h6 className="card-title mb-0">Token限制</h6>
             </div>
             <div className="card-body">
               <div className="mb-3">
                 <label className="form-label small">
                   回應長度上限:{" "}
-                  <span className="text-info fw-bold">
+                  <span
+                    className={
+                      disabled ? "text-secondary fw-bold" : "text-info fw-bold"
+                    }
+                  >
                     {parameters.token_threshold.toLocaleString()}
                   </span>
                 </label>
@@ -49,6 +70,7 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                   max="10000"
                   step="1000"
                   value={parameters.token_threshold}
+                  disabled={disabled}
                   onChange={(e) =>
                     onParameterChange(
                       "token_threshold",
@@ -67,14 +89,23 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
 
         {/* 回應詳細程度卡片 */}
         <div className="col-lg-4 col-xl-3">
-          <div className="card h-100 border-info">
-            <div className="card-header bg-info text-white">
+          <div
+            className={`card h-100 ${
+              disabled ? "border-secondary" : "border-info"
+            }`}
+          >
+            <div
+              className={`card-header ${
+                disabled ? "bg-secondary" : "bg-info"
+              } text-white`}
+            >
               <h6 className="card-title mb-0">回應詳細程度</h6>
             </div>
             <div className="card-body">
               <select
                 className="form-select"
                 value={parameters.response_style}
+                disabled={disabled}
                 onChange={(e) =>
                   onParameterChange("response_style", e.target.value)
                 }
@@ -97,14 +128,23 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
 
         {/* 專業程度卡片 */}
         <div className="col-lg-4 col-xl-3">
-          <div className="card h-100 border-info">
-            <div className="card-header bg-info text-white">
+          <div
+            className={`card h-100 ${
+              disabled ? "border-secondary" : "border-info"
+            }`}
+          >
+            <div
+              className={`card-header ${
+                disabled ? "bg-secondary" : "bg-info"
+              } text-white`}
+            >
               <h6 className="card-title mb-0">專業程度</h6>
             </div>
             <div className="card-body">
               <select
                 className="form-select"
                 value={parameters.professional_level}
+                disabled={disabled}
                 onChange={(e) =>
                   onParameterChange("professional_level", e.target.value)
                 }
@@ -127,14 +167,23 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
 
         {/* 創意程度卡片 */}
         <div className="col-lg-4 col-xl-3">
-          <div className="card h-100 border-info">
-            <div className="card-header bg-info text-white">
+          <div
+            className={`card h-100 ${
+              disabled ? "border-secondary" : "border-info"
+            }`}
+          >
+            <div
+              className={`card-header ${
+                disabled ? "bg-secondary" : "bg-info"
+              } text-white`}
+            >
               <h6 className="card-title mb-0">創意程度</h6>
             </div>
             <div className="card-body">
               <select
                 className="form-select"
                 value={parameters.creativity_level}
+                disabled={disabled}
                 onChange={(e) =>
                   onParameterChange("creativity_level", e.target.value)
                 }

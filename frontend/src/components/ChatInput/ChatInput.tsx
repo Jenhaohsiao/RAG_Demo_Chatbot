@@ -62,10 +62,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           {isLoading ? (
             <>
               <span className="spinner"></span>
-              {t("chat.input.sending")}
+              {t("chat.input.sending", "傳送中...")}
             </>
           ) : (
-            t("chat.input.send")
+            t("chat.input.submit")
           )}
         </button>
       </div>

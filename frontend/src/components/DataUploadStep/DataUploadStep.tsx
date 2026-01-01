@@ -35,9 +35,9 @@ const DataUploadStep: React.FC<DataUploadStepProps> = ({
   crawledUrls = [],
 }) => {
   const { t } = useTranslation();
-  const [activeLeftTab, setActiveLeftTab] = useState<"system" | "files">(
-    "system"
-  );
+
+  // 追蹤當前上傳模式 (檔案上傳 或 網站爬蟲)
+  const [uploadMode, setUploadMode] = useState<"file" | "crawler">("file");
 
   // 檢查是否有上傳內容
   const hasUploadedContent =
@@ -51,55 +51,32 @@ const DataUploadStep: React.FC<DataUploadStepProps> = ({
 
   return (
     <div className="data-upload-step">
-      <div className="row g-3">
-        {/* 左側區域 - 系統設定和檔案類型 (40%) */}
-        <div className="col-12 col-lg-5">
-          {/* 左側標籤頁導航 */}
-          <ul className="nav nav-tabs mb-3" role="tablist">
-            <li className="nav-item" role="presentation">
-              <button
-                className={`nav-link ${
-                  activeLeftTab === "system" ? "active" : ""
-                }`}
-                onClick={() => setActiveLeftTab("system")}
-                type="button"
-              >
-                <i className="bi bi-gear me-2"></i>
-                系統設定
-              </button>
-            </li>
-            <li className="nav-item" role="presentation">
-              <button
-                className={`nav-link ${
-                  activeLeftTab === "files" ? "active" : ""
-                }`}
-                onClick={() => setActiveLeftTab("files")}
-                type="button"
-              >
-                <i className="bi bi-file-earmark me-2"></i>
-                檔案類型
-              </button>
-            </li>
-          </ul>
-
-          {/* 左側標籤頁內容 */}
-          <div className="tab-content">
-            {/* 系統設定標籤 */}
-            {activeLeftTab === "system" && (
-              <div className="card">
-                <div className="card-header bg-success text-white">
-                  <h5 className="card-title mb-0">
-                    <i className="bi bi-gear me-2"></i>
-                    系統設定
-                  </h5>
-                </div>
-                <div className="card-body">
+      {/* 統一的上傳資料區塊 */}
+      <div className="card">
+        <div className="card-header bg-info text-white">
+          <h5 className="card-title mb-0">
+            <i className="bi bi-cloud-upload me-2"></i>
+            上傳資料
+          </h5>
+        </div>
+        <div className="card-body">
+          <div className="row g-4">
+            {/* 左側 - 參數設定區塊 (根據模式動態顯示) */}
+            <div className="col-12 col-lg-5">
+              {uploadMode === "file" ? (
+                /* 檔案上傳模式 - 顯示檔案大小限制和支援檔案類型 */
+                <div className="parameter-section">
                   {/* 檔案大小限制 */}
                   <div className="mb-4">
-                    <label className="form-label">
-                      檔案大小限制<small> (上傳檔案)</small>:{" "}
-                      {parameters.max_file_size_mb} MB
-                    </label>
+                    <h6 className="mb-3">
+                      <i className="bi bi-hdd me-2"></i>
+                      檔案大小限制
+                    </h6>
+                    <div className="text-center mb-2">
+                      <strong className="text-primary fs-5">
+                        {parameters.max_file_size_mb} MB
+                      </strong>
+                    </div>
                     <input
                       type="range"
                       className="form-range"
@@ -120,12 +97,106 @@ const DataUploadStep: React.FC<DataUploadStepProps> = ({
                     </div>
                   </div>
 
+                  {/* 支援檔案類型 */}
+                  <div>
+                    <h6 className="mb-3">
+                      <i className="bi bi-file-earmark-check me-2"></i>
+                      支援檔案類型
+                    </h6>
+                    <p className="text-muted small mb-3">
+                      選擇系統支援的檔案格式類型
+                    </p>
+
+                    <div className="row g-2">
+                      {["pdf", "txt", "docx", "md", "csv", "xlsx"].map(
+                        (fileType) => (
+                          <div key={fileType} className="col-6">
+                            <div className="form-check">
+                              <input
+                                className="form-check-input"
+                                type="checkbox"
+                                checked={parameters.supported_file_types.includes(
+                                  fileType
+                                )}
+                                onChange={(e) => {
+                                  const updatedTypes = e.target.checked
+                                    ? [
+                                        ...parameters.supported_file_types,
+                                        fileType,
+                                      ]
+                                    : parameters.supported_file_types.filter(
+                                        (type) => type !== fileType
+                                      );
+                                  onParameterChange(
+                                    "supported_file_types",
+                                    updatedTypes
+                                  );
+                                }}
+                                id={`fileType-${fileType}`}
+                              />
+                              <label
+                                className="form-check-label"
+                                htmlFor={`fileType-${fileType}`}
+                              >
+                                <strong className="text-uppercase">
+                                  {fileType}
+                                </strong>
+                                <div className="small text-muted">
+                                  {fileType === "pdf" && "Adobe PDF 文件"}
+                                  {fileType === "txt" && "純文字檔案"}
+                                  {fileType === "docx" && "Word 文件"}
+                                  {fileType === "md" && "Markdown 文件"}
+                                  {fileType === "csv" && "CSV 表格檔"}
+                                  {fileType === "xlsx" && "Excel 表格檔"}
+                                </div>
+                              </label>
+                            </div>
+                          </div>
+                        )
+                      )}
+                    </div>
+
+                    {/* 已選檔案類型摘要 */}
+                    <div className="mt-3 p-2 bg-light rounded">
+                      <small className="text-muted">
+                        <i className="bi bi-check-circle me-1"></i>
+                        已選擇 {parameters.supported_file_types.length}{" "}
+                        種檔案類型
+                      </small>
+                      <div className="d-flex flex-wrap gap-1 mt-2">
+                        {parameters.supported_file_types.map((type) => (
+                          <span
+                            key={type}
+                            className="badge bg-primary text-uppercase"
+                          >
+                            {type}
+                          </span>
+                        ))}
+                      </div>
+                      {parameters.supported_file_types.length === 0 && (
+                        <small className="text-danger d-block mt-2">
+                          ⚠️ 請至少選擇一種檔案類型
+                        </small>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* 網站爬蟲模式 - 顯示爬蟲參數 */
+                <div className="parameter-section">
+                  <h6 className="mb-3">
+                    <i className="bi bi-globe me-2"></i>
+                    網站爬蟲參數
+                  </h6>
+
                   {/* 網站爬蟲最大Token */}
                   <div className="mb-4">
-                    <label className="form-label">
-                      網站爬蟲最大 Token<small> (爬取內容)</small>:{" "}
-                      {parameters.crawler_max_tokens.toLocaleString()}
-                    </label>
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <small className="text-muted">最大 Token 數</small>
+                      <strong className="text-primary">
+                        {parameters.crawler_max_tokens.toLocaleString()}
+                      </strong>
+                    </div>
                     <input
                       type="range"
                       className="form-range"
@@ -148,10 +219,12 @@ const DataUploadStep: React.FC<DataUploadStepProps> = ({
 
                   {/* 網站爬蟲最大頁面數 */}
                   <div className="mb-4">
-                    <label className="form-label">
-                      網站爬蟲最大頁面數<small> (爬取範圍)</small>:{" "}
-                      {parameters.crawler_max_pages}
-                    </label>
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <small className="text-muted">最大頁面數</small>
+                      <strong className="text-primary">
+                        {parameters.crawler_max_pages} 頁
+                      </strong>
+                    </div>
                     <input
                       type="range"
                       className="form-range"
@@ -171,104 +244,23 @@ const DataUploadStep: React.FC<DataUploadStepProps> = ({
                       <span>30</span>
                     </div>
                   </div>
-                </div>
-              </div>
-            )}
 
-            {/* 檔案類型標籤 */}
-            {activeLeftTab === "files" && (
-              <div className="card">
-                <div className="card-header bg-warning text-dark">
-                  <h5 className="card-title mb-0">
-                    <i className="bi bi-file-earmark me-2"></i>
-                    支援檔案類型
-                  </h5>
-                </div>
-                <div className="card-body">
-                  <p className="text-muted mb-3">選擇系統支援的檔案格式類型</p>
-
-                  <div className="row">
-                    {["pdf", "txt", "docx", "md", "csv", "xlsx"].map(
-                      (fileType) => (
-                        <div key={fileType} className="col-6 mb-3">
-                          <div className="form-check">
-                            <input
-                              className="form-check-input"
-                              type="checkbox"
-                              checked={parameters.supported_file_types.includes(
-                                fileType
-                              )}
-                              onChange={(e) => {
-                                const updatedTypes = e.target.checked
-                                  ? [
-                                      ...parameters.supported_file_types,
-                                      fileType,
-                                    ]
-                                  : parameters.supported_file_types.filter(
-                                      (type) => type !== fileType
-                                    );
-                                onParameterChange(
-                                  "supported_file_types",
-                                  updatedTypes
-                                );
-                              }}
-                              id={`fileType-${fileType}`}
-                            />
-                            <label
-                              className="form-check-label"
-                              htmlFor={`fileType-${fileType}`}
-                            >
-                              <strong>{fileType.toUpperCase()}</strong>
-                              <div className="small text-muted">
-                                {fileType === "pdf" && "Adobe PDF 文件"}
-                                {fileType === "txt" && "純文字檔案"}
-                                {fileType === "docx" && "Word 文件"}
-                                {fileType === "md" && "Markdown 文件"}
-                                {fileType === "csv" && "CSV 表格檔"}
-                                {fileType === "xlsx" && "Excel 表格檔"}
-                              </div>
-                            </label>
-                          </div>
-                        </div>
-                      )
-                    )}
-                  </div>
-
-                  {/* 已選檔案類型摘要 */}
-                  <div className="mt-4 p-3 bg-light rounded">
-                    <h6>
-                      <i className="bi bi-check-circle me-2"></i>
-                      已選檔案類型 ({parameters.supported_file_types.length}個)
-                    </h6>
-                    <div className="d-flex flex-wrap gap-2">
-                      {parameters.supported_file_types.map((type) => (
-                        <span key={type} className="badge bg-primary">
-                          {type.toUpperCase()}
-                        </span>
-                      ))}
-                    </div>
-                    {parameters.supported_file_types.length === 0 && (
-                      <small className="text-danger">
-                        ⚠️ 請至少選擇一種檔案類型
-                      </small>
-                    )}
+                  {/* 爬蟲參數說明 */}
+                  <div className="alert alert-info small mb-0">
+                    <i className="bi bi-info-circle me-2"></i>
+                    <strong>提示：</strong>
+                    <ul className="mb-0 mt-2 ps-3">
+                      <li>Token 數越大，可爬取的內容越多</li>
+                      <li>頁面數限制爬蟲深度</li>
+                      <li>建議先小範圍測試</li>
+                    </ul>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* 右側區域 - 上傳資料 (60%) */}
-        <div className="col-12 col-lg-7">
-          <div className="card h-100">
-            <div className="card-header bg-info text-white">
-              <h5 className="card-title mb-0">
-                <i className="bi bi-cloud-upload me-2"></i>
-                上傳資料
-              </h5>
+              )}
             </div>
-            <div className="card-body">
+
+            {/* 右側 - 上傳區塊 */}
+            <div className="col-12 col-lg-7">
               {sessionId && (
                 <UploadScreen
                   sessionId={sessionId}
@@ -287,6 +279,7 @@ const DataUploadStep: React.FC<DataUploadStepProps> = ({
                   hasUploadedContent={hasUploadedContent}
                   uploadedFiles={documents}
                   crawledUrls={crawledUrls}
+                  onTabChange={setUploadMode}
                 />
               )}
             </div>
@@ -295,13 +288,12 @@ const DataUploadStep: React.FC<DataUploadStepProps> = ({
       </div>
 
       {/* 配置摘要 */}
-      <div className="mt-4 p-3 bg-light rounded">
-        <h6 className="mb-3">
-          <i className="bi bi-info-circle me-2"></i>
-          {hasUploadedContent ? "上傳內容摘要" : "當前上傳配置摘要"}
-        </h6>
-        {hasUploadedContent ? (
-          // 顯示上傳內容統計
+      {hasUploadedContent && (
+        <div className="mt-4 p-3 bg-light rounded">
+          <h6 className="mb-3">
+            <i className="bi bi-info-circle me-2"></i>
+            上傳內容摘要
+          </h6>
           <div className="row">
             <div className="col-6 col-md-3">
               <small>
@@ -327,40 +319,8 @@ const DataUploadStep: React.FC<DataUploadStepProps> = ({
               </small>
             </div>
           </div>
-        ) : (
-          // 顯示配置參數
-          <div className="row">
-            <div className="col-6 col-md-3">
-              <small>
-                <strong>Session時長:</strong> {parameters.session_ttl_minutes}
-                分鐘
-              </small>
-            </div>
-            <div className="col-6 col-md-3">
-              <small>
-                <strong>檔案大小:</strong> 最大{parameters.max_file_size_mb}MB
-              </small>
-            </div>
-            <div className="col-6 col-md-3">
-              <small>
-                <strong>爬蟲Token:</strong>{" "}
-                {(parameters.crawler_max_tokens / 1000).toFixed(0)}K
-              </small>
-            </div>
-            <div className="col-6 col-md-3">
-              <small>
-                <strong>爬蟲頁數:</strong> {parameters.crawler_max_pages}頁
-              </small>
-            </div>
-            <div className="col-12 mt-2">
-              <small>
-                <strong>支援格式:</strong>{" "}
-                {parameters.supported_file_types.join(", ").toUpperCase()}
-              </small>
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

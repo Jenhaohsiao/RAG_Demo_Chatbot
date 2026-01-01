@@ -4,9 +4,11 @@
 .chat-screen {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
+  max-height: calc(100vh - 200px); // 減去 header 和 stepper 的高度
   background: $color-white;
   position: relative;
+  overflow: hidden; // 防止多層滾動條
 }
 
 .chat-header {
@@ -59,14 +61,14 @@
 
 .chat-main-content {
   flex: 1;
-  overflow: hidden;
-  padding-bottom: 120px;
+  overflow: hidden; // 禁止此層滾動
+  padding-bottom: 0; // 移除底部 padding，由 input-area 處理
 }
 
 .document-summary-full-width {
   background: #f8f9fa;
   border-bottom: 1px solid #e1e8ed;
-  margin-bottom: 1rem;
+  margin-bottom: 0;
 }
 
 .document-summary-full-width .section-title {
@@ -80,16 +82,17 @@
 .left-panel {
   background: $color-gray-50;
   border-right: 1px solid $color-border;
-  height: 100vh;
+  height: 100%;
   overflow-y: auto;
   padding: $spacing-4;
 }
 
 .right-panel {
-  height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   padding: $spacing-4;
+  overflow: hidden; // 禁止此層滾動
 }
 
 .document-summary-section {
@@ -124,36 +127,37 @@
   flex-direction: column;
   height: 100%;
   position: relative;
+  overflow: hidden; // 禁止此層滾動
 }
 
 .chat-area {
   flex: 1;
-  overflow: hidden;
+  overflow: hidden; // 只讓 messages-container 滾動
   margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .input-area {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
   background: #f0f7ff;
   padding: 1rem;
-  border-radius: 0;
+  border-radius: 8px 8px 0 0;
   border: 1px solid #bee3f8;
   border-bottom: none;
-  z-index: 1000;
+  z-index: 10;
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0; // 防止輸入區被壓縮
 }
 
 .messages-container {
-  height: calc(100vh - 350px);
-  overflow-y: auto;
+  flex: 1;
+  overflow-y: auto; // 只有這裡可以滾動
   padding: 1rem;
   border: 1px solid #e1e8ed;
   border-radius: 8px;
   background: white;
   margin-bottom: 0;
+  min-height: 200px;
 }
 
 .metrics-toggle-btn:hover {
@@ -245,6 +249,14 @@
   border-bottom: 2px solid #e2e8f0;
   padding: 20px;
   margin: 0;
+}
+
+.document-summary-header.sticky-summary {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
 .document-summary-content {

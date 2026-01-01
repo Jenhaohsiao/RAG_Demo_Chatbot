@@ -56,6 +56,8 @@ interface ChatScreenProps {
   crawlDurationSeconds?: number;
   avgTokensPerPage?: number;
   totalTokenLimit?: number;
+  savedChatMessages?: ChatMessageType[];
+  onSaveChatMessages?: (messages: ChatMessageType[]) => void;
   onSendQuery: (query: string) => Promise<ChatResponse>;
 }
 
@@ -72,10 +74,15 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   crawlDurationSeconds,
   avgTokensPerPage,
   totalTokenLimit,
+  savedChatMessages,
+  onSaveChatMessages,
   onSendQuery,
 }) => {
   const { t } = useTranslation();
-  const [messages, setMessages] = useState<ChatMessageType[]>([]);
+  // 初始化時使用保存的訊息
+  const [messages, setMessages] = useState<ChatMessageType[]>(
+    savedChatMessages || []
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [responseTypes, setResponseTypes] = useState<
@@ -88,6 +95,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   } | null>(null);
   const [sessionExpiredNotified, setSessionExpiredNotified] = useState(false);
   const [metricsErrorCount, setMetricsErrorCount] = useState(0);
+  const [isSummaryExpanded, setIsSummaryExpanded] = useState(true);
   const [sessionErrorCount, setSessionErrorCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -124,6 +132,13 @@ ${summary}`,
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // 當訊息變化時保存到父組件
+  useEffect(() => {
+    if (messages.length > 0 && onSaveChatMessages) {
+      onSaveChatMessages(messages);
+    }
+  }, [messages, onSaveChatMessages]);
 
   // 定期更新 metrics
   useEffect(() => {
@@ -307,35 +322,53 @@ ${summary}`,
           const { content, isTranslationNote } =
             getLocalizedDocumentSummary(documentSummary);
           return (
-            <div className="document-summary-header">
+            <div className="document-summary-header sticky-summary">
               <div className="document-summary-content">
-                <h5 className="summary-title">
-                  <i className="bi bi-file-text me-2"></i>
-                  文件摘要
-                  {isTranslationNote && (
-                    <span
-                      className="badge bg-info ms-2"
-                      title="此摘要包含語言說明"
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <h5 className="summary-title mb-0">
+                    <i className="bi bi-file-text me-2"></i>
+                    文件摘要
+                    {isTranslationNote && (
+                      <span
+                        className="badge bg-info ms-2"
+                        title="此摘要包含語言說明"
+                      >
+                        <i className="bi bi-translate"></i>
+                      </span>
+                    )}
+                  </h5>
+                  <button
+                    className="btn btn-sm btn-outline-secondary"
+                    onClick={() => setIsSummaryExpanded(!isSummaryExpanded)}
+                    title={isSummaryExpanded ? "收起" : "展開"}
+                  >
+                    <i
+                      className={`bi bi-chevron-${
+                        isSummaryExpanded ? "up" : "down"
+                      }`}
+                    ></i>
+                    {isSummaryExpanded ? "收起" : "展開"}
+                  </button>
+                </div>
+                {isSummaryExpanded && (
+                  <>
+                    <div
+                      className={`summary-text ${
+                        isTranslationNote ? "translation-note" : ""
+                      }`}
                     >
-                      <i className="bi bi-translate"></i>
-                    </span>
-                  )}
-                </h5>
-                <div
-                  className={`summary-text ${
-                    isTranslationNote ? "translation-note" : ""
-                  }`}
-                >
-                  {content}
-                </div>
-                <div className="summary-meta">
-                  <small className="text-muted">
-                    <i className="bi bi-robot me-1"></i>
-                    由AI分析生成 •{sourceType && ` ${sourceType} • `}
-                    {chunkCount && `${chunkCount} 個文本段落 • `}
-                    {tokensUsed && `${tokensUsed.toLocaleString()} Tokens`}
-                  </small>
-                </div>
+                      {content}
+                    </div>
+                    <div className="summary-meta">
+                      <small className="text-muted">
+                        <i className="bi bi-robot me-1"></i>
+                        由AI分析生成 •{sourceType && ` ${sourceType} • `}
+                        {chunkCount && `${chunkCount} 個文本段落 • `}
+                        {tokensUsed && `${tokensUsed.toLocaleString()} Tokens`}
+                      </small>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           );

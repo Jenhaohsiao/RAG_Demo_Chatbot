@@ -33,16 +33,17 @@
   width: 100%;
 }
 
-/* AI Chat Step Container */
+/* AI Chat Step Container - 流程6專用 */
 .ai-chat-step-container {
-  height: 100%;
+  height: calc(100vh - 280px); // 減去 stepper header 和導航的高度
   display: flex;
   flex-direction: column;
+  overflow: hidden; // 防止多層滾動條
 }
 
 .ai-chat-content {
   flex: 1;
-  overflow-y: auto; 
+  overflow: hidden; // 讓內部組件處理滾動
 }
 
 /* Sticky flow diagram for step 6 */
@@ -51,7 +52,7 @@
   top: 0;
   z-index: 10;
   background-color: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* 水平排列的步驟項目 */
@@ -185,7 +186,7 @@
   padding: 10px 10px;
   border-left: 5px solid #0d6efd;
   box-shadow: none;
-  width: 100%; 
+  width: 100%;
 }
 
 /* 導航按鈕樣式 */
@@ -215,6 +216,7 @@
   margin: 0;
   border: none;
   box-shadow: none;
+  overflow: hidden; // 防止此層產生滾動條
 }
 
 /* 響應式設計 */
@@ -223,12 +225,12 @@
     font-size: 12px;
     min-height: 28px;
   }
-  
+
   .stepper-description {
     font-size: 9px;
     min-height: 22px;
   }
-  
+
   .stepper-circle {
     width: 50px;
     height: 50px;
@@ -241,45 +243,44 @@
     font-size: 11px;
     min-height: 24px;
   }
-  
+
   .stepper-description {
     font-size: 8px;
     min-height: 20px;
     max-width: 80px;
   }
-  
+
   .stepper-circle {
     width: 45px;
     height: 45px;
     font-size: 18px;
     margin-bottom: 10px;
   }
-  
+
   .stepper-item {
     padding: 10px 5px;
   }
 }
 
 @media (max-width: 768px) {
- 
   .stepper-title {
     font-size: 10px;
     min-height: 20px;
   }
-  
+
   .stepper-description {
     font-size: 7px;
     min-height: 18px;
     max-width: 70px;
   }
-  
+
   .stepper-circle {
     width: 40px;
     height: 40px;
     font-size: 16px;
     margin-bottom: 8px;
   }
-  
+
   .stepper-connector {
     top: 42px;
     width: 30px;
@@ -290,7 +291,7 @@
     padding: 20px 15px;
     min-height: 300px;
   }
-  
+
   .stepper-navigation {
     padding: 15px;
   }
@@ -302,23 +303,23 @@
     overflow-x: auto;
     padding-bottom: 10px;
   }
-  
+
   .stepper-item {
     min-width: 80px;
     flex: 0 0 auto;
   }
-  
+
   .stepper-title {
     font-size: 9px;
     min-height: 18px;
   }
-  
+
   .stepper-description {
     font-size: 6px;
     min-height: 16px;
     max-width: 60px;
   }
-  
+
   .stepper-circle {
     width: 35px;
     height: 35px;
@@ -403,14 +404,30 @@
   animation: fadeInUp 0.5s ease forwards;
 }
 
-.rag-config-step .card:nth-child(1) { animation-delay: 0.1s; }
-.rag-config-step .card:nth-child(2) { animation-delay: 0.2s; }
-.rag-config-step .card:nth-child(3) { animation-delay: 0.3s; }
-.rag-config-step .card:nth-child(4) { animation-delay: 0.4s; }
-.rag-config-step .card:nth-child(5) { animation-delay: 0.5s; }
-.rag-config-step .card:nth-child(6) { animation-delay: 0.6s; }
-.rag-config-step .card:nth-child(7) { animation-delay: 0.7s; }
-.rag-config-step .card:nth-child(8) { animation-delay: 0.8s; }
+.rag-config-step .card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.rag-config-step .card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.rag-config-step .card:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.rag-config-step .card:nth-child(4) {
+  animation-delay: 0.4s;
+}
+.rag-config-step .card:nth-child(5) {
+  animation-delay: 0.5s;
+}
+.rag-config-step .card:nth-child(6) {
+  animation-delay: 0.6s;
+}
+.rag-config-step .card:nth-child(7) {
+  animation-delay: 0.7s;
+}
+.rag-config-step .card:nth-child(8) {
+  animation-delay: 0.8s;
+}
 
 /* Prompt設置卡片樣式 */
 .prompt-config-step .card {
@@ -431,16 +448,30 @@
   animation: fadeInUp 0.5s ease forwards;
 }
 
-.prompt-config-step .card:nth-child(1) { animation-delay: 0.1s; }
-.prompt-config-step .card:nth-child(2) { animation-delay: 0.2s; }
-.prompt-config-step .card:nth-child(3) { animation-delay: 0.3s; }
-.prompt-config-step .card:nth-child(4) { animation-delay: 0.4s; }
+.prompt-config-step .card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.prompt-config-step .card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.prompt-config-step .card:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.prompt-config-step .card:nth-child(4) {
+  animation-delay: 0.4s;
+}
 
 /* 動畫效果 */
 @keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .stepper-item.active .stepper-circle {
@@ -450,7 +481,7 @@
 .progress-bar {
   transition: width 0.5s ease-in-out;
 }
-  
+
 /* 自定義步驟顏色 */
 .bg-orange {
   background-color: #ff7849 !important;
@@ -481,10 +512,7 @@
 /* 數字文字樣式 - 白字灰色外框 */
 .stepper-circle span {
   color: white !important;
-  text-shadow: 
-    -1px -1px 0 #6c757d,
-    1px -1px 0 #6c757d,
-    -1px 1px 0 #6c757d,
+  text-shadow: -1px -1px 0 #6c757d, 1px -1px 0 #6c757d, -1px 1px 0 #6c757d,
     1px 1px 0 #6c757d !important;
 }
 
@@ -507,5 +535,34 @@
   100% {
     transform: scale(1);
     box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+  }
+}
+
+/* 禁用步驟樣式 - 當流程3完成後，流程1、2應該被鎖定 */
+.disabled-step {
+  position: relative;
+
+  .card {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  input[type="range"],
+  select,
+  input[type="text"],
+  input[type="number"],
+  textarea,
+  button:not(.btn-outline-secondary) {
+    pointer-events: none;
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .form-range::-webkit-slider-thumb {
+    cursor: not-allowed;
+  }
+
+  .form-select {
+    background-color: #f8f9fa;
   }
 }

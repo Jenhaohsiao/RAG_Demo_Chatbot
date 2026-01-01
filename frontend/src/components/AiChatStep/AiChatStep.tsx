@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import i18n from "../../i18n/config";
 import ChatScreen from "../ChatScreen/ChatScreen";
 import FixedRagFlow from "../FixedRagFlow/FixedRagFlow";
-import { ResponseType } from "../../types/chat";
+import { ResponseType, ChatMessage as ChatMessageType } from "../../types/chat";
 import { listDocuments } from "../../services/uploadService";
 import { submitQuery } from "../../services/chatService";
 import "./AiChatStep.scss";
@@ -22,9 +22,16 @@ export interface AiChatStepProps {
     response_style?: string;
     professional_level?: string;
   };
+  savedChatMessages?: ChatMessageType[];
+  onSaveChatMessages?: (messages: ChatMessageType[]) => void;
 }
 
-const AiChatStep: React.FC<AiChatStepProps> = ({ sessionId, parameters }) => {
+const AiChatStep: React.FC<AiChatStepProps> = ({
+  sessionId,
+  parameters,
+  savedChatMessages,
+  onSaveChatMessages,
+}) => {
   const { t } = useTranslation();
   const [isReady, setIsReady] = useState(false);
   const [documentSummary, setDocumentSummary] = useState<string>("");
@@ -153,6 +160,8 @@ const AiChatStep: React.FC<AiChatStepProps> = ({ sessionId, parameters }) => {
             sourceType={documentInfo.sourceType}
             chunkCount={documentInfo.chunkCount}
             tokensUsed={documentInfo.tokensUsed}
+            savedChatMessages={savedChatMessages}
+            onSaveChatMessages={onSaveChatMessages}
             onSendQuery={async (query: string) => {
               try {
                 // 調用真實的聊天服務，傳遞當前語言

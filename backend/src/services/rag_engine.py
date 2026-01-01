@@ -511,8 +511,10 @@ Contenu du document:
         """
         # If custom prompt is provided, use it directly with variable substitution
         if custom_prompt:
-            # 語言映射
+            # 語言映射（支援 zh-TW, zh-CN 等完整語言代碼）
             language_names = {
+                "zh-TW": "Traditional Chinese (繁體中文)",
+                "zh-CN": "Simplified Chinese (简体中文)",
                 "zh": "Traditional Chinese (繁體中文)",
                 "en": "English",
                 "ko": "Korean (한국어)",
@@ -521,7 +523,7 @@ Contenu du document:
                 "ar": "Arabic (العربية)",
                 "fr": "French (Français)"
             }
-            response_language = language_names.get(language, "English")
+            response_language = language_names.get(language, language_names.get(language.split('-')[0], "English"))
             
             # 組合檢索內容
             context_parts = []
@@ -541,8 +543,10 @@ Contenu du document:
             return prompt
         
         # Default prompt logic (existing code)
-        # 語言映射：UI 語言代碼 -> 語言名稱
+        # 語言映射：UI 語言代碼 -> 語言名稱（支援 zh-TW, zh-CN 等完整語言代碼）
         language_names = {
+            "zh-TW": "Traditional Chinese (繁體中文)",
+            "zh-CN": "Simplified Chinese (简体中文)",
             "zh": "Traditional Chinese (繁體中文)",
             "en": "English",
             "ko": "Korean (한국어)",
@@ -552,7 +556,8 @@ Contenu du document:
             "fr": "French (Français)"
         }
         
-        response_language = language_names.get(language, "English")
+        # 嘗試完整語言代碼，再嘗試語言前綴
+        response_language = language_names.get(language, language_names.get(language.split('-')[0] if '-' in language else language, "English"))
         
         # 組合檢索內容
         context_parts = []
@@ -565,8 +570,11 @@ Contenu du document:
         
         context = "\n---\n".join(context_parts) if context_parts else "No documents retrieved."
         
-        # 建構 Prompt（允許回答基本問題，但優先使用文檔內容）
+        # 建構 Prompt（嚴格基於文檔內容回答 - Strict RAG）
         # 定義術語（用於幫助LLM理解"文檔"的定義）
+        # 獲取語言對應的 key（支援 zh-TW -> zh 映射）
+        lang_key = language if language in ["en", "zh", "ko", "es", "ja", "ar", "fr"] else (language.split('-')[0] if '-' in language else "en")
+        
         document_definition = {
             "zh": """**術語定義**:
 - **文檔 (Documents)**: 用戶上傳到系統中的內容，包括網頁、PDF、文本文件等。這些內容已被提取、清理、分塊和索引。
@@ -591,44 +599,49 @@ Contenu du document:
 - **Chunks**: Petits passages dans lesquels les documents sont divisés pour la recherche sémantique."""
         }
         
+        # 獲取 document_definition 時也使用 lang_key
+        doc_def = document_definition.get(lang_key, document_definition['en'])
+        
         if not retrieved_chunks:
-            # 沒有檢索到相關文檔片段時的 Prompt
-            prompt = f"""You are a helpful multilingual assistant.
+            # 沒有檢索到相關文檔片段時的 Prompt - STRICT RAG：明確告知無法回答
+            prompt = f"""You are a RAG (Retrieval-Augmented Generation) assistant that ONLY answers based on uploaded documents.
 
-{document_definition.get(response_language, document_definition['en'])}
+{doc_def}
 
-**IMPORTANT RULES**:
-1. **Response Language**: Always respond in {response_language}. Even if the user types in English, respond in {response_language}
-2. **Context**: Some documents may have been uploaded to the system, but no relevant passages were found for this specific question
-3. For general questions (greetings, simple requests, common knowledge), answer naturally and helpfully
-4. If the user asks to summarize or explain "the document/文檔/file content", politely explain that you cannot find relevant passages matching their query, and suggest they ask more specific questions about the topics they're interested in
-5. Be friendly, concise, and helpful in {response_language}
+**CRITICAL RULES - YOU MUST FOLLOW**:
+1. **Response Language**: ALWAYS respond ONLY in {response_language}. This is mandatory. DO NOT include any other language in your response. DO NOT include English translations or explanations in parentheses.
+2. **STRICT RAG POLICY**: No relevant document passages were found for this question.
+3. **DO NOT answer questions** that require knowledge not in the documents.
+4. **DO NOT make up information** or use general knowledge to answer.
+5. **Politely explain** that you cannot find relevant information in the uploaded documents.
+6. **SINGLE LANGUAGE ONLY**: Your entire response must be in {response_language} only. No bilingual content.
 
 **User Question**:
 {user_query}
 
-**Your Answer** (in {response_language}):"""
+**Your Answer** (MUST be ONLY in {response_language}, explain that you cannot find relevant content):"""
         else:
-            # 有文檔時的標準 RAG Prompt
-            prompt = f"""You are a helpful multilingual assistant.
+            # 有文檔時的標準 RAG Prompt - STRICT RAG
+            prompt = f"""You are a RAG (Retrieval-Augmented Generation) assistant that ONLY answers based on uploaded documents.
 
-{document_definition.get(response_language, document_definition['en'])}
+{doc_def}
 
-**IMPORTANT RULES**:
-1. **Response Language**: Always respond in {response_language}. Even if the user types in English, respond in {response_language}
-2. **Primary**: Answer based on the provided documents/文檔 when relevant information is available
-3. **Secondary**: For general questions (greetings, language requests), you may answer politely
-4. If the user asks about document/文檔 content and it's not in the documents, say in {response_language}: "I cannot find this information in the uploaded documents" (中文: "我無法在已上傳的文檔中找到此信息")
-5. Cite document numbers when using document information
-6. Be helpful, concise, and accurate in {response_language}
+**CRITICAL RULES - YOU MUST FOLLOW**:
+1. **Response Language**: ALWAYS respond ONLY in {response_language}. This is mandatory. DO NOT include any other language in your response. DO NOT include English translations or explanations in parentheses.
+2. **STRICT RAG POLICY**: ONLY answer based on the retrieved documents below.
+3. **DO NOT make up information** or use knowledge outside the documents.
+4. If the question cannot be answered from the documents, politely say you cannot find the information in the uploaded documents.
+5. **CITE document numbers** when using information.
+6. Be accurate and concise.
+7. **SINGLE LANGUAGE ONLY**: Your entire response must be in {response_language} only. No bilingual content, no mixed languages.
 
-**Retrieved Documents/已上傳文檔**:
+**Retrieved Documents**:
 {context}
 
-**User Question/用戶問題**:
+**User Question**:
 {user_query}
 
-**Your Answer** (in {response_language}):"""
+**Your Answer** (MUST be ONLY in {response_language}, based ONLY on the documents above):"""
         
         return prompt
     
@@ -637,21 +650,25 @@ Contenu du document:
         取得「無法回答」訊息
         
         Args:
-            language: UI 語言代碼
+            language: UI 語言代碼 (支援 zh-TW, zh-CN 等完整代碼)
         
         Returns:
             str: 標準「無法回答」訊息（根據語言）
         """
         messages = {
-            "zh": "無法根據已上傳的文檔回答此問題。",
-            "en": "I cannot answer this question based on the uploaded documents.",
-            "ko": "업로드된 문서를 기반으로 이 질문에 답할 수 없습니다.",
-            "es": "No puedo responder esta pregunta basándome en los documentos cargados.",
-            "ja": "アップロードされた文書に基づいてこの質問に答えることができません。",
-            "ar": "لا أستطيع الإجابة على هذا السؤال بناءً على المستندات المحملة.",
-            "fr": "Je ne peux pas répondre à cette question en me basant sur les documents téléchargés."
+            "zh-TW": "抱歉，我無法在已上傳的文檔中找到與您問題相關的內容。",
+            "zh-CN": "抱歉，我无法在已上传的文档中找到与您问题相关的内容。",
+            "zh": "抱歉，我無法在已上傳的文檔中找到與您問題相關的內容。",
+            "en": "I'm sorry, I couldn't find relevant information in the uploaded documents to answer this question.",
+            "ko": "죄송합니다. 업로드된 문서에서 관련 정보를 찾을 수 없습니다.",
+            "es": "Lo siento, no pude encontrar información relevante en los documentos cargados.",
+            "ja": "申し訳ありませんが、アップロードされた文書に関連する情報が見つかりませんでした。",
+            "ar": "عذرًا، لم أتمكن من العثور على معلومات ذات صلة في المستندات المحملة.",
+            "fr": "Désolé, je n'ai pas pu trouver d'informations pertinentes dans les documents téléchargés."
         }
-        return messages.get(language, messages["en"])
+        # 嘗試完整語言代碼，再嘗試語言前綴
+        lang_key = language if language in messages else (language.split('-')[0] if '-' in language else language)
+        return messages.get(lang_key, messages["en"])
     
     def _calculate_metrics(
         self,

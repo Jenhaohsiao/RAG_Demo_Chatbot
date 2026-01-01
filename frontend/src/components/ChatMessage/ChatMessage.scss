@@ -33,19 +33,19 @@
 
 .message-role {
   font-weight: $font-weight-semibold;
-  font-size: $font-size-xs;
-  text-transform: uppercase;
+  font-size: $font-size-base;
+  text-transform: none;
   letter-spacing: 0.5px;
 }
 
 .message-time {
-  font-size: 11px;
+  font-size: $font-size-sm;
   color: $color-text-secondary;
 }
 
 .message-content {
-  font-size: $font-size-sm;
-  line-height: 1.6;
+  font-size: $font-size-lg;
+  line-height: 1.7;
   color: $color-text;
   white-space: pre-wrap;
   word-wrap: break-word;
