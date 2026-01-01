@@ -47,6 +47,7 @@ export interface ChatResponse {
   token_output: number;
   token_total: number;
   timestamp: string;
+  suggestions?: string[]; // 建議問題（當無法回答時提供）
 }
 
 // Chat history from GET /chat/{session_id}/history

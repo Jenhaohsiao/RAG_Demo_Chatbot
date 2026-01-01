@@ -109,6 +109,24 @@ export const updateLanguage = async (
   return response.data;
 };
 
+/**
+ * Update session custom prompt template
+ * @param sessionId UUID of the session
+ * @param customPrompt Custom prompt template (optional, null to clear)
+ * @returns Updated session details
+ */
+export const updateCustomPrompt = async (
+  sessionId: string,
+  customPrompt?: string | null
+): Promise<SessionResponse> => {
+  const response = await api.put<SessionResponse>(
+    `/session/${sessionId}/prompt`,
+    null,
+    { params: { custom_prompt: customPrompt || null } }
+  );
+  return response.data;
+};
+
 const sessionService = {
   createSession,
   getSession,
@@ -116,7 +134,8 @@ const sessionService = {
   heartbeat,
   closeSession,
   restartSession,
-  updateLanguage
+  updateLanguage,
+  updateCustomPrompt
 };
 
 export default sessionService;

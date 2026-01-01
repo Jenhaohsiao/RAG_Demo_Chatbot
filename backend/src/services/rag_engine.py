@@ -59,6 +59,7 @@ class RAGResponse:
     token_output: int
     token_total: int
     metrics: Optional[SessionMetrics] = None
+    suggestions: Optional[List[str]] = None  # 建議問題（當無法回答時提供）
 
 
 class RAGEngine:
@@ -229,6 +230,74 @@ class RAGEngine:
                 
                 time.sleep(current_delay)
                 current_delay = min(current_delay * 2, self.max_retry_delay)
+
+    def _generate_suggestions(
+        self,
+        session_id: UUID,
+        user_query: str,
+        retrieved_chunks: List[RetrievedChunk],
+        language: str = "en"
+    ) -> List[str]:
+        """
+        根據文件內容和用戶問題生成建議問題
+        
+        Args:
+            session_id: Session ID
+            user_query: 用戶原始問題
+            retrieved_chunks: 檢索到的文檔片段（用於分析文件主題）
+            language: UI 語言代碼
+        
+        Returns:
+            List[str]: 2-3 個建議問題
+        """
+        # 語言映射
+        lang_map = {
+            'zh-TW': '繁體中文', 'zh-CN': '简体中文', 'en': 'English',
+            'ko': '한국어', 'es': 'Español', 'ja': '日本語',
+            'ar': 'العربية', 'fr': 'Français'
+        }
+        response_language = lang_map.get(language, lang_map.get(language.split('-')[0], 'English'))
+        
+        # 構建文檔內容摘要供分析
+        doc_summary = ""
+        if retrieved_chunks:
+            doc_texts = [chunk.text[:200] for chunk in retrieved_chunks[:3]]
+            doc_summary = "\n".join(doc_texts)
+        
+        prompt = f"""Based on the user's question and the available document content, generate 2-3 specific questions that the user might want to ask.
+
+**User's Original Question**: {user_query}
+
+**Available Document Content** (partial):
+{doc_summary if doc_summary else "No document content available yet."}
+
+**Requirements**:
+1. Generate questions in {response_language} ONLY
+2. Questions should be specific and based on the actual document topics
+3. Questions should help the user understand the document content better
+4. Return ONLY the questions, one per line, no numbering or bullets
+5. Generate exactly 2-3 questions
+
+**Suggested Questions**:"""
+
+        try:
+            response = self._generate_with_retry(prompt, session_id)
+            suggestions_text = response.text.strip()
+            
+            # 解析建議問題
+            suggestions = [s.strip() for s in suggestions_text.split('\n') if s.strip()]
+            # 清理格式（移除數字開頭、符號等）
+            cleaned = []
+            for s in suggestions[:3]:
+                # 移除開頭的數字、點、破折號等
+                s = s.lstrip('0123456789.-•）) \t')
+                if s and len(s) > 5:  # 過濾太短的
+                    cleaned.append(s)
+            
+            return cleaned[:3] if cleaned else []
+        except Exception as e:
+            logger.warning(f"[{session_id}] Failed to generate suggestions: {e}")
+            return []
     
     def query(
         self,
@@ -263,6 +332,14 @@ class RAGEngine:
         
         logger.info(f"[{session_id}] RAG query: {user_query[:100]} (threshold={threshold})")
         
+        # 檢測是否為通用文件請求（如「說明文件內容」、「總結這個文件」等）
+        general_query_patterns = [
+            '說明', '總結', '摘要', '概述', '介紹', '描述', '解釋', '內容',
+            'summarize', 'summary', 'explain', 'describe', 'overview', 'content',
+            '文件', '文檔', '文章', 'document', 'file', '再說一次', '重新說明'
+        ]
+        is_general_query = any(pattern in user_query.lower() for pattern in general_query_patterns)
+        
         try:
             # Step 1: 查詢嵌入
             logger.debug(f"[{session_id}] Embedding query...")
@@ -280,6 +357,16 @@ class RAGEngine:
                 limit=self.max_chunks,
                 score_threshold=threshold
             )
+            
+            # 如果是通用查詢且沒找到結果，用較低閾值重試
+            if not search_results and is_general_query:
+                logger.info(f"[{session_id}] General query detected, retrying with lower threshold (0.3)")
+                search_results = self.vector_store.search_similar(
+                    collection_name=collection_name,
+                    query_vector=query_embedding.vector,
+                    limit=self.max_chunks,
+                    score_threshold=0.3  # 使用較低的閾值讓通用查詢能檢索到內容
+                )
             
             # 轉換為 RetrievedChunk
             retrieved_chunks = []
@@ -321,22 +408,59 @@ class RAGEngine:
                 f"(tokens: {token_input} + {token_output} = {token_total})"
             )
             
+            # 判斷回應類型：是否為「無法回答」
+            cannot_answer_indicators = [
+                "無法", "找不到", "沒有找到", "抱歉", "無關", "不包含",
+                "cannot find", "no relevant", "unable to", "sorry",
+                "nicht finden", "찾을 수 없", "見つかりません"
+            ]
+            is_cannot_answer = any(ind in llm_response.lower() for ind in cannot_answer_indicators) and len(retrieved_chunks) == 0
+            response_type = "CANNOT_ANSWER" if is_cannot_answer else "ANSWERED"
+            
+            # 如果無法回答，生成建議問題
+            suggestions = None
+            if is_cannot_answer:
+                logger.info(f"[{session_id}] Generating suggestions for unanswered query...")
+                # 嘗試用較低閾值獲取一些文檔內容來生成建議
+                try:
+                    sample_results = self.vector_store.search_similar(
+                        collection_name=collection_name,
+                        query_vector=query_embedding.vector,
+                        limit=3,
+                        score_threshold=0.1  # 非常低的閾值，只是為了獲取文檔樣本
+                    )
+                    sample_chunks = [
+                        RetrievedChunk(
+                            chunk_id=str(r['id']),
+                            text=r['payload'].get('text', ''),
+                            similarity_score=r['score'],
+                            document_id=r['payload'].get('document_id', ''),
+                            source_reference=r['payload'].get('source_reference', ''),
+                            chunk_index=r['payload'].get('chunk_index', 0)
+                        ) for r in sample_results
+                    ]
+                    suggestions = self._generate_suggestions(session_id, user_query, sample_chunks, language)
+                except Exception as e:
+                    logger.warning(f"[{session_id}] Failed to get sample chunks for suggestions: {e}")
+                    suggestions = self._generate_suggestions(session_id, user_query, [], language)
+            
             # 更新記憶體和 metrics
-            self._update_memory(session_id, user_query, "ANSWERED", token_total)
+            self._update_memory(session_id, user_query, response_type, token_total)
             metrics = self._calculate_metrics(
                 session_id, token_input, token_output, 
-                len(retrieved_chunks), response_type="ANSWERED"
+                len(retrieved_chunks), response_type=response_type
             )
             
             return RAGResponse(
                 llm_response=llm_response,
-                response_type="ANSWERED",
+                response_type=response_type,
                 retrieved_chunks=retrieved_chunks,
                 similarity_scores=similarity_scores,
                 token_input=token_input,
                 token_output=token_output,
                 token_total=token_total,
-                metrics=metrics
+                metrics=metrics,
+                suggestions=suggestions
             )
         
         except Exception as e:
@@ -505,6 +629,7 @@ Contenu du document:
             retrieved_chunks: 檢索到的文字塊
             language: UI 語言代碼
             custom_prompt: 自定義 prompt 模板（優先使用）
+                          支援變數：{{language}}, {{context}}, {{query}}, {{persona}}
         
         Returns:
             str: 完整 Prompt
@@ -539,6 +664,7 @@ Contenu du document:
             prompt = custom_prompt.replace('{{language}}', response_language)
             prompt = prompt.replace('{{context}}', context)
             prompt = prompt.replace('{{query}}', user_query)
+            # {{persona}} 變數會在前端生成 custom_prompt 時直接替換，這裡不處理
             
             return prompt
         
@@ -614,14 +740,15 @@ Contenu du document:
 3. **DO NOT answer questions** that require knowledge not in the documents.
 4. **DO NOT make up information** or use general knowledge to answer.
 5. **Politely explain** that you cannot find relevant information in the uploaded documents.
-6. **SINGLE LANGUAGE ONLY**: Your entire response must be in {response_language} only. No bilingual content.
+6. **SUGGESTION**: If the user asks general questions like "explain the document" or "summarize", suggest they ask more specific questions about particular topics in the documents.
+7. **SINGLE LANGUAGE ONLY**: Your entire response must be in {response_language} only. No bilingual content.
 
 **User Question**:
 {user_query}
 
-**Your Answer** (MUST be ONLY in {response_language}, explain that you cannot find relevant content):"""
+**Your Answer** (MUST be ONLY in {response_language}, explain that you cannot find relevant content and suggest asking specific questions):"""
         else:
-            # 有文檔時的標準 RAG Prompt - STRICT RAG
+            # 有文檔時的標準 RAG Prompt - STRICT RAG with partial match handling
             prompt = f"""You are a RAG (Retrieval-Augmented Generation) assistant that ONLY answers based on uploaded documents.
 
 {doc_def}
@@ -630,10 +757,14 @@ Contenu du document:
 1. **Response Language**: ALWAYS respond ONLY in {response_language}. This is mandatory. DO NOT include any other language in your response. DO NOT include English translations or explanations in parentheses.
 2. **STRICT RAG POLICY**: ONLY answer based on the retrieved documents below.
 3. **DO NOT make up information** or use knowledge outside the documents.
-4. If the question cannot be answered from the documents, politely say you cannot find the information in the uploaded documents.
-5. **CITE document numbers** when using information.
-6. Be accurate and concise.
-7. **SINGLE LANGUAGE ONLY**: Your entire response must be in {response_language} only. No bilingual content, no mixed languages.
+4. **GENERAL REQUESTS**: If the user asks to "explain", "summarize", or "describe" the document content (with or without a specific style/tone like "健身教練口氣"), provide a summary based on the retrieved document chunks below.
+5. **STYLE REQUESTS**: If the user requests a specific tone or persona (e.g., "用老師口氣", "用健身教練口氣", "用朋友口吻"), adapt your response style accordingly while still basing content ONLY on the documents.
+6. **PARTIAL MATCH HANDLING**: If the user's question is PARTIALLY related to the documents:
+   - First acknowledge what information IS available in the documents
+   - Then clearly state what specific aspect of the question is NOT covered
+7. **CITE document numbers** when using information.
+8. Be accurate and helpful.
+9. **SINGLE LANGUAGE ONLY**: Your entire response must be in {response_language} only. No bilingual content, no mixed languages.
 
 **Retrieved Documents**:
 {context}
@@ -641,7 +772,7 @@ Contenu du document:
 **User Question**:
 {user_query}
 
-**Your Answer** (MUST be ONLY in {response_language}, based ONLY on the documents above):"""
+**Your Answer** (MUST be ONLY in {response_language}, based ONLY on the documents above. If user requests a specific style, use that style. If asking for explanation/summary, provide one based on the document chunks):"""
         
         return prompt
     

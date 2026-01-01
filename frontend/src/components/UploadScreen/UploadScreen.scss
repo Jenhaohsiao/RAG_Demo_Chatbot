@@ -3,6 +3,30 @@
   display: none;
 }
 
+/* Tab content wrapper */
+.tab-content-wrapper {
+  background-color: #fff;
+}
+
+/* Parameter section styling */
+.parameter-section {
+  h6 {
+    color: #495057;
+    font-weight: 600;
+  }
+}
+
+/* Crawler section styling */
+.crawler-section {
+  .dropzone-icon-large {
+    margin-bottom: 10px;
+
+    i {
+      font-size: 2.5rem;
+    }
+  }
+}
+
 /* 檔案上傳拖放區域樣式 */
 .file-upload-dropzone {
   background-color: #f8f9fa;
@@ -11,7 +35,7 @@
   padding: 40px 20px;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-height: 200px;
+  min-height: 280px;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -11,7 +11,7 @@ T089: Enhanced error handling with appropriate HTTP status codes
 
 import logging
 from uuid import UUID
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
@@ -58,6 +58,7 @@ class ChatResponse(BaseModel):
     token_output: int
     token_total: int
     timestamp: str
+    suggestions: Optional[List[str]] = None  # 建議問題（當無法回答時提供）
 
 
 class ChatHistoryResponse(BaseModel):
@@ -212,7 +213,8 @@ async def query(
             token_input=rag_response.token_input,
             token_output=rag_response.token_output,
             token_total=rag_response.token_total,
-            timestamp=assistant_message.timestamp.isoformat() + "Z"
+            timestamp=assistant_message.timestamp.isoformat() + "Z",
+            suggestions=rag_response.suggestions
         )
     
     except RAGError as e:

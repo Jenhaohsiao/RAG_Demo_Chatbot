@@ -88,6 +88,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   const [responseTypes, setResponseTypes] = useState<
     Record<string, ResponseType>
   >({});
+  const [suggestions, setSuggestions] = useState<Record<string, string[]>>({}); // 每條訊息的建議問題
   const [metrics, setMetrics] = useState<SessionMetrics | null>(null);
   const [sessionInfo, setSessionInfo] = useState<{
     document_count: number;
@@ -294,6 +295,14 @@ ${summary}`,
         [response.message_id]: response.response_type,
       }));
 
+      // 記錄建議問題（如果有）
+      if (response.suggestions && response.suggestions.length > 0) {
+        setSuggestions((prev) => ({
+          ...prev,
+          [response.message_id]: response.suggestions!,
+        }));
+      }
+
       // 查詢後立即更新 metrics
       const updatedMetrics = await getSessionMetrics(sessionId);
       setMetrics(updatedMetrics);
@@ -398,6 +407,15 @@ ${summary}`,
                           ? responseTypes[msg.message_id]
                           : undefined
                       }
+                      suggestions={
+                        msg.role === ChatRole.ASSISTANT
+                          ? suggestions[msg.message_id]
+                          : undefined
+                      }
+                      onSuggestionClick={(suggestion) => {
+                        // 點擊建議問題時，自動發送該問題
+                        handleSendMessage(suggestion);
+                      }}
                     />
                   ))
                 )}

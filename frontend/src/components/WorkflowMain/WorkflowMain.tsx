@@ -66,6 +66,11 @@ const WorkflowMain: React.FC<WorkflowMainProps> = ({
     response_style: "standard" as const,
     professional_level: "professional" as const,
     creativity_level: "balanced" as const,
+    persona: "", // 語氣/角色設定 (例如: "國中老師", "專業顧問")
+    // 新增參數
+    combined_style: "professional_standard", // 合併的風格選擇
+    response_format: "auto" as const, // 回應格式
+    citation_style: "inline" as const, // 引用格式
 
     // 系統參數 (Step 3)
     session_ttl_minutes: 30,

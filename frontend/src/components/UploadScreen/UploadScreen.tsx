@@ -27,10 +27,19 @@ export interface UploadScreenProps {
   crawlerMaxTokens?: number;
   crawlerMaxPages?: number;
   disabled?: boolean;
-  hasUploadedContent?: boolean; // 新增：是否已有上傳內容
-  uploadedFiles?: any[]; // 新增：已上傳文件列表
-  crawledUrls?: any[]; // 新增：已爬取URL列表
-  onTabChange?: (tab: "file" | "crawler") => void; // 新增：tab 切換回調
+  hasUploadedContent?: boolean; // 是否已有上傳內容
+  uploadedFiles?: any[]; // 已上傳文件列表
+  crawledUrls?: any[]; // 已爬取URL列表
+  onTabChange?: (tab: "file" | "crawler") => void; // tab 切換回調
+  // 新增：參數設定相關 props
+  parameters?: {
+    session_ttl_minutes: number;
+    max_file_size_mb: number;
+    crawler_max_tokens: number;
+    crawler_max_pages: number;
+    supported_file_types: string[];
+  };
+  onParameterChange?: (parameter: string, value: any) => void;
 }
 
 const UploadScreen: React.FC<UploadScreenProps> = ({
@@ -46,6 +55,8 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
   uploadedFiles = [],
   crawledUrls = [],
   onTabChange,
+  parameters,
+  onParameterChange,
 }) => {
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
@@ -341,10 +352,10 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
       {!hasUploadedContent && (
         <>
           {/* Upload tabs */}
-          <ul className="nav nav-tabs mb-3">
+          <ul className="nav nav-tabs mb-0">
             <li className="nav-item">
               <button
-                className={`nav-link text-start  ${
+                className={`nav-link text-start ${
                   activeTab === "file" ? "active" : ""
                 }`}
                 onClick={() => {
@@ -374,63 +385,301 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
             </li>
           </ul>
 
-          {/* Main upload area */}
-          {activeTab === "file" && (
-            <div
-              className={`file-upload-dropzone ${
-                isDragging ? "dragging" : ""
-              } ${disabled ? "disabled" : ""}`}
-              onDragEnter={handleDragEnter}
-              onDragLeave={handleDragLeave}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-              onClick={handleBrowseClick}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept={getAcceptAttribute()}
-                onChange={handleFileInputChange}
-                disabled={disabled}
-                className="upload-screen-hidden-input"
-              />
+          {/* Tab content with border */}
+          <div className="tab-content-wrapper border border-top-0 rounded-bottom p-4">
+            {/* 檔案上傳 Tab */}
+            {activeTab === "file" && (
+              <div className="row g-4">
+                {/* 左側 - 檔案上傳參數設定 */}
+                <div className="col-12 col-lg-5">
+                  <div className="parameter-section">
+                    {/* 檔案大小限制 */}
+                    <div className="mb-4">
+                      <h6 className="mb-3">
+                        <i className="bi bi-hdd me-2"></i>
+                        檔案大小限制
+                      </h6>
+                      <div className="text-center mb-2">
+                        <strong className="text-primary fs-5">
+                          {parameters?.max_file_size_mb || maxFileSizeMB} MB
+                        </strong>
+                      </div>
+                      <input
+                        type="range"
+                        className="form-range"
+                        min="1"
+                        max="10"
+                        step="1"
+                        value={parameters?.max_file_size_mb || maxFileSizeMB}
+                        onChange={(e) =>
+                          onParameterChange?.(
+                            "max_file_size_mb",
+                            parseInt(e.target.value)
+                          )
+                        }
+                        disabled={!onParameterChange}
+                      />
+                      <div className="d-flex justify-content-between small text-muted">
+                        <span>1MB</span>
+                        <span>10MB</span>
+                      </div>
+                    </div>
 
-              <div className="dropzone-content">
-                <div className="dropzone-icon-large">
-                  <i className="bi bi-cloud-upload-fill text-primary"></i>
+                    {/* 支援檔案類型 */}
+                    <div>
+                      <h6 className="mb-3">
+                        <i className="bi bi-file-earmark-check me-2"></i>
+                        支援檔案類型
+                      </h6>
+                      <p className="text-muted small mb-3">
+                        選擇系統支援的檔案格式類型
+                      </p>
+
+                      <div className="row g-2">
+                        {["pdf", "txt", "docx", "md", "csv", "xlsx"].map(
+                          (fileType) => (
+                            <div key={fileType} className="col-6">
+                              <div className="form-check">
+                                <input
+                                  className="form-check-input"
+                                  type="checkbox"
+                                  checked={(
+                                    parameters?.supported_file_types ||
+                                    supportedFileTypes
+                                  ).includes(fileType)}
+                                  onChange={(e) => {
+                                    if (onParameterChange && parameters) {
+                                      const updatedTypes = e.target.checked
+                                        ? [
+                                            ...parameters.supported_file_types,
+                                            fileType,
+                                          ]
+                                        : parameters.supported_file_types.filter(
+                                            (type) => type !== fileType
+                                          );
+                                      onParameterChange(
+                                        "supported_file_types",
+                                        updatedTypes
+                                      );
+                                    }
+                                  }}
+                                  id={`fileType-${fileType}`}
+                                  disabled={!onParameterChange}
+                                />
+                                <label
+                                  className="form-check-label"
+                                  htmlFor={`fileType-${fileType}`}
+                                >
+                                  <strong className="text-uppercase">
+                                    {fileType}
+                                  </strong>
+                                  <div className="small text-muted">
+                                    {fileType === "pdf" && "Adobe PDF 文件"}
+                                    {fileType === "txt" && "純文字檔案"}
+                                    {fileType === "docx" && "Word 文件"}
+                                    {fileType === "md" && "Markdown 文件"}
+                                    {fileType === "csv" && "CSV 表格檔"}
+                                    {fileType === "xlsx" && "Excel 表格檔"}
+                                  </div>
+                                </label>
+                              </div>
+                            </div>
+                          )
+                        )}
+                      </div>
+
+                      {/* 已選檔案類型摘要 */}
+                      <div className="mt-3 p-2 bg-light rounded">
+                        <small className="text-muted">
+                          <i className="bi bi-check-circle me-1"></i>
+                          已選擇{" "}
+                          {
+                            (
+                              parameters?.supported_file_types ||
+                              supportedFileTypes
+                            ).length
+                          }{" "}
+                          種檔案類型
+                        </small>
+                        <div className="d-flex flex-wrap gap-1 mt-2">
+                          {(
+                            parameters?.supported_file_types ||
+                            supportedFileTypes
+                          ).map((type) => (
+                            <span
+                              key={type}
+                              className="badge bg-primary text-uppercase"
+                            >
+                              {type}
+                            </span>
+                          ))}
+                        </div>
+                        {(
+                          parameters?.supported_file_types || supportedFileTypes
+                        ).length === 0 && (
+                          <small className="text-danger d-block mt-2">
+                            ⚠️ 請至少選擇一種檔案類型
+                          </small>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <p className="mb-2">
-                  {isDragging
-                    ? t("upload.dropzone.drop", "拖放檔案到此區域")
-                    : t(
-                        "upload.dropzone.dragOrClick",
-                        "拖放檔案到此區域，或點擊進入"
-                      )}
-                </p>
-                <small className="text-muted">
-                  {getSupportedFormatsText()}
-                </small>
-              </div>
-            </div>
-          )}
 
-          {/* Website crawler tab */}
-          {activeTab === "crawler" && (
-            <div className="container">
-              <div className="dropzone-icon-large">
-                <i className="bi bi-globe text-success"></i>
+                {/* 右側 - 檔案上傳區 */}
+                <div className="col-12 col-lg-7">
+                  <div
+                    className={`file-upload-dropzone ${
+                      isDragging ? "dragging" : ""
+                    } ${disabled ? "disabled" : ""}`}
+                    onDragEnter={handleDragEnter}
+                    onDragLeave={handleDragLeave}
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
+                    onClick={handleBrowseClick}
+                  >
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept={getAcceptAttribute()}
+                      onChange={handleFileInputChange}
+                      disabled={disabled}
+                      className="upload-screen-hidden-input"
+                    />
+
+                    <div className="dropzone-content">
+                      <div className="dropzone-icon-large">
+                        <i className="bi bi-cloud-upload-fill text-primary"></i>
+                      </div>
+                      <p className="mb-2">
+                        {isDragging
+                          ? t("upload.dropzone.drop", "拖放檔案到此區域")
+                          : t(
+                              "upload.dropzone.dragOrClick",
+                              "拖放檔案到此區域，或點擊進入"
+                            )}
+                      </p>
+                      <small className="text-muted">
+                        {getSupportedFormatsText()}
+                      </small>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <WebsiteCrawlerPanel
-                onCrawl={handleCrawlerSubmit}
-                isLoading={crawlerLoading}
-                error={crawlerError}
-                crawlResults={crawlerResults}
-                maxTokens={crawlerMaxTokens}
-                maxPages={crawlerMaxPages}
-                disabled={disabled}
-              />
-            </div>
-          )}
+            )}
+
+            {/* 網站爬蟲 Tab */}
+            {activeTab === "crawler" && (
+              <div className="row g-4">
+                {/* 左側 - 爬蟲參數設定 */}
+                <div className="col-12 col-lg-5">
+                  <div className="parameter-section">
+                    <h6 className="mb-3">
+                      <i className="bi bi-gear me-2"></i>
+                      網站爬蟲參數
+                    </h6>
+
+                    {/* 網站爬蟲最大Token */}
+                    <div className="mb-4">
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <small className="text-muted">最大 Token 數</small>
+                        <strong className="text-primary">
+                          {(
+                            parameters?.crawler_max_tokens || crawlerMaxTokens
+                          ).toLocaleString()}
+                        </strong>
+                      </div>
+                      <input
+                        type="range"
+                        className="form-range"
+                        min="1000"
+                        max="200000"
+                        step="1000"
+                        value={
+                          parameters?.crawler_max_tokens || crawlerMaxTokens
+                        }
+                        onChange={(e) =>
+                          onParameterChange?.(
+                            "crawler_max_tokens",
+                            parseInt(e.target.value)
+                          )
+                        }
+                        disabled={!onParameterChange}
+                      />
+                      <div className="d-flex justify-content-between small text-muted">
+                        <span>1K</span>
+                        <span>200K</span>
+                      </div>
+                    </div>
+
+                    {/* 網站爬蟲最大頁面數 */}
+                    <div className="mb-4">
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <small className="text-muted">最大頁面數</small>
+                        <strong className="text-primary">
+                          {parameters?.crawler_max_pages || crawlerMaxPages} 頁
+                        </strong>
+                      </div>
+                      <input
+                        type="range"
+                        className="form-range"
+                        min="1"
+                        max="30"
+                        step="1"
+                        value={parameters?.crawler_max_pages || crawlerMaxPages}
+                        onChange={(e) =>
+                          onParameterChange?.(
+                            "crawler_max_pages",
+                            parseInt(e.target.value)
+                          )
+                        }
+                        disabled={!onParameterChange}
+                      />
+                      <div className="d-flex justify-content-between small text-muted">
+                        <span>1</span>
+                        <span>30</span>
+                      </div>
+                    </div>
+
+                    {/* 爬蟲參數說明 */}
+                    <div className="alert alert-info small mb-0">
+                      <i className="bi bi-info-circle me-2"></i>
+                      <strong>提示：</strong>
+                      <ul className="mb-0 mt-2 ps-3">
+                        <li>Token 數越大，可爬取的內容越多</li>
+                        <li>頁面數限制爬蟲深度</li>
+                        <li>建議先小範圍測試</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 右側 - 網站爬蟲輸入區 */}
+                <div className="col-12 col-lg-7">
+                  <div className="crawler-section">
+                    <div className="text-center mb-3">
+                      <div className="dropzone-icon-large">
+                        <i className="bi bi-globe text-success"></i>
+                      </div>
+                    </div>
+                    <WebsiteCrawlerPanel
+                      onCrawl={handleCrawlerSubmit}
+                      isLoading={crawlerLoading}
+                      error={crawlerError}
+                      crawlResults={crawlerResults}
+                      maxTokens={
+                        parameters?.crawler_max_tokens || crawlerMaxTokens
+                      }
+                      maxPages={
+                        parameters?.crawler_max_pages || crawlerMaxPages
+                      }
+                      disabled={disabled}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </>
       )}
     </div>

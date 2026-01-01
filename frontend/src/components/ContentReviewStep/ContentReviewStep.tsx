@@ -556,15 +556,6 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
             </div>
           )}
 
-          {/* 完成提示 - 根據審核結果顯示不同狀態 */}
-          {reviewProgress.isCompleted && reviewProgress.failed.length === 0 && (
-            <div className="alert alert-success mt-3 mb-0">
-              <i className="bi bi-check-circle-fill me-2"></i>
-              <strong>審核完成！</strong>{" "}
-              所有上傳的內容已通過安全檢查，可以進入下一步。
-            </div>
-          )}
-
           {/* 審核失敗提示 */}
           {reviewProgress.isCompleted && reviewProgress.failed.length > 0 && (
             <div className="alert alert-danger mt-3 mb-0">
@@ -642,15 +633,29 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                     </div>
                   );
                 })}
-                <div className="mt-3 p-2 bg-warning-subtle border border-warning rounded">
-                  <small>
+                <div className="mt-3 p-3 bg-warning-subtle border border-warning rounded">
+                  <div className="mb-2">
                     <i className="bi bi-exclamation-triangle-fill text-warning me-2"></i>
                     <strong>建議解決方案：</strong>
-                    <br />• 檢查上傳內容是否符合社區準則
-                    <br />• 確保文件來源可靠且不含惡意軟體
-                    <br />• 避免上傳包含色情、暴力或其他不當內容的資料
-                    <br />• 如需重新上傳，請點擊「上一步」回到上傳步驟
-                  </small>
+                  </div>
+                  <ul className="mb-3 ps-4 small">
+                    <li>檢查上傳內容是否符合社區準則</li>
+                    <li>確保文件來源可靠且不含惡意軟體</li>
+                    <li>避免上傳包含色情、暴力或其他不當內容的資料</li>
+                  </ul>
+                  <div className="p-2 bg-info-subtle border border-info rounded">
+                    <i className="bi bi-arrow-left-circle-fill text-info me-2"></i>
+                    <strong className="text-info">如何重新上傳？</strong>
+                    <div className="small mt-1">
+                      請點擊下方「<strong>上一步</strong>
+                      」按鈕返回上傳步驟。系統將<strong>自動清除</strong>
+                      原有內容，您可以重新上傳符合規範的資料。
+                      <br />
+                      <span className="text-muted">
+                        （流程1、2的配置也可以重新調整）
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
                 {/* 學術內容重試選項 */}
@@ -688,42 +693,6 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
               </div>
             </div>
           )}
-
-          {/* 文件統計 */}
-          <div className="row mt-4 text-center">
-            <div className="col-4">
-              <div className="h5 text-primary mb-1">{documents.length}</div>
-              <div className="small text-muted">總文件數</div>
-            </div>
-            <div className="col-4">
-              <div
-                className={`h5 mb-1 ${
-                  reviewProgress.isCompleted
-                    ? reviewProgress.failed.length === 0
-                      ? "text-success"
-                      : "text-danger"
-                    : reviewProgress.isRunning
-                    ? "text-warning"
-                    : "text-muted"
-                }`}
-              >
-                {reviewProgress.isCompleted
-                  ? reviewProgress.failed.length === 0
-                    ? "✅ 通過"
-                    : "❌ 失敗"
-                  : reviewProgress.isRunning
-                  ? "審核中"
-                  : "等待審核"}
-              </div>
-              <div className="small text-muted">狀態</div>
-            </div>
-            <div className="col-4">
-              <div className="h5 text-info mb-1">
-                {documents.reduce((sum, doc) => sum + (doc.chunks || 0), 0)}
-              </div>
-              <div className="small text-muted">預計文件塊</div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

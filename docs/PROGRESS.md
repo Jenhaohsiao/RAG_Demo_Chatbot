@@ -2,8 +2,8 @@
 
 **專案名稱**: Multilingual RAG-Powered Chatbot  
 **分支**: `001-multilingual-rag-chatbot`  
-**最後更新**: 2025-12-29  
-**總體狀態**: ✅ MVP 完成，Loading Overlay 已實作，用戶體驗大幅優化
+**最後更新**: 2026-01-01  
+**總體狀態**: ✅ MVP 完成，Step 2 UI 重構，Step 6 建議氣泡功能
 
 ---
 
@@ -20,10 +20,109 @@
 - **Metrics儀表板**: 實時性能監控
 - **6步驟工作流程**: RAG配置→Prompt配置→資料上傳→內容審核→文字處理→AI對話
 - **Loading Overlay**: 全局處理狀態提示，防止重複操作
+- **工作流程狀態保留**: 步驟3/4/5/6 返回上一步時保持狀態
+- **建議氣泡功能**: AI無法回答時自動生成2-3個可點擊的建議問題
 
 ---
 
 ## 🎯 最近完成
+
+### 📅 2026-01-01 (下午) - Step 2 UI 重構與 Step 6 建議氣泡功能
+
+**🎨 Step 2 Prompt 配置 UI 重構**:
+- 合併 3 個相似下拉選單（回應詳細程度、專業程度、創意程度）為單一「回應風格」
+- 6 種預設風格選項：簡潔通俗、詳細通俗、專業標準、專業詳細、學術嚴謹、創意活潑
+- 新增「回應格式」參數：自動、條列、段落、步驟化
+- 新增「來源引用」參數：無引用、內文引用、註腳引用
+- 保留「AI 角色設定」輸入框
+
+**💡 Step 6 建議氣泡功能（當 AI 無法回答時）**:
+- **後端 RAGResponse**: 新增 `suggestions: Optional[List[str]]` 欄位
+- **後端 _generate_suggestions()**: 根據文件內容和用戶問題生成 2-3 個建議問題
+- **後端 CANNOT_ANSWER 偵測**: 根據關鍵字（無法、找不到、抱歉等）判斷是否需要建議
+- **API ChatResponse**: 新增 `suggestions` 欄位傳遞到前端
+- **前端 ChatMessage**: 新增建議氣泡 UI，紫色漸層按鈕，標示「也許您想問：」
+- **前端 ChatScreen**: 新增 `suggestions` 狀態管理，點擊氣泡自動發送該問題
+
+**修改的檔案**:
+- `backend/src/services/rag_engine.py` - 新增 suggestions 欄位和生成邏輯
+- `backend/src/api/routes/chat.py` - ChatResponse 新增 suggestions
+- `frontend/src/types/chat.ts` - ChatResponse interface 新增 suggestions
+- `frontend/src/components/ChatMessage/ChatMessage.tsx` - 建議氣泡 UI
+- `frontend/src/components/ChatMessage/ChatMessage.scss` - 氣泡樣式
+- `frontend/src/components/ChatScreen/ChatScreen.tsx` - suggestions 狀態管理
+- `frontend/src/components/PromptConfigStep/PromptConfigStep.tsx` - 合併風格下拉
+- `frontend/src/components/WorkflowMain/WorkflowMain.tsx` - 新參數預設值
+- `frontend/src/components/WorkflowStepper/WorkflowStepper.tsx` - 更新 prompt 生成
+
+---
+
+### 📅 2026-01-01 (上午) - 工作流程狀態管理與 Step 6 AI Chat 修復
+
+**🔧 Step 1/2 禁用邏輯**:
+- 當 Step 3 已有上傳資料（documents 或 crawledUrls）時，自動禁用 Step 1 和 Step 2
+- 添加 `shouldDisableConfigSteps` useMemo 計算邏輯
+- RagConfigStep 和 PromptConfigStep 添加 `disabled` prop 支援
+
+**📁 Step 3 資料上傳畫面重構**:
+- 合併「參數設定」和「上傳資料」為單一卡片
+- 根據上傳模式動態顯示對應參數：
+  - **檔案上傳模式**: 顯示檔案大小限制 + 支援檔案類型
+  - **網站爬蟲模式**: 顯示最大 Token 數 + 最大頁面數 + 使用提示
+- 添加 `onTabChange` callback 到 UploadScreen，通知父組件當前選擇的 tab
+- 優化 dropzone 樣式：添加背景色、全區域可點擊
+
+**💾 Step 4 內容審核狀態保留**:
+- 添加 `savedReviewResults` 和 `onSaveReviewResults` props
+- 從 Step 5 返回 Step 4 時恢復已完成的審核結果
+- 避免重複審核已處理的內容
+
+**💾 Step 5 文本處理狀態保留**:
+- 添加 `savedProcessingResults` 和 `onSaveProcessingResults` props
+- 從 Step 6 返回 Step 5 時恢復已完成的處理結果
+- 避免重複處理已索引的內容
+
+**💬 Step 6 AI Chat 全面修復**:
+
+1. **翻譯鍵修復**:
+   - ChatMessage.tsx: `chat.message.you` → `chat.messages.you`
+   - ChatMessage.tsx: `chat.message.assistant` → `chat.messages.assistant`
+   - ChatInput.tsx: `chat.input.send` → `chat.input.submit`
+   - 添加 `sending` 翻譯鍵到 zh-TW.json
+
+2. **字體大小增加**:
+   - ChatMessage.scss: 訊息角色字體 `font-size-xs` → `font-size-base`
+   - ChatMessage.scss: 訊息內容字體 `font-size-sm` → `font-size-lg`
+   - ChatInput.scss: 輸入框字體 `font-size-sm` → `font-size-base`
+
+3. **雙語顯示問題修復** (Backend):
+   - 更新 rag_engine.py 的 prompt 模板
+   - 添加明確指示：「DO NOT include any other language in your response」
+   - 添加明確指示：「DO NOT include English translations or explanations in parentheses」
+   - 添加明確指示：「SINGLE LANGUAGE ONLY: Your entire response must be in {response_language} only」
+
+4. **聊天記錄保留**:
+   - WorkflowStepper 添加 `savedChatMessages` state
+   - AiChatStep 添加 `savedChatMessages` 和 `onSaveChatMessages` props
+   - ChatScreen 初始化時使用保存的訊息，訊息變化時自動保存
+   - 從 Step 5 返回 Step 6 時恢復聊天記錄
+
+**修改的檔案**:
+- `frontend/src/components/WorkflowStepper/WorkflowStepper.tsx` - 狀態管理整合
+- `frontend/src/components/RagConfigStep/RagConfigStep.tsx` - disabled prop
+- `frontend/src/components/PromptConfigStep/PromptConfigStep.tsx` - disabled prop
+- `frontend/src/components/DataUploadStep/DataUploadStep.tsx` - 畫面重構
+- `frontend/src/components/UploadScreen/UploadScreen.tsx` - onTabChange callback
+- `frontend/src/components/ContentReviewStep/ContentReviewStep.tsx` - 狀態保留
+- `frontend/src/components/TextProcessingStep/TextProcessingStep.tsx` - 狀態保留
+- `frontend/src/components/AiChatStep/AiChatStep.tsx` - 聊天記錄 props
+- `frontend/src/components/ChatScreen/ChatScreen.tsx` - 聊天記錄保留
+- `frontend/src/components/ChatMessage/ChatMessage.tsx` - 翻譯鍵修復
+- `frontend/src/components/ChatMessage/ChatMessage.scss` - 字體大小
+- `frontend/src/components/ChatInput/ChatInput.tsx` - 翻譯鍵修復
+- `frontend/src/components/ChatInput/ChatInput.scss` - 字體大小
+- `frontend/src/i18n/locales/zh-TW.json` - 添加 sending 翻譯
+- `backend/src/services/rag_engine.py` - 單語言回應 prompt
 
 ### 📅 2025-12-29 下午 - Loading Overlay 系統實作
 
@@ -142,7 +241,23 @@
 ## 🔧 技術債務與改進
 
 ### 已解決問題
-- ✅ **Loading Overlay 系統（2025-12-29 下午最新）**:
+- ✅ **Step 2 UI 重構與建議氣泡功能（2026-01-01 下午最新）**:
+  - ✅ 合併 3 個相似下拉選單為單一「回應風格」
+  - ✅ 新增「回應格式」和「來源引用」參數
+  - ✅ 實作 AI 無法回答時的建議氣泡功能
+  - ✅ 前後端完整整合
+
+- ✅ **工作流程狀態管理（2026-01-01 上午）**:
+  - ✅ Step 1/2 禁用邏輯（有上傳資料時）
+  - ✅ Step 3 畫面重構（參數設定與上傳合併）
+  - ✅ Step 4 內容審核狀態保留
+  - ✅ Step 5 文本處理狀態保留
+  - ✅ Step 6 聊天記錄保留
+  - ✅ Step 6 翻譯鍵修復
+  - ✅ Step 6 字體大小增加
+  - ✅ Step 6 雙語顯示問題修復
+
+- ✅ **Loading Overlay 系統（2025-12-29 下午）**:
   - ✅ 創建專用的全局 loading 組件
   - ✅ 修復檔案上傳 loading 過早消失問題
   - ✅ 整合流程3/4/5的 loading 狀態管理
@@ -294,6 +409,10 @@ curl http://localhost:5175/
 ## 🎉 當前狀態總結
 
 ✅ **系統狀態**: 穩定運行，核心功能完整，代碼簡潔  
+✅ **Step 2 UI**: 合併相似參數，新增回應格式和引用選項  
+✅ **Step 6 建議氣泡**: AI 無法回答時自動生成可點擊的建議問題  
+✅ **工作流程**: 狀態保留機制完善，步驟間導航流暢  
+✅ **AI Chat**: 翻譯鍵修復、字體加大、單語言回應、聊天記錄保留  
 ✅ **Loading 體驗**: 全局 Loading Overlay 系統已實作並整合完成  
 ✅ **內容審核**: 已徹底簡化並優化，通過三項實際測試驗證  
 ✅ **UI/UX**: 狀態同步問題全部修復，用戶體驗流暢  
@@ -302,6 +421,7 @@ curl http://localhost:5175/
 ✅ **文檔系統**: 已簡化並更新，從 20 個文件精簡至 12 個  
 
 **下一步建議**:
+- 測試建議氣泡功能的實際效果
 - 考慮生產環境部署
 - 進行性能壓力測試
 - 收集用戶反饋進行微調
@@ -309,6 +429,48 @@ curl http://localhost:5175/
 ---
 
 ## 📝 重要變更記錄
+
+### Step 2 UI 重構與 Step 6 建議氣泡 (2026-01-01 下午)
+**修改檔案**:
+- `backend/src/services/rag_engine.py` - 新增 suggestions 欄位、_generate_suggestions 方法、CANNOT_ANSWER 偵測
+- `backend/src/api/routes/chat.py` - ChatResponse 新增 suggestions 欄位
+- `frontend/src/types/chat.ts` - ChatResponse interface 新增 suggestions
+- `frontend/src/components/ChatMessage/ChatMessage.tsx` - 建議氣泡 UI 和點擊事件
+- `frontend/src/components/ChatMessage/ChatMessage.scss` - 氣泡樣式（紫色漸層、hover 效果）
+- `frontend/src/components/ChatScreen/ChatScreen.tsx` - suggestions 狀態管理、onSuggestionClick 處理
+- `frontend/src/components/PromptConfigStep/PromptConfigStep.tsx` - 合併風格下拉、新增參數
+- `frontend/src/components/WorkflowMain/WorkflowMain.tsx` - combined_style, response_format, citation_style 預設值
+- `frontend/src/components/WorkflowStepper/WorkflowStepper.tsx` - generateCustomPrompt 更新
+
+**關鍵改進**:
+- Step 2：3 個相似下拉合併為 1 個「回應風格」選擇器
+- Step 2：新增回應格式（條列/段落/步驟化）和引用格式參數
+- Step 6：AI 無法回答時自動生成 2-3 個建議問題
+- Step 6：可點擊的紫色漸層氣泡，標示「也許您想問：」
+
+### 工作流程狀態管理與 Step 6 修復 (2026-01-01 上午)
+**修改檔案**:
+- `frontend/src/components/WorkflowStepper/WorkflowStepper.tsx` - 狀態管理整合
+- `frontend/src/components/RagConfigStep/RagConfigStep.tsx` - disabled prop
+- `frontend/src/components/PromptConfigStep/PromptConfigStep.tsx` - disabled prop
+- `frontend/src/components/DataUploadStep/DataUploadStep.tsx` - 畫面重構
+- `frontend/src/components/UploadScreen/UploadScreen.tsx` - onTabChange callback
+- `frontend/src/components/ContentReviewStep/ContentReviewStep.tsx` - 狀態保留
+- `frontend/src/components/TextProcessingStep/TextProcessingStep.tsx` - 狀態保留
+- `frontend/src/components/AiChatStep/AiChatStep.tsx` - 聊天記錄 props
+- `frontend/src/components/ChatScreen/ChatScreen.tsx` - 聊天記錄保留
+- `frontend/src/components/ChatMessage/ChatMessage.tsx` - 翻譯鍵修復
+- `frontend/src/components/ChatMessage/ChatMessage.scss` - 字體大小
+- `frontend/src/components/ChatInput/ChatInput.tsx` - 翻譯鍵修復
+- `frontend/src/components/ChatInput/ChatInput.scss` - 字體大小
+- `frontend/src/i18n/locales/zh-TW.json` - 添加 sending 翻譯
+- `backend/src/services/rag_engine.py` - 單語言回應 prompt
+
+**關鍵改進**:
+- Step 1/2 禁用邏輯：有上傳資料時防止修改配置
+- Step 3 畫面重構：根據上傳模式動態顯示對應參數
+- Step 4/5/6 狀態保留：返回上一步時保持已完成的結果
+- Step 6 AI Chat 修復：翻譯、字體、單語言回應、聊天記錄
 
 ### Loading Overlay 系統 (2025-12-29 下午)
 **新增檔案**:

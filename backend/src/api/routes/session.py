@@ -257,3 +257,30 @@ async def update_language(session_id: UUID, request: LanguageUpdateRequest):
     
     session = session_manager.get_session(session_id)
     return session_manager.to_response(session)
+
+
+@router.put("/{session_id}/prompt", response_model=SessionResponse)
+async def update_custom_prompt(session_id: UUID, custom_prompt: str | None = None):
+    """
+    Update session custom prompt template
+    
+    Args:
+        session_id: UUID of the session
+        custom_prompt: Custom prompt template (optional, None to clear)
+        
+    Returns:
+        SessionResponse: Updated session details
+    """
+    session = session_manager.get_session(session_id)
+    
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Session {session_id} not found"
+        )
+    
+    # Update custom prompt
+    session.custom_prompt = custom_prompt
+    logger.info(f"Session {session_id} custom_prompt updated (has_prompt: {bool(custom_prompt)})")
+    
+    return session_manager.to_response(session)

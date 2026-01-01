@@ -241,12 +241,28 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       console.error(`[WorkflowStepper] 文檔狀態輪詢失敗:`, error);
       // 錯誤時也要調用回調
       onComplete?.();
-      onShowMessage?.({
-        type: "error",
-        message: `${
-          docItem.type === "file" ? "檔案" : "URL"
-        } ${identifier} 處理失敗: ${error}`,
-      });
+
+      // 檢查是否為內容審核錯誤 - 如果是，不在流程3顯示錯誤（會在流程4審核時再處理）
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      const isContentBlockedError =
+        errorMessage.toLowerCase().includes("content blocked") ||
+        errorMessage.toLowerCase().includes("moderation");
+
+      if (!isContentBlockedError) {
+        // 只顯示非內容審核相關的錯誤
+        onShowMessage?.({
+          type: "error",
+          message: `${
+            docItem.type === "file" ? "檔案" : "URL"
+          } ${identifier} 處理失敗: ${error}`,
+        });
+      } else {
+        // 內容審核錯誤只記錄日誌，不顯示 toast
+        console.warn(
+          `[WorkflowStepper] 內容審核問題將在流程4處理: ${errorMessage}`
+        );
+      }
     }
   };
 
@@ -492,10 +508,38 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
   // 處理上一步點擊
   const handlePreviousStepClick = () => {
-    // 直接回到上一步，保持所有已上傳的資料不變
+    // 如果從流程4（內容審核）返回流程3（資料上傳），且審核失敗
+    if (
+      currentStep === 4 &&
+      reviewPassed === false &&
+      savedReviewResults?.failed &&
+      savedReviewResults.failed.length > 0
+    ) {
+      // 清除所有上傳資料
+      onDocumentsUpdate?.([]);
+      onCrawledUrlsUpdate?.([]);
+
+      // 重置審核狀態
+      setReviewPassed(false);
+      setSavedReviewResults(null);
+      setShouldStartReview(false);
+
+      // 顯示 toast 訊息
+      onShowMessage?.({
+        type: "info",
+        message:
+          "已清除上傳內容，請重新上傳符合規範的資料。流程1、2的配置也可重新調整。",
+      });
+
+      // 回到上一步
+      onStepChange(currentStep - 1);
+      return;
+    }
+
+    // 其他情況直接回到上一步，保持所有已上傳的資料不變
     onStepChange(currentStep - 1);
   };
-  const handleNextStepClick = () => {
+  const handleNextStepClick = async () => {
     // 檢查是否正在處理中
     if (isGlobalLoading) {
       onShowMessage?.({
@@ -539,6 +583,27 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       return;
     }
 
+    // 如果從步驟5進入步驟6，生成並更新 custom_prompt
+    if (currentStep === 5 && sessionId && parameters) {
+      try {
+        // 根據流程2的參數生成 custom_prompt
+        const customPrompt = generateCustomPrompt(parameters);
+        if (customPrompt) {
+          const { updateCustomPrompt } = await import(
+            "../../services/sessionService"
+          );
+          await updateCustomPrompt(sessionId, customPrompt);
+          console.log("[WorkflowStepper] Custom prompt updated for step 6");
+        }
+      } catch (error) {
+        console.warn(
+          "[WorkflowStepper] Failed to update custom prompt:",
+          error
+        );
+        // 不阻擋進入步驟6
+      }
+    }
+
     // 如果從步驟3進入步驟4，直接進入下一步
     if (currentStep === 3) {
       onStepChange(currentStep + 1);
@@ -546,6 +611,118 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     }
     // 继续到下一步
     onStepChange(currentStep + 1);
+  };
+
+  // 根據流程2參數生成 custom_prompt
+  const generateCustomPrompt = (params: any): string | null => {
+    const {
+      persona,
+      response_style,
+      professional_level,
+      creativity_level,
+      response_format,
+      citation_style,
+      combined_style,
+    } = params;
+
+    // 如果沒有設定任何特殊參數，返回 null 使用預設 prompt
+    if (
+      !persona &&
+      combined_style === "professional_standard" &&
+      response_format === "auto" &&
+      citation_style === "inline"
+    ) {
+      return null;
+    }
+
+    // 構建語氣指示
+    let toneInstructions = "";
+
+    if (persona) {
+      toneInstructions += `**PERSONA**: Respond as if you are a "${persona}". Adopt this persona's communication style, vocabulary level, and tone.\n`;
+    }
+
+    // 回應風格
+    const styleMap: Record<string, string> = {
+      concise:
+        "Keep responses brief and to the point. Use bullet points when helpful.",
+      standard: "Provide balanced responses with appropriate detail.",
+      detailed:
+        "Provide comprehensive, thorough explanations with examples when relevant.",
+    };
+
+    // 專業程度
+    const levelMap: Record<string, string> = {
+      casual: "Use everyday language that anyone can understand. Avoid jargon.",
+      professional:
+        "Use professional terminology appropriately. Be formal but accessible.",
+      academic:
+        "Use academic language and precise terminology. Be rigorous and scholarly.",
+    };
+
+    // 創意程度
+    const creativityMap: Record<string, string> = {
+      conservative:
+        "Stick strictly to the document content. Minimize interpretation.",
+      balanced: "Balance factual content with reasonable inferences.",
+      creative:
+        "Allow for creative connections and broader context when relevant.",
+    };
+
+    // 回應格式
+    const formatMap: Record<string, string> = {
+      auto: "Choose the most appropriate format based on the question.",
+      bullet: "Always use bullet points and numbered lists for clarity.",
+      paragraph: "Write in complete paragraphs with smooth transitions.",
+      step_by_step: "Break down responses into clear, numbered steps.",
+    };
+
+    // 引用格式
+    const citationMap: Record<string, string> = {
+      none: "Do not include source citations in your response.",
+      inline:
+        "Include source citations inline after relevant information, like [Document 1].",
+      footnote:
+        "List all source citations at the end of your response as footnotes.",
+    };
+
+    const styleInstruction = styleMap[response_style] || styleMap["standard"];
+    const levelInstruction =
+      levelMap[professional_level] || levelMap["professional"];
+    const creativityInstruction =
+      creativityMap[creativity_level] || creativityMap["balanced"];
+    const formatInstruction = formatMap[response_format] || formatMap["auto"];
+    const citationInstruction =
+      citationMap[citation_style] || citationMap["inline"];
+
+    // 生成完整的 custom_prompt
+    return `You are a RAG (Retrieval-Augmented Generation) assistant.
+
+${toneInstructions}
+**RESPONSE STYLE**: ${styleInstruction}
+**LANGUAGE LEVEL**: ${levelInstruction}
+**CREATIVITY LEVEL**: ${creativityInstruction}
+**RESPONSE FORMAT**: ${formatInstruction}
+**CITATION STYLE**: ${citationInstruction}
+
+**CRITICAL RULES**:
+1. **Response Language**: ALWAYS respond ONLY in {{language}}.
+2. **STRICT RAG POLICY**: ONLY answer based on the retrieved documents below.
+3. **DO NOT make up information** or use knowledge outside the documents.
+4. **GENERAL REQUESTS**: If user asks to "explain", "summarize", or "describe" document content, provide a summary based on retrieved chunks.
+5. **STYLE REQUESTS**: If user requests a specific tone or persona, adapt accordingly while staying within document content.
+6. **PARTIAL MATCH HANDLING**: If the user's question is PARTIALLY related to the documents:
+   - First acknowledge what information IS available in the documents
+   - Then clearly state what specific aspect of the question is NOT covered
+7. Follow the citation style specified above when referencing document sources.
+
+**Retrieved Documents**:
+{{context}}
+
+**User Question**:
+{{query}}
+
+**Your Answer** (in {{language}}, following your persona and style guidelines):`;
   };
 
   const handleStepComplete = (stepId: number) => {
@@ -672,12 +849,24 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
               } catch (error) {
                 console.error("URL upload failed:", error);
                 setIsGlobalLoading(false);
-                onShowMessage?.({
-                  type: "error",
-                  message: `URL處理失敗: ${
-                    error instanceof Error ? error.message : "未知錯誤"
-                  }`,
-                });
+
+                // 檢查是否為內容審核錯誤
+                const errorMessage =
+                  error instanceof Error ? error.message : String(error);
+                const isContentBlockedError =
+                  errorMessage.toLowerCase().includes("content blocked") ||
+                  errorMessage.toLowerCase().includes("moderation");
+
+                if (!isContentBlockedError) {
+                  onShowMessage?.({
+                    type: "error",
+                    message: `URL處理失敗: ${errorMessage}`,
+                  });
+                } else {
+                  console.warn(
+                    `[WorkflowStepper] URL內容審核問題將在流程4處理: ${errorMessage}`
+                  );
+                }
               }
             }}
             onCrawlerUpload={async (url, maxTokens, maxPages) => {
@@ -722,12 +911,24 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
               } catch (error) {
                 console.error("Website crawl failed:", error);
                 setIsGlobalLoading(false);
-                onShowMessage?.({
-                  type: "error",
-                  message: `網站爬取失敗: ${
-                    error instanceof Error ? error.message : "未知錯誤"
-                  }`,
-                });
+
+                // 檢查是否為內容審核錯誤
+                const errorMessage =
+                  error instanceof Error ? error.message : String(error);
+                const isContentBlockedError =
+                  errorMessage.toLowerCase().includes("content blocked") ||
+                  errorMessage.toLowerCase().includes("moderation");
+
+                if (!isContentBlockedError) {
+                  onShowMessage?.({
+                    type: "error",
+                    message: `網站爬取失敗: ${errorMessage}`,
+                  });
+                } else {
+                  console.warn(
+                    `[WorkflowStepper] 網站內容審核問題將在流程4處理: ${errorMessage}`
+                  );
+                }
               }
             }}
           />
