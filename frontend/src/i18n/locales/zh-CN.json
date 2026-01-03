@@ -1,0 +1,278 @@
+{
+  "app": {
+    "title": "RAG 演示聊天机器人",
+    "subtitle": "AI 工程师作品集项目",
+    "description": "上传文件或网络内容，然后使用 AI 驱动的语义搜索提出问题。",
+    "features": {
+      "pdfSupport": "📄 PDF & 文本支持",
+      "urlExtraction": "🔗 URL 提取",
+      "aiQa": "🤖 AI 问答",
+      "multilingual": "🌐 多语言"
+    }
+  },
+  "buttons": {
+    "uploadPdf": "上传 PDF",
+    "uploadText": "上传文字",
+    "uploadUrl": "输入网址",
+    "send": "发送",
+    "leave": "离开会话",
+    "restart": "重新开始",
+    "close": "关闭",
+    "cancel": "取消",
+    "confirm": "确认",
+    "settings": "设置"
+  },
+  "labels": {
+    "session": "会话",
+    "sessionId": "会话 ID",
+    "language": "语言",
+    "selectLanguage": "选择语言",
+    "expires": "到期时间",
+    "documents": "文件",
+    "chunks": "块",
+    "metrics": "指标",
+    "tokenUsage": "Token 使用量",
+    "contextUsage": "上下文使用量",
+    "vectors": "向量",
+    "chatHistory": "对话记录",
+    "typeMessage": "输入您的问题...",
+    "processing": "处理中...",
+    "uploadStatus": "上传状态",
+    "sessionExpiresIn": "会话将在 ~30 分钟后过期"
+  },
+  "messages": {
+    "sessionCreated": "会话创建成功",
+    "sessionExpired": "会话已过期",
+    "uploadSuccess": "文件上传成功",
+    "uploadFailed": "上传失败",
+    "processingDocument": "文件处理中...",
+    "moderationBlocked": "内容审查已阻止此文件",
+    "readyToChat": "准备就绪!请提出您的问题。",
+    "cannotAnswer": "根据已上传的文件,我无法回答此问题。",
+    "networkError": "网络错误。请检查您的连接。",
+    "serverError": "服务器错误。请稍后再试。",
+    "invalidFile": "无效的文件格式",
+    "invalidUrl": "无效的网址格式",
+    "noDocuments": "尚未上传任何文件",
+    "confirmLeave": "您确定要离开此会话吗?"
+  },
+  "settings": {
+    "title": "RAG 设置",
+    "customPrompt": {
+      "label": "自定义提示模板",
+      "placeholder": "留空使用默认提示，或输入自定义提示模板...",
+      "hint": "使用 {{context}} 和 {{question}} 作为占位符",
+      "reset": "重置"
+    },
+    "threshold": {
+      "label": "相似度阈值",
+      "description": "控制 RAG 系统的严格程度。较高的值会提供更精确但可能更少的回答，较低的值会提供更多但可能较不相关的回答。",
+      "low": "宽松",
+      "high": "严格",
+      "strict": "严格模式",
+      "balanced": "平衡模式",
+      "lenient": "宽松模式",
+      "recommendations": "建议",
+      "rec_lenient": "适合探索性查询，可能包含更多不相关内容",
+      "rec_balanced": "推荐设置，平衡精确性和包容性",
+      "rec_strict": "仅回答高度相关的问题，可能经常无法回答"
+    }
+  },
+  "states": {
+    "INITIALIZING": "初始化中...",
+    "READY_FOR_UPLOAD": "准备上传",
+    "PROCESSING": "处理中...",
+    "ERROR": "错误",
+    "READY_FOR_CHAT": "准备对话",
+    "CHATTING": "对话中"
+  },
+  "errors": {
+    "required": "此字段为必填",
+    "minLength": "最小长度为 {{min}} 个字符",
+    "maxLength": "最大长度为 {{max}} 个字符",
+    "invalidFormat": "格式无效"
+  },
+  "upload": {
+    "title": "上传文件",
+    "subtitle": "上传 PDF、文本文件或提供 URL 来开始",
+    "mode": {
+      "file": "文件上传",
+      "url": "网址"
+    },
+    "dropzone": {
+      "dragOrClick": "拖放文件到此处，或点击浏览",
+      "drop": "放开文件",
+      "hint": "支持格式：PDF、TXT（最大 {{maxSize}}）"
+    },
+    "divider": "或",
+    "url": {
+      "label": "提供网址",
+      "placeholder": "输入网址（http:// 或 https://）",
+      "submit": "抓取",
+      "hint": "我们将从网址中提取文本内容"
+    },
+    "error": {
+      "invalidFileType": "仅支持 PDF 和 TXT 文件",
+      "fileTooLarge": "文件大小超过 {{maxSize}}",
+      "emptyFile": "文件为空",
+      "invalidUrl": "无效的网址格式。必须是 http:// 或 https://"
+    }
+  },
+  "processing": {
+    "title": "处理文件中",
+    "sourceType": {
+      "PDF": "PDF 文件",
+      "TEXT": "文本文件",
+      "URL": "网页"
+    },
+    "stage": {
+      "extracting": "提取文本中...",
+      "moderating": "检查内容安全性...",
+      "chunking": "分块文本中...",
+      "embedding": "嵌入与存储中...",
+      "complete": "处理完成",
+      "failed": "处理失败",
+      "blocked": "内容被阻止"
+    },
+    "pleaseWait": "请稍候，这可能需要一些时间...",
+    "complete": {
+      "message": "文件处理成功！",
+      "chunks": "已创建 {{count}} 个文本块",
+      "preview": "预览",
+      "tokensUsed": "已使用令牌",
+      "pagesCrawled": "已爬取页面"
+    },
+    "error": {
+      "moderationBlocked": "内容被安全检查阻止",
+      "processingFailed": "处理失败",
+      "code": "错误代码",
+      "blockedCategories": "阻止类别"
+    },
+    "steps": {
+      "extract": "提取",
+      "moderate": "审核",
+      "chunk": "分块",
+      "embed": "嵌入"
+    },
+    "debug": {
+      "title": "调试信息"
+    }
+  },
+  "chat": {
+    "title": "聊天",
+    "subtitle": "提出关于您的文件的问题",
+    "empty": {
+      "message": "还没有消息",
+      "hint": "开始输入关于已上传文件的问题"
+    },
+    "input": {
+      "placeholder": "提出关于文件的问题...",
+      "submit": "发送",
+      "hint": "按 Enter 发送，Shift+Enter 换行",
+      "maxLength": "{{count}} / 2000"
+    },
+    "loading": "思考中...",
+    "error": {
+      "sendFailed": "发送消息失败",
+      "loadFailed": "加载聊天记录失败",
+      "networkError": "发生网络错误"
+    },
+    "messages": {
+      "cannotAnswer": "无法根据已上传的文件回答此问题。",
+      "you": "您",
+      "assistant": "助理"
+    },
+    "retrieved": {
+      "title": "检索到的来源",
+      "chunks": "找到 {{count}} 个相关段落",
+      "similarity": "相似度"
+    }
+  },
+  "metrics": {
+    "title": "📊 实时指标",
+    "loading": "加载指标中...",
+    "tokens": "Token 使用量",
+    "tokenInput": "输入 Tokens",
+    "tokenOutput": "输出 Tokens",
+    "tokenTotal": "总 Tokens",
+    "tokenPercent": "使用百分比",
+    "context": "上下文窗口",
+    "contextTokens": "上下文 Tokens",
+    "contextPercent": "上下文百分比",
+    "vectors": "向量数据库",
+    "vectorCount": "存储的向量",
+    "tokenWarning": "⚠️ Token 使用量已超过 80%。建议开始新会话。"
+  },
+  "dialogs": {
+    "leave": {
+      "title": "离开会话",
+      "message": "您确定要离开吗？所有会话数据将被永久删除。"
+    },
+    "restart": {
+      "title": "重新启动会话",
+      "message": "您确定要重新启动吗？当前会话将被关闭，并创建新会话。"
+    }
+  },
+  "step2": {
+    "title": "AI 行为与回答规则设定",
+    "disabledNotice": "数据已上传处理，配置已锁定，无法修改。",
+    "system": {
+      "title": "系统行为",
+      "allowInference": "允许推论",
+      "inferenceOn": "开启：可在上传数据范围内合理推论",
+      "inferenceOff": "关闭：仅回答文件中明确记载的内容"
+    },
+    "policy": {
+      "title": "回答政策",
+      "style": {
+        "label": "回答风格",
+        "concise": "简洁扼要",
+        "standard": "标准详细",
+        "detailed": "深入完整",
+        "stepByStep": "步骤教学"
+      },
+      "tone": {
+        "label": "回答语气",
+        "formal": "正式专业",
+        "friendly": "亲切友善",
+        "casual": "轻松活泼",
+        "academic": "严谨学术"
+      },
+      "persona": {
+        "label": "角色设定 (Persona)"
+      }
+    },
+    "persona": {
+      "professor": "大学教授",
+      "expert": "职场专家",
+      "educator": "儿童教育者",
+      "neighbor": "市场大妈大叔"
+    },
+    "runtime": {
+      "title": "执行限制",
+      "maxTokens": "最大回应 Token",
+      "short": "简短",
+      "detailed": "详细",
+      "tokenHint": "数值越大，回答越长越详细",
+      "contextWarning": "Context 使用预警",
+      "contextHint": "达到此比例时提醒您 Token 使用量"
+    },
+    "info": {
+      "title": "系统状态",
+      "notice": "系统自动设定，无法调整",
+      "llmModel": "LLM 模型",
+      "contextWindow": "Context Window",
+      "vectorDb": "Vector DB",
+      "embeddingModel": "Embedding Model",
+      "strictRag": "严格 RAG",
+      "moderation": "内容审核",
+      "sessionTtl": "Session TTL",
+      "similarityThreshold": "相似度阈值",
+      "citationStyle": "引用方式",
+      "enabled": "已启用"
+    }
+  },
+  "common": {
+    "processing": "处理中..."
+  }
+}

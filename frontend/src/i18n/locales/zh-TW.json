@@ -1,0 +1,410 @@
+{
+  "app": {
+    "title": "RAG 演示聊天機器人",
+    "subtitle": "AI 工程師作品集專案",
+    "description": "上傳文件或網路內容，然後使用 AI 驅動的語義搜索提出問題。",
+    "features": {
+      "pdfSupport": "📄 PDF & 文本支援",
+      "urlExtraction": "🔗 URL 擷取",
+      "aiQa": "🤖 AI 問答",
+      "multilingual": "🌐 多語言"
+    }
+  },
+  "buttons": {
+    "uploadPdf": "上傳 PDF",
+    "uploadText": "上傳文字",
+    "uploadUrl": "輸入網址",
+    "send": "發送",
+    "leave": "離開會話",
+    "restart": "重新開始",
+    "close": "關閉",
+    "cancel": "取消",
+    "confirm": "確認",
+    "settings": "設定"
+  },
+  "labels": {
+    "session": "會話",
+    "sessionId": "會話 ID",
+    "language": "語言",
+    "selectLanguage": "選擇語言",
+    "expires": "到期時間",
+    "documents": "文件",
+    "chunks": "區塊",
+    "metrics": "指標",
+    "tokenUsage": "Token 使用量",
+    "contextUsage": "上下文使用量",
+    "vectors": "向量",
+    "chatHistory": "對話紀錄",
+    "typeMessage": "輸入您的問題...",
+    "processing": "處理中...",
+    "uploadStatus": "上傳狀態",
+    "sessionExpiresIn": "會話將在 ~30 分鐘後過期"
+  },
+  "parameters": {
+    "title": "參數設定"
+  },
+  "workflow": {
+    "title": "RAG 工作流程",
+    "step": "步驟",
+    "of": "共",
+    "previous": "上一步",
+    "next": "下一步",
+    "complete": "完成",
+    "steps": {
+      "ragConfig": {
+        "title": "RAG 設定",
+        "description": "配置檢索增強生成參數",
+        "complete": "完成 RAG 設定"
+      },
+      "promptConfig": {
+        "title": "AI 行為與回答規則設定",
+        "description": "設定 AI 回應風格、語氣和限制",
+        "complete": "完成設定"
+      },
+      "dataUpload": {
+        "title": "資訊上傳",
+        "description": "上傳文件和系統設定",
+        "systemSettings": "系統設定",
+        "fileTypes": "檔案類型",
+        "uploadData": "上傳資料",
+        "sessionTtl": "Session存活時間",
+        "fileSizeLimit": "檔案大小限制",
+        "crawlerMaxTokens": "網站爬蟲最大 Token",
+        "crawlerMaxPages": "網站爬蟲最大頁面數",
+        "supportedTypes": "支援檔案類型",
+        "uploadConfig": "當前上傳配置摘要"
+      },
+      "contentReview": {
+        "title": "內容審核",
+        "description": "安全性檢查和內容審查",
+        "documentList": "上傳的文件列表",
+        "preview": "內容預覽與審核",
+        "approve": "核准此文件",
+        "reject": "拒絕此文件",
+        "approveAll": "全部核准",
+        "rejectAll": "全部拒絕",
+        "pending": "待審核",
+        "approved": "已核准",
+        "rejected": "已拒絕",
+        "statistics": "審核統計",
+        "completeReview": "完成內容審核"
+      },
+      "textProcessing": {
+        "title": "文本切割 向量嵌入",
+        "description": "分塊處理並生成向量",
+        "settings": "文本處理設定",
+        "chunkSize": "文本分塊大小",
+        "chunkOverlap": "分塊重疊",
+        "overallProgress": "整體處理進度",
+        "startProcessing": "開始文本處理",
+        "jobStatus": "處理作業狀態",
+        "chunking": "切塊中",
+        "embedding": "嵌入中",
+        "completed": "已完成",
+        "processingComplete": "文本處理完成！"
+      },
+      "aiChat": {
+        "title": "AI 對談",
+        "description": "開始智能問答對話",
+        "systemReady": "RAG 系統準備就緒！",
+        "readyDescription": "您的文件已完成處理，AI助手已準備好為您提供基於文檔內容的智能問答服務。",
+        "currentConfig": "當前 RAG 配置",
+        "usageGuide": "使用指南",
+        "exampleQuestions": "示例問題",
+        "startChat": "開始 AI 對談",
+        "systemInfo": "系統資訊"
+      }
+    }
+  },
+  "messages": {
+    "sessionCreated": "會話建立成功",
+    "sessionExpired": "會話已過期",
+    "uploadSuccess": "文件上傳成功",
+    "uploadFailed": "上傳失敗",
+    "processingDocument": "文件處理中...",
+    "moderationBlocked": "內容審查已封鎖此文件",
+    "readyToChat": "準備就緒!請提出您的問題。",
+    "cannotAnswer": "根據已上傳的文件,我無法回答此問題。",
+    "networkError": "網路錯誤。請檢查您的連線。",
+    "serverError": "伺服器錯誤。請稍後再試。",
+    "invalidFile": "無效的檔案格式",
+    "invalidUrl": "無效的網址格式",
+    "noDocuments": "尚未上傳任何文件",
+    "confirmLeave": "您確定要離開此會話嗎?"
+  },
+  "settings": {
+    "title": "RAG 設定",
+    "customPrompt": {
+      "label": "自定義提示樣板",
+      "placeholder": "留空使用預設提示，或輸入自定義提示樣板...",
+      "hint": "使用 {{context}} 和 {{question}} 作為佔位符",
+      "reset": "重設"
+    },
+    "threshold": {
+      "label": "相似度閈值",
+      "description": "控制 RAG 系統的嚴格程度。較高的值會提供更精確但可能更少的回答，較低的值會提供更多但可能較不相關的回答。",
+      "low": "寬鬆",
+      "high": "嚴格",
+      "strict": "嚴格模式",
+      "balanced": "平衡模式",
+      "lenient": "寬鬆模式",
+      "recommendations": "建議",
+      "rec_lenient": "適合探索性查詢，可能包含更多不相關內容",
+      "rec_balanced": "建議設定，平衡精確性和包容性",
+      "rec_strict": "僅回答高度相關的問題，可能經常無法回答"
+    }
+  },
+  "states": {
+    "INITIALIZING": "初始化中...",
+    "READY_FOR_UPLOAD": "準備上傳",
+    "PROCESSING": "處理中...",
+    "ERROR": "錯誤",
+    "READY_FOR_CHAT": "準備對話",
+    "CHATTING": "對話中"
+  },
+  "errors": {
+    "required": "此欄位為必填",
+    "minLength": "最小長度為 {{min}} 個字元",
+    "maxLength": "最大長度為 {{max}} 個字元",
+    "invalidFormat": "格式無效"
+  },
+  "upload": {
+    "title": "資料上傳",
+    "subtitle": "上傳 PDF、文字檔或提供 URL 來開始",
+    "tab": {
+      "file": "檔案上傳",
+      "url": "單一URL",
+      "crawler": "網站爬蟲"
+    },
+    "mode": {
+      "file": "檔案上傳",
+      "url": "網址"
+    },
+    "dropzone": {
+      "dragOrClick": "拖放檔案到此區域，或點擊進入",
+      "drop": "拖放檔案到此區域",
+      "hint": "支援格式：PDF、TXT（最大 {{maxSize}}）"
+    },
+    "divider": "或",
+    "url": {
+      "label": "提供網址",
+      "placeholder": "輸入 URL (http:// 或 https://)",
+      "submit": "獲取",
+      "hint": "我們將從 URL 中提取文字內容"
+    },
+    "error": {
+      "invalidFileType": "僅支援 PDF 和 TXT 檔案",
+      "fileTooLarge": "檔案大小超過 {{maxSize}}",
+      "emptyFile": "檔案為空",
+      "invalidUrl": "無效的網址格式。必須是 http:// 或 https://"
+    }
+  },
+  "crawler": {
+    "title": "網站爬蟲",
+    "description": "輸入網站 URL 以自動爬取和提取內容",
+    "url": "網站 URL",
+    "maxTokens": "最大 Token 數",
+    "maxPages": "最大頁面數",
+    "advancedOptions": "進階選項",
+    "start": "開始爬蟲",
+    "crawling": "爬蟲中...",
+    "results": "爬蟲結果",
+    "pagesFound": "找到頁面",
+    "totalTokens": "總 Token 數",
+    "urlList": "爬蟲的 URL",
+    "urlNote": "已爬蟲 {{count}} 個 URL，準備處理",
+    "error": {
+      "emptyUrl": "請輸入網站 URL",
+      "invalidUrl": "請輸入有效的 URL"
+    },
+    "tokenHint": {
+      "small": "適合小型網站",
+      "medium": "適合中型網站",
+      "large": "適合大型網站"
+    }
+  },
+  "processing": {
+    "title": "處理文件中",
+    "sourceType": {
+      "PDF": "PDF 文件",
+      "TEXT": "文字檔",
+      "URL": "網頁"
+    },
+    "stage": {
+      "extracting": "萃取文字中...",
+      "moderating": "檢查內容安全性...",
+      "chunking": "分塊文字中...",
+      "embedding": "嵌入與儲存中...",
+      "complete": "處理完成",
+      "failed": "處理失敗",
+      "blocked": "內容被封鎖"
+    },
+    "pleaseWait": "請稍候，這可能需要一些時間...",
+    "complete": {
+      "message": "文件處理成功！",
+      "chunks": "已建立 {{count}} 個文字塊",
+      "preview": "預覽",
+      "tokensUsed": "已使用 Token",
+      "pagesCrawled": "已爬取頁面"
+    },
+    "error": {
+      "moderationBlocked": "內容被安全檢查封鎖",
+      "processingFailed": "處理失敗",
+      "code": "錯誤代碼",
+      "blockedCategories": "封鎖類別"
+    },
+    "steps": {
+      "extract": "萃取",
+      "moderate": "審核",
+      "chunk": "分塊",
+      "embed": "嵌入"
+    },
+    "debug": {
+      "title": "除錯資訊"
+    }
+  },
+  "chat": {
+    "title": "聊天",
+    "subtitle": "提出關於您的文件的問題",
+    "empty": {
+      "message": "還沒有訊息",
+      "hint": "開始輸入關於已上傳文件的問題"
+    },
+    "input": {
+      "placeholder": "提出關於文件的問題...",
+      "submit": "發送",
+      "sending": "傳送中...",
+      "hint": "按 Enter 發送，Shift+Enter 換行",
+      "maxLength": "{{count}} / 2000"
+    },
+    "loading": "思考中...",
+    "error": {
+      "sendFailed": "發送訊息失敗",
+      "loadFailed": "載入聊天記錄失敗",
+      "networkError": "發生網路錯誤"
+    },
+    "messages": {
+      "cannotAnswer": "無法根據已上傳的文件回答此問題。",
+      "you": "您",
+      "assistant": "助理"
+    },
+    "retrieved": {
+      "title": "檢索到的來源",
+      "chunks": "找到 {{count}} 個相關段落",
+      "similarity": "相似度"
+    }
+  },
+  "metrics": {
+    "title": "📊 實時指標",
+    "loading": "載入指標中...",
+    "tokens": "Token 使用量",
+    "tokenInput": "輸入 Tokens",
+    "tokenOutput": "輸出 Tokens",
+    "tokenTotal": "總 Tokens",
+    "tokenPercent": "使用百分比",
+    "context": "上下文窗口",
+    "contextTokens": "上下文 Tokens",
+    "contextPercent": "上下文百分比",
+    "vectors": "向量資料庫",
+    "vectorCount": "儲存的向量",
+    "tokenWarning": "⚠️ Token 使用量已超過 80%。建議開始新會話。"
+  },
+  "dialogs": {
+    "leave": {
+      "title": "離開會話",
+      "message": "您確定要離開嗎？所有會話資料將被永久刪除。"
+    },
+    "restart": {
+      "title": "重新啟動會話",
+      "message": "您確定要重新啟動嗎？當前會話將被關閉，並建立新會話。"
+    }
+  },
+  "step2": {
+    "title": "AI 行為與回答規則設定",
+    "subtitle": "設定 AI 的行為、回答政策與執行限制",
+    "disabledNotice": "資料已上傳處理，配置已鎖定，無法修改。",
+    "badge": {
+      "sessionFixed": "Session 固定",
+      "chatAdjustable": "對話中可調整",
+      "partialFixed": "部分固定",
+      "readonly": "唯讀"
+    },
+    "system": {
+      "title": "系統規則",
+      "answerLanguage": "回答語言",
+      "lang": {
+        "zhTW": "繁體中文",
+        "en": "English",
+        "auto": "自動偵測"
+      },
+      "strictRagMode": "嚴格 RAG 模式",
+      "strictRagOn": "開啟：當資料不足時 AI 將拒絕回答",
+      "strictRagOff": "關閉：AI 可能使用一般知識補充",
+      "allowInference": "允許推論",
+      "inferenceOn": "開啟：可在上傳資料範圍內合理推論",
+      "inferenceOff": "關閉：僅回答文件中明確記載的內容",
+      "externalKnowledge": "外部知識存取",
+      "alwaysOff": "永遠關閉",
+      "noDataPolicy": "無資料回應政策",
+      "noDataPolicyDesc": "當檢索不到相關資料時，AI 會明確告知使用者，並提供可能的替代問題建議。"
+    },
+    "policy": {
+      "title": "回答政策",
+      "style": {
+        "label": "回答風格",
+        "concise": "簡潔扼要",
+        "standard": "標準詳細",
+        "detailed": "深入完整",
+        "stepByStep": "步驟教學"
+      },
+      "tone": {
+        "label": "回答語氣",
+        "formal": "正式專業",
+        "friendly": "親切友善",
+        "casual": "輕鬆活潑",
+        "academic": "嚴謹學術"
+      },
+      "persona": {
+        "label": "角色設定 (Persona)"
+      },
+      "citation": {
+        "label": "引用方式",
+        "inline": "行內引用",
+        "document": "文件引用",
+        "none": "不顯示"
+      }
+    },
+    "persona": {
+      "professor": "大學教授",
+      "expert": "職場專家",
+      "educator": "兒童教育者",
+      "neighbor": "市場大媽大伯"
+    },
+    "runtime": {
+      "title": "執行限制",
+      "maxTokens": "最大回應 Token",
+      "retrievalTopK": "Retrieval Top-K",
+      "similarityThreshold": "相似度閾值",
+      "maxContextTokens": "最大 Context Token",
+      "contextWarning": "Context 使用預警",
+      "precise": "精確",
+      "broad": "廣泛",
+      "loose": "寬鬆",
+      "strict": "嚴格"
+    },
+    "info": {
+      "title": "系統狀態",
+      "notice": "系統自動設定，無法調整",
+      "llmModel": "LLM 模型",
+      "contextWindow": "Context Window",
+      "vectorDb": "Vector DB",
+      "embeddingModel": "Embedding Model",
+      "moderation": "內容審核",
+      "sessionTtl": "Session TTL",
+      "enabled": "已啟用"
+    }
+  },
+  "common": {
+    "processing": "處理中..."
+  }
+}

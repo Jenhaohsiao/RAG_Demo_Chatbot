@@ -1,0 +1,123 @@
+@import "../../styles/variables";
+@import "../../styles/mixins";
+
+.message-container {
+  margin-bottom: $spacing-4;
+  padding: $spacing-3;
+  border-radius: $border-radius;
+
+  &.user {
+    background: #ebf8ff;
+    margin-left: 20%;
+
+    .message-role {
+      color: #2b6cb0;
+    }
+  }
+
+  &.assistant {
+    background: $color-gray-50;
+    margin-right: 20%;
+
+    .message-role {
+      color: $color-text;
+    }
+  }
+}
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: $spacing-2;
+}
+
+.message-role {
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-base;
+  text-transform: none;
+  letter-spacing: 0.5px;
+}
+
+.message-time {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.message-content {
+  font-size: $font-size-lg;
+  line-height: 1.7;
+  color: $color-text;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+
+  &.cannot-answer {
+    color: #9b2c2c;
+    font-style: italic;
+  }
+}
+
+.cannot-answer-note {
+  margin-top: $spacing-2;
+  padding: $spacing-2;
+  background: #fff5f5;
+  border-left: 3px solid #fc8181;
+  font-size: $font-size-xs;
+  color: #742a2a;
+}
+
+/* 建議氣泡標籤樣式 */
+.suggestion-bubbles {
+  margin-top: $spacing-3;
+  padding-top: $spacing-3;
+  border-top: 1px solid #e2e8f0;
+}
+
+.suggestion-label {
+  font-size: $font-size-sm;
+  color: #718096;
+  margin-bottom: $spacing-2;
+  display: flex;
+  align-items: center;
+
+  i {
+    color: #ecc94b;
+  }
+}
+
+.suggestion-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-2;
+}
+
+.suggestion-bubble {
+  display: inline-block;
+  padding: $spacing-2 $spacing-3;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: $font-size-sm;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.5);
+  }
+}

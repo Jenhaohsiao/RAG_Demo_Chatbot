@@ -1,0 +1,38 @@
+@import "../../styles/variables";
+@import "../../styles/mixins";
+
+/**
+ * Loading Overlay Styles
+ * 全局等候轉動圖示樣式
+ */
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  @include flex-center;
+  z-index: $z-index-modal;
+}
+
+.loading-overlay-content {
+  text-align: center;
+  background-color: $color-white;
+  padding: $spacing-8 $spacing-12;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-xl;
+}
+
+.loading-spinner {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-width: 0.3rem;
+}
+
+.loading-message {
+  font-size: $font-size-base;
+  color: $color-text;
+  font-weight: $font-weight-medium;
+}

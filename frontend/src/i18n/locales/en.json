@@ -1,0 +1,333 @@
+{
+  "app": {
+    "title": "RAG Demo Chatbot",
+    "subtitle": "AI Engineer Portfolio Project",
+    "description": "Upload documents or web content, then ask questions about them using AI-powered semantic search.",
+    "features": {
+      "pdfSupport": "📄 PDF & Text Support",
+      "urlExtraction": "🔗 URL Extraction",
+      "aiQa": "🤖 AI Q&A",
+      "multilingual": "🌐 Multilingual"
+    }
+  },
+  "buttons": {
+    "uploadPdf": "Upload PDF",
+    "uploadText": "Upload Text",
+    "uploadUrl": "Enter URL",
+    "send": "Send",
+    "leave": "Leave Session",
+    "restart": "Restart",
+    "close": "Close",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "settings": "Settings"
+  },
+  "labels": {
+    "session": "Session",
+    "sessionId": "Session ID",
+    "language": "Language",
+    "selectLanguage": "Select Language",
+    "expires": "Expires",
+    "documents": "Documents",
+    "chunks": "Chunks",
+    "metrics": "Metrics",
+    "tokenUsage": "Token Usage",
+    "contextUsage": "Context Usage",
+    "vectors": "Vectors",
+    "chatHistory": "Chat History",
+    "typeMessage": "Type your question...",
+    "processing": "Processing...",
+    "uploadStatus": "Upload Status",
+    "sessionExpiresIn": "Session expires in ~30 minutes"
+  },
+  "messages": {
+    "sessionCreated": "Session created successfully",
+    "sessionExpired": "Session has expired",
+    "uploadSuccess": "Document uploaded successfully",
+    "uploadFailed": "Upload failed",
+    "processingDocument": "Processing document...",
+    "moderationBlocked": "Content moderation blocked this document",
+    "readyToChat": "Ready to chat! Ask your question.",
+    "cannotAnswer": "I cannot answer this question based on the uploaded documents.",
+    "networkError": "Network error. Please check your connection.",
+    "serverError": "Server error. Please try again later.",
+    "invalidFile": "Invalid file format",
+    "invalidUrl": "Invalid URL format",
+    "noDocuments": "No documents uploaded yet",
+    "confirmLeave": "Are you sure you want to leave this session?"
+  },
+  "settings": {
+    "title": "RAG Settings",
+    "customPrompt": {
+      "label": "Custom Prompt Template",
+      "placeholder": "Leave empty to use default prompt, or enter your custom prompt template here...",
+      "hint": "Use {{context}} and {{question}} as placeholders",
+      "reset": "Reset"
+    },
+    "threshold": {
+      "label": "Similarity Threshold",
+      "description": "Controls how strict the RAG system is. Higher values provide more precise but potentially fewer answers, lower values provide more but potentially less relevant answers.",
+      "low": "Lenient",
+      "high": "Strict",
+      "strict": "Strict Mode",
+      "balanced": "Balanced Mode",
+      "lenient": "Lenient Mode",
+      "recommendations": "Recommendations",
+      "rec_lenient": "Suitable for exploratory queries, may include more irrelevant content",
+      "rec_balanced": "Recommended setting, balances precision and recall",
+      "rec_strict": "Only answers highly relevant questions, may often return cannot answer"
+    }
+  },
+  "states": {
+    "INITIALIZING": "Initializing...",
+    "READY_FOR_UPLOAD": "Ready for Upload",
+    "PROCESSING": "Processing...",
+    "ERROR": "Error",
+    "READY_FOR_CHAT": "Ready for Chat",
+    "CHATTING": "Chatting"
+  },
+  "errors": {
+    "required": "This field is required",
+    "minLength": "Minimum length is {{min}} characters",
+    "maxLength": "Maximum length is {{max}} characters",
+    "invalidFormat": "Invalid format"
+  },
+  "upload": {
+    "title": "Upload Document",
+    "subtitle": "Upload a PDF, text file, or provide a URL to get started",
+    "tab": {
+      "file": "File Upload",
+      "url": "Single URL",
+      "crawler": "Website Crawler"
+    },
+    "mode": {
+      "file": "File Upload",
+      "url": "URL"
+    },
+    "dropzone": {
+      "dragOrClick": "Drag & drop a file here, or click to browse",
+      "drop": "Drop file here",
+      "hint": "Supported formats: PDF, TXT (max {{maxSize}})"
+    },
+    "divider": "Or",
+    "url": {
+      "label": "Provide a URL",
+      "placeholder": "Enter URL (http:// or https://)",
+      "submit": "Fetch",
+      "hint": "We will extract text content from the URL"
+    },
+    "error": {
+      "invalidFileType": "Only PDF and TXT files are supported",
+      "fileTooLarge": "File size exceeds {{maxSize}}",
+      "emptyFile": "File is empty",
+      "invalidUrl": "Invalid URL format. Must be http:// or https://"
+    }
+  },
+  "crawler": {
+    "title": "Website Crawler",
+    "description": "Enter a website URL to automatically crawl and extract content",
+    "url": "Website URL",
+    "maxTokens": "Max Tokens",
+    "maxPages": "Max Pages",
+    "advancedOptions": "Advanced Options",
+    "start": "Start Crawl",
+    "crawling": "Crawling...",
+    "results": "Crawl Results",
+    "pagesFound": "Pages Found",
+    "totalTokens": "Total Tokens",
+    "urlList": "Crawled URLs",
+    "urlNote": "{{count}} URLs crawled and ready for processing",
+    "error": {
+      "emptyUrl": "Please enter a website URL",
+      "invalidUrl": "Please enter a valid URL"
+    },
+    "tokenHint": {
+      "small": "Suitable for small websites",
+      "medium": "Suitable for medium websites",
+      "large": "Suitable for large websites"
+    }
+  },
+  "processing": {
+    "title": "Processing Document",
+    "sourceType": {
+      "PDF": "PDF Document",
+      "TEXT": "Text File",
+      "URL": "Web Page"
+    },
+    "stage": {
+      "extracting": "Extracting Text...",
+      "moderating": "Checking Content Safety...",
+      "chunking": "Chunking Text...",
+      "embedding": "Embedding & Storing...",
+      "complete": "Processing Complete",
+      "failed": "Processing Failed",
+      "blocked": "Content Blocked"
+    },
+    "pleaseWait": "Please wait, this may take a few moments...",
+    "complete": {
+      "message": "Document processed successfully!",
+      "chunks": "{{count}} text chunks created",
+      "preview": "Preview",
+      "tokensUsed": "Tokens Used",
+      "pagesCrawled": "Pages Crawled"
+    },
+    "error": {
+      "moderationBlocked": "Content Blocked by Safety Check",
+      "processingFailed": "Processing Failed",
+      "code": "Error Code",
+      "blockedCategories": "Blocked Categories"
+    },
+    "steps": {
+      "extract": "Extract",
+      "moderate": "Moderate",
+      "chunk": "Chunk",
+      "embed": "Embed"
+    },
+    "debug": {
+      "title": "Debug Info"
+    }
+  },
+  "chat": {
+    "title": "Chat",
+    "subtitle": "Ask questions about your documents",
+    "empty": {
+      "message": "No messages yet",
+      "hint": "Start by typing a question about the uploaded document"
+    },
+    "input": {
+      "placeholder": "Ask a question about the document...",
+      "submit": "Send",
+      "hint": "Press Enter to send, Shift+Enter for new line",
+      "maxLength": "{{count}} / 2000"
+    },
+    "loading": "Thinking...",
+    "error": {
+      "sendFailed": "Failed to send message",
+      "loadFailed": "Failed to load chat history",
+      "networkError": "Network error occurred"
+    },
+    "messages": {
+      "cannotAnswer": "I cannot answer this question based on the uploaded documents.",
+      "you": "You",
+      "assistant": "Assistant"
+    },
+    "retrieved": {
+      "title": "Retrieved Sources",
+      "chunks": "{{count}} relevant chunks found",
+      "similarity": "Similarity"
+    }
+  },
+  "metrics": {
+    "title": "📊 Real-time Metrics",
+    "loading": "Loading metrics...",
+    "tokens": "Token Usage",
+    "tokenInput": "Input Tokens",
+    "tokenOutput": "Output Tokens",
+    "tokenTotal": "Total Tokens",
+    "tokenPercent": "Usage Percentage",
+    "context": "Context Window",
+    "contextTokens": "Context Tokens Used",
+    "contextPercent": "Context Percentage",
+    "vectors": "Vector Database",
+    "vectorCount": "Vectors Stored",
+    "tokenWarning": "⚠️ Token usage is above 80%. Consider starting a new session."
+  },
+  "dialogs": {
+    "leave": {
+      "title": "Leave Session",
+      "message": "Are you sure you want to leave? All session data will be deleted permanently."
+    },
+    "restart": {
+      "title": "Restart Session",
+      "message": "Are you sure you want to restart? Your current session will be closed and a new session will be created."
+    }
+  },
+  "step2": {
+    "title": "AI Behavior & Response Configuration",
+    "subtitle": "Configure AI behavior, response policy, and runtime constraints",
+    "disabledNotice": "Data has been uploaded. Configuration is locked and cannot be modified.",
+    "badge": {
+      "sessionFixed": "Session Fixed",
+      "chatAdjustable": "Adjustable During Chat",
+      "partialFixed": "Partially Fixed",
+      "readonly": "Read-only"
+    },
+    "system": {
+      "title": "System Rules",
+      "answerLanguage": "Answer Language",
+      "lang": {
+        "zhTW": "Traditional Chinese",
+        "en": "English",
+        "auto": "Auto-detect"
+      },
+      "strictRagMode": "Strict RAG Mode",
+      "strictRagOn": "ON: AI will refuse to answer when data is insufficient",
+      "strictRagOff": "OFF: AI may supplement with general knowledge",
+      "allowInference": "Allow Inference",
+      "inferenceOn": "ON: May make reasonable inferences within document scope",
+      "inferenceOff": "OFF: Only answers explicitly stated in documents",
+      "externalKnowledge": "External Knowledge Access",
+      "alwaysOff": "Always Off",
+      "noDataPolicy": "No-data Response Policy",
+      "noDataPolicyDesc": "When no relevant data is found, AI will clearly inform the user and suggest possible alternative questions."
+    },
+    "policy": {
+      "title": "Response Policy",
+      "style": {
+        "label": "Response Style",
+        "concise": "Concise",
+        "standard": "Standard",
+        "detailed": "Detailed",
+        "stepByStep": "Step-by-Step"
+      },
+      "tone": {
+        "label": "Response Tone",
+        "formal": "Formal Professional",
+        "friendly": "Friendly Approachable",
+        "casual": "Casual Relaxed",
+        "academic": "Academic Rigorous"
+      },
+      "persona": {
+        "label": "Persona"
+      },
+      "citation": {
+        "label": "Citation Style",
+        "inline": "Inline Citation",
+        "document": "Document Reference",
+        "none": "No Citation"
+      }
+    },
+    "persona": {
+      "professor": "University Professor",
+      "expert": "Workplace Expert",
+      "educator": "Children's Educator",
+      "neighbor": "Friendly Neighbor"
+    },
+    "runtime": {
+      "title": "Runtime Constraints",
+      "maxTokens": "Max Response Tokens",
+      "retrievalTopK": "Retrieval Top-K",
+      "similarityThreshold": "Similarity Threshold",
+      "maxContextTokens": "Max Context Tokens",
+      "contextWarning": "Context Warning Threshold",
+      "precise": "Precise",
+      "broad": "Broad",
+      "loose": "Loose",
+      "strict": "Strict"
+    },
+    "info": {
+      "title": "System Info",
+      "notice": "Automatically configured, cannot be modified",
+      "llmModel": "LLM Model",
+      "contextWindow": "Context Window",
+      "vectorDb": "Vector DB",
+      "embeddingModel": "Embedding Model",
+      "moderation": "Content Moderation",
+      "sessionTtl": "Session TTL",
+      "enabled": "Enabled"
+    }
+  },
+  "common": {
+    "processing": "Processing..."
+  }
+}

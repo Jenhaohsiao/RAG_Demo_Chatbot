@@ -1,0 +1,186 @@
+/**
+ * Global Design Tokens & Variables
+ * 全局設計變數 - 統一顏色、間距、字型等
+ */
+
+// ========================================
+// Colors - 顏色系統
+// ========================================
+
+// Primary Colors - 主要顏色
+$color-primary: #0d6efd;
+$color-primary-light: #ebf8ff;
+$color-primary-dark: #2b6cb0;
+
+// Secondary Colors - 次要顏色
+$color-secondary: #6c757d;
+$color-secondary-light: #f7fafc;
+$color-secondary-dark: #2d3748;
+
+// Semantic Colors - 語意顏色
+$color-success: #28a745;
+$color-success-light: #d4edda;
+$color-success-dark: #155724;
+
+$color-warning: #ffc107;
+$color-warning-light: #fff3cd;
+$color-warning-dark: #856404;
+
+$color-danger: #dc3545;
+$color-danger-light: #fff5f5;
+$color-danger-dark: #9b2c2c;
+
+$color-info: #17a2b8;
+$color-info-light: #d1ecf1;
+$color-info-dark: #0c5460;
+
+// Neutral Colors - 中性色
+$color-white: #ffffff;
+$color-black: #000000;
+$color-gray-50: #f8f9fa;
+$color-gray-100: #f7fafc;
+$color-gray-200: #dee2e6;
+$color-gray-300: #ced4da;
+$color-gray-400: #adb5bd;
+$color-gray-500: #718096;
+$color-gray-600: #6c757d;
+$color-gray-700: #495057;
+$color-gray-800: #2d3748;
+$color-gray-900: #212529;
+
+// Text Colors - 文字顏色
+$color-text: #2d3748; // 主要文字顏色
+$color-text-dark: #1a202c; // 深色文字
+$color-text-secondary: #718096; // 次要文字顏色
+$color-text-muted: #a0aec0; // 淡化文字
+
+// Background Colors - 背景色
+$bg-light: #f8f9fa;
+$bg-dark: #212529;
+$bg-overlay: rgba(0, 0, 0, 0.3);
+$bg-overlay-light: rgba(0, 0, 0, 0.1);
+
+// Border Colors - 邊框顏色
+$color-border: #e1e8ed;
+$color-border-light: #f1f3f5;
+
+// ========================================
+// Spacing - 間距系統
+// ========================================
+$spacing-0: 0;
+$spacing-1: 0.25rem; // 4px
+$spacing-2: 0.5rem; // 8px
+$spacing-2-5: 0.625rem; // 10px
+$spacing-3: 0.75rem; // 12px
+$spacing-4: 1rem; // 16px
+$spacing-5: 1.25rem; // 20px
+$spacing-6: 1.5rem; // 24px
+$spacing-8: 2rem; // 32px
+$spacing-10: 2.5rem; // 40px
+$spacing-12: 3rem; // 48px
+$spacing-16: 4rem; // 64px
+
+// ========================================
+// Typography - 字型系統
+// ========================================
+$font-family-base: system-ui, -apple-system, "Segoe UI", Roboto,
+  "Helvetica Neue", Arial, sans-serif;
+$font-family-monospace: "Monaco", "Menlo", "Ubuntu Mono", "Courier New",
+  monospace;
+
+// Font Sizes
+$font-size-xs: 0.6875rem; // 11px
+$font-size-sm: 0.75rem; // 12px
+$font-size-base: 0.875rem; // 14px
+$font-size-md: 1rem; // 16px
+$font-size-lg: 1.125rem; // 18px
+$font-size-xl: 1.25rem; // 20px
+$font-size-2xl: 1.5rem; // 24px
+$font-size-3xl: 1.75rem; // 28px
+$font-size-4xl: 2rem; // 32px
+
+// Font Weights
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// Line Heights
+$line-height-tight: 1.25;
+$line-height-normal: 1.5;
+$line-height-relaxed: 1.6;
+$line-height-loose: 2;
+
+// ========================================
+// Border Radius - 圓角
+// ========================================
+$border-radius-sm: 0.25rem; // 4px
+$border-radius: 0.5rem; // 8px
+$border-radius-md: 0.75rem; // 12px
+$border-radius-lg: 1rem; // 16px
+$border-radius-full: 50%;
+
+// ========================================
+// Shadows - 陰影
+// ========================================
+$shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+$shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);
+$shadow-xl: 0 8px 32px rgba(0, 0, 0, 0.2);
+
+// ========================================
+// Z-Index - 層級
+// ========================================
+$z-index-dropdown: 1000;
+$z-index-sticky: 1020;
+$z-index-fixed: 1030;
+$z-index-modal-backdrop: 1040;
+$z-index-modal: 1050;
+$z-index-popover: 1060;
+$z-index-tooltip: 1070;
+$z-index-loading: 9999;
+$z-index-toast: 10000;
+
+// ========================================
+// Transitions - 過渡動畫
+// ========================================
+$transition-fast: 0.15s ease;
+$transition-base: 0.3s ease;
+$transition-slow: 0.5s ease;
+
+// ========================================
+// Breakpoints - 響應式斷點
+// ========================================
+$breakpoint-xs: 0;
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 992px;
+$breakpoint-xl: 1200px;
+$breakpoint-xxl: 1400px;
+
+// ========================================
+// Component-Specific Variables
+// ========================================
+
+// Cards
+$card-border-color: $color-gray-200;
+$card-border-radius: $border-radius;
+$card-padding: $spacing-4;
+
+// Buttons
+$btn-padding-y: $spacing-2;
+$btn-padding-x: $spacing-4;
+$btn-border-radius: $border-radius;
+
+// Inputs
+$input-border-color: $color-gray-300;
+$input-border-radius: $border-radius;
+$input-padding-y: $spacing-2;
+$input-padding-x: $spacing-3;
+
+// Messages
+$message-padding: $spacing-3;
+$message-border-radius: $border-radius;
+$message-user-bg: $color-primary-light;
+$message-assistant-bg: $color-gray-100;

@@ -1,0 +1,267 @@
+/**
+ * Global Mixins & Functions
+ * 全局混合宏 - 可重用的樣式模式
+ */
+
+@import "./variables";
+
+// ========================================
+// Layout Mixins
+// ========================================
+
+// Flexbox Center
+@mixin flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+// Flexbox Between
+@mixin flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+// Flexbox Column
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+// Absolute Full
+@mixin absolute-full {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+// Fixed Full
+@mixin fixed-full {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+// ========================================
+// Responsive Mixins
+// ========================================
+
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == "xs" {
+    @media (max-width: #{$breakpoint-sm - 1}) {
+      @content;
+    }
+  } @else if $breakpoint == "sm" {
+    @media (min-width: $breakpoint-sm) {
+      @content;
+    }
+  } @else if $breakpoint == "md" {
+    @media (min-width: $breakpoint-md) {
+      @content;
+    }
+  } @else if $breakpoint == "lg" {
+    @media (min-width: $breakpoint-lg) {
+      @content;
+    }
+  } @else if $breakpoint == "xl" {
+    @media (min-width: $breakpoint-xl) {
+      @content;
+    }
+  } @else if $breakpoint == "xxl" {
+    @media (min-width: $breakpoint-xxl) {
+      @content;
+    }
+  }
+}
+
+// ========================================
+// Typography Mixins
+// ========================================
+
+@mixin text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin text-truncate-lines($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@mixin heading($size: "base") {
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
+
+  @if $size == "xs" {
+    font-size: $font-size-lg;
+  } @else if $size == "sm" {
+    font-size: $font-size-xl;
+  } @else if $size == "base" {
+    font-size: $font-size-2xl;
+  } @else if $size == "lg" {
+    font-size: $font-size-3xl;
+  } @else if $size == "xl" {
+    font-size: $font-size-4xl;
+  }
+}
+
+// ========================================
+// Visual Mixins
+// ========================================
+
+// Card Style
+@mixin card {
+  background: $color-white;
+  border: 1px solid $card-border-color;
+  border-radius: $card-border-radius;
+  padding: $card-padding;
+  box-shadow: $shadow-sm;
+}
+
+// Overlay
+@mixin overlay($opacity: 0.3) {
+  @include fixed-full;
+  background-color: rgba($color-black, $opacity);
+  z-index: $z-index-modal-backdrop;
+}
+
+// Button Reset
+@mixin button-reset {
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+// Smooth Scroll
+@mixin smooth-scroll {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $color-gray-100;
+    border-radius: $border-radius;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $color-gray-400;
+    border-radius: $border-radius;
+
+    &:hover {
+      background: $color-gray-500;
+    }
+  }
+}
+
+// Hover Effect
+@mixin hover-lift {
+  transition: transform $transition-base, box-shadow $transition-base;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-md;
+  }
+}
+
+// Focus Visible
+@mixin focus-visible {
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+}
+
+// ========================================
+// Animation Mixins
+// ========================================
+
+@mixin fade-in($duration: $transition-base) {
+  animation: fadeIn $duration ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@mixin slide-in-right($duration: $transition-base) {
+  animation: slideInRight $duration ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@mixin slide-in-up($duration: $transition-base) {
+  animation: slideInUp $duration ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+// Spinner Animation
+@mixin spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ========================================
+// Utility Functions
+// ========================================
+
+// Spacing helper
+@function spacing($multiplier) {
+  @return $spacing-4 * $multiplier;
+}
+
+// Color with opacity
+@function color-alpha($color, $alpha) {
+  @return rgba($color, $alpha);
+}

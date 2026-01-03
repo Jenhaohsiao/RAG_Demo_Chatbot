@@ -1,0 +1,110 @@
+@import "../../styles/variables";
+@import "../../styles/mixins";
+
+.error-boundary-container {
+  min-height: 100vh;
+  @include flex-center;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.error-boundary-content {
+  background: $color-white;
+  border-radius: $border-radius-lg;
+  padding: $spacing-10;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  text-align: center;
+}
+
+.error-icon {
+  font-size: 48px;
+  margin-bottom: $spacing-4;
+}
+
+.error-boundary {
+  h1 {
+    margin: 0 0 $spacing-2 0;
+    font-size: $font-size-2xl;
+    color: $color-text;
+    font-weight: $font-weight-semibold;
+  }
+
+  p {
+    margin: 0 0 $spacing-6 0;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    line-height: 1.6;
+  }
+}
+
+.error-details {
+  margin: $spacing-6 0;
+  padding: $spacing-4;
+  background: $color-gray-50;
+  border-radius: $border-radius;
+  border-left: 4px solid $color-danger;
+
+  summary {
+    cursor: pointer;
+    font-weight: $font-weight-medium;
+    color: $color-text;
+    user-select: none;
+
+    &:hover {
+      color: $color-text-dark;
+    }
+  }
+
+  pre {
+    margin: $spacing-3 0 0 0;
+    overflow-x: auto;
+    background: $color-white;
+    padding: $spacing-3;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-xs;
+    color: #e53e3e;
+  }
+
+  code {
+    font-family: "Courier New", monospace;
+  }
+}
+
+.error-actions {
+  @include flex-center;
+  gap: $spacing-3;
+}
+
+.button {
+  padding: $spacing-2-5 $spacing-6;
+  border: none;
+  border-radius: $border-radius-md;
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: $font-size-sm;
+}
+
+.button-primary {
+  background: $color-primary;
+  color: $color-white;
+
+  &:hover {
+    background: darken($color-primary, 10%);
+    @include hover-lift;
+  }
+}
+
+.button-secondary {
+  background: $color-gray-200;
+  color: $color-text;
+
+  &:hover {
+    background: $color-gray-300;
+  }
+}
+
+.button-secondary:hover {
+  background: #cbd5e0;
+  transform: translateY(-2px);
+}

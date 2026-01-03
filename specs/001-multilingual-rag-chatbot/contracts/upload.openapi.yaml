@@ -1,0 +1,386 @@
+openapi: 3.0.3
+info:
+  title: RAG Chatbot - Upload API
+  description: API for uploading documents (PDF/text/URL), content moderation, and embedding pipeline
+  version: 1.0.0
+  contact:
+    name: RAG Demo Chatbot
+    email: jenhao.hsiao@gmail.com
+
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Development server
+  - url: https://api.ragchatbot.example.com/api/v1
+    description: Production server
+
+tags:
+  - name: upload
+    description: Document upload and processing
+
+paths:
+  /upload/{session_id}/file:
+    post:
+      tags:
+        - upload
+      summary: Upload PDF or text file
+      description: |
+        Upload a PDF or text file for processing. Flow:
+        1. Extract text from file
+        2. Moderate content via Gemini Safety API
+        3. Chunk text into segments
+        4. Generate embeddings
+        5. Store in Qdrant collection
+      operationId: uploadFile
+      parameters:
+        - $ref: '../session.openapi.yaml#/components/parameters/SessionIdPath'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: PDF or text file (max 10MB)
+              required:
+                - file
+      responses:
+        '202':
+          description: Upload accepted, processing started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadResponse'
+              example:
+                document_id: "d1e2f3a4-b5c6-7890-def0-123456789abc"
+                session_id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                source_type: "PDF"
+                source_reference: "example.pdf"
+                upload_timestamp: "2025-12-08T10:31:00Z"
+                extraction_status: "EXTRACTING"
+                moderation_status: "PENDING"
+        '400':
+          $ref: '#/components/responses/InvalidFileUpload'
+        '404':
+          $ref: '../session.openapi.yaml#/components/responses/SessionNotFound'
+        '413':
+          description: File too large
+          content:
+            application/json:
+              schema:
+                $ref: '../session.openapi.yaml#/components/schemas/Error'
+              example:
+                error_code: "FILE_TOO_LARGE"
+                message: "File size exceeds 10MB limit"
+
+  /upload/{session_id}/url:
+    post:
+      tags:
+        - upload
+      summary: Upload content from URL
+      description: |
+        Fetch and process content from a web URL. Same flow as file upload:
+        Extract → Moderate → Chunk → Embed → Store
+      operationId: uploadUrl
+      parameters:
+        - $ref: '../session.openapi.yaml#/components/parameters/SessionIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url:
+                  type: string
+                  format: uri
+                  description: Web URL to fetch content from
+              required:
+                - url
+            example:
+              url: "https://example.com/article"
+      responses:
+        '202':
+          description: URL fetch accepted, processing started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadResponse'
+              example:
+                document_id: "d1e2f3a4-b5c6-7890-def0-123456789abc"
+                session_id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                source_type: "URL"
+                source_reference: "https://example.com/article"
+                upload_timestamp: "2025-12-08T10:31:00Z"
+                extraction_status: "EXTRACTING"
+                moderation_status: "PENDING"
+        '400':
+          description: Invalid URL
+          content:
+            application/json:
+              schema:
+                $ref: '../session.openapi.yaml#/components/schemas/Error'
+              example:
+                error_code: "INVALID_URL"
+                message: "URL must be valid http:// or https:// format"
+        '404':
+          $ref: '../session.openapi.yaml#/components/responses/SessionNotFound'
+
+  /upload/{session_id}/status/{document_id}:
+    get:
+      tags:
+        - upload
+      summary: Get upload processing status
+      description: |
+        Poll for upload processing progress. Returns extraction status, moderation result,
+        chunking progress, and error details if any.
+      operationId: getUploadStatus
+      parameters:
+        - $ref: '../session.openapi.yaml#/components/parameters/SessionIdPath'
+        - name: document_id
+          in: path
+          required: true
+          description: UUID of the uploaded document
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Upload status retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadStatusResponse'
+              examples:
+                processing:
+                  summary: Upload in progress
+                  value:
+                    document_id: "d1e2f3a4-b5c6-7890-def0-123456789abc"
+                    source_type: "PDF"
+                    source_reference: "example.pdf"
+                    extraction_status: "EXTRACTED"
+                    moderation_status: "CHECKING"
+                    chunk_count: 0
+                    processing_progress: 50
+                complete:
+                  summary: Upload complete
+                  value:
+                    document_id: "d1e2f3a4-b5c6-7890-def0-123456789abc"
+                    source_type: "PDF"
+                    source_reference: "example.pdf"
+                    extraction_status: "EXTRACTED"
+                    moderation_status: "APPROVED"
+                    chunk_count: 15
+                    processing_progress: 100
+                    summary: "Document about machine learning basics..."
+                moderation_blocked:
+                  summary: Content blocked by moderation
+                  value:
+                    document_id: "d1e2f3a4-b5c6-7890-def0-123456789abc"
+                    source_type: "PDF"
+                    source_reference: "blocked.pdf"
+                    extraction_status: "EXTRACTED"
+                    moderation_status: "BLOCKED"
+                    error_code: "ERR_MODERATION_BLOCKED"
+                    error_message: "Content violates safety policies"
+                    moderation_categories: ["harassment", "hate-speech"]
+                extraction_failed:
+                  summary: Extraction failed
+                  value:
+                    document_id: "d1e2f3a4-b5c6-7890-def0-123456789abc"
+                    source_type: "PDF"
+                    source_reference: "corrupted.pdf"
+                    extraction_status: "FAILED"
+                    moderation_status: "PENDING"
+                    error_code: "ERR_EXTRACT_FAILED"
+                    error_message: "Unable to extract text from PDF"
+        '404':
+          description: Document not found
+          content:
+            application/json:
+              schema:
+                $ref: '../session.openapi.yaml#/components/schemas/Error'
+              example:
+                error_code: "DOCUMENT_NOT_FOUND"
+                message: "Document does not exist in this session"
+
+  /upload/{session_id}/documents:
+    get:
+      tags:
+        - upload
+      summary: List all uploaded documents
+      description: Retrieve all documents uploaded in this session with their processing status
+      operationId: listDocuments
+      parameters:
+        - $ref: '../session.openapi.yaml#/components/parameters/SessionIdPath'
+      responses:
+        '200':
+          description: Documents list retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session_id:
+                    type: string
+                    format: uuid
+                  documents:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DocumentSummary'
+                  total_documents:
+                    type: integer
+                  total_chunks:
+                    type: integer
+              example:
+                session_id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                documents:
+                  - document_id: "d1e2f3a4-b5c6-7890-def0-123456789abc"
+                    source_type: "PDF"
+                    source_reference: "ml-basics.pdf"
+                    chunk_count: 15
+                    upload_timestamp: "2025-12-08T10:31:00Z"
+                  - document_id: "d2e3f4a5-b6c7-8901-def1-234567890bcd"
+                    source_type: "URL"
+                    source_reference: "https://example.com/article"
+                    chunk_count: 8
+                    upload_timestamp: "2025-12-08T10:33:00Z"
+                total_documents: 2
+                total_chunks: 23
+        '404':
+          $ref: '../session.openapi.yaml#/components/responses/SessionNotFound'
+
+components:
+  schemas:
+    UploadResponse:
+      type: object
+      required:
+        - document_id
+        - session_id
+        - source_type
+        - source_reference
+        - upload_timestamp
+        - extraction_status
+        - moderation_status
+      properties:
+        document_id:
+          type: string
+          format: uuid
+          description: Unique document identifier
+        session_id:
+          type: string
+          format: uuid
+          description: Parent session ID
+        source_type:
+          type: string
+          enum: [PDF, TEXT, URL]
+          description: Type of uploaded content
+        source_reference:
+          type: string
+          description: Original filename or URL
+        upload_timestamp:
+          type: string
+          format: date-time
+          description: Upload initiation time
+        extraction_status:
+          type: string
+          enum: [PENDING, EXTRACTING, EXTRACTED, FAILED]
+          description: Text extraction status
+        moderation_status:
+          type: string
+          enum: [PENDING, CHECKING, APPROVED, BLOCKED]
+          description: Gemini Safety check status
+
+    UploadStatusResponse:
+      type: object
+      required:
+        - document_id
+        - source_type
+        - source_reference
+        - extraction_status
+        - moderation_status
+        - chunk_count
+      properties:
+        document_id:
+          type: string
+          format: uuid
+        source_type:
+          type: string
+          enum: [PDF, TEXT, URL]
+        source_reference:
+          type: string
+        extraction_status:
+          type: string
+          enum: [PENDING, EXTRACTING, EXTRACTED, FAILED]
+        moderation_status:
+          type: string
+          enum: [PENDING, CHECKING, APPROVED, BLOCKED]
+        chunk_count:
+          type: integer
+          minimum: 0
+          description: Number of chunks created
+        processing_progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Overall processing percentage
+        summary:
+          type: string
+          description: Brief content summary (available after completion)
+        error_code:
+          type: string
+          enum: [ERR_EXTRACT_FAILED, ERR_FETCH_FAILED, ERR_MODERATION_BLOCKED]
+          description: Error code if processing failed
+        error_message:
+          type: string
+          description: Human-readable error message
+        moderation_categories:
+          type: array
+          items:
+            type: string
+          description: Blocked content categories (if moderation failed)
+
+    DocumentSummary:
+      type: object
+      required:
+        - document_id
+        - source_type
+        - source_reference
+        - chunk_count
+        - upload_timestamp
+      properties:
+        document_id:
+          type: string
+          format: uuid
+        source_type:
+          type: string
+          enum: [PDF, TEXT, URL]
+        source_reference:
+          type: string
+        chunk_count:
+          type: integer
+          minimum: 0
+        upload_timestamp:
+          type: string
+          format: date-time
+
+  responses:
+    InvalidFileUpload:
+      description: Invalid file upload
+      content:
+        application/json:
+          schema:
+            $ref: '../session.openapi.yaml#/components/schemas/Error'
+          examples:
+            unsupported_format:
+              summary: Unsupported file format
+              value:
+                error_code: "UNSUPPORTED_FORMAT"
+                message: "Only PDF and text files are supported"
+            empty_file:
+              summary: Empty file
+              value:
+                error_code: "EMPTY_FILE"
+                message: "Uploaded file is empty"

@@ -1,0 +1,278 @@
+{
+  "app": {
+    "title": "Chatbot de Démonstration RAG",
+    "subtitle": "Projet de Portfolio d'Ingénieur IA",
+    "description": "Téléchargez des documents ou du contenu web, puis posez des questions à leur sujet en utilisant la recherche sémantique alimentée par l'IA.",
+    "features": {
+      "pdfSupport": "📄 Support PDF et Texte",
+      "urlExtraction": "🔗 Extraction d'URL",
+      "aiQa": "🤖 Questions et Réponses IA",
+      "multilingual": "🌐 Multilingue"
+    }
+  },
+  "buttons": {
+    "uploadPdf": "Télécharger PDF",
+    "uploadText": "Télécharger Texte",
+    "uploadUrl": "Entrer URL",
+    "send": "Envoyer",
+    "leave": "Quitter la Session",
+    "restart": "Redémarrer",
+    "close": "Fermer",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "settings": "Paramètres"
+  },
+  "labels": {
+    "session": "Session",
+    "sessionId": "ID de Session",
+    "language": "Langue",
+    "selectLanguage": "Sélectionner la langue",
+    "expires": "Expire",
+    "documents": "Documents",
+    "chunks": "Fragments",
+    "metrics": "Métriques",
+    "tokenUsage": "Utilisation de Tokens",
+    "contextUsage": "Utilisation du Contexte",
+    "vectors": "Vecteurs",
+    "chatHistory": "Historique de Chat",
+    "typeMessage": "Tapez votre question...",
+    "processing": "Traitement...",
+    "uploadStatus": "État du Chargement",
+    "sessionExpiresIn": "La session expirera dans ~30 minutes"
+  },
+  "messages": {
+    "sessionCreated": "Session créée avec succès",
+    "sessionExpired": "La session a expiré",
+    "uploadSuccess": "Document téléchargé avec succès",
+    "uploadFailed": "Échec du téléchargement",
+    "processingDocument": "Traitement du document...",
+    "moderationBlocked": "La modération du contenu a bloqué ce document",
+    "readyToChat": "Prêt à discuter ! Posez votre question.",
+    "cannotAnswer": "Je ne peux pas répondre à cette question en fonction des documents téléchargés.",
+    "networkError": "Erreur réseau. Vérifiez votre connexion.",
+    "serverError": "Erreur serveur. Réessayez plus tard.",
+    "invalidFile": "Format de fichier invalide",
+    "invalidUrl": "Format d'URL invalide",
+    "noDocuments": "Aucun document téléchargé pour le moment",
+    "confirmLeave": "Êtes-vous sûr de vouloir quitter cette session ?"
+  },
+  "settings": {
+    "title": "Paramètres RAG",
+    "customPrompt": {
+      "label": "Modèle d'invite personnalisé",
+      "placeholder": "Laissez vide pour utiliser l'invite par défaut, ou entrez votre modèle d'invite personnalisé ici...",
+      "hint": "Utilisez {{context}} et {{question}} comme espaces réservés",
+      "reset": "Réinitialiser"
+    },
+    "threshold": {
+      "label": "Seuil de Similitude",
+      "description": "Contrôle la rigueur du système RAG. Des valeurs plus élevées fournissent des réponses plus précises mais potentiellement moins nombreuses, des valeurs plus basses fournissent plus de réponses mais potentiellement moins pertinentes.",
+      "low": "Tolérant",
+      "high": "Strict",
+      "strict": "Mode Strict",
+      "balanced": "Mode Équilibré",
+      "lenient": "Mode Tolérant",
+      "recommendations": "Recommandations",
+      "rec_lenient": "Convient aux requêtes exploratoires, peut inclure plus de contenu non pertinent",
+      "rec_balanced": "Paramètre recommandé, équilibre précision et exhaustivité",
+      "rec_strict": "Répond uniquement aux questions très pertinentes, peut souvent retourner ne peut pas répondre"
+    }
+  },
+  "states": {
+    "INITIALIZING": "Initialisation...",
+    "READY_FOR_UPLOAD": "Prêt pour le Téléchargement",
+    "PROCESSING": "Traitement...",
+    "ERROR": "Erreur",
+    "READY_FOR_CHAT": "Prêt pour le Chat",
+    "CHATTING": "Discussion"
+  },
+  "errors": {
+    "required": "Ce champ est obligatoire",
+    "minLength": "La longueur minimale est de {{min}} caractères",
+    "maxLength": "La longueur maximale est de {{max}} caractères",
+    "invalidFormat": "Format invalide"
+  },
+  "upload": {
+    "title": "Télécharger un Document",
+    "subtitle": "Téléchargez un PDF, un fichier texte ou fournissez une URL pour commencer",
+    "mode": {
+      "file": "Télécharger un Fichier",
+      "url": "URL"
+    },
+    "dropzone": {
+      "dragOrClick": "Glissez-déposez un fichier ici, ou cliquez pour parcourir",
+      "drop": "Déposez le fichier ici",
+      "hint": "Formats supportés : PDF, TXT (max {{maxSize}})"
+    },
+    "divider": "Ou",
+    "url": {
+      "label": "Fournir une URL",
+      "placeholder": "Entrez l'URL (http:// ou https://)",
+      "submit": "Récupérer",
+      "hint": "Nous extrairons le contenu textuel de l'URL"
+    },
+    "error": {
+      "invalidFileType": "Seuls les fichiers PDF et TXT sont supportés",
+      "fileTooLarge": "La taille du fichier dépasse {{maxSize}}",
+      "emptyFile": "Le fichier est vide",
+      "invalidUrl": "Format d'URL invalide. Doit être http:// ou https://"
+    }
+  },
+  "processing": {
+    "title": "Traitement du Document",
+    "sourceType": {
+      "PDF": "Document PDF",
+      "TEXT": "Fichier Texte",
+      "URL": "Page Web"
+    },
+    "stage": {
+      "extracting": "Extraction du Texte...",
+      "moderating": "Vérification de la Sécurité du Contenu...",
+      "chunking": "Découpage du Texte...",
+      "embedding": "Intégration et Stockage...",
+      "complete": "Traitement Terminé",
+      "failed": "Traitement Échoué",
+      "blocked": "Contenu Bloqué"
+    },
+    "pleaseWait": "Veuillez patienter, cela peut prendre quelques instants...",
+    "complete": {
+      "message": "Document traité avec succès !",
+      "chunks": "{{count}} fragments de texte créés",
+      "preview": "Aperçu",
+      "tokensUsed": "Tokens Utilisés",
+      "pagesCrawled": "Pages Rastreées"
+    },
+    "error": {
+      "moderationBlocked": "Contenu Bloqué par Vérification de Sécurité",
+      "processingFailed": "Traitement Échoué",
+      "code": "Code d'Erreur",
+      "blockedCategories": "Catégories Bloquées"
+    },
+    "steps": {
+      "extract": "Extraire",
+      "moderate": "Modérer",
+      "chunk": "Découper",
+      "embed": "Intégrer"
+    },
+    "debug": {
+      "title": "Informations de débogage"
+    }
+  },
+  "chat": {
+    "title": "Discuter",
+    "subtitle": "Posez des questions sur vos documents",
+    "empty": {
+      "message": "Pas de messages pour l'instant",
+      "hint": "Commencez par taper une question sur le document chargé"
+    },
+    "input": {
+      "placeholder": "Posez une question sur le document...",
+      "submit": "Envoyer",
+      "hint": "Appuyez sur Entrée pour envoyer, Maj+Entrée pour une nouvelle ligne",
+      "maxLength": "{{count}} / 2000"
+    },
+    "loading": "Réflexion en cours...",
+    "error": {
+      "sendFailed": "Échec de l'envoi du message",
+      "loadFailed": "Impossible de charger l'historique de chat",
+      "networkError": "Erreur réseau"
+    },
+    "messages": {
+      "cannotAnswer": "Je ne peux pas répondre à cette question en me basant sur les documents chargés.",
+      "you": "Vous",
+      "assistant": "Assistante"
+    },
+    "retrieved": {
+      "title": "Sources récupérées",
+      "chunks": "{{count}} fragments pertinents trouvés",
+      "similarity": "Similarité"
+    }
+  },
+  "metrics": {
+    "title": "📊 Métriques en temps réel",
+    "loading": "Chargement des métriques...",
+    "tokens": "Utilisation des tokens",
+    "tokenInput": "Tokens d'entrée",
+    "tokenOutput": "Tokens de sortie",
+    "tokenTotal": "Tokens totaux",
+    "tokenPercent": "Pourcentage d'utilisation",
+    "context": "Fenêtre de contexte",
+    "contextTokens": "Tokens de contexte utilisés",
+    "contextPercent": "Pourcentage de contexte",
+    "vectors": "Base de données vectorielle",
+    "vectorCount": "Vecteurs stockés",
+    "tokenWarning": "⚠️ L'utilisation des tokens dépasse 80%. Il est recommandé de commencer une nouvelle session."
+  },
+  "dialogs": {
+    "leave": {
+      "title": "Quitter la session",
+      "message": "Êtes-vous sûr de vouloir quitter ? Toutes les données de la session seront supprimées définitivement."
+    },
+    "restart": {
+      "title": "Redémarrer la session",
+      "message": "Êtes-vous sûr de vouloir redémarrer ? La session actuelle sera fermée et une nouvelle session sera créée."
+    }
+  },
+  "step2": {
+    "title": "Configuration du Comportement et des Réponses de l'IA",
+    "disabledNotice": "Les données ont été téléchargées. La configuration est verrouillée et ne peut pas être modifiée.",
+    "system": {
+      "title": "Règles Système",
+      "allowInference": "Autoriser l'Inférence",
+      "inferenceOn": "Activé : Peut faire des inférences raisonnables dans la portée du document",
+      "inferenceOff": "Désactivé : Répond uniquement aux informations explicites dans les documents"
+    },
+    "policy": {
+      "title": "Politique de Réponse",
+      "style": {
+        "label": "Style de Réponse",
+        "concise": "Concis",
+        "standard": "Standard",
+        "detailed": "Détaillé",
+        "stepByStep": "Étape par Étape"
+      },
+      "tone": {
+        "label": "Ton de Réponse",
+        "formal": "Formel Professionnel",
+        "friendly": "Amical Approchable",
+        "casual": "Décontracté",
+        "academic": "Académique Rigoureux"
+      },
+      "persona": {
+        "label": "Configuration du Persona"
+      }
+    },
+    "persona": {
+      "professor": "Professeur d'Université",
+      "expert": "Expert en Milieu de Travail",
+      "educator": "Éducateur pour Enfants",
+      "neighbor": "Voisin Sympathique"
+    },
+    "runtime": {
+      "title": "Contraintes d'Exécution",
+      "maxTokens": "Tokens de Réponse Maximum",
+      "short": "Court",
+      "detailed": "Détaillé",
+      "tokenHint": "Des valeurs plus élevées produisent des réponses plus longues et détaillées",
+      "contextWarning": "Seuil d'Avertissement de Contexte",
+      "contextHint": "Vous alerte lorsque l'utilisation des tokens atteint ce pourcentage"
+    },
+    "info": {
+      "title": "Informations Système",
+      "notice": "Configuration automatique, non modifiable",
+      "llmModel": "Modèle LLM",
+      "contextWindow": "Fenêtre de Contexte",
+      "vectorDb": "Base de Données Vectorielle",
+      "embeddingModel": "Modèle d'Embedding",
+      "strictRag": "RAG Strict",
+      "moderation": "Modération de Contenu",
+      "sessionTtl": "TTL de Session",
+      "similarityThreshold": "Seuil de Similarité",
+      "citationStyle": "Style de Citation",
+      "enabled": "Activé"
+    }
+  },
+  "common": {
+    "processing": "Traitement en cours..."
+  }
+}

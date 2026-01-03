@@ -1,0 +1,354 @@
+openapi: 3.0.3
+info:
+  title: RAG Chatbot - Chat API
+  description: API for RAG-powered query responses with strict context-based answering
+  version: 1.0.0
+  contact:
+    name: RAG Demo Chatbot
+    email: jenhao.hsiao@gmail.com
+
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Development server
+  - url: https://api.ragchatbot.example.com/api/v1
+    description: Production server
+
+tags:
+  - name: chat
+    description: RAG query and response operations
+
+paths:
+  /chat/{session_id}/query:
+    post:
+      tags:
+        - chat
+      summary: Submit query and get RAG response
+      description: |
+        Submit a user question and receive a response strictly based on uploaded documents.
+        
+        Flow:
+        1. Embed user query via Gemini Embedding API
+        2. Search Qdrant for similar chunks (cosine similarity >= 0.7)
+        3. Build prompt with retrieved context
+        4. Generate response via Gemini API (temperature=0.1)
+        5. Return response with metrics
+        
+        If no chunks meet similarity threshold, returns "cannot answer" response.
+      operationId: queryChat
+      parameters:
+        - $ref: '../session.openapi.yaml#/components/parameters/SessionIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                  minLength: 1
+                  maxLength: 1000
+                  description: User's question
+              required:
+                - query
+            example:
+              query: "What is machine learning?"
+      responses:
+        '200':
+          description: Query processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+              examples:
+                answered:
+                  summary: Question answered from context
+                  value:
+                    message_id: "m1a2b3c4-d5e6-7890-abcd-ef1234567890"
+                    session_id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                    timestamp: "2025-12-08T10:35:00Z"
+                    user_query: "What is machine learning?"
+                    llm_response: "Based on the uploaded document, machine learning is a subset of artificial intelligence that enables computers to learn from data without being explicitly programmed..."
+                    response_type: "ANSWERED"
+                    retrieved_chunks:
+                      - chunk_id: "c1d2e3f4-a5b6-7890-cdef-123456789012"
+                        text_content: "Machine learning is a subset of AI..."
+                        similarity_score: 0.89
+                        document_id: "d1e2f3a4-b5c6-7890-def0-123456789abc"
+                        chunk_index: 3
+                      - chunk_id: "c2d3e4f5-a6b7-8901-cdef-234567890123"
+                        text_content: "ML algorithms learn patterns from data..."
+                        similarity_score: 0.82
+                        document_id: "d1e2f3a4-b5c6-7890-def0-123456789abc"
+                        chunk_index: 4
+                    metrics:
+                      token_input: 256
+                      token_output: 128
+                      token_total: 384
+                      token_limit: 32000
+                      token_percent: 1.2
+                      context_tokens: 180
+                      context_percent: 0.56
+                      vector_count: 23
+                cannot_answer:
+                  summary: No relevant context found
+                  value:
+                    message_id: "m2a3b4c5-d6e7-8901-abcd-ef2345678901"
+                    session_id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                    timestamp: "2025-12-08T10:36:00Z"
+                    user_query: "What is the meaning of life?"
+                    llm_response: "I cannot answer this question based on the uploaded documents."
+                    response_type: "CANNOT_ANSWER"
+                    retrieved_chunks: []
+                    metrics:
+                      token_input: 32
+                      token_output: 15
+                      token_total: 47
+                      token_limit: 32000
+                      token_percent: 0.15
+                      context_tokens: 0
+                      context_percent: 0.0
+                      vector_count: 23
+        '400':
+          description: Invalid query
+          content:
+            application/json:
+              schema:
+                $ref: '../session.openapi.yaml#/components/schemas/Error'
+              examples:
+                empty_query:
+                  summary: Empty query
+                  value:
+                    error_code: "EMPTY_QUERY"
+                    message: "Query cannot be empty"
+                query_too_long:
+                  summary: Query exceeds length limit
+                  value:
+                    error_code: "QUERY_TOO_LONG"
+                    message: "Query must not exceed 1000 characters"
+        '404':
+          $ref: '../session.openapi.yaml#/components/responses/SessionNotFound'
+        '409':
+          description: Session not ready for chat
+          content:
+            application/json:
+              schema:
+                $ref: '../session.openapi.yaml#/components/schemas/Error'
+              example:
+                error_code: "SESSION_NOT_READY"
+                message: "Session must have uploaded documents before querying (current state: READY_FOR_UPLOAD)"
+
+  /chat/{session_id}/history:
+    get:
+      tags:
+        - chat
+      summary: Get chat message history
+      description: Retrieve all query-response pairs for this session
+      operationId: getChatHistory
+      parameters:
+        - $ref: '../session.openapi.yaml#/components/parameters/SessionIdPath'
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of messages to return (default: 50)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: offset
+          in: query
+          required: false
+          description: Number of messages to skip for pagination (default: 0)
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Chat history retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session_id:
+                    type: string
+                    format: uuid
+                  messages:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChatHistoryMessage'
+                  total_messages:
+                    type: integer
+                  limit:
+                    type: integer
+                  offset:
+                    type: integer
+              example:
+                session_id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                messages:
+                  - message_id: "m1a2b3c4-d5e6-7890-abcd-ef1234567890"
+                    timestamp: "2025-12-08T10:35:00Z"
+                    user_query: "What is machine learning?"
+                    llm_response: "Based on the uploaded document..."
+                    response_type: "ANSWERED"
+                  - message_id: "m2a3b4c5-d6e7-8901-abcd-ef2345678901"
+                    timestamp: "2025-12-08T10:36:00Z"
+                    user_query: "What is the meaning of life?"
+                    llm_response: "I cannot answer this question based on the uploaded documents."
+                    response_type: "CANNOT_ANSWER"
+                total_messages: 2
+                limit: 50
+                offset: 0
+        '404':
+          $ref: '../session.openapi.yaml#/components/responses/SessionNotFound'
+
+components:
+  schemas:
+    ChatResponse:
+      type: object
+      required:
+        - message_id
+        - session_id
+        - timestamp
+        - user_query
+        - llm_response
+        - response_type
+        - retrieved_chunks
+        - metrics
+      properties:
+        message_id:
+          type: string
+          format: uuid
+          description: Unique message identifier
+        session_id:
+          type: string
+          format: uuid
+          description: Session identifier
+        timestamp:
+          type: string
+          format: date-time
+          description: Message creation timestamp
+        user_query:
+          type: string
+          description: User's original question
+        llm_response:
+          type: string
+          description: Gemini-generated response
+        response_type:
+          type: string
+          enum: [ANSWERED, CANNOT_ANSWER]
+          description: |
+            ANSWERED: Successfully answered from context
+            CANNOT_ANSWER: No relevant context found (strict RAG enforcement)
+        retrieved_chunks:
+          type: array
+          items:
+            $ref: '#/components/schemas/RetrievedChunk'
+          description: Chunks used for context (sorted by similarity score descending)
+        metrics:
+          $ref: '#/components/schemas/Metrics'
+
+    RetrievedChunk:
+      type: object
+      required:
+        - chunk_id
+        - text_content
+        - similarity_score
+        - document_id
+        - chunk_index
+      properties:
+        chunk_id:
+          type: string
+          format: uuid
+          description: Chunk identifier
+        text_content:
+          type: string
+          description: Chunk text content (truncated if >500 chars)
+        similarity_score:
+          type: number
+          format: float
+          minimum: 0.7
+          maximum: 1.0
+          description: Cosine similarity score (only chunks >= 0.7 returned)
+        document_id:
+          type: string
+          format: uuid
+          description: Parent document ID
+        chunk_index:
+          type: integer
+          minimum: 0
+          description: Position within parent document
+
+    Metrics:
+      type: object
+      required:
+        - token_input
+        - token_output
+        - token_total
+        - token_limit
+        - token_percent
+        - context_tokens
+        - context_percent
+        - vector_count
+      properties:
+        token_input:
+          type: integer
+          minimum: 0
+          description: Input tokens (prompt to Gemini)
+        token_output:
+          type: integer
+          minimum: 0
+          description: Output tokens (Gemini response)
+        token_total:
+          type: integer
+          minimum: 0
+          description: Total tokens (input + output)
+        token_limit:
+          type: integer
+          default: 32000
+          description: Gemini-pro token limit
+        token_percent:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 100.0
+          description: Percentage of token limit used
+        context_tokens:
+          type: integer
+          minimum: 0
+          description: Tokens in retrieved context chunks
+        context_percent:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 100.0
+          description: Context as percentage of token limit
+        vector_count:
+          type: integer
+          minimum: 0
+          description: Total vectors in session collection
+
+    ChatHistoryMessage:
+      type: object
+      required:
+        - message_id
+        - timestamp
+        - user_query
+        - llm_response
+        - response_type
+      properties:
+        message_id:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        user_query:
+          type: string
+        llm_response:
+          type: string
+        response_type:
+          type: string
+          enum: [ANSWERED, CANNOT_ANSWER]

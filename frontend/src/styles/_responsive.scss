@@ -1,0 +1,152 @@
+/**
+ * Responsive Design Utilities
+ * T094: Responsive design breakpoints for mobile/tablet/desktop
+ * 
+ * Bootstrap breakpoints:
+ * - xs: < 576px
+ * - sm: >= 576px
+ * - md: >= 768px
+ * - lg: >= 992px
+ * - xl: >= 1200px
+ * - xxl: >= 1400px
+ */
+
+@import "./variables";
+@import "./mixins";
+
+/* T094: Base responsive utilities */
+.container-responsive {
+  padding: $spacing-4;
+
+  @include respond-to("sm") {
+    padding: $spacing-5;
+  }
+
+  @include respond-to("md") {
+    padding: $spacing-6;
+  }
+
+  @include respond-to("lg") {
+    padding: $spacing-8;
+  }
+}
+
+/* T094: Typography responsiveness */
+.heading-responsive {
+  font-size: $font-size-xl;
+  line-height: $line-height-normal;
+
+  @include respond-to("sm") {
+    font-size: $font-size-2xl;
+  }
+
+  @include respond-to("md") {
+    font-size: $font-size-3xl;
+  }
+
+  @include respond-to("lg") {
+    font-size: $font-size-4xl;
+  }
+}
+
+/* T094: Grid responsive */
+.grid-responsive {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-3;
+
+  @include respond-to("sm") {
+    gap: $spacing-4;
+  }
+
+  @include respond-to("md") {
+    grid-template-columns: repeat(2, 1fr);
+    gap: $spacing-5;
+  }
+
+  @include respond-to("lg") {
+    grid-template-columns: repeat(3, 1fr);
+    gap: $spacing-6;
+  }
+}
+
+/* T094: Flexbox responsive */
+.flex-responsive {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+
+  @include respond-to("md") {
+    flex-direction: row;
+    gap: $spacing-4;
+  }
+}
+
+/* Screen Size Visibility Classes */
+.hide-mobile {
+  @media (max-width: #{$breakpoint-md - 1}) {
+    display: none !important;
+  }
+}
+
+.hide-desktop {
+  @media (min-width: $breakpoint-md) {
+    display: none !important;
+  }
+}
+
+.show-mobile {
+  display: none !important;
+
+  @media (max-width: #{$breakpoint-md - 1}) {
+    display: block !important;
+  }
+}
+
+.show-desktop {
+  display: none !important;
+
+  @media (min-width: $breakpoint-md) {
+    display: block !important;
+  }
+}
+
+/* Responsive Text Alignment */
+.text-center-mobile {
+  @media (max-width: #{$breakpoint-md - 1}) {
+    text-align: center !important;
+  }
+}
+
+/* Responsive Padding/Margin */
+.p-responsive {
+  padding: $spacing-3;
+
+  @include respond-to("sm") {
+    padding: $spacing-4;
+  }
+
+  @include respond-to("md") {
+    padding: $spacing-5;
+  }
+
+  @include respond-to("lg") {
+    padding: $spacing-6;
+  }
+}
+
+.m-responsive {
+  margin: $spacing-3;
+
+  @include respond-to("sm") {
+    margin: $spacing-4;
+  }
+
+  @include respond-to("md") {
+    margin: $spacing-5;
+  }
+
+  @include respond-to("lg") {
+    margin: $spacing-6;
+  }
+}

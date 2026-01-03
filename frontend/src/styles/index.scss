@@ -1,0 +1,79 @@
+/**
+ * Global Styles Index
+ * 統一的樣式導入入口 - 所有全局SCSS檔案
+ * 
+ * 使用方式：在main.tsx中導入此檔案
+ * import './styles/index.scss';
+ */
+
+// ========================================
+// 1. Variables & Design Tokens (必須最先導入)
+// ========================================
+@import "./variables";
+
+// ========================================
+// 2. Mixins & Functions
+// ========================================
+@import "./mixins";
+
+// ========================================
+// 3. Utility Classes
+// ========================================
+@import "./utilities";
+
+// ========================================
+// 4. Theme & Layout Styles
+// ========================================
+@import "./badges";
+@import "./responsive";
+@import "./rtl";
+@import "./professional-header";
+
+// ========================================
+// 5. Component Styles
+// ========================================
+@import "./components";
+
+/*
+檔案結構說明：
+
+frontend/src/styles/
+├── _variables.scss           - 全局設計變數（顏色、間距、字型等）
+├── _mixins.scss              - 可重用的混合宏和動畫
+├── _utilities.scss           - 通用工具類（flex、spacing、text等）
+├── _badges.scss              - 徽章樣式
+├── _responsive.scss          - 響應式工具
+├── _rtl.scss                 - RTL（阿拉伯語）支援
+├── _professional-header.scss - 頭部樣式
+├── _components.scss          - 所有組件樣式（hero、toast、upload等）
+└── index.scss                - 統一導入入口（本檔案）
+
+使用指南：
+
+1. 使用設計變數：
+   color: $color-primary;
+   margin: $spacing-4;
+   font-size: $font-size-lg;
+
+2. 使用Mixins：
+   @include flex-center;
+   @include card;
+   @include respond-to('md') { ... }
+
+3. 使用工具類（HTML中）：
+   <div class="flex-center gap-4 p-4 rounded shadow-md">
+   
+4. 響應式設計：
+   @include respond-to('md') {
+     // 在 768px 以上生效的樣式
+   }
+
+5. 動畫：
+   @include fade-in;
+   @include slide-in-right;
+
+組件樣式已統一：
+
+所有組件樣式（hero、toast、upload、flow等）已整合到 _components.scss 中，
+使用設計變數和mixins確保一致性和可維護性。
+*/
