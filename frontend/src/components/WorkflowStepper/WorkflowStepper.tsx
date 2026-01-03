@@ -613,116 +613,114 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     onStepChange(currentStep + 1);
   };
 
-  // 根據流程2參數生成 custom_prompt
+  // 根據流程2參數生成 custom_prompt（新版 4 區塊架構）
   const generateCustomPrompt = (params: any): string | null => {
     const {
-      persona,
+      // A. 系統規則
+      allow_inference,
+      answer_language,
+      strict_rag_mode,
+      // B. 回答政策
       response_style,
-      professional_level,
-      creativity_level,
-      response_format,
+      response_tone,
+      persona,
       citation_style,
-      combined_style,
+      // C. 執行限制
+      max_response_tokens,
+      retrieval_top_k,
+      similarity_threshold,
     } = params;
 
-    // 如果沒有設定任何特殊參數，返回 null 使用預設 prompt
-    if (
-      !persona &&
-      combined_style === "professional_standard" &&
-      response_format === "auto" &&
-      citation_style === "inline"
-    ) {
-      return null;
-    }
+    // Persona 映射
+    const personaMap: Record<string, string> = {
+      professor: "大學教授 - 使用學術嚴謹的語言，適當引用文獻來源，用專業術語解釋概念。",
+      expert: "職場專家 - 務實導向、重點明確，使用專業術語，直接切入問題核心。",
+      educator: "兒童教育者 - 使用淺顯易懂的語言，多舉生活化例子，一步步解釋概念。",
+      neighbor: "市場大媽大伯 - 用口語化、生活化的方式說話，就像跟鄰居聊天一樣親切自然，多用比喻。",
+    };
 
-    // 構建語氣指示
-    let toneInstructions = "";
-
-    if (persona) {
-      toneInstructions += `**PERSONA**: Respond as if you are a "${persona}". Adopt this persona's communication style, vocabulary level, and tone.\n`;
-    }
-
-    // 回應風格
+    // 回答風格映射
     const styleMap: Record<string, string> = {
-      concise:
-        "Keep responses brief and to the point. Use bullet points when helpful.",
-      standard: "Provide balanced responses with appropriate detail.",
-      detailed:
-        "Provide comprehensive, thorough explanations with examples when relevant.",
+      concise: "簡潔扼要，只提供關鍵重點，不要冗長說明。",
+      standard: "標準詳細程度，提供適當的背景和說明。",
+      detailed: "深入完整，提供詳盡的解釋和相關例子。",
+      step_by_step: "分步驟說明，用編號清單引導使用者理解。",
     };
 
-    // 專業程度
-    const levelMap: Record<string, string> = {
-      casual: "Use everyday language that anyone can understand. Avoid jargon.",
-      professional:
-        "Use professional terminology appropriately. Be formal but accessible.",
-      academic:
-        "Use academic language and precise terminology. Be rigorous and scholarly.",
+    // 回答語氣映射
+    const toneMap: Record<string, string> = {
+      formal: "使用正式專業的語氣，精確客觀。",
+      friendly: "使用親切友善的語氣，溫暖且容易親近。",
+      casual: "使用輕鬆活潑的口語化語氣，有趣且易於理解。",
+      academic: "使用嚴謹學術的語氣，精確使用術語。",
     };
 
-    // 創意程度
-    const creativityMap: Record<string, string> = {
-      conservative:
-        "Stick strictly to the document content. Minimize interpretation.",
-      balanced: "Balance factual content with reasonable inferences.",
-      creative:
-        "Allow for creative connections and broader context when relevant.",
-    };
-
-    // 回應格式
-    const formatMap: Record<string, string> = {
-      auto: "Choose the most appropriate format based on the question.",
-      bullet: "Always use bullet points and numbered lists for clarity.",
-      paragraph: "Write in complete paragraphs with smooth transitions.",
-      step_by_step: "Break down responses into clear, numbered steps.",
-    };
-
-    // 引用格式
+    // 引用方式映射
     const citationMap: Record<string, string> = {
-      none: "Do not include source citations in your response.",
-      inline:
-        "Include source citations inline after relevant information, like [Document 1].",
-      footnote:
-        "List all source citations at the end of your response as footnotes.",
+      inline: "在相關資訊後面直接標註來源，例如 [文件1]。",
+      document: "在回答結尾統一列出所有引用來源。",
+      none: "不需要標註引用來源。",
     };
 
+    // 語言映射
+    const languageMap: Record<string, string> = {
+      "zh-TW": "Traditional Chinese (繁體中文)",
+      "en": "English",
+      "auto": "{{language}}", // 使用變數，讓後端決定
+    };
+
+    // 推論政策
+    const inferencePolicy = allow_inference
+      ? "你可以基於文件內容做出合理推論，但必須明確標示哪些是推論（非直接引用）。"
+      : "你只能回答文件中明確記載的內容，不可推論或外推。";
+
+    // 嚴格 RAG 政策
+    const strictRagPolicy = strict_rag_mode !== false
+      ? "當檢索到的文件無法回答問題時，你必須明確拒絕回答，並告知使用者找不到相關資料。"
+      : "當文件資料不足時，你可以適度使用一般知識補充，但需標示哪些來自文件、哪些是補充。";
+
+    // 組裝指示
+    const personaInstruction = personaMap[persona] || personaMap["expert"];
     const styleInstruction = styleMap[response_style] || styleMap["standard"];
-    const levelInstruction =
-      levelMap[professional_level] || levelMap["professional"];
-    const creativityInstruction =
-      creativityMap[creativity_level] || creativityMap["balanced"];
-    const formatInstruction = formatMap[response_format] || formatMap["auto"];
-    const citationInstruction =
-      citationMap[citation_style] || citationMap["inline"];
+    const toneInstruction = toneMap[response_tone] || toneMap["formal"];
+    const citationInstruction = citationMap[citation_style] || citationMap["inline"];
+    const responseLanguage = languageMap[answer_language] || "{{language}}";
 
     // 生成完整的 custom_prompt
-    return `You are a RAG (Retrieval-Augmented Generation) assistant.
+    return `你是一個 RAG (Retrieval-Augmented Generation) 助理。
 
-${toneInstructions}
-**RESPONSE STYLE**: ${styleInstruction}
-**LANGUAGE LEVEL**: ${levelInstruction}
-**CREATIVITY LEVEL**: ${creativityInstruction}
-**RESPONSE FORMAT**: ${formatInstruction}
-**CITATION STYLE**: ${citationInstruction}
+**角色設定 (PERSONA)**: ${personaInstruction}
 
-**CRITICAL RULES**:
-1. **Response Language**: ALWAYS respond ONLY in {{language}}.
-2. **STRICT RAG POLICY**: ONLY answer based on the retrieved documents below.
-3. **DO NOT make up information** or use knowledge outside the documents.
-4. **GENERAL REQUESTS**: If user asks to "explain", "summarize", or "describe" document content, provide a summary based on retrieved chunks.
-5. **STYLE REQUESTS**: If user requests a specific tone or persona, adapt accordingly while staying within document content.
-6. **PARTIAL MATCH HANDLING**: If the user's question is PARTIALLY related to the documents:
-   - First acknowledge what information IS available in the documents
-   - Then clearly state what specific aspect of the question is NOT covered
-7. Follow the citation style specified above when referencing document sources.
+**回答風格 (RESPONSE STYLE)**: ${styleInstruction}
 
-**Retrieved Documents**:
+**回答語氣 (RESPONSE TONE)**: ${toneInstruction}
+
+**引用方式 (CITATION)**: ${citationInstruction}
+
+**推論政策 (INFERENCE)**: ${inferencePolicy}
+
+**嚴格 RAG 政策**: ${strictRagPolicy}
+
+**回應長度限制**: 將回答控制在約 ${max_response_tokens || 2048} tokens 以內。
+
+**檢索設定**: Top-K=${retrieval_top_k || 5}, 相似度閾值=${similarity_threshold || 0.7}
+
+**關鍵規則**:
+1. **回答語言**: 一律使用 ${responseLanguage} 回答。整個回答必須是同一種語言。
+2. **嚴格 RAG**: 只能根據下方檢索到的文件內容回答。
+3. **禁止捏造**: 不可編造資訊或使用文件以外的知識。
+4. **部分相關處理**: 如果問題只有部分與文件相關：
+   - 先說明文件中有哪些相關資訊
+   - 再明確指出問題的哪個部分找不到資料
+5. **無法回答時**: 明確告知使用者，並建議可能的替代問題。
+
+**檢索到的文件 (Retrieved Documents)**:
 {{context}}
 
-**User Question**:
+**使用者問題 (User Question)**:
 {{query}}
 
-**Your Answer** (in {{language}}, following your persona and style guidelines):`;
+**你的回答** (請遵循上述角色、風格和語氣設定):`;
   };
 
   const handleStepComplete = (stepId: number) => {

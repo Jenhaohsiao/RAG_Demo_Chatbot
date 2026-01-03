@@ -213,6 +213,65 @@
       "message": "您确定要重新启动吗？当前会话将被关闭，并创建新会话。"
     }
   },
+  "step2": {
+    "title": "AI 行为与回答规则设定",
+    "disabledNotice": "数据已上传处理，配置已锁定，无法修改。",
+    "system": {
+      "title": "系统行为",
+      "allowInference": "允许推论",
+      "inferenceOn": "开启：可在上传数据范围内合理推论",
+      "inferenceOff": "关闭：仅回答文件中明确记载的内容"
+    },
+    "policy": {
+      "title": "回答政策",
+      "style": {
+        "label": "回答风格",
+        "concise": "简洁扼要",
+        "standard": "标准详细",
+        "detailed": "深入完整",
+        "stepByStep": "步骤教学"
+      },
+      "tone": {
+        "label": "回答语气",
+        "formal": "正式专业",
+        "friendly": "亲切友善",
+        "casual": "轻松活泼",
+        "academic": "严谨学术"
+      },
+      "persona": {
+        "label": "角色设定 (Persona)"
+      }
+    },
+    "persona": {
+      "professor": "大学教授",
+      "expert": "职场专家",
+      "educator": "儿童教育者",
+      "neighbor": "市场大妈大叔"
+    },
+    "runtime": {
+      "title": "执行限制",
+      "maxTokens": "最大回应 Token",
+      "short": "简短",
+      "detailed": "详细",
+      "tokenHint": "数值越大，回答越长越详细",
+      "contextWarning": "Context 使用预警",
+      "contextHint": "达到此比例时提醒您 Token 使用量"
+    },
+    "info": {
+      "title": "系统状态",
+      "notice": "系统自动设定，无法调整",
+      "llmModel": "LLM 模型",
+      "contextWindow": "Context Window",
+      "vectorDb": "Vector DB",
+      "embeddingModel": "Embedding Model",
+      "strictRag": "严格 RAG",
+      "moderation": "内容审核",
+      "sessionTtl": "Session TTL",
+      "similarityThreshold": "相似度阈值",
+      "citationStyle": "引用方式",
+      "enabled": "已启用"
+    }
+  },
   "common": {
     "processing": "处理中..."
   }

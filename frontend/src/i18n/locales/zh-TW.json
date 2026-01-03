@@ -57,9 +57,9 @@
         "complete": "完成 RAG 設定"
       },
       "promptConfig": {
-        "title": "Prompt 設定",
-        "description": "設定AI回應風格和創意度",
-        "complete": "完成 Prompt 設定"
+        "title": "AI 行為與回答規則設定",
+        "description": "設定 AI 回應風格、語氣和限制",
+        "complete": "完成設定"
       },
       "dataUpload": {
         "title": "資訊上傳",
@@ -317,6 +317,91 @@
     "restart": {
       "title": "重新啟動會話",
       "message": "您確定要重新啟動嗎？當前會話將被關閉，並建立新會話。"
+    }
+  },
+  "step2": {
+    "title": "AI 行為與回答規則設定",
+    "subtitle": "設定 AI 的行為、回答政策與執行限制",
+    "disabledNotice": "資料已上傳處理，配置已鎖定，無法修改。",
+    "badge": {
+      "sessionFixed": "Session 固定",
+      "chatAdjustable": "對話中可調整",
+      "partialFixed": "部分固定",
+      "readonly": "唯讀"
+    },
+    "system": {
+      "title": "系統規則",
+      "answerLanguage": "回答語言",
+      "lang": {
+        "zhTW": "繁體中文",
+        "en": "English",
+        "auto": "自動偵測"
+      },
+      "strictRagMode": "嚴格 RAG 模式",
+      "strictRagOn": "開啟：當資料不足時 AI 將拒絕回答",
+      "strictRagOff": "關閉：AI 可能使用一般知識補充",
+      "allowInference": "允許推論",
+      "inferenceOn": "開啟：可在上傳資料範圍內合理推論",
+      "inferenceOff": "關閉：僅回答文件中明確記載的內容",
+      "externalKnowledge": "外部知識存取",
+      "alwaysOff": "永遠關閉",
+      "noDataPolicy": "無資料回應政策",
+      "noDataPolicyDesc": "當檢索不到相關資料時，AI 會明確告知使用者，並提供可能的替代問題建議。"
+    },
+    "policy": {
+      "title": "回答政策",
+      "style": {
+        "label": "回答風格",
+        "concise": "簡潔扼要",
+        "standard": "標準詳細",
+        "detailed": "深入完整",
+        "stepByStep": "步驟教學"
+      },
+      "tone": {
+        "label": "回答語氣",
+        "formal": "正式專業",
+        "friendly": "親切友善",
+        "casual": "輕鬆活潑",
+        "academic": "嚴謹學術"
+      },
+      "persona": {
+        "label": "角色設定 (Persona)"
+      },
+      "citation": {
+        "label": "引用方式",
+        "inline": "行內引用",
+        "document": "文件引用",
+        "none": "不顯示"
+      }
+    },
+    "persona": {
+      "professor": "大學教授",
+      "expert": "職場專家",
+      "educator": "兒童教育者",
+      "neighbor": "市場大媽大伯"
+    },
+    "runtime": {
+      "title": "執行限制",
+      "maxTokens": "最大回應 Token",
+      "retrievalTopK": "Retrieval Top-K",
+      "similarityThreshold": "相似度閾值",
+      "maxContextTokens": "最大 Context Token",
+      "contextWarning": "Context 使用預警",
+      "precise": "精確",
+      "broad": "廣泛",
+      "loose": "寬鬆",
+      "strict": "嚴格"
+    },
+    "info": {
+      "title": "系統狀態",
+      "notice": "系統自動設定，無法調整",
+      "llmModel": "LLM 模型",
+      "contextWindow": "Context Window",
+      "vectorDb": "Vector DB",
+      "embeddingModel": "Embedding Model",
+      "moderation": "內容審核",
+      "sessionTtl": "Session TTL",
+      "enabled": "已啟用"
     }
   },
   "common": {

@@ -2,8 +2,8 @@
 
 **專案名稱**: Multilingual RAG-Powered Chatbot  
 **分支**: `001-multilingual-rag-chatbot`  
-**最後更新**: 2026-01-01  
-**總體狀態**: ✅ MVP 完成，Step 2 UI 重構，Step 6 建議氣泡功能
+**最後更新**: 2026-01-03  
+**總體狀態**: ✅ MVP 完成，Step 2「AI 行為與回答規則設定」全新 4 區塊架構完成（含視覺標識、完整參數）
 
 ---
 
@@ -18,23 +18,102 @@
 - **RAG查詢**: 語義搜索，嚴格基於上傳內容回答
 - **多語言支援**: 8種語言UI切換
 - **Metrics儀表板**: 實時性能監控
-- **6步驟工作流程**: RAG配置→Prompt配置→資料上傳→內容審核→文字處理→AI對話
+- **6步驟工作流程**: RAG配置→AI行為設定→資料上傳→內容審核→文字處理→AI對話
 - **Loading Overlay**: 全局處理狀態提示，防止重複操作
 - **工作流程狀態保留**: 步驟3/4/5/6 返回上一步時保持狀態
 - **建議氣泡功能**: AI無法回答時自動生成2-3個可點擊的建議問題
+- **Step 2 完整參數**: 回答語言、嚴格RAG模式、引用風格、檢索Top-K、相似度閾值、最大上下文Token等
 
 ---
 
 ## 🎯 最近完成
 
-### 📅 2026-01-01 (下午) - Step 2 UI 重構與 Step 6 建議氣泡功能
+### 📅 2026-01-03 - Step 2「AI 行為與回答規則設定」全面重構（含視覺標識）
 
-**🎨 Step 2 Prompt 配置 UI 重構**:
-- 合併 3 個相似下拉選單（回應詳細程度、專業程度、創意程度）為單一「回應風格」
-- 6 種預設風格選項：簡潔通俗、詳細通俗、專業標準、專業詳細、學術嚴謹、創意活潑
-- 新增「回應格式」參數：自動、條列、段落、步驟化
-- 新增「來源引用」參數：無引用、內文引用、註腳引用
-- 保留「AI 角色設定」輸入框
+**🎯 重構目標**:
+將 Step 2 重新設計為「AI 行為與回答規則設定」，採用 4 區塊 2x2 Grid 卡片佈局，每個區塊配有視覺標識 Badge 說明可調整性。
+
+**🏗️ 新架構 - 4 區塊設計（含視覺標識）**:
+
+| 區塊 | 名稱 | Badge 標識 | 內容 |
+|------|------|------------|------|
+| A | 系統規則 (System Rules) | 🔒 Session 階段固定 | 回答語言、嚴格RAG模式、允許推論、外部知識、無資料回應政策 |
+| B | 回應政策 (Response Policy) | 💬 對話中可微調 | Response Style, Tone, Persona, Citation Style 下拉選單 |
+| C | 執行限制 (Runtime Constraints) | ⚙️ 部分固定 | Max Tokens, Top-K, Similarity Threshold, Max Context, Warning 滑桿 |
+| D | 系統資訊 (System Info) | 📋 唯讀 | LLM Model, Context Window, Vector DB, Embedding, Moderation, TTL |
+
+**📋 完整參數設計**:
+
+| 區塊 | 參數 | 類型 | 選項/範圍 | 預設值 |
+|------|------|------|-----------|--------|
+| A 系統規則 | 回答語言 | 下拉選單 | 自動偵測/繁體中文/English | 自動偵測 |
+| A 系統規則 | 嚴格RAG模式 | 開關 | 開/關 | 開 |
+| A 系統規則 | 允許推論 | 開關 | 開/關 | 開 |
+| A 系統規則 | 外部知識 | 顯示 | 永遠關閉（僅使用上傳文件） | - |
+| A 系統規則 | 無資料回應政策 | 顯示 | 明確告知用戶無法回答 | - |
+| B 回應政策 | Response Style | 下拉選單 | 簡潔/標準/詳細/步驟 | 標準 |
+| B 回應政策 | Response Tone | 下拉選單 | 正式/親切/輕鬆/學術 | 親切 |
+| B 回應政策 | Persona | 下拉選單 | 教授/專家/教育者/大媽大伯 | 專家 |
+| B 回應政策 | Citation Style | 下拉選單 | 無/內文/註腳 | 內文 |
+| C 執行限制 | Max Tokens | 滑桿 | 512-4096 | 2048 |
+| C 執行限制 | Retrieval Top-K | 滑桿 | 1-10 | 5 |
+| C 執行限制 | Similarity Threshold | 滑桿 | 0.30-0.95 | 0.70 |
+| C 執行限制 | Max Context Tokens | 滑桿 | 1000-8000 | 4000 |
+| C 執行限制 | Context Warning | 滑桿 | 50%-90% | 80% |
+| D 系統資訊 | LLM Model | 唯讀 | gemini-2.0-flash | - |
+| D 系統資訊 | Context Window | 唯讀 | 128,000 tokens | - |
+| D 系統資訊 | Vector DB | 唯讀 | Qdrant | - |
+| D 系統資訊 | Embedding Model | 唯讀 | text-embedding-004 | - |
+| D 系統資訊 | Content Moderation | 唯讀 | Gemini Safety | - |
+| D 系統資訊 | Session TTL | 唯讀 | 30 分鐘 | - |
+
+**🔧 修改的檔案**:
+- `frontend/src/components/PromptConfigStep/PromptConfigStep.tsx` - 完整重寫，新 4 區塊架構含視覺標識
+- `frontend/src/components/WorkflowMain/WorkflowMain.tsx` - 更新 Step 2 預設參數（新增 answer_language, strict_rag_mode, citation_style, retrieval_top_k, similarity_threshold, max_context_tokens）
+- `frontend/src/components/WorkflowStepper/WorkflowStepper.tsx` - 更新 generateCustomPrompt 函數（中文 prompt 模板）
+- `frontend/src/i18n/locales/zh-TW.json` - 完整 step2 翻譯區塊（badge, lang, strictRag, citation, runtime 等）
+- `frontend/src/i18n/locales/en.json` - 完整 step2 翻譯區塊
+
+**⚠️ 待更新的翻譯檔案**:
+- `frontend/src/i18n/locales/zh-CN.json` - 需新增 step2 區塊
+- `frontend/src/i18n/locales/ja.json` - 需新增 step2 區塊
+- `frontend/src/i18n/locales/ko.json` - 需新增 step2 區塊
+- `frontend/src/i18n/locales/es.json` - 需新增 step2 區塊
+- `frontend/src/i18n/locales/fr.json` - 需新增 step2 區塊
+- `frontend/src/i18n/locales/ar.json` - 需新增 step2 區塊
+
+**🎨 UI/UX 設計**:
+- 使用 Bootstrap 卡片，每個區塊不同邊框色彩 + Badge 標識
+- 區塊 A: warning 色 (黃) + 🔒 Session 階段固定
+- 區塊 B: info 色 (藍) + 💬 對話中可微調
+- 區塊 C: success 色 (綠) + ⚙️ 部分固定
+- 區塊 D: secondary 色 (灰) + 📋 唯讀
+- 響應式設計：`col-md-6` 實現桌面 2x2，手機單欄
+
+**🔗 新增 TypeScript Interface**:
+```typescript
+interface Step2Config {
+  // System Rules
+  answer_language: 'auto' | 'zh-TW' | 'en';
+  strict_rag_mode: boolean;
+  allow_inference: boolean;
+  // Response Policy
+  response_style: string;
+  response_tone: string;
+  persona: string;
+  citation_style: 'none' | 'inline' | 'footnote';
+  // Runtime Constraints
+  max_tokens: number;
+  retrieval_top_k: number;
+  similarity_threshold: number;
+  max_context_tokens: number;
+  context_warning_threshold: number;
+}
+```
+
+---
+
+### 📅 2026-01-01 (下午) - Step 6 建議氣泡功能
 
 **💡 Step 6 建議氣泡功能（當 AI 無法回答時）**:
 - **後端 RAGResponse**: 新增 `suggestions: Optional[List[str]]` 欄位
@@ -51,9 +130,6 @@
 - `frontend/src/components/ChatMessage/ChatMessage.tsx` - 建議氣泡 UI
 - `frontend/src/components/ChatMessage/ChatMessage.scss` - 氣泡樣式
 - `frontend/src/components/ChatScreen/ChatScreen.tsx` - suggestions 狀態管理
-- `frontend/src/components/PromptConfigStep/PromptConfigStep.tsx` - 合併風格下拉
-- `frontend/src/components/WorkflowMain/WorkflowMain.tsx` - 新參數預設值
-- `frontend/src/components/WorkflowStepper/WorkflowStepper.tsx` - 更新 prompt 生成
 
 ---
 

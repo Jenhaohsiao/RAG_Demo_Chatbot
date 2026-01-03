@@ -213,6 +213,65 @@
       "message": "本当に再開してよろしいですか？現在のセッションが終了され、新しいセッションが作成されます。"
     }
   },
+  "step2": {
+    "title": "AI動作と回答ルール設定",
+    "disabledNotice": "データがアップロードされました。設定はロックされ、変更できません。",
+    "system": {
+      "title": "システム動作",
+      "allowInference": "推論を許可",
+      "inferenceOn": "オン：アップロードされたデータの範囲内で合理的な推論が可能",
+      "inferenceOff": "オフ：ドキュメントに明記された内容のみ回答"
+    },
+    "policy": {
+      "title": "回答ポリシー",
+      "style": {
+        "label": "回答スタイル",
+        "concise": "簡潔",
+        "standard": "標準",
+        "detailed": "詳細",
+        "stepByStep": "ステップバイステップ"
+      },
+      "tone": {
+        "label": "回答トーン",
+        "formal": "フォーマル",
+        "friendly": "フレンドリー",
+        "casual": "カジュアル",
+        "academic": "学術的"
+      },
+      "persona": {
+        "label": "ペルソナ設定"
+      }
+    },
+    "persona": {
+      "professor": "大学教授",
+      "expert": "職場の専門家",
+      "educator": "子供の教育者",
+      "neighbor": "親しみやすいご近所さん"
+    },
+    "runtime": {
+      "title": "実行制限",
+      "maxTokens": "最大応答トークン",
+      "short": "短い",
+      "detailed": "詳細",
+      "tokenHint": "値が大きいほど、回答が長く詳細になります",
+      "contextWarning": "コンテキスト使用警告",
+      "contextHint": "この割合に達すると、トークン使用量を警告します"
+    },
+    "info": {
+      "title": "システム情報",
+      "notice": "システムが自動設定、変更不可",
+      "llmModel": "LLMモデル",
+      "contextWindow": "コンテキストウィンドウ",
+      "vectorDb": "ベクターDB",
+      "embeddingModel": "埋め込みモデル",
+      "strictRag": "厳格RAG",
+      "moderation": "コンテンツ審査",
+      "sessionTtl": "セッションTTL",
+      "similarityThreshold": "類似度閾値",
+      "citationStyle": "引用方式",
+      "enabled": "有効"
+    }
+  },
   "common": {
     "processing": "処理中..."
   }

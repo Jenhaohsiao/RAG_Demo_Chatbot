@@ -213,6 +213,65 @@
       "message": "Êtes-vous sûr de vouloir redémarrer ? La session actuelle sera fermée et une nouvelle session sera créée."
     }
   },
+  "step2": {
+    "title": "Configuration du Comportement et des Réponses de l'IA",
+    "disabledNotice": "Les données ont été téléchargées. La configuration est verrouillée et ne peut pas être modifiée.",
+    "system": {
+      "title": "Règles Système",
+      "allowInference": "Autoriser l'Inférence",
+      "inferenceOn": "Activé : Peut faire des inférences raisonnables dans la portée du document",
+      "inferenceOff": "Désactivé : Répond uniquement aux informations explicites dans les documents"
+    },
+    "policy": {
+      "title": "Politique de Réponse",
+      "style": {
+        "label": "Style de Réponse",
+        "concise": "Concis",
+        "standard": "Standard",
+        "detailed": "Détaillé",
+        "stepByStep": "Étape par Étape"
+      },
+      "tone": {
+        "label": "Ton de Réponse",
+        "formal": "Formel Professionnel",
+        "friendly": "Amical Approchable",
+        "casual": "Décontracté",
+        "academic": "Académique Rigoureux"
+      },
+      "persona": {
+        "label": "Configuration du Persona"
+      }
+    },
+    "persona": {
+      "professor": "Professeur d'Université",
+      "expert": "Expert en Milieu de Travail",
+      "educator": "Éducateur pour Enfants",
+      "neighbor": "Voisin Sympathique"
+    },
+    "runtime": {
+      "title": "Contraintes d'Exécution",
+      "maxTokens": "Tokens de Réponse Maximum",
+      "short": "Court",
+      "detailed": "Détaillé",
+      "tokenHint": "Des valeurs plus élevées produisent des réponses plus longues et détaillées",
+      "contextWarning": "Seuil d'Avertissement de Contexte",
+      "contextHint": "Vous alerte lorsque l'utilisation des tokens atteint ce pourcentage"
+    },
+    "info": {
+      "title": "Informations Système",
+      "notice": "Configuration automatique, non modifiable",
+      "llmModel": "Modèle LLM",
+      "contextWindow": "Fenêtre de Contexte",
+      "vectorDb": "Base de Données Vectorielle",
+      "embeddingModel": "Modèle d'Embedding",
+      "strictRag": "RAG Strict",
+      "moderation": "Modération de Contenu",
+      "sessionTtl": "TTL de Session",
+      "similarityThreshold": "Seuil de Similarité",
+      "citationStyle": "Style de Citation",
+      "enabled": "Activé"
+    }
+  },
   "common": {
     "processing": "Traitement en cours..."
   }

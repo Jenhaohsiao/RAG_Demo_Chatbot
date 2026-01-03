@@ -61,16 +61,31 @@ const WorkflowMain: React.FC<WorkflowMainProps> = ({
     rag_chunk_overlap: 200,
     rag_min_chunk_length: 100,
 
-    // Prompt 參數 (Step 2)
+    // Step 2: AI 行為與回答規則設定
+    // A. 系統規則 (System Rules) - Session 固定
+    allow_inference: false,
+    answer_language: "auto" as "zh-TW" | "en" | "auto",
+    strict_rag_mode: true,
+
+    // B. 回答政策 (Response Policy) - 對話中可調整
+    response_style: "standard" as "concise" | "standard" | "detailed" | "step_by_step",
+    response_tone: "formal" as "formal" | "friendly" | "casual" | "academic",
+    persona: "expert" as "professor" | "expert" | "educator" | "neighbor",
+    citation_style: "inline" as "inline" | "document" | "none",
+
+    // C. 執行限制 (Runtime Constraints) - 部分固定
+    max_response_tokens: 2048,
+    context_warning_threshold: 80,
+    retrieval_top_k: 5,
+    similarity_threshold: 0.7,
+    max_context_tokens: 4000,
+
+    // 舊參數保留（供向後相容）
     token_threshold: 4000,
-    response_style: "standard" as const,
     professional_level: "professional" as const,
     creativity_level: "balanced" as const,
-    persona: "", // 語氣/角色設定 (例如: "國中老師", "專業顧問")
-    // 新增參數
-    combined_style: "professional_standard", // 合併的風格選擇
-    response_format: "auto" as const, // 回應格式
-    citation_style: "inline" as const, // 引用格式
+    combined_style: "professional_standard",
+    response_format: "auto" as const,
 
     // 系統參數 (Step 3)
     session_ttl_minutes: 30,

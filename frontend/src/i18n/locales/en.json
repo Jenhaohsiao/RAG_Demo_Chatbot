@@ -242,6 +242,91 @@
       "message": "Are you sure you want to restart? Your current session will be closed and a new session will be created."
     }
   },
+  "step2": {
+    "title": "AI Behavior & Response Configuration",
+    "subtitle": "Configure AI behavior, response policy, and runtime constraints",
+    "disabledNotice": "Data has been uploaded. Configuration is locked and cannot be modified.",
+    "badge": {
+      "sessionFixed": "Session Fixed",
+      "chatAdjustable": "Adjustable During Chat",
+      "partialFixed": "Partially Fixed",
+      "readonly": "Read-only"
+    },
+    "system": {
+      "title": "System Rules",
+      "answerLanguage": "Answer Language",
+      "lang": {
+        "zhTW": "Traditional Chinese",
+        "en": "English",
+        "auto": "Auto-detect"
+      },
+      "strictRagMode": "Strict RAG Mode",
+      "strictRagOn": "ON: AI will refuse to answer when data is insufficient",
+      "strictRagOff": "OFF: AI may supplement with general knowledge",
+      "allowInference": "Allow Inference",
+      "inferenceOn": "ON: May make reasonable inferences within document scope",
+      "inferenceOff": "OFF: Only answers explicitly stated in documents",
+      "externalKnowledge": "External Knowledge Access",
+      "alwaysOff": "Always Off",
+      "noDataPolicy": "No-data Response Policy",
+      "noDataPolicyDesc": "When no relevant data is found, AI will clearly inform the user and suggest possible alternative questions."
+    },
+    "policy": {
+      "title": "Response Policy",
+      "style": {
+        "label": "Response Style",
+        "concise": "Concise",
+        "standard": "Standard",
+        "detailed": "Detailed",
+        "stepByStep": "Step-by-Step"
+      },
+      "tone": {
+        "label": "Response Tone",
+        "formal": "Formal Professional",
+        "friendly": "Friendly Approachable",
+        "casual": "Casual Relaxed",
+        "academic": "Academic Rigorous"
+      },
+      "persona": {
+        "label": "Persona"
+      },
+      "citation": {
+        "label": "Citation Style",
+        "inline": "Inline Citation",
+        "document": "Document Reference",
+        "none": "No Citation"
+      }
+    },
+    "persona": {
+      "professor": "University Professor",
+      "expert": "Workplace Expert",
+      "educator": "Children's Educator",
+      "neighbor": "Friendly Neighbor"
+    },
+    "runtime": {
+      "title": "Runtime Constraints",
+      "maxTokens": "Max Response Tokens",
+      "retrievalTopK": "Retrieval Top-K",
+      "similarityThreshold": "Similarity Threshold",
+      "maxContextTokens": "Max Context Tokens",
+      "contextWarning": "Context Warning Threshold",
+      "precise": "Precise",
+      "broad": "Broad",
+      "loose": "Loose",
+      "strict": "Strict"
+    },
+    "info": {
+      "title": "System Info",
+      "notice": "Automatically configured, cannot be modified",
+      "llmModel": "LLM Model",
+      "contextWindow": "Context Window",
+      "vectorDb": "Vector DB",
+      "embeddingModel": "Embedding Model",
+      "moderation": "Content Moderation",
+      "sessionTtl": "Session TTL",
+      "enabled": "Enabled"
+    }
+  },
   "common": {
     "processing": "Processing..."
   }

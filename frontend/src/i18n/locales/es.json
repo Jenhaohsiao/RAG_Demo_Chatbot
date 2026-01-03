@@ -213,6 +213,65 @@
       "message": "¿Está seguro de que desea reiniciar? La sesión actual se cerrará y se creará una nueva sesión."
     }
   },
+  "step2": {
+    "title": "Configuración de Comportamiento y Respuestas de IA",
+    "disabledNotice": "Los datos han sido cargados. La configuración está bloqueada y no puede ser modificada.",
+    "system": {
+      "title": "Reglas del Sistema",
+      "allowInference": "Permitir Inferencia",
+      "inferenceOn": "Activado: Puede hacer inferencias razonables dentro del alcance del documento",
+      "inferenceOff": "Desactivado: Solo responde información explícita en los documentos"
+    },
+    "policy": {
+      "title": "Política de Respuesta",
+      "style": {
+        "label": "Estilo de Respuesta",
+        "concise": "Conciso",
+        "standard": "Estándar",
+        "detailed": "Detallado",
+        "stepByStep": "Paso a Paso"
+      },
+      "tone": {
+        "label": "Tono de Respuesta",
+        "formal": "Formal Profesional",
+        "friendly": "Amigable",
+        "casual": "Casual Relajado",
+        "academic": "Académico Riguroso"
+      },
+      "persona": {
+        "label": "Configuración de Persona"
+      }
+    },
+    "persona": {
+      "professor": "Profesor Universitario",
+      "expert": "Experto Laboral",
+      "educator": "Educador Infantil",
+      "neighbor": "Vecino Amigable"
+    },
+    "runtime": {
+      "title": "Restricciones de Ejecución",
+      "maxTokens": "Tokens Máximos de Respuesta",
+      "short": "Corto",
+      "detailed": "Detallado",
+      "tokenHint": "Valores más altos producen respuestas más largas y detalladas",
+      "contextWarning": "Umbral de Advertencia de Contexto",
+      "contextHint": "Le alerta cuando el uso de tokens alcanza este porcentaje"
+    },
+    "info": {
+      "title": "Información del Sistema",
+      "notice": "Configuración automática, no modificable",
+      "llmModel": "Modelo LLM",
+      "contextWindow": "Ventana de Contexto",
+      "vectorDb": "Base de Datos Vectorial",
+      "embeddingModel": "Modelo de Embedding",
+      "strictRag": "RAG Estricto",
+      "moderation": "Moderación de Contenido",
+      "sessionTtl": "TTL de Sesión",
+      "similarityThreshold": "Umbral de Similitud",
+      "citationStyle": "Estilo de Citación",
+      "enabled": "Habilitado"
+    }
+  },
   "common": {
     "processing": "Procesando..."
   }

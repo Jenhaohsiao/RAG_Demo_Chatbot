@@ -414,8 +414,12 @@ class RAGEngine:
                 "cannot find", "no relevant", "unable to", "sorry",
                 "nicht finden", "찾을 수 없", "見つかりません"
             ]
-            is_cannot_answer = any(ind in llm_response.lower() for ind in cannot_answer_indicators) and len(retrieved_chunks) == 0
+            # 改進邏輯：有 indicator 就算 CANNOT_ANSWER（不再要求 len(retrieved_chunks) == 0）
+            has_cannot_answer_indicator = any(ind in llm_response.lower() for ind in cannot_answer_indicators)
+            is_cannot_answer = has_cannot_answer_indicator or len(retrieved_chunks) == 0
             response_type = "CANNOT_ANSWER" if is_cannot_answer else "ANSWERED"
+            
+            logger.info(f"[{session_id}] Response type: {response_type} (has_indicator={has_cannot_answer_indicator}, chunks={len(retrieved_chunks)})")
             
             # 如果無法回答，生成建議問題
             suggestions = None
@@ -636,6 +640,7 @@ Contenu du document:
         """
         # If custom prompt is provided, use it directly with variable substitution
         if custom_prompt:
+            logger.info(f"Using custom_prompt (length={len(custom_prompt)}, preview={custom_prompt[:200]}...)")
             # 語言映射（支援 zh-TW, zh-CN 等完整語言代碼）
             language_names = {
                 "zh-TW": "Traditional Chinese (繁體中文)",
