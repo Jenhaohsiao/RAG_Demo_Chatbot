@@ -633,10 +633,13 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
     // Persona 映射
     const personaMap: Record<string, string> = {
-      professor: "大學教授 - 使用學術嚴謹的語言，適當引用文獻來源，用專業術語解釋概念。",
+      professor:
+        "大學教授 - 使用學術嚴謹的語言，適當引用文獻來源，用專業術語解釋概念。",
       expert: "職場專家 - 務實導向、重點明確，使用專業術語，直接切入問題核心。",
-      educator: "兒童教育者 - 使用淺顯易懂的語言，多舉生活化例子，一步步解釋概念。",
-      neighbor: "市場大媽大伯 - 用口語化、生活化的方式說話，就像跟鄰居聊天一樣親切自然，多用比喻。",
+      educator:
+        "兒童教育者 - 使用淺顯易懂的語言，多舉生活化例子，一步步解釋概念。",
+      neighbor:
+        "市場大媽大伯 - 用口語化、生活化的方式說話，就像跟鄰居聊天一樣親切自然，多用比喻。",
     };
 
     // 回答風格映射
@@ -665,8 +668,8 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     // 語言映射
     const languageMap: Record<string, string> = {
       "zh-TW": "Traditional Chinese (繁體中文)",
-      "en": "English",
-      "auto": "{{language}}", // 使用變數，讓後端決定
+      en: "English",
+      auto: "{{language}}", // 使用變數，讓後端決定
     };
 
     // 推論政策
@@ -675,15 +678,17 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       : "你只能回答文件中明確記載的內容，不可推論或外推。";
 
     // 嚴格 RAG 政策
-    const strictRagPolicy = strict_rag_mode !== false
-      ? "當檢索到的文件無法回答問題時，你必須明確拒絕回答，並告知使用者找不到相關資料。"
-      : "當文件資料不足時，你可以適度使用一般知識補充，但需標示哪些來自文件、哪些是補充。";
+    const strictRagPolicy =
+      strict_rag_mode !== false
+        ? "當檢索到的文件無法回答問題時，你必須明確拒絕回答，並告知使用者找不到相關資料。"
+        : "當文件資料不足時，你可以適度使用一般知識補充，但需標示哪些來自文件、哪些是補充。";
 
     // 組裝指示
     const personaInstruction = personaMap[persona] || personaMap["expert"];
     const styleInstruction = styleMap[response_style] || styleMap["standard"];
     const toneInstruction = toneMap[response_tone] || toneMap["formal"];
-    const citationInstruction = citationMap[citation_style] || citationMap["inline"];
+    const citationInstruction =
+      citationMap[citation_style] || citationMap["inline"];
     const responseLanguage = languageMap[answer_language] || "{{language}}";
 
     // 生成完整的 custom_prompt
@@ -703,7 +708,9 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
 **回應長度限制**: 將回答控制在約 ${max_response_tokens || 2048} tokens 以內。
 
-**檢索設定**: Top-K=${retrieval_top_k || 5}, 相似度閾值=${similarity_threshold || 0.7}
+**檢索設定**: Top-K=${retrieval_top_k || 5}, 相似度閾值=${
+      similarity_threshold || 0.7
+    }
 
 **關鍵規則**:
 1. **回答語言**: 一律使用 ${responseLanguage} 回答。整個回答必須是同一種語言。

@@ -68,7 +68,11 @@ const WorkflowMain: React.FC<WorkflowMainProps> = ({
     strict_rag_mode: true,
 
     // B. 回答政策 (Response Policy) - 對話中可調整
-    response_style: "standard" as "concise" | "standard" | "detailed" | "step_by_step",
+    response_style: "standard" as
+      | "concise"
+      | "standard"
+      | "detailed"
+      | "step_by_step",
     response_tone: "formal" as "formal" | "friendly" | "casual" | "academic",
     persona: "expert" as "professor" | "expert" | "educator" | "neighbor",
     citation_style: "inline" as "inline" | "document" | "none",
