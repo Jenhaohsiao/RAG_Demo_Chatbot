@@ -57,8 +57,8 @@
         "complete": "完成 RAG 設定"
       },
       "promptConfig": {
-        "title": "AI 行為與回答規則設定",
-        "description": "設定 AI 回應風格、語氣和限制",
+        "title": "System Prompt",
+        "description": "定義模型行為、角色、能力範圍與安全規則",
         "complete": "完成設定"
       },
       "dataUpload": {
@@ -87,11 +87,13 @@
         "approved": "已核准",
         "rejected": "已拒絕",
         "statistics": "審核統計",
-        "completeReview": "完成內容審核"
+        "completeReview": "完成內容審核",
+        "toolUsed": "審核工具：Gemini Safety API",
+        "standards": "審核標準：阻擋騷擾 (Harassment)、仇恨言論 (Hate Speech)、性相關內容 (Sexually Explicit)、危險內容 (Dangerous Content)"
       },
       "textProcessing": {
-        "title": "文本切割 向量嵌入",
-        "description": "分塊處理並生成向量",
+        "title": "資料向量化, 寫入 Vector DB",
+        "description": "將文件分塊、轉換為向量，並寫入 Vector DB 以供後續檢索",
         "settings": "文本處理設定",
         "chunkSize": "文本分塊大小",
         "chunkOverlap": "分塊重疊",
@@ -101,7 +103,36 @@
         "chunking": "切塊中",
         "embedding": "嵌入中",
         "completed": "已完成",
-        "processingComplete": "文本處理完成！"
+        "processingComplete": "文本處理完成！",
+        "vectorDbStatus": {
+          "title": "Vector DB 寫入狀態",
+          "type": "Vector DB 類型",
+          "collection": "Collection 名稱",
+          "vectorCount": "向量總數 (Vector Count)",
+          "sourceDocs": "來源文件數",
+          "newVectors": "本次新增向量",
+          "edu": "AI 將從這裡檢索記憶，而非憑空捏造"
+        },
+        "settingsSummary": {
+          "title": "向量化設定摘要",
+          "embeddingModel": "Embedding Model",
+          "chunkSize": "Chunk Size",
+          "chunkOverlap": "Chunk Overlap",
+          "language": "語言",
+          "edu": "適當的分塊與重疊能確保上下文連貫性"
+        },
+        "ragReadiness": {
+          "title": "RAG 檢索準備狀態",
+          "status": "可檢索狀態",
+          "ready": "✅ 已就緒",
+          "processing": "⏳ 處理中...",
+          "threshold": "最小相似度門檻",
+          "topK": "預設 Top-K",
+          "strictMode": "是否啟用嚴格 RAG",
+          "yes": "是",
+          "no": "否",
+          "edu": "嚴格模式下，若相似度低於門檻將拒絕回答"
+        }
       },
       "aiChat": {
         "title": "AI 對談",
@@ -406,5 +437,40 @@
   },
   "common": {
     "processing": "處理中..."
+  },
+  "workflow": {
+    "steps": {
+      "textProcessing": {
+        "vectorDbStatus": {
+          "title": "Vector DB 寫入狀態",
+          "type": "Vector DB 類型",
+          "collection": "Collection 名稱",
+          "vectorCount": "向量總數",
+          "sourceDocs": "來源文件數",
+          "newVectors": "本次新增向量",
+          "notExecuted": "未執行, 無資料",
+          "edu": "AI 將從這裡檢索記憶，而非憑空捏造"
+        },
+        "settingsSummary": {
+          "title": "向量化設定摘要",
+          "embeddingModel": "Embedding Model",
+          "chunkSize": "Chunk Size",
+          "chunkOverlap": "Chunk Overlap",
+          "language": "語言",
+          "edu": "適當的分塊與重疊能確保上下文連貫性"
+        },
+        "ragReadiness": {
+          "title": "RAG 檢索準備狀態",
+          "status": "可檢索狀態",
+          "ready": "✅ 已就緒",
+          "processing": "⏳ 處理中...",
+          "notExecuted": "未執行",
+          "distanceMetric": "距離度量",
+          "dimensions": "向量維度",
+          "indexType": "索引類型",
+          "edu": "嚴格模式下，若相似度低於門檻將拒絕回答"
+        }
+      }
+    }
   }
 }

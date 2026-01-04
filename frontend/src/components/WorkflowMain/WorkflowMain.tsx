@@ -81,7 +81,6 @@ const WorkflowMain: React.FC<WorkflowMainProps> = ({
     max_response_tokens: 2048,
     context_warning_threshold: 80,
     retrieval_top_k: 5,
-    similarity_threshold: 0.7,
     max_context_tokens: 4000,
 
     // 舊參數保留（供向後相容）

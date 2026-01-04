@@ -247,15 +247,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
       {/* 如果已有上傳內容，顯示結果摘要 */}
       {hasUploadedContent && (
         <div className="upload-results-summary">
-          <div className="alert alert-success mb-4" role="alert">
-            <h6 className="alert-heading mb-3">
-              <i className="bi bi-check-circle-fill me-2"></i>
-              資料上傳完成
-            </h6>
-            <p className="mb-0 small">
-              已成功上傳內容，您可以進入下一步驟進行內容審核。如需重新上傳，請重新啟動會話。
-            </p>
-          </div>
+          {/* 移除綠色 alert，改在 WorkflowStepper 顯示 */}
 
           {/* 文件上傳結果 */}
           {uploadedFiles.length > 0 && (

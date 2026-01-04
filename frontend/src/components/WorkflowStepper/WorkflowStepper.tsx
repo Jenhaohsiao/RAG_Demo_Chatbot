@@ -366,9 +366,9 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     {
       id: 2,
       key: "prompt-config",
-      title: "Prompt 配置",
+      title: "System Prompt",
       icon: "bi-chat-dots",
-      description: "優化AI模型對話風格",
+      description: "定義模型行為、角色、能力範圍與安全規則",
       color: "info",
       detailMessage:
         "設定AI助手的角色定位、回答風格和行為準則。您可以定義AI的專業領域、語氣風格、回答長度等，讓AI更符合您的使用需求和品牌形象。",
@@ -396,9 +396,9 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     {
       id: 5,
       key: "text-processing",
-      title: "文本切割 向量嵌入",
+      title: "資料向量化, 寫入 Vector DB",
       icon: "bi-diagram-3",
-      description: "分塊處理並生成向量",
+      description: "將文件分塊、轉換為向量，並寫入 Vector DB 以供後續檢索",
       color: "purple",
       detailMessage:
         "將文檔內容切分成適當大小的段落，並轉換為高維向量表示。這個過程讓AI能夠理解和檢索相關內容，是實現精準問答的關鍵技術步驟。",
@@ -1089,6 +1089,16 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
             {/* 中间重点数据显示 */}
             <div className="text-center mx-3 workflow-stepper-progress-center">
+              {/* 步驟3：上傳完成顯示 */}
+              {currentStep === 3 &&
+                ((documents && documents.length > 0 && documents.every(d => d.chunks > 0)) ||
+                 (crawledUrls && crawledUrls.length > 0 && crawledUrls.every(u => u.chunks > 0))) && (
+                <div className="d-flex align-items-center text-success">
+                  <i className="bi bi-check-circle-fill me-2"></i>
+                  <span className="fw-bold">資料上傳完成，可以進入下一步</span>
+                </div>
+              )}
+
               {/* 步驟4專用：內容審核執行按鈕 */}
               {currentStep === 4 && !shouldStartReview && !reviewPassed && (
                 <button

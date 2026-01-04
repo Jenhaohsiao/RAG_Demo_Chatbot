@@ -1,7 +1,7 @@
 /**
  * Step 2: AI 行為與回答規則設定
  * AI Behavior & Response Configuration
- * 分為 4 區塊：系統規則 / 回答政策 / 執行限制 / 系統狀態
+ * 分為 2 區塊：系統規則 / 回答政策
  */
 
 import React from "react";
@@ -153,16 +153,6 @@ const CITATION_STYLE_OPTIONS = [
   },
 ];
 
-// 系統狀態資訊（Read-only）
-const SYSTEM_INFO = {
-  llm_model: "Gemini 2.0 Flash",
-  context_window: "32k",
-  vector_db: "Qdrant",
-  embedding_model: "text-embedding-004",
-  content_moderation: true,
-  session_ttl: "30 分鐘",
-};
-
 const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
   parameters,
   onParameterChange,
@@ -194,16 +184,7 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
 
   return (
     <div className={`prompt-config-step ${disabled ? "disabled-step" : ""}`}>
-      {/* 標題與副標題 */}
-      <div className="mb-3">
-        <h5 className="mb-1">
-          <i className="bi bi-gear-wide-connected me-2"></i>
-          {t("step2.title", "AI 行為與回答規則設定")}
-        </h5>
-        <p className="text-muted small mb-0">
-          {t("step2.subtitle", "設定 AI 的行為、回答政策與執行限制")}
-        </p>
-      </div>
+
 
       {/* 禁用狀態提示 */}
       {disabled && (
@@ -317,6 +298,28 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                         "step2.system.inferenceOff",
                         "關閉：僅回答文件中明確記載的內容"
                       )}
+                </div>
+              </div>
+
+              {/* 允許使用者的 Prompt 來調整 System Prompt (永遠關閉) */}
+              <div className="mb-3">
+                <div className="form-check form-switch">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    id="allowUserOverride"
+                    checked={false}
+                    disabled={true}
+                  />
+                  <label
+                    className="form-check-label text-muted"
+                    htmlFor="allowUserOverride"
+                  >
+                    {t("step2.system.allowUserOverride", "允許使用者的 Prompt 來調整 System Prompt")}
+                    <span className="badge bg-secondary ms-2 small">
+                      {t("step2.system.alwaysOff", "永遠關閉")}
+                    </span>
+                  </label>
                 </div>
               </div>
 
@@ -480,271 +483,6 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
           </div>
         </div>
 
-        {/* C. 執行限制 (Runtime Constraints) - 左下 */}
-        <div className="col-lg-6">
-          <div
-            className={`card h-100 ${
-              disabled ? "border-secondary" : "border-success"
-            }`}
-          >
-            <div
-              className={`card-header ${
-                disabled ? "bg-secondary" : "bg-success"
-              } text-white d-flex justify-content-between align-items-center`}
-            >
-              <h6 className="card-title mb-0">
-                <i className="bi bi-sliders me-2"></i>
-                {t("step2.runtime.title", "執行限制")}
-              </h6>
-              <span className="badge bg-light text-dark small">
-                <i className="bi bi-lock me-1"></i>
-                {t("step2.badge.partialFixed", "部分固定")}
-              </span>
-            </div>
-            <div className="card-body">
-              {/* 最大回應 Token */}
-              <div className="mb-3">
-                <label className="form-label small fw-bold">
-                  {t("step2.runtime.maxTokens", "最大回應 Token")}：
-                  <span
-                    className={
-                      disabled
-                        ? "text-secondary fw-bold ms-1"
-                        : "text-success fw-bold ms-1"
-                    }
-                  >
-                    {(parameters.max_response_tokens || 2048).toLocaleString()}
-                  </span>
-                </label>
-                <input
-                  type="range"
-                  className="form-range"
-                  min="512"
-                  max="4096"
-                  step="256"
-                  value={parameters.max_response_tokens || 2048}
-                  disabled={disabled}
-                  onChange={(e) =>
-                    onParameterChange(
-                      "max_response_tokens",
-                      parseInt(e.target.value)
-                    )
-                  }
-                />
-                <div className="d-flex justify-content-between small text-muted">
-                  <span>512</span>
-                  <span>4096</span>
-                </div>
-              </div>
-
-              {/* Retrieval Top-K */}
-              <div className="mb-3">
-                <label className="form-label small fw-bold">
-                  {t("step2.runtime.retrievalTopK", "Retrieval Top-K")}：
-                  <span
-                    className={
-                      disabled
-                        ? "text-secondary fw-bold ms-1"
-                        : "text-success fw-bold ms-1"
-                    }
-                  >
-                    {parameters.retrieval_top_k || 5}
-                  </span>
-                </label>
-                <input
-                  type="range"
-                  className="form-range"
-                  min="1"
-                  max="10"
-                  step="1"
-                  value={parameters.retrieval_top_k || 5}
-                  disabled={disabled}
-                  onChange={(e) =>
-                    onParameterChange(
-                      "retrieval_top_k",
-                      parseInt(e.target.value)
-                    )
-                  }
-                />
-                <div className="d-flex justify-content-between small text-muted">
-                  <span>1 ({t("step2.runtime.precise", "精確")})</span>
-                  <span>10 ({t("step2.runtime.broad", "廣泛")})</span>
-                </div>
-              </div>
-
-              {/* 相似度閾值 */}
-              <div className="mb-3">
-                <label className="form-label small fw-bold">
-                  {t("step2.runtime.similarityThreshold", "相似度閾值")}：
-                  <span
-                    className={
-                      disabled
-                        ? "text-secondary fw-bold ms-1"
-                        : "text-success fw-bold ms-1"
-                    }
-                  >
-                    {(parameters.similarity_threshold || 0.7).toFixed(2)}
-                  </span>
-                </label>
-                <input
-                  type="range"
-                  className="form-range"
-                  min="0.3"
-                  max="0.95"
-                  step="0.05"
-                  value={parameters.similarity_threshold || 0.7}
-                  disabled={disabled}
-                  onChange={(e) =>
-                    onParameterChange(
-                      "similarity_threshold",
-                      parseFloat(e.target.value)
-                    )
-                  }
-                />
-                <div className="d-flex justify-content-between small text-muted">
-                  <span>0.3 ({t("step2.runtime.loose", "寬鬆")})</span>
-                  <span>0.95 ({t("step2.runtime.strict", "嚴格")})</span>
-                </div>
-              </div>
-
-              {/* 最大 Context Token */}
-              <div className="mb-3">
-                <label className="form-label small fw-bold">
-                  {t("step2.runtime.maxContextTokens", "最大 Context Token")}：
-                  <span
-                    className={
-                      disabled
-                        ? "text-secondary fw-bold ms-1"
-                        : "text-success fw-bold ms-1"
-                    }
-                  >
-                    {(parameters.max_context_tokens || 4000).toLocaleString()}
-                  </span>
-                </label>
-                <input
-                  type="range"
-                  className="form-range"
-                  min="1000"
-                  max="8000"
-                  step="500"
-                  value={parameters.max_context_tokens || 4000}
-                  disabled={disabled}
-                  onChange={(e) =>
-                    onParameterChange(
-                      "max_context_tokens",
-                      parseInt(e.target.value)
-                    )
-                  }
-                />
-                <div className="d-flex justify-content-between small text-muted">
-                  <span>1000</span>
-                  <span>8000</span>
-                </div>
-              </div>
-
-              {/* Context 預警閾值 */}
-              <div className="mb-0">
-                <label className="form-label small fw-bold">
-                  {t("step2.runtime.contextWarning", "Context 使用預警")}：
-                  <span
-                    className={
-                      disabled
-                        ? "text-secondary fw-bold ms-1"
-                        : "text-success fw-bold ms-1"
-                    }
-                  >
-                    {parameters.context_warning_threshold || 80}%
-                  </span>
-                </label>
-                <input
-                  type="range"
-                  className="form-range"
-                  min="50"
-                  max="90"
-                  step="5"
-                  value={parameters.context_warning_threshold || 80}
-                  disabled={disabled}
-                  onChange={(e) =>
-                    onParameterChange(
-                      "context_warning_threshold",
-                      parseInt(e.target.value)
-                    )
-                  }
-                />
-                <div className="d-flex justify-content-between small text-muted">
-                  <span>50%</span>
-                  <span>90%</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* D. 系統狀態 (Read-only) - 右下 */}
-        <div className="col-lg-6">
-          <div className="card h-100 border-secondary">
-            <div className="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
-              <h6 className="card-title mb-0">
-                <i className="bi bi-info-circle me-2"></i>
-                {t("step2.info.title", "系統狀態")}
-              </h6>
-              <span className="badge bg-light text-dark small">
-                <i className="bi bi-eye me-1"></i>
-                {t("step2.badge.readonly", "唯讀")}
-              </span>
-            </div>
-            <div className="card-body bg-light">
-              <div className="small text-muted mb-2">
-                <i className="bi bi-lock me-1"></i>
-                {t("step2.info.notice", "系統自動設定，無法調整")}
-              </div>
-              <table className="table table-sm table-borderless mb-0 small">
-                <tbody>
-                  <tr>
-                    <td className="text-muted">
-                      {t("step2.info.llmModel", "LLM 模型")}
-                    </td>
-                    <td className="fw-bold">{SYSTEM_INFO.llm_model}</td>
-                  </tr>
-                  <tr>
-                    <td className="text-muted">
-                      {t("step2.info.contextWindow", "Context Window")}
-                    </td>
-                    <td className="fw-bold">{SYSTEM_INFO.context_window}</td>
-                  </tr>
-                  <tr>
-                    <td className="text-muted">
-                      {t("step2.info.vectorDb", "Vector DB")}
-                    </td>
-                    <td className="fw-bold">{SYSTEM_INFO.vector_db}</td>
-                  </tr>
-                  <tr>
-                    <td className="text-muted">
-                      {t("step2.info.embeddingModel", "Embedding Model")}
-                    </td>
-                    <td className="fw-bold">{SYSTEM_INFO.embedding_model}</td>
-                  </tr>
-                  <tr>
-                    <td className="text-muted">
-                      {t("step2.info.moderation", "內容審核")}
-                    </td>
-                    <td>
-                      <span className="badge bg-success">
-                        {t("step2.info.enabled", "已啟用")}
-                      </span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-muted">
-                      {t("step2.info.sessionTtl", "Session TTL")}
-                    </td>
-                    <td className="fw-bold">{SYSTEM_INFO.session_ttl}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

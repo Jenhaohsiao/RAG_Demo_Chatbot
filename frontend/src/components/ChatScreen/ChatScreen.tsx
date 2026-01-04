@@ -335,7 +335,6 @@ ${summary}`,
               <div className="document-summary-content">
                 <div className="d-flex justify-content-between align-items-center mb-2">
                   <h5 className="summary-title mb-0">
-                    <i className="bi bi-file-text me-2"></i>
                     文件摘要
                     {isTranslationNote && (
                       <span
@@ -346,6 +345,12 @@ ${summary}`,
                       </span>
                     )}
                   </h5>
+
+                  <small className="text-muted">
+                    由AI分析生成 •{sourceType && ` ${sourceType} • `}
+                    {chunkCount && `${chunkCount} 個文本段落 • `}
+                    {tokensUsed && `${tokensUsed.toLocaleString()} Tokens`}
+                  </small>
                   <button
                     className="btn btn-sm btn-outline-secondary"
                     onClick={() => setIsSummaryExpanded(!isSummaryExpanded)}
@@ -367,14 +372,6 @@ ${summary}`,
                       }`}
                     >
                       {content}
-                    </div>
-                    <div className="summary-meta">
-                      <small className="text-muted">
-                        <i className="bi bi-robot me-1"></i>
-                        由AI分析生成 •{sourceType && ` ${sourceType} • `}
-                        {chunkCount && `${chunkCount} 個文本段落 • `}
-                        {tokensUsed && `${tokensUsed.toLocaleString()} Tokens`}
-                      </small>
                     </div>
                   </>
                 )}

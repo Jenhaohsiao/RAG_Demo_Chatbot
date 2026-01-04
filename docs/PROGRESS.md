@@ -2,8 +2,8 @@
 
 **專案名稱**: Multilingual RAG-Powered Chatbot  
 **分支**: `001-multilingual-rag-chatbot`  
-**最後更新**: 2026-01-03  
-**總體狀態**: ✅ MVP 完成，Step 2「AI 行為與回答規則設定」全新 4 區塊架構完成（含視覺標識、完整參數）
+**最後更新**: 2026-01-04  
+**總體狀態**: ✅ MVP 完成，Step 3 & Step 5 UI 優化完成（狀態顯示、參數簡化）
 
 ---
 
@@ -23,10 +23,49 @@
 - **工作流程狀態保留**: 步驟3/4/5/6 返回上一步時保持狀態
 - **建議氣泡功能**: AI無法回答時自動生成2-3個可點擊的建議問題
 - **Step 2 完整參數**: 回答語言、嚴格RAG模式、引用風格、檢索Top-K、相似度閾值、最大上下文Token等
+- **Step 3 UI 優化**: 簡化完成訊息顯示，移除冗餘 Alert
+- **Step 5 UI 優化**: 向量化狀態顯示優化（未執行狀態）、顯示 Vector DB 技術規格（Cosine, 768, HNSW）
 
 ---
 
 ## 🎯 最近完成
+
+### 📅 2026-01-04 - Step 3 & Step 5 UI 優化與狀態顯示改進
+
+**🎯 優化目標**:
+改善 Step 3 (資料上傳) 與 Step 5 (文字處理) 的使用者體驗，確保狀態顯示準確（區分「未執行」與「0」），並提供更具技術價值的 Vector DB 資訊。
+
+**✨ 主要變更**:
+
+1.  **Step 3 資料上傳 (Data Upload)**:
+    *   **UI 簡化**: 移除上傳完成後的綠色 Alert 提示框，將「資料上傳完成...」訊息整合至卡片標題 (Header) 中，介面更清爽。
+    *   **檔案**: `frontend/src/components/UploadScreen/UploadScreen.tsx`, `frontend/src/components/WorkflowStepper/WorkflowStepper.tsx`
+
+2.  **Step 5 文字處理 (Text Processing)**:
+    *   **標題更新**: 英文標題更新為中文「資料向量化, 寫入 Vector DB」。
+    *   **狀態顯示優化**:
+        *   **Vector DB 卡片**: 當尚未開始處理時，「向量總數」與「本次新增向量」顯示為「未執行, 無資料」，而非誤導性的「0」。
+        *   **RAG 準備狀態**: 新增「未執行」狀態顯示。
+    *   **技術規格展示**:
+        *   移除與 Step 1 重複的 RAG 參數 (Threshold, Top-K, Strict Mode)。
+        *   新增 Vector DB 核心規格顯示：
+            *   **Distance Metric**: Cosine
+            *   **Dimensions**: 768
+            *   **Index Type**: HNSW
+    *   **版面調整**: 將「來源文件數」移至 Vector DB 卡片的第三順位。
+    *   **檔案**: `frontend/src/components/TextProcessingStep/TextProcessingStep.tsx`, `frontend/src/i18n/locales/zh-TW.json`
+
+3.  **系統修復**:
+    *   修復 `WorkflowMain.tsx` 中重複定義 `similarity_threshold` 導致的 Build Error。
+
+**🔧 修改的檔案**:
+- `frontend/src/components/UploadScreen/UploadScreen.tsx`
+- `frontend/src/components/TextProcessingStep/TextProcessingStep.tsx`
+- `frontend/src/components/WorkflowStepper/WorkflowStepper.tsx`
+- `frontend/src/components/WorkflowMain/WorkflowMain.tsx`
+- `frontend/src/i18n/locales/zh-TW.json`
+
+---
 
 ### 📅 2026-01-03 - Step 2「AI 行為與回答規則設定」全面重構（含視覺標識）
 

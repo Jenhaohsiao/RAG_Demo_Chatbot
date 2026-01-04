@@ -442,6 +442,18 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
           </h6>
         </div>
         <div className="card-body">
+          {/* 審核工具與標準說明 */}
+          <div className="alert alert-info mb-3 py-2">
+            <div className="d-flex align-items-center mb-1">
+              <i className="bi bi-tools me-2"></i>
+              <strong>{t("workflow.steps.contentReview.toolUsed", "審核工具：Gemini Safety API")}</strong>
+            </div>
+            <div className="d-flex align-items-start">
+              <i className="bi bi-shield-exclamation me-2 mt-1"></i>
+              <span>{t("workflow.steps.contentReview.standards", "審核標準：阻擋騷擾 (Harassment)、仇恨言論 (Hate Speech)、性相關內容 (Sexually Explicit)、危險內容 (Dangerous Content)")}</span>
+            </div>
+          </div>
+
           <div className="row">
             {[
               "檢查文件格式完整性",
