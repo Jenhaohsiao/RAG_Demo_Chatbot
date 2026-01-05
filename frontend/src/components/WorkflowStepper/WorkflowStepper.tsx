@@ -79,8 +79,11 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
         documentId,
         (status) => {
           console.log(`[WorkflowStepper] 輪詢狀態更新:`, status);
-          // 更新文檔的 chunks 數量
-          if (status.chunk_count > 0) {
+          // 更新文檔的 chunks 數量 (Flow 3 不再分塊，所以 chunk_count 可能為 0，改檢查 extraction_status)
+          if (
+            status.extraction_status === "completed" ||
+            status.chunk_count > 0
+          ) {
             const updatedDoc = {
               ...docItem,
               chunks: status.chunk_count,
@@ -139,7 +142,10 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       );
 
       // 最終更新（確保不會意外清空documents）
-      if (finalStatus.chunk_count > 0) {
+      if (
+        finalStatus.extraction_status === "completed" ||
+        finalStatus.chunk_count > 0
+      ) {
         console.log(
           `[WorkflowStepper] 輪詢完成，最終chunks:`,
           finalStatus.chunk_count
@@ -296,6 +302,49 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
   // 保存聊天記錄，用於返回流程6時恢復狀態
   const [savedChatMessages, setSavedChatMessages] = useState<any[]>([]);
+
+  // 監聽 sessionId 變化，重置所有狀態
+  React.useEffect(() => {
+    if (sessionId) {
+      console.log("[WorkflowStepper] SessionId changed, resetting all states");
+      setStepCompletion({
+        1: false,
+        2: false,
+        3: false,
+        4: false,
+        5: false,
+        6: false,
+      });
+      setReviewPassed(false);
+      setShouldStartReview(false);
+      setSavedReviewResults(null);
+      setTextProcessingCompleted(false);
+      setShouldStartProcessing(false);
+      setSavedProcessingResults(null);
+      setSavedChatMessages([]);
+    }
+  }, [sessionId]);
+
+  // 輔助函數：當上傳新資料時，重置後續步驟狀態
+  const resetDownstreamSteps = () => {
+    console.log(
+      "[WorkflowStepper] New data uploaded, resetting downstream steps (4, 5, 6)"
+    );
+    setReviewPassed(false);
+    setShouldStartReview(false);
+    setSavedReviewResults(null);
+    setTextProcessingCompleted(false);
+    setShouldStartProcessing(false);
+    setSavedProcessingResults(null);
+    setSavedChatMessages([]);
+
+    setStepCompletion((prev) => ({
+      ...prev,
+      4: false,
+      5: false,
+      6: false,
+    }));
+  };
 
   // 計算流程1、2是否應該被禁用
   // 只要流程3有上傳資料（documents 或 crawledUrls 不為空），就禁用流程1、2的配置
@@ -660,7 +709,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
     // 引用方式映射
     const citationMap: Record<string, string> = {
-      inline: "在相關資訊後面直接標註來源，例如 [文件1]。",
+      inline: "請勿在回答中加入 [文件ID] 或 [文件x] 等引用標記。直接回答即可。",
       document: "在回答結尾統一列出所有引用來源。",
       none: "不需要標註引用來源。",
     };
@@ -804,6 +853,9 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                 };
                 onDocumentsUpdate?.([...documents, newDoc]);
 
+                // 重置後續步驟狀態
+                resetDownstreamSteps();
+
                 // 開始輪詢文檔狀態以獲取最終的 chunks 數量（成功訊息將在輪詢完成後顯示）
                 pollFileStatus(response.document_id, newDoc, file.name, () => {
                   // 輪詢完成後隱藏全局 Loading
@@ -843,6 +895,9 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                   status: "processing",
                 };
                 onDocumentsUpdate?.([...documents, newDoc]);
+
+                // 重置後續步驟狀態
+                resetDownstreamSteps();
 
                 // 開始輪詢文檔狀態以獲取最終的 chunks 數量（成功訊息將在輪詢完成後顯示）
                 pollDocumentStatus(response.document_id, newDoc, url, () => {
@@ -903,6 +958,9 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                   pages_found: response.pages_found || 1,
                 };
                 onCrawledUrlsUpdate?.([...crawledUrls, newUrl]);
+
+                // 重置後續步驟狀態
+                resetDownstreamSteps();
 
                 // 隱藏全局 Loading
                 setIsGlobalLoading(false);
@@ -1080,7 +1138,17 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             <div className="d-flex align-items-center workflow-stepper-progress-container">
               <div className="badge bg-primary me-3">步驟 {currentStep}</div>
               <div className="flex-grow-1">
-                <h4 className="mb-0">{steps[currentStep - 1].title}</h4>
+                <h4 className="mb-0">
+                  {steps[currentStep - 1].title}
+                  {currentStep === 6 && (
+                    <span
+                      className="badge bg-secondary ms-2"
+                      style={{ fontSize: "0.8rem" }}
+                    >
+                      Model: Gemini 2.0 Flash
+                    </span>
+                  )}
+                </h4>
                 <small className="text-muted">
                   {steps[currentStep - 1].description}
                 </small>

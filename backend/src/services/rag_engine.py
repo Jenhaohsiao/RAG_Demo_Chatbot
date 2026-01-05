@@ -313,10 +313,14 @@ class RAGEngine:
             # Embed "summary" to find relevant chunks
             query_embedding = self.embedder.embed_text("summary main points overview")
             
+            # Remove hyphens from session_id for valid Qdrant collection name
+            clean_session_id = str(session_id).replace("-", "")
+            collection_name = f"session_{clean_session_id}"
+            
             # Search with low threshold to ensure we get something
             results = self.vector_store.search_similar(
-                session_id=session_id,
-                query_vector=query_embedding,
+                collection_name=collection_name,
+                query_vector=query_embedding.vector,
                 limit=5,
                 score_threshold=0.0
             )
@@ -1041,6 +1045,64 @@ Contenu du document:
             del self._session_memory[session_id]
         
         logger.info(f"[{session_id}] Session metrics and memory cleared")
+
+    def generate_initial_suggestions(self, session_id: UUID, language: str = "en") -> List[str]:
+        """
+        Generate 3 initial suggested questions based on document summary.
+        
+        Args:
+            session_id: Session ID
+            language: Language code
+            
+        Returns:
+            List[str]: List of 3 suggested questions
+        """
+        try:
+            # 1. Get document summary (or first chunk if summary not available)
+            # Since we don't store summary in RAGEngine, we might need to fetch from Qdrant or rely on what's passed.
+            # However, for simplicity and since we don't have easy access to document summary here without passing it,
+            # let's try to retrieve a few random chunks to generate questions.
+            
+            # Clean session ID for collection name
+            clean_session_id = str(session_id).replace("-", "")
+            collection_name = f"session_{clean_session_id}"
+            
+            # Retrieve a few random points (using vector search with a dummy vector or scroll)
+            # Here we use scroll to get some points
+            points, _ = self.vector_store.client.scroll(
+                collection_name=collection_name,
+                limit=3,
+                with_payload=True,
+                with_vectors=False
+            )
+            
+            if not points:
+                logger.warning(f"[{session_id}] No documents found for suggestions")
+                return []
+                
+            context_text = "\n".join([point.payload.get('text', '') for point in points])
+            
+            # 2. Construct prompt
+            prompt = f"""
+            Based on the following document context, generate 3 short, relevant questions that a user might ask.
+            The questions should be in {language} language.
+            Return ONLY the 3 questions, one per line. No numbering or bullets.
+            
+            Context:
+            {context_text[:2000]}
+            """
+            
+            # 3. Call LLM
+            model = genai.GenerativeModel(settings.gemini_model)
+            response = model.generate_content(prompt)
+            
+            # 4. Parse response
+            questions = [line.strip() for line in response.text.strip().split('\n') if line.strip()]
+            return questions[:3]
+            
+        except Exception as e:
+            logger.error(f"[{session_id}] Failed to generate initial suggestions: {e}")
+            return []
 
 
 class RAGError(Exception):

@@ -228,85 +228,86 @@ def process_document(document: Document):
 
         
         # Step 3: Chunk 文字分塊
-        logger.info(f"[{document.document_id}] Starting chunking")
-        chunks = chunker.chunk_text(
-            text=document.raw_content,
-            source_reference=document.source_reference
-        )
-        document.chunk_count = len(chunks)
-        logger.info(f"[{document.document_id}] Chunking complete: {len(chunks)} chunks")
+        # 根據用戶需求，Flow 3 不再執行分塊、向量化與儲存，改由 Flow 5 處理
+        # logger.info(f"[{document.document_id}] Starting chunking")
+        # chunks = chunker.chunk_text(
+        #     text=document.raw_content,
+        #     source_reference=document.source_reference
+        # )
+        # document.chunk_count = len(chunks)
+        # logger.info(f"[{document.document_id}] Chunking complete: {len(chunks)} chunks")
         
         # Step 4: Embed 向量嵌入
-        logger.info(f"[{document.document_id}] Starting embedding")
-        chunk_texts = [chunk.text for chunk in chunks]
-        embedding_results = embedder.embed_batch(
-            texts=chunk_texts,
-            task_type="retrieval_document",
-            source_reference=document.source_reference
-        )
-        logger.info(f"[{document.document_id}] Embedding complete: {len(embedding_results)} vectors")
+        # logger.info(f"[{document.document_id}] Starting embedding")
+        # chunk_texts = [chunk.text for chunk in chunks]
+        # embedding_results = embedder.embed_batch(
+        #     texts=chunk_texts,
+        #     task_type="retrieval_document",
+        #     source_reference=document.source_reference
+        # )
+        # logger.info(f"[{document.document_id}] Embedding complete: {len(embedding_results)} vectors")
         
         # Step 5: Store 儲存到 Qdrant
-        logger.info(f"[{document.document_id}] Starting vector storage")
-        # Remove hyphens from session_id for valid Qdrant collection name
-        clean_session_id = str(document.session_id).replace("-", "")
-        collection_name = f"session_{clean_session_id}"
+        # logger.info(f"[{document.document_id}] Starting vector storage")
+        # # Remove hyphens from session_id for valid Qdrant collection name
+        # clean_session_id = str(document.session_id).replace("-", "")
+        # collection_name = f"session_{clean_session_id}"
         
-        # 準備 points 資料
-        # NOTE: Qdrant 要求點 ID 是整數（通過 hash），不接受字串
-        # 我們為每個 chunk 生成唯一的整數 ID (基於 document_id + chunk_index)
-        import uuid
-        import hashlib
-        points = []
-        for idx, (chunk, emb_result) in enumerate(zip(chunks, embedding_results)):
-            # 產生唯一的整數 ID (基於 document_id 和 chunk_index)
-            id_string = f"{document.document_id}_{chunk.chunk_index}"
-            point_id = int(hashlib.md5(id_string.encode()).hexdigest(), 16) % (2**31)  # 轉換為 32-bit 整數
-            
-            point_data = {
-                "id": point_id,  # Qdrant 要求的整數 ID
-                "vector": emb_result.vector,
-                "payload": {
-                    "document_id": str(document.document_id),
-                    "chunk_index": chunk.chunk_index,
-                    "text": chunk.text,
-                    "char_start": chunk.start_char,
-                    "char_count": chunk.char_count,
-                    "source_reference": document.source_reference,
-                    "source_type": document.source_type.value
-                }
-            }
-            points.append(point_data)
+        # # 準備 points 資料
+        # # NOTE: Qdrant 要求點 ID 是整數（通過 hash），不接受字串
+        # # 我們為每個 chunk 生成唯一的整數 ID (基於 document_id + chunk_index)
+        # import uuid
+        # import hashlib
+        # points = []
+        # for idx, (chunk, emb_result) in enumerate(zip(chunks, embedding_results)):
+        #     # 產生唯一的整數 ID (基於 document_id 和 chunk_index)
+        #     id_string = f"{document.document_id}_{chunk.chunk_index}"
+        #     point_id = int(hashlib.md5(id_string.encode()).hexdigest(), 16) % (2**31)  # 轉換為 32-bit 整數
+        #     
+        #     point_data = {
+        #         "id": point_id,  # Qdrant 要求的整數 ID
+        #         "vector": emb_result.vector,
+        #         "payload": {
+        #             "document_id": str(document.document_id),
+        #             "chunk_index": chunk.chunk_index,
+        #             "text": chunk.text,
+        #             "char_start": chunk.start_char,
+        #             "char_count": chunk.char_count,
+        #             "source_reference": document.source_reference,
+        #             "source_type": document.source_type.value
+        #         }
+        #     }
+        #     points.append(point_data)
         
-        # Upsert 到 Qdrant（增強錯誤處理）
-        upsert_success = vector_store.upsert_chunks(
-            collection_name=collection_name,
-            chunks=points
-        )
+        # # Upsert 到 Qdrant（增強錯誤處理）
+        # upsert_success = vector_store.upsert_chunks(
+        #     collection_name=collection_name,
+        #     chunks=points
+        # )
         
-        if not upsert_success:
-            raise Exception(f"Failed to upsert {len(points)} chunks to Qdrant collection '{collection_name}'")
+        # if not upsert_success:
+        #     raise Exception(f"Failed to upsert {len(points)} chunks to Qdrant collection '{collection_name}'")
         
-        # 驗證資料已成功寫入
-        collection_info = vector_store.get_collection_info(collection_name)
-        if collection_info:
-            actual_count = collection_info.get('vectors_count') or collection_info.get('points_count', 0)
-            # 確保 actual_count 不是 None
-            if actual_count is None:
-                actual_count = 0
-            logger.info(
-                f"[{document.document_id}] Storage verified: {actual_count} vectors in collection (expected: {len(points)})"
-            )
-            if actual_count < len(points):
-                logger.warning(
-                    f"[{document.document_id}] Vector count mismatch! Expected {len(points)}, got {actual_count}"
-                )
-        else:
-            logger.error(f"[{document.document_id}] Cannot verify storage - collection info unavailable")
+        # # 驗證資料已成功寫入
+        # collection_info = vector_store.get_collection_info(collection_name)
+        # if collection_info:
+        #     actual_count = collection_info.get('vectors_count') or collection_info.get('points_count', 0)
+        #     # 確保 actual_count 不是 None
+        #     if actual_count is None:
+        #         actual_count = 0
+        #     logger.info(
+        #         f"[{document.document_id}] Storage verified: {actual_count} vectors in collection (expected: {len(points)})"
+        #     )
+        #     if actual_count < len(points):
+        #         logger.warning(
+        #             f"[{document.document_id}] Vector count mismatch! Expected {len(points)}, got {actual_count}"
+        #         )
+        # else:
+        #     logger.error(f"[{document.document_id}] Cannot verify storage - collection info unavailable")
         
-        logger.info(
-            f"[{document.document_id}] Storage complete: {len(points)} points uploaded"
-        )
+        # logger.info(
+        #     f"[{document.document_id}] Storage complete: {len(points)} points uploaded"
+        # )
         
         # Step 6: 生成摘要（改進的 Prompt）
         logger.info(f"[{document.document_id}] Generating summary")
@@ -362,10 +363,10 @@ def process_document(document: Document):
         session = session_manager.get_session(document.session_id)
         if session:
             session.document_count += 1
-            session.vector_count += len(points)
+            # session.vector_count += len(points) # 暫不增加 vector count
             # 如果之前是 PROCESSING，改為 READY_FOR_CHAT
-            if session.state == SessionState.PROCESSING:
-                session_manager.update_state(document.session_id, SessionState.READY_FOR_CHAT)
+            # if session.state == SessionState.PROCESSING:
+            #     session_manager.update_state(document.session_id, SessionState.READY_FOR_CHAT)
         
         logger.info(f"[{document.document_id}] Document processing complete!")
         

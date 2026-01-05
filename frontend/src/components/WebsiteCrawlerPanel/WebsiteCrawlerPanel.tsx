@@ -95,33 +95,8 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
           )}
         </p>
 
-        {/* 當前參數顯示 */}
-        <div className="mb-3 p-3 border rounded bg-light">
-          <h6 className="mb-2 text-muted">
-            <i className="bi bi-gear me-2"></i>
-            當前爬蟲參數
-          </h6>
-          <div className="row">
-            <div className="col-6">
-              <small className="text-muted">最大 Token 數:</small>
-              <div className="fw-bold text-primary">
-                {formatTokens(maxTokens)}
-              </div>
-            </div>
-            <div className="col-6">
-              <small className="text-muted">最大頁面數:</small>
-              <div className="fw-bold text-success">{maxPages} 頁</div>
-            </div>
-          </div>
-          <small className="text-muted">
-            <i className="bi bi-info-circle me-1"></i>
-            可在左側「參數設定」中調整
-          </small>
-        </div>
-
         {/* URL 輸入 */}
         <div className="form-group">
-          <label htmlFor="crawler-url">{t("crawler.url", "Website URL")}</label>
           <input
             id="crawler-url"
             type="text"
@@ -146,7 +121,11 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
         >
           {isLoading ? (
             <>
-              <i className="bi bi-arrow-repeat spinner-border spinner-border-sm me-2"></i>
+              <span
+                className="spinner-border spinner-border-sm me-2"
+                role="status"
+                aria-hidden="true"
+              ></span>
               {t("crawler.crawling", "Crawling...")}
             </>
           ) : (

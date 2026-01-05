@@ -86,47 +86,6 @@ const DataUploadStep: React.FC<DataUploadStepProps> = ({
           onParameterChange={onParameterChange}
         />
       )}
-
-      {/* 配置摘要 - 當有任何內容時顯示 */}
-      {hasAnyContent && (
-        <div className="mt-4 p-3 bg-light rounded">
-          <h6 className="mb-3">
-            <i className="bi bi-info-circle me-2"></i>
-            上傳內容摘要
-          </h6>
-          <div className="row">
-            <div className="col-6 col-md-3">
-              <small>
-                <strong>上傳文件:</strong> {documents.length} 個
-              </small>
-            </div>
-            <div className="col-6 col-md-3">
-              <small>
-                <strong>爬取網站:</strong> {crawledUrls.length} 個
-              </small>
-            </div>
-            <div className="col-6 col-md-3">
-              <small>
-                <strong>總文檔塊:</strong>{" "}
-                {documents.reduce((sum, doc) => sum + (doc.chunks || 0), 0) +
-                  crawledUrls.reduce((sum, url) => sum + (url.chunks || 0), 0)}
-              </small>
-            </div>
-            <div className="col-6 col-md-3">
-              <small>
-                <strong>狀態:</strong>
-                {hasUploadedContent ? (
-                  <span className="text-success ms-1">✓ 準備審核</span>
-                ) : (
-                  <span className="text-warning ms-1">
-                    <i className="bi bi-hourglass-split me-1"></i>處理中...
-                  </span>
-                )}
-              </small>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

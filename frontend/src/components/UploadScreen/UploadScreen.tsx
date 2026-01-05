@@ -248,95 +248,94 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
       {/* 如果已有上傳內容，顯示結果摘要 */}
       {hasUploadedContent && (
         <div className="upload-results-summary">
-          {/* 移除綠色 alert，改在 WorkflowStepper 顯示 */}
+          {/* 保持與上傳介面一致的卡片外框 */}
+          <div
+            className="card shadow-sm mx-auto border-0 bg-light"
+            style={{ maxWidth: "600px" }}
+          >
+            <div className="card-body p-4">
+              <h5 className="card-title text-center mb-4 fw-bold text-secondary">
+                上傳完成
+              </h5>
 
-          {/* 文件上傳結果 */}
-          {uploadedFiles.length > 0 && (
-            <div className="card mb-3">
-              <div className="card-header bg-light">
-                <h6 className="mb-0">
-                  <i className="bi bi-file-earmark-check me-2"></i>
-                  已上傳文件 ({uploadedFiles.length})
-                </h6>
-              </div>
-              <div className="card-body">
-                <div className="list-group list-group-flush">
-                  {uploadedFiles.map((file, index) => (
-                    <div key={index} className="list-group-item px-0 py-2">
-                      <div className="d-flex justify-content-between align-items-start">
-                        <div className="flex-grow-1">
-                          <div className="fw-medium text-truncate">
-                            {file.filename}
+              {/* 文件上傳結果 */}
+              {uploadedFiles.length > 0 && (
+                <div className="card mb-3 border-0 shadow-sm">
+                  <div className="card-header bg-white border-bottom-0 pt-3">
+                    <h6 className="mb-0 fw-bold text-primary">
+                      <i className="bi bi-file-earmark-check me-2"></i>
+                      已上傳文件 ({uploadedFiles.length})
+                    </h6>
+                  </div>
+                  <div className="card-body pt-0">
+                    <div className="list-group list-group-flush">
+                      {uploadedFiles.map((file, index) => (
+                        <div
+                          key={index}
+                          className="list-group-item px-0 py-2 border-0"
+                        >
+                          <div className="d-flex justify-content-between align-items-center">
+                            <div className="flex-grow-1">
+                              <div className="fw-medium text-truncate">
+                                {file.filename}
+                              </div>
+                              <small className="text-muted">
+                                {formatFileSize(file.size)} •{" "}
+                                {new Date(file.uploadTime).toLocaleString()}
+                              </small>
+                            </div>
+                            <span className="badge bg-success rounded-pill ms-2">
+                              <i className="bi bi-check-lg"></i>
+                            </span>
                           </div>
-                          <small className="text-muted">
-                            {formatFileSize(file.size)} •{" "}
-                            {new Date(file.uploadTime).toLocaleString()}
-                          </small>
+                          {/* 移除預覽文字 */}
                         </div>
-                        <span className="badge bg-success ms-2">
-                          <i className="bi bi-check me-1"></i>
-                          {file.chunks || 0} chunks
-                        </span>
-                      </div>
-                      {file.preview && file.preview !== "文件內容預覽..." && (
-                        <div className="mt-2">
-                          <small className="text-muted">
-                            {file.preview.substring(0, 100)}
-                            {file.preview.length > 100 ? "..." : ""}
-                          </small>
-                        </div>
-                      )}
+                      ))}
                     </div>
-                  ))}
+                  </div>
                 </div>
-              </div>
-            </div>
-          )}
+              )}
 
-          {/* 網站爬蟲結果 */}
-          {crawledUrls.length > 0 && (
-            <div className="card">
-              <div className="card-header bg-light">
-                <h6 className="mb-0">
-                  <i className="bi bi-globe-americas me-2"></i>
-                  已爬取網站 ({crawledUrls.length})
-                </h6>
-              </div>
-              <div className="card-body">
-                <div className="list-group list-group-flush">
-                  {crawledUrls.map((site, index) => (
-                    <div key={index} className="list-group-item px-0 py-2">
-                      <div className="d-flex justify-content-between align-items-start">
-                        <div className="flex-grow-1">
-                          <div className="fw-medium text-truncate">
-                            {site.url}
+              {/* 網站爬蟲結果 */}
+              {crawledUrls.length > 0 && (
+                <div className="card border-0 shadow-sm">
+                  <div className="card-header bg-white border-bottom-0 pt-3">
+                    <h6 className="mb-0 fw-bold text-primary">
+                      <i className="bi bi-globe-americas me-2"></i>
+                      已爬取網站 ({crawledUrls.length})
+                    </h6>
+                  </div>
+                  <div className="card-body pt-0">
+                    <div className="list-group list-group-flush">
+                      {crawledUrls.map((site, index) => (
+                        <div
+                          key={index}
+                          className="list-group-item px-0 py-2 border-0"
+                        >
+                          <div className="d-flex justify-content-between align-items-center">
+                            <div className="flex-grow-1">
+                              <div className="fw-medium text-truncate">
+                                {site.url}
+                              </div>
+                              <small className="text-muted">
+                                {formatFileSize(site.content_size)} •{" "}
+                                {site.pages_found || 1} 頁面 •{" "}
+                                {new Date(site.crawl_time).toLocaleString()}
+                              </small>
+                            </div>
+                            <span className="badge bg-success rounded-pill ms-2">
+                              <i className="bi bi-check-lg"></i>
+                            </span>
                           </div>
-                          <small className="text-muted">
-                            {formatFileSize(site.content_size)} •{" "}
-                            {site.pages_found || 1} 頁面 •{" "}
-                            {new Date(site.crawl_time).toLocaleString()}
-                          </small>
+                          {/* 移除摘要文字 */}
                         </div>
-                        <span className="badge bg-info ms-2">
-                          <i className="bi bi-check me-1"></i>
-                          {site.chunks || 0} chunks
-                        </span>
-                      </div>
-                      {site.summary && site.summary !== "網站內容摘要..." && (
-                        <div className="mt-2">
-                          <small className="text-muted">
-                            <strong>摘要：</strong>
-                            {site.summary.substring(0, 150)}
-                            {site.summary.length > 150 ? "..." : ""}
-                          </small>
-                        </div>
-                      )}
+                      ))}
                     </div>
-                  ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       )}
 

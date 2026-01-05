@@ -238,40 +238,6 @@ const WorkflowMain: React.FC<WorkflowMainProps> = ({
           onDocumentsUpdate={setDocuments}
           onCrawledUrlsUpdate={setCrawledUrls}
         />
-
-        {/* 調試資訊 (開發時可用) */}
-        {process.env.NODE_ENV === "development" && (
-          <div className="mt-5">
-            <div className="card">
-              <div className="card-header bg-dark text-white">
-                <h6 className="card-title mb-0">
-                  <i className="bi bi-bug me-2"></i>
-                  調試資訊 (開發模式)
-                </h6>
-              </div>
-              <div className="card-body">
-                <div className="row">
-                  <div className="col-6">
-                    <strong>當前步驟:</strong> {currentStep}
-                  </div>
-                  <div className="col-6">
-                    <strong>會話 ID:</strong> {sessionId || "None"}
-                  </div>
-                  <div className="col-6">
-                    <strong>工作流程狀態:</strong>{" "}
-                    {workflowComplete ? "已完成" : "進行中"}
-                  </div>
-                </div>
-                <details className="mt-2">
-                  <summary>當前參數配置</summary>
-                  <pre className="small mt-2 p-2 bg-light rounded">
-                    {JSON.stringify(parameters, null, 2)}
-                  </pre>
-                </details>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
