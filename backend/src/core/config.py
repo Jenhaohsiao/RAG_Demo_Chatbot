@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     qdrant_url: str | None = None  # For cloud mode
     
     # Session Configuration
-    session_ttl_minutes: int = 20
+    session_ttl_minutes: int = 10
     
     # RAG Configuration
     similarity_threshold: float = 0.5  # Lowered from 0.7 to improve recall

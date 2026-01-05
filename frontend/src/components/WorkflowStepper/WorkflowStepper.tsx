@@ -1091,13 +1091,19 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             <div className="text-center mx-3 workflow-stepper-progress-center">
               {/* 步驟3：上傳完成顯示 */}
               {currentStep === 3 &&
-                ((documents && documents.length > 0 && documents.every(d => d.chunks > 0)) ||
-                 (crawledUrls && crawledUrls.length > 0 && crawledUrls.every(u => u.chunks > 0))) && (
-                <div className="d-flex align-items-center text-success">
-                  <i className="bi bi-check-circle-fill me-2"></i>
-                  <span className="fw-bold">資料上傳完成，可以進入下一步</span>
-                </div>
-              )}
+                ((documents &&
+                  documents.length > 0 &&
+                  documents.every((d) => d.chunks > 0)) ||
+                  (crawledUrls &&
+                    crawledUrls.length > 0 &&
+                    crawledUrls.every((u) => u.chunks > 0))) && (
+                  <div className="d-flex align-items-center text-success">
+                    <i className="bi bi-check-circle-fill me-2"></i>
+                    <span className="fw-bold">
+                      資料上傳完成，可以進入下一步
+                    </span>
+                  </div>
+                )}
 
               {/* 步驟4專用：內容審核執行按鈕 */}
               {currentStep === 4 && !shouldStartReview && !reviewPassed && (

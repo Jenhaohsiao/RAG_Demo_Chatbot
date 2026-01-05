@@ -4,7 +4,7 @@ Handles session lifecycle endpoints
 
 T089: Enhanced error handling with appropriate HTTP status codes
 """
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Request
 from uuid import UUID
 import logging
 
@@ -16,6 +16,7 @@ from src.models.session import (
 )
 from src.models.metrics import Metrics
 from src.models.errors import ErrorCode
+from src.core.logger import session_activity_logger
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ router = APIRouter()
 
 
 @router.post("/create", response_model=SessionResponse, status_code=status.HTTP_201_CREATED)
-async def create_session(language: str = "en", similarity_threshold: float = 0.5, custom_prompt: str | None = None):
+async def create_session(request: Request, language: str = "en", similarity_threshold: float = 0.5, custom_prompt: str | None = None):
     """
     Create a new session with unique ID and Qdrant collection
     
@@ -35,6 +36,9 @@ async def create_session(language: str = "en", similarity_threshold: float = 0.5
     Returns:
         SessionResponse: Session details
     """
+    # Get client IP for logging
+    client_ip = request.client.host if request.client else "unknown"
+    
     try:
         # Validate similarity_threshold
         if not 0.0 <= similarity_threshold <= 1.0:
@@ -62,11 +66,17 @@ async def create_session(language: str = "en", similarity_threshold: float = 0.5
         # Update state to READY_FOR_UPLOAD
         session_manager.update_state(session.session_id, SessionState.READY_FOR_UPLOAD)
         
+        # Log session creation with structured logger
+        session_activity_logger.session_created(
+            session.session_id, client_ip, language, similarity_threshold
+        )
+        
         logger.info(f"Session {session.session_id} created and ready")
         return session_manager.to_response(session)
         
     except Exception as e:
         logger.error(f"Failed to create session: {e}", exc_info=True)
+        session_activity_logger.error(None, "SESSION_CREATE_FAILED", str(e), client_ip)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create session"
@@ -145,7 +155,7 @@ async def get_session_with_metrics(session_id: UUID):
 
 
 @router.post("/{session_id}/heartbeat", response_model=SessionResponse)
-async def session_heartbeat(session_id: UUID):
+async def session_heartbeat(session_id: UUID, request: Request):
     """
     Update session activity and extend TTL
     
@@ -155,29 +165,36 @@ async def session_heartbeat(session_id: UUID):
     Returns:
         SessionResponse: Updated session details
     """
+    client_ip = request.client.host if request.client else "unknown"
+    
     success = session_manager.update_activity(session_id)
     
     if not success:
+        session_activity_logger.session_not_found(session_id, client_ip, "heartbeat")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Session {session_id} not found or expired"
         )
     
     session = session_manager.get_session(session_id)
+    session_activity_logger.session_heartbeat(session_id, client_ip, session.expires_at)
     return session_manager.to_response(session)
 
 
 @router.post("/{session_id}/close", status_code=status.HTTP_204_NO_CONTENT)
-async def close_session(session_id: UUID):
+async def close_session(session_id: UUID, request: Request):
     """
     Close session and delete associated data
     
     Args:
         session_id: UUID of the session
     """
+    client_ip = request.client.host if request.client else "unknown"
+    
     session = session_manager.get_session(session_id)
     
     if not session:
+        session_activity_logger.session_not_found(session_id, client_ip, "close")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Session {session_id} not found"
@@ -201,11 +218,13 @@ async def close_session(session_id: UUID):
     # Remove session
     session_manager.close_session(session_id)
     
+    # Log session close with structured logger
+    session_activity_logger.session_closed(session_id, client_ip, "user_closed")
     logger.info(f"Session {session_id} closed successfully")
 
 
 @router.post("/{session_id}/restart", response_model=SessionResponse, status_code=status.HTTP_201_CREATED)
-async def restart_session(session_id: UUID):
+async def restart_session(session_id: UUID, request: Request):
     """
     Close current session and create a new one
     
@@ -215,6 +234,7 @@ async def restart_session(session_id: UUID):
     Returns:
         SessionResponse: New session details
     """
+    client_ip = request.client.host if request.client else "unknown"
     old_session = session_manager.get_session(session_id)
     
     # Get language from old session (or default to 'en')
@@ -224,6 +244,7 @@ async def restart_session(session_id: UUID):
     if old_session:
         vector_store.delete_collection(old_session.qdrant_collection_name)
         session_manager.close_session(session_id)
+        session_activity_logger.session_closed(session_id, client_ip, "restart")
         logger.info(f"Old session {session_id} closed during restart")
     
     # Create new session (reuse create_session logic)
@@ -231,6 +252,8 @@ async def restart_session(session_id: UUID):
     vector_store.create_collection(new_session.qdrant_collection_name)
     session_manager.update_state(new_session.session_id, SessionState.READY_FOR_UPLOAD)
     
+    # Log new session creation
+    session_activity_logger.session_created(new_session.session_id, client_ip, language)
     logger.info(f"New session {new_session.session_id} created after restart")
     return session_manager.to_response(new_session)
 

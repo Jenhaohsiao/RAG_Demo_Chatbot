@@ -472,5 +472,12 @@
         }
       }
     }
+  },
+  "session": {
+    "expiredTitle": "Session已過期",
+    "expiredMessage": "閒置超過 10 分鐘，Session 已過期。互動資料已被清除，將回到初始畫面。",
+    "reloadMessage": "頁面已重新載入，您的會話已重置。",
+    "restartMessage": "您點擊了「重新開始」，會話已重置。",
+    "startNewSession": "確定"
   }
 }

@@ -30,6 +30,43 @@
 
 ## 🎯 最近完成
 
+### 📅 2026-01-04 - Session 管理機制優化與 Log 系統建立
+
+**🎯 優化目標**:
+解決 Session Heartbeat 異常與過期處理邏輯，建立後端結構化日誌系統以利排查，並優化前端 Session 過期提示體驗。
+
+**✨ 主要變更**:
+
+1.  **後端 Session 機制與日誌 (Backend)**:
+    *   **TTL 設定**: 正式環境 Session 有效期設定為 **10 分鐘**。
+    *   **結構化日誌 (Structured Logging)**: 實作 `SessionActivityLogger`，詳細記錄 Session 生命周期事件 (`CREATED`, `HEARTBEAT`, `CLOSED`, `EXPIRED`)，包含 Session ID、User ID 與時間戳記。
+    *   **API 路由**: 整合日誌系統至 `create`, `heartbeat`, `close` 等 API 端點。
+    *   **檔案**: `backend/src/models/session.py`, `backend/src/core/logger.py`, `backend/src/api/routes/session.py`
+
+2.  **前端 Heartbeat 與過期處理 (Frontend)**:
+    *   **Heartbeat 優化**: `useSession` Hook 增加 30 秒節流 (Throttle) 機制，避免過於頻繁的 API 請求。
+    *   **過期邏輯修復**: 修正 `handleSessionExpiration` 與 `createSession` 邏輯，防止 Session 過期後自動重新建立導致的無限迴圈。
+    *   **錯誤處理**: 強化 Heartbeat API 的 404 錯誤捕捉，確保前端能正確識別 Session 失效狀態。
+    *   **檔案**: `frontend/src/hooks/useSession.ts`, `frontend/src/main.tsx`
+
+3.  **UI 優化 (Session Expired Modal)**:
+    *   **視覺風格**: 改為黃色警示主題 (Warning Theme)，去除多餘圖示，背景半透明 (0.5)。
+    *   **提示訊息**: 明確告知「Session 已過期 (10分鐘閒置)，資料已清除」。
+    *   **按鈕設計**: 調整為黃色背景、置中顯示，點擊後強制重置狀態並返回初始畫面。
+    *   **檔案**: `frontend/src/components/SessionExpiredModal/SessionExpiredModal.tsx`, `frontend/src/i18n/locales/*.json`
+
+**🔧 修改的檔案**:
+- `backend/src/models/session.py`
+- `backend/src/core/logger.py`
+- `backend/src/api/routes/session.py`
+- `frontend/src/hooks/useSession.ts`
+- `frontend/src/components/SessionExpiredModal/SessionExpiredModal.tsx`
+- `frontend/src/main.tsx`
+- `frontend/src/i18n/locales/zh-TW.json`
+- `frontend/src/i18n/locales/en-US.json`
+
+---
+
 ### 📅 2026-01-04 - Step 3 & Step 5 UI 優化與狀態顯示改進
 
 **🎯 優化目標**:

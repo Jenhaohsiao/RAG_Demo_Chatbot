@@ -29,6 +29,7 @@ export interface SessionResponse {
   session_id: string;
   state: SessionState;
   created_at: string;
+  last_activity: string; // ISO 8601 datetime
   expires_at: string;
   qdrant_collection: string;
   language: 'en' | 'zh-TW' | 'zh-CN' | 'ko' | 'es' | 'ja' | 'ar' | 'fr';

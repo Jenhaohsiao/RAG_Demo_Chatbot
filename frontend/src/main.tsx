@@ -25,6 +25,7 @@ import PromptVisualization from "./components/PromptVisualization/PromptVisualiz
 import FixedRagFlow from "./components/FixedRagFlow/FixedRagFlow";
 import AboutProjectModal from "./components/AboutProjectModal/AboutProjectModal";
 import WorkflowMain from "./components/WorkflowMain/WorkflowMain"; // New workflow integration
+import SessionExpiredModal from "./components/SessionExpiredModal/SessionExpiredModal";
 import ToastMessage from "./components/ToastMessage/ToastMessage";
 import { useSession } from "./hooks/useSession";
 import { useUpload } from "./hooks/useUpload";
@@ -59,6 +60,7 @@ const App: React.FC = () => {
     restartSession,
     updateLanguage,
     setOnSessionExpired,
+    resetSessionExpired,
   } = useSession(); // 先初始化session，稍後設置callback
 
   const {
@@ -75,20 +77,14 @@ const App: React.FC = () => {
    * Handle session expiration
    */
   const handleSessionExpiration = useCallback(() => {
-    // 顯示toast通知
-    showToast({
-      type: "error",
-      message: "會話已過期，將重新開始整個流程",
-      duration: 4000,
-    });
-
+    // Modal will be shown via isSessionExpired state
     // 重置所有狀態到第一步
     setCurrentStep(1);
     setChatPhase(false);
     resetUpload();
 
     console.log("Session expired, reset to step 1");
-  }, [showToast, resetUpload]);
+  }, [resetUpload]);
 
   // 設置session過期回調
   React.useEffect(() => {
@@ -199,11 +195,18 @@ const App: React.FC = () => {
   };
 
   // Auto-create session on component mount
+  // But NOT when session has expired - wait for user to confirm modal first
   React.useEffect(() => {
-    if (!sessionId && !isLoading) {
+    if (!sessionId && !isLoading && !isSessionExpired) {
       createSession(similarityThreshold);
     }
-  }, [sessionId, isLoading, createSession, similarityThreshold]);
+  }, [
+    sessionId,
+    isLoading,
+    isSessionExpired,
+    createSession,
+    similarityThreshold,
+  ]);
 
   // Handle error messages from session and upload
   React.useEffect(() => {
@@ -504,6 +507,20 @@ const App: React.FC = () => {
         isOpen={showRestartConfirm}
         onConfirm={handleConfirmRestart}
         onCancel={() => setShowRestartConfirm(false)}
+      />
+
+      {/* Session Expired Modal */}
+      <SessionExpiredModal
+        isOpen={isSessionExpired}
+        onConfirm={() => {
+          // First reset the expired state so auto-create effect can work
+          // Then the useEffect will auto-create new session
+          setCurrentStep(1);
+          setChatPhase(false);
+          resetUpload();
+          // Reset session expired state - this will trigger auto-create session effect
+          resetSessionExpired();
+        }}
       />
 
       {/* About Project Modal */}

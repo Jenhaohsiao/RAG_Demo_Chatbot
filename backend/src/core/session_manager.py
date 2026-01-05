@@ -46,7 +46,7 @@ class SessionManager:
         
         self._sessions[session.session_id] = session
         
-        logger.info(f"Session created: {session.session_id} (language: {language}, custom_prompt: {bool(custom_prompt)})")
+        logger.info(f"[Session Created] ID: {session.session_id} | Lang: {language} | Expires: {session.expires_at}")
         return session
     
     def get_session(self, session_id: UUID) -> Optional[Session]:
@@ -62,7 +62,7 @@ class SessionManager:
         session = self._sessions.get(session_id)
         
         if session and session.is_expired():
-            logger.warning(f"Session {session_id} has expired")
+            logger.warning(f"[Session Expired Access] ID: {session_id} | Expired At: {session.expires_at}")
             return None
         
         return session
@@ -79,10 +79,12 @@ class SessionManager:
         """
         session = self.get_session(session_id)
         if not session:
+            logger.warning(f"[Session Update Failed] ID: {session_id} not found or expired")
             return False
         
+        old_expires = session.expires_at
         session.update_activity()
-        logger.debug(f"Session {session_id} activity updated, expires at {session.expires_at}")
+        logger.info(f"[Session Heartbeat] ID: {session_id} | Extended: {old_expires} -> {session.expires_at}")
         return True
     
     def update_state(self, session_id: UUID, state: SessionState) -> bool:
@@ -179,10 +181,10 @@ class SessionManager:
         """
         if session_id in self._sessions:
             del self._sessions[session_id]
-            logger.info(f"Session {session_id} closed and removed")
+            logger.info(f"[Session Closed] ID: {session_id} removed from memory")
             return True
         
-        logger.warning(f"Session {session_id} not found for closure")
+        logger.warning(f"[Session Close Failed] ID: {session_id} not found")
         return False
     
     def get_expired_sessions(self) -> list[UUID]:

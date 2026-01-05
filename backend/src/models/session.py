@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, field_validator
 from datetime import datetime, timedelta
 from enum import Enum
 from uuid import UUID, uuid4
+from src.core.config import settings
 
 
 class SessionState(str, Enum):
@@ -35,7 +36,8 @@ class Session(BaseModel):
     def __init__(self, **data):
         super().__init__(**data)
         if not self.expires_at:
-            self.expires_at = self.created_at + timedelta(minutes=30)
+            # Session TTL: 10 minutes
+            self.expires_at = self.created_at + timedelta(minutes=10)
         if not self.qdrant_collection_name:
             # Remove hyphens from UUID for valid collection name
             clean_id = str(self.session_id).replace("-", "")
@@ -51,9 +53,10 @@ class Session(BaseModel):
         return v
     
     def update_activity(self) -> None:
-        """Update last_activity and extends expires_at by 30 minutes"""
+        """Update last_activity and extends expires_at by TTL (10 minutes)"""
         self.last_activity = datetime.utcnow()
-        self.expires_at = self.last_activity + timedelta(minutes=30)
+        # Session TTL: 10 minutes
+        self.expires_at = self.last_activity + timedelta(minutes=10)
     
     def is_expired(self) -> bool:
         """Check if session has expired"""

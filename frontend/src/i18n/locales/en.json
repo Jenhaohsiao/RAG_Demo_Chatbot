@@ -329,5 +329,12 @@
   },
   "common": {
     "processing": "Processing..."
+  },
+  "session": {
+    "expiredTitle": "Session Expired",
+    "expiredMessage": "Session expired after 10 minutes of inactivity. Data has been cleared, returning to the initial screen.",
+    "reloadMessage": "The page was reloaded. Your session has been reset.",
+    "restartMessage": "You clicked 'Start Over'. Your session has been reset.",
+    "startNewSession": "OK"
   }
 }

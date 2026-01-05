@@ -184,8 +184,6 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
 
   return (
     <div className={`prompt-config-step ${disabled ? "disabled-step" : ""}`}>
-
-
       {/* 禁用狀態提示 */}
       {disabled && (
         <div className="alert alert-info mb-3">
@@ -315,7 +313,10 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                     className="form-check-label text-muted"
                     htmlFor="allowUserOverride"
                   >
-                    {t("step2.system.allowUserOverride", "允許使用者的 Prompt 來調整 System Prompt")}
+                    {t(
+                      "step2.system.allowUserOverride",
+                      "允許使用者的 Prompt 來調整 System Prompt"
+                    )}
                     <span className="badge bg-secondary ms-2 small">
                       {t("step2.system.alwaysOff", "永遠關閉")}
                     </span>
@@ -482,7 +483,6 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );
