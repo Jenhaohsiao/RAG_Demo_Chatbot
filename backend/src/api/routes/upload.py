@@ -193,33 +193,38 @@ def process_document(document: Document):
         logger.info(f"[{document.document_id}] Extraction complete: {len(extracted_text)} chars")
         logger.info(f"[{document.document_id}] TOKENS_USED CALCULATION: {len(extracted_text)} chars // 3 = {document.tokens_used} tokens")
         
-        # Step 2: Moderate 內容審核（憲法 Principle VI）
-        if settings.enable_content_moderation:
-            logger.info(f"[{document.document_id}] Starting moderation")
-            document.moderation_status = ModerationStatus.CHECKING
-            
-            mod_result = moderator.check_content_safety(
-                text=document.raw_content,
-                source_reference=document.source_reference
-            )
-            if mod_result.status == ModStatus.BLOCKED:
-                document.moderation_status = ModerationStatus.BLOCKED
-                document.moderation_categories = mod_result.blocked_categories
-                document.error_code = ErrorCode.MODERATION_BLOCKED
-                document.error_message = mod_result.reason
-                logger.warning(
-                    f"[{document.document_id}] Moderation BLOCKED: {mod_result.reason}"
-                )
-                # 更新 session 狀態為 ERROR
-                session_manager.update_state(document.session_id, SessionState.ERROR)
-                return
-            
-            document.moderation_status = ModerationStatus.APPROVED
-            logger.info(f"[{document.document_id}] Moderation APPROVED")
-        else:
-            # 跳過審核（測試模式）
-            document.moderation_status = ModerationStatus.APPROVED
-            logger.warning(f"[{document.document_id}] Moderation SKIPPED (testing mode)")
+        # Step 2: Moderate 內容審核
+        # 根據用戶需求，Flow 3 不再執行內容審核，改由 Flow 4 處理
+        # if settings.enable_content_moderation:
+        #     logger.info(f"[{document.document_id}] Starting moderation")
+        #     document.moderation_status = ModerationStatus.CHECKING
+        #     
+        #     mod_result = moderator.check_content_safety(
+        #         text=document.raw_content,
+        #         source_reference=document.source_reference
+        #     )
+        #     if mod_result.status == ModStatus.BLOCKED:
+        #         document.moderation_status = ModerationStatus.BLOCKED
+        #         document.moderation_categories = mod_result.blocked_categories
+        #         document.error_code = ErrorCode.MODERATION_BLOCKED
+        #         document.error_message = mod_result.reason
+        #         logger.warning(
+        #             f"[{document.document_id}] Moderation BLOCKED: {mod_result.reason}"
+        #         )
+        #         # 更新 session 狀態為 ERROR
+        #         session_manager.update_state(document.session_id, SessionState.ERROR)
+        #         return
+        #     
+        #     document.moderation_status = ModerationStatus.APPROVED
+        #     logger.info(f"[{document.document_id}] Moderation APPROVED")
+        # else:
+        #     # 跳過審核（測試模式）
+        #     document.moderation_status = ModerationStatus.APPROVED
+        #     logger.warning(f"[{document.document_id}] Moderation SKIPPED (testing mode)")
+        
+        # 直接標記為 APPROVED，因為 Flow 3 不再負責攔截
+        document.moderation_status = ModerationStatus.APPROVED
+        logger.info(f"[{document.document_id}] Moderation SKIPPED in Flow 3 (deferred to Flow 4)")
 
         
         # Step 3: Chunk 文字分塊

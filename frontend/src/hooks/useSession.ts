@@ -27,6 +27,7 @@ interface UseSessionReturn {
   restartSession: () => Promise<void>;
   updateLanguage: (newLanguage: 'en' | 'zh-TW' | 'zh-CN' | 'ko' | 'es' | 'ja' | 'ar' | 'fr', passedSessionId?: string | null) => Promise<void>;
   setOnSessionExpired: (callback: (() => void) | undefined) => void;
+  resetSessionExpired: () => void;
 }
 
 /**

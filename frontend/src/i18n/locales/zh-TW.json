@@ -303,6 +303,7 @@
     },
     "input": {
       "placeholder": "提出關於文件的問題...",
+      "placeholder_new": "歡迎討論跟上傳資料相關的話題",
       "submit": "發送",
       "sending": "傳送中...",
       "hint": "按 Enter 發送，Shift+Enter 換行",

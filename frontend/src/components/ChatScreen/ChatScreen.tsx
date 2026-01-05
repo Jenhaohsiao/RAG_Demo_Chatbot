@@ -26,6 +26,7 @@ import {
   type SessionMetrics,
 } from "../../services/metricsService";
 import { getSession } from "../../services/sessionService";
+import { getSuggestions as getChatSuggestions } from "../../services/chatService";
 import { type CrawledPage } from "../../services/uploadService";
 import "./ChatScreen.scss";
 
@@ -98,6 +99,25 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   const [metricsErrorCount, setMetricsErrorCount] = useState(0);
   const [isSummaryExpanded, setIsSummaryExpanded] = useState(true);
   const [sessionErrorCount, setSessionErrorCount] = useState(0);
+  const [initialSuggestions, setInitialSuggestions] = useState<string[]>([]);
+  const [areSuggestionsLoading, setAreSuggestionsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (messages.length === 0 && sessionId) {
+        setAreSuggestionsLoading(true);
+        try {
+          const suggs = await getChatSuggestions(sessionId, i18n.language);
+          setInitialSuggestions(suggs);
+        } catch (err) {
+          console.error("Failed to fetch suggestions", err);
+        } finally {
+          setAreSuggestionsLoading(false);
+        }
+      }
+    };
+    fetchSuggestions();
+  }, [sessionId, messages.length, i18n.language]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // 處理文檔摘要的語言顯示
@@ -383,39 +403,59 @@ ${summary}`,
       <div className="row chat-main-content">
         <div className="col-md-12 right-panel">
           <div className="interaction-area">
-            <h5 className="section-title">💬 互動專區</h5>
-
             {/* 聊天對話區 */}
             <div className="chat-area">
-              <h6 className="subsection-title">聊天對話區</h6>
               <div className="messages-container">
-                {messages.length === 0 ? (
+                {messages.length === 0 && (
                   <div className="empty-state">
                     <p>{t("chat.empty.message")}</p>
                     <p className="empty-hint">{t("chat.empty.hint")}</p>
+
+                    <div className="initial-suggestions">
+                      {areSuggestionsLoading ? (
+                        <div className="suggestions-loading">
+                          {t(
+                            "chat.suggestions.loading",
+                            "Generating suggested questions..."
+                          )}
+                        </div>
+                      ) : (
+                        <div className="suggestion-chips">
+                          {initialSuggestions.map((s, i) => (
+                            <button
+                              key={i}
+                              className="suggestion-chip"
+                              onClick={() => handleSendMessage(s)}
+                            >
+                              {s}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                ) : (
-                  messages.map((msg) => (
-                    <ChatMessage
-                      key={msg.message_id}
-                      message={msg}
-                      responseType={
-                        msg.role === ChatRole.ASSISTANT
-                          ? responseTypes[msg.message_id]
-                          : undefined
-                      }
-                      suggestions={
-                        msg.role === ChatRole.ASSISTANT
-                          ? suggestions[msg.message_id]
-                          : undefined
-                      }
-                      onSuggestionClick={(suggestion) => {
-                        // 點擊建議問題時，自動發送該問題
-                        handleSendMessage(suggestion);
-                      }}
-                    />
-                  ))
                 )}
+
+                {messages.map((msg) => (
+                  <ChatMessage
+                    key={msg.message_id}
+                    message={msg}
+                    responseType={
+                      msg.role === ChatRole.ASSISTANT
+                        ? responseTypes[msg.message_id]
+                        : undefined
+                    }
+                    suggestions={
+                      msg.role === ChatRole.ASSISTANT
+                        ? suggestions[msg.message_id]
+                        : undefined
+                    }
+                    onSuggestionClick={(suggestion) => {
+                      // 點擊建議問題時，自動發送該問題
+                      handleSendMessage(suggestion);
+                    }}
+                  />
+                ))}
 
                 {isLoading && (
                   <div className="loading-indicator">
@@ -430,11 +470,14 @@ ${summary}`,
 
             {/* 提問區 */}
             <div className="input-area">
-              <h6 className="subsection-title">提問區</h6>
               {error && <div className="error-banner">❌ {error}</div>}
               <ChatInput
                 onSendMessage={handleSendMessage}
                 disabled={isLoading}
+                placeholder={t(
+                  "chat.input.placeholder_new",
+                  "歡迎討論跟上傳資料相關的話題"
+                )}
               />
             </div>
           </div>

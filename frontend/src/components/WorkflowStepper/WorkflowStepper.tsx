@@ -225,14 +225,14 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
         onDocumentsUpdate?.(finalDocs);
 
         // 只在這裡顯示最終的成功訊息，包含chunks信息
-        onShowMessage?.({
-          type: "success",
-          message: `${
-            docItem.type === "file" ? "檔案" : "URL"
-          } ${identifier} 處理完成！產生 ${
-            finalStatus.chunk_count
-          } 個文字段落。`,
-        });
+        // onShowMessage?.({
+        //   type: "success",
+        //   message: `${
+        //     docItem.type === "file" ? "檔案" : "URL"
+        //   } ${identifier} 處理完成！產生 ${
+        //     finalStatus.chunk_count
+        //   } 個文字段落。`,
+        // });
       }
 
       // 輪詢完成，調用回調

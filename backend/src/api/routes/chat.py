@@ -385,3 +385,29 @@ async def get_metrics(session_id: UUID):
             status_code=get_http_status_code(ErrorCode.INTERNAL_SERVER_ERROR),
             detail=error.dict()
         )
+
+
+@router.get("/{session_id}/suggestions", response_model=List[str])
+def get_suggestions(
+    session_id: UUID,
+    language: str = "en"
+):
+    """
+    Get initial suggested questions based on uploaded documents.
+    """
+    # Verify session exists
+    session = session_manager.get_session(session_id)
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=get_error_response(ErrorCode.SESSION_NOT_FOUND).dict()
+        )
+        
+    # Generate suggestions
+    try:
+        suggestions = rag_engine.generate_initial_suggestions(session_id, language)
+        return suggestions
+    except Exception as e:
+        logger.error(f"Error generating suggestions: {e}")
+        return []
+

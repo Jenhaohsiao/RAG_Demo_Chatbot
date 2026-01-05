@@ -298,6 +298,82 @@ class RAGEngine:
         except Exception as e:
             logger.warning(f"[{session_id}] Failed to generate suggestions: {e}")
             return []
+
+    def generate_initial_suggestions(
+        self,
+        session_id: UUID,
+        language: str = "en"
+    ) -> List[str]:
+        """
+        Generate initial suggested questions based on uploaded documents.
+        Used for "Default Question Bubbles" feature.
+        """
+        try:
+            # 1. Get context (summary/overview)
+            # Embed "summary" to find relevant chunks
+            query_embedding = self.embedder.embed_text("summary main points overview")
+            
+            # Search with low threshold to ensure we get something
+            results = self.vector_store.search_similar(
+                session_id=session_id,
+                query_vector=query_embedding,
+                limit=5,
+                score_threshold=0.0
+            )
+            
+            if not results:
+                return []
+                
+            retrieved_chunks = [
+                RetrievedChunk(
+                    chunk_id=r.payload['chunk_id'],
+                    text=r.payload['text'],
+                    similarity_score=r.score,
+                    document_id=r.payload['document_id'],
+                    source_reference=r.payload['source_reference'],
+                    chunk_index=r.payload['chunk_index']
+                ) for r in results
+            ]
+            
+            # 2. Generate suggestions
+            lang_map = {
+                'zh-TW': '繁體中文', 'zh-CN': '简体中文', 'en': 'English',
+                'ko': '한국어', 'es': 'Español', 'ja': '日本語',
+                'ar': 'العربية', 'fr': 'Français'
+            }
+            response_language = lang_map.get(language, lang_map.get(language.split('-')[0], 'English'))
+            
+            doc_summary = "\\n".join([chunk.text[:300] for chunk in retrieved_chunks])
+            
+            prompt = f\"\"\"Based on the following document content, generate 3 specific questions that a user might want to ask to understand the main topics.
+
+**Document Content** (partial):
+{doc_summary}
+
+**Requirements**:
+1. Generate questions in {response_language} ONLY
+2. Questions should be specific and based on the actual document topics
+3. Questions should cover the 3 most important concepts
+4. Return ONLY the questions, one per line, no numbering or bullets
+5. Generate exactly 3 questions
+
+**Suggested Questions**:\"\"\"
+
+            response = self._generate_with_retry(prompt, session_id)
+            suggestions_text = response.text.strip()
+            
+            suggestions = [s.strip() for s in suggestions_text.split('\\n') if s.strip()]
+            cleaned = []
+            for s in suggestions[:3]:
+                s = s.lstrip('0123456789.-•）) \\t')
+                if s and len(s) > 5:
+                    cleaned.append(s)
+            
+            return cleaned[:3] if cleaned else []
+            
+        except Exception as e:
+            logger.warning(f"[{session_id}] Failed to generate initial suggestions: {e}")
+            return []
     
     def query(
         self,
@@ -709,19 +785,39 @@ Contenu du document:
         document_definition = {
             "zh": """**術語定義**:
 - **文檔 (Documents)**: 用戶上傳到系統中的內容，包括網頁、PDF、文本文件等。這些內容已被提取、清理、分塊和索引。
-- **分塊 (Chunks)**: 文檔被分成的小段落，以便進行語義搜索。""",
+- **分塊 (Chunks)**: 文檔被分成的小段落，以便進行語義搜索。
+
+**重要指示**:
+- 請勿在回答中包含引用標記（如 [Document 1], [文件1] 等）。
+- 直接回答問題即可。""",
             "en": """**Term Definitions**:
 - **Documents**: Content uploaded by the user (webpages, PDFs, text files, etc.) that has been extracted, cleaned, chunked and indexed.
-- **Chunks**: Small passages that documents are split into for semantic search.""",
+- **Chunks**: Small passages that documents are split into for semantic search.
+
+**Important Instructions**:
+- Do NOT include citation markers (e.g., [Document 1]) in your response.
+- Just answer the question directly.""",
             "ko": """**용어 정의**:
 - **문서**: 사용자가 시스템에 업로드한 콘텐츠(웹페이지, PDF, 텍스트 파일 등)로, 추출, 정리, 청크 분할 및 인덱싱되었습니다.
-- **청크**: 의미론적 검색을 위해 문서를 분할한 작은 구절입니다.""",
+- **청크**: 의미론적 검색을 위해 문서를 분할한 작은 구절입니다.
+
+**중요 지침**:
+- 답변에 인용 표시(예: [Document 1])를 포함하지 마십시오.
+- 질문에 직접 답변하십시오.""",
             "es": """**Definiciones de términos**:
 - **Documentos**: Contenido cargado por el usuario (páginas web, PDF, archivos de texto, etc.) que ha sido extraído, limpiado, dividido y indexado.
-- **Fragmentos**: Pasajes pequeños en los que se dividen los documentos para la búsqueda semántica.""",
+- **Fragmentos**: Pasajes pequeños en los que se dividen los documentos para la búsqueda semántica.
+
+**Instrucciones importantes**:
+- NO incluya marcadores de cita (por ejemplo, [Document 1]) en su respuesta.
+- Responda directamente a la pregunta.""",
             "ja": """**用語定義**:
 - **文書**: ユーザーがシステムにアップロードしたコンテンツ（Webページ、PDF、テキストファイルなど）で、抽出、クリーニング、チャンク分割、インデックス化されています。
-- **チャンク**: セマンティック検索のために文書を分割した小さな段落です。""",
+- **チャンク**: セマンティック検索のために文書を分割した小さな段落です。
+
+**重要な指示**:
+- 回答に引用マーカー（例：[Document 1]）を含めないでください。
+- 質問に直接回答してください。""",
             "ar": """**تعريف المصطلحات**:
 - **المستندات**: المحتوى الذي حمله المستخدم إلى النظام (صفحات الويب وملفات PDF وملفات نصية وما إلى ذلك) الذي تم استخراجه وتنظيفه وتقسيمه وفهرسته.
 - **القطع**: فقرات صغيرة يتم تقسيم المستندات إليها للبحث الدلالي.""",

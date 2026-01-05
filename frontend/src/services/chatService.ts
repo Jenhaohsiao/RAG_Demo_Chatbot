@@ -50,6 +50,21 @@ export async function clearHistory(sessionId: string): Promise<void> {
 }
 
 /**
+ * 取得建議問題
+ */
+export async function getSuggestions(
+  sessionId: string,
+  language?: string
+): Promise<string[]> {
+  const lang = language || 'en';
+  const response = await api.get<string[]>(
+    `/chat/${sessionId}/suggestions`,
+    { params: { language: lang } }
+  );
+  return response.data;
+}
+
+/**
  * 驗證查詢輸入
  */
 export function validateQuery(query: string): {
@@ -68,3 +83,4 @@ export function validateQuery(query: string): {
   
   return { valid: true };
 }
+

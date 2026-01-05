@@ -196,6 +196,7 @@
     },
     "input": {
       "placeholder": "Ask a question about the document...",
+      "placeholder_new": "Welcome to discuss topics related to uploaded data",
       "submit": "Send",
       "hint": "Press Enter to send, Shift+Enter for new line",
       "maxLength": "{{count}} / 2000"

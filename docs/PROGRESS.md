@@ -3,7 +3,7 @@
 **專案名稱**: Multilingual RAG-Powered Chatbot  
 **分支**: `001-multilingual-rag-chatbot`  
 **最後更新**: 2026-01-04  
-**總體狀態**: ✅ MVP 完成，Step 3 & Step 5 UI 優化完成（狀態顯示、參數簡化）
+**總體狀態**: ✅ MVP 完成，Step 3 UI 重構完成（2步驟嚮導、按鈕切換），Step 6 體驗優化（建議氣泡、移除引用標記）
 
 ---
 
@@ -23,12 +23,69 @@
 - **工作流程狀態保留**: 步驟3/4/5/6 返回上一步時保持狀態
 - **建議氣泡功能**: AI無法回答時自動生成2-3個可點擊的建議問題
 - **Step 2 完整參數**: 回答語言、嚴格RAG模式、引用風格、檢索Top-K、相似度閾值、最大上下文Token等
-- **Step 3 UI 優化**: 簡化完成訊息顯示，移除冗餘 Alert
+- **Step 3 UI 重構**: 2步驟嚮導模式（參數設定→上傳），按鈕切換 Tabs，簡化卡片風格
 - **Step 5 UI 優化**: 向量化狀態顯示優化（未執行狀態）、顯示 Vector DB 技術規格（Cosine, 768, HNSW）
+- **Step 6 體驗優化**: 移除引用標記（[Document 1]），新增建議問題氣泡
 
 ---
 
 ## 🎯 最近完成
+
+### 📅 2026-01-04 - Step 3 資料上傳 UI 重構與流程優化
+
+**🎯 優化目標**:
+徹底重構 Step 3 (資料上傳) 的使用者介面，使其更現代化且易於使用，並解決流程重複執行的問題。
+
+**✨ 主要變更**:
+
+1.  **UI 重構 (UploadScreen)**:
+    *   **導航優化**: 將原本的 Tabs 切換改為兩個置中的大型按鈕（檔案上傳 / 網站爬蟲）。
+    *   **2步驟嚮導 (Wizard Flow)**: 實作內部 2 步驟流程：
+        *   **Step 1**: 參數設定（檔案大小/類型限制、爬蟲 Token/頁數限制）。
+        *   **Step 2**: 執行上傳（拖放區域或網址輸入框）。
+    *   **視覺簡化**: 縮減卡片寬度 (max-width: 600px)，移除冗餘的邊框與背景色，使焦點更集中。
+    *   **列表優化**: 移除已上傳文件列表中的「預覽：」文字前綴，保持介面清爽。
+    *   **檔案**: `frontend/src/components/UploadScreen/UploadScreen.tsx`, `frontend/src/components/UploadScreen/UploadScreen.scss`
+
+2.  **流程邏輯調整 (Backend & Frontend)**:
+    *   **移除重複審核**: 在 Flow 3 的後端上傳 API (`upload.py`) 中，**停用**自動觸發的內容審核 (Content Moderation)，將此職責完全交由 Flow 4 (Content Review) 處理，避免重複執行與計費。
+    *   **移除 Toast**: 移除前端上傳成功後的 Toast 通知，避免干擾用戶操作。
+    *   **檔案**: `backend/src/api/routes/upload.py`, `frontend/src/components/WorkflowStepper/WorkflowStepper.tsx`
+
+**🔧 修改的檔案**:
+- `frontend/src/components/UploadScreen/UploadScreen.tsx`
+- `frontend/src/components/UploadScreen/UploadScreen.scss`
+- `frontend/src/components/WorkflowStepper/WorkflowStepper.tsx`
+- `backend/src/api/routes/upload.py`
+
+---
+
+### 📅 2026-01-04 - Step 6 AI 對話體驗優化
+
+**🎯 優化目標**:
+提升 AI 回答的可讀性與互動性，解決引用標記干擾閱讀的問題，並增加引導式建議問題。
+
+**✨ 主要變更**:
+
+1.  **移除引用標記**:
+    *   修改後端 RAG Prompt，明確指示 AI **不要**在回答中包含 `[Document X]` 等引用標記，使閱讀體驗更流暢。
+    *   **檔案**: `backend/src/services/rag_engine.py`
+
+2.  **建議問題氣泡 (Suggestion Bubbles)**:
+    *   **前端實作**: 在 AI 回答下方新增可點擊的建議問題氣泡。
+    *   **互動邏輯**: 點擊氣泡後，自動將問題填入輸入框並發送。
+    *   **API 整合**: 確保前端正確接收後端回傳的 `suggestions` 欄位並渲染。
+    *   **檔案**: `frontend/src/components/ChatMessage/ChatMessage.tsx`, `frontend/src/services/chatService.ts`
+
+3.  **系統修復**:
+    *   修復 `chatService.ts` 中重複導出 `getSuggestions` 導致的 Build Error。
+
+**🔧 修改的檔案**:
+- `backend/src/services/rag_engine.py`
+- `frontend/src/components/ChatMessage/ChatMessage.tsx`
+- `frontend/src/services/chatService.ts`
+
+---
 
 ### 📅 2026-01-04 - Session 管理機制優化與 Log 系統建立
 
