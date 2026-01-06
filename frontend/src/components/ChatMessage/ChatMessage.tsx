@@ -31,24 +31,20 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
   return (
     <div className={`message-container ${isUser ? "user" : "assistant"}`}>
-      <div className="message-header">
-        <span className="message-role">
-          {isUser ? t("chat.messages.you") : t("chat.messages.assistant")}
-        </span>
-        <span className="message-time">
-          {new Date(message.timestamp).toLocaleTimeString()}
-        </span>
-      </div>
+      {!isUser && (
+        <div className="message-header">
+          <span className="message-role">
+            <i
+              className="bi bi-robot"
+              aria-label={t("chat.messages.assistant")}
+            ></i>
+          </span>
+        </div>
+      )}
 
       <div className={`message-content ${cannotAnswer ? "cannot-answer" : ""}`}>
         {message.content}
       </div>
-
-      {cannotAnswer && (
-        <div className="cannot-answer-note">
-          ⚠️ {t("chat.message.cannotAnswerNote")}
-        </div>
-      )}
 
       {/* 建議氣泡標籤 */}
       {suggestions && suggestions.length > 0 && (

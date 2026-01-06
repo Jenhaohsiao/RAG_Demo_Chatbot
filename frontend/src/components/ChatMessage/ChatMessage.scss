@@ -36,6 +36,10 @@
   font-size: $font-size-base;
   text-transform: none;
   letter-spacing: 0.5px;
+
+  i {
+    font-size: 1.5rem;
+  }
 }
 
 .message-time {
@@ -93,23 +97,25 @@
 .suggestion-bubble {
   display: inline-block;
   padding: $spacing-2 $spacing-3;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
+  background: #fff;
+  color: $color-primary;
+  border: 1px solid $color-primary;
   border-radius: 20px;
-  font-size: $font-size-sm;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
   cursor: pointer;
   transition: all 0.2s ease;
   max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
-    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    background: $color-primary;
+    color: #fff;
+    box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
   }
 
   &:active {
@@ -118,6 +124,6 @@
 
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.5);
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
   }
 }

@@ -76,7 +76,7 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header>
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
-        <div className="container-fluid">
+        <div>
           {/* App Title */}
           <a className="navbar-brand" href="/">
             <h3

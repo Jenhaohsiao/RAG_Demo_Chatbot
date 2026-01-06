@@ -1288,12 +1288,8 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       </div>
 
       {/* 步驟內容區域 - 全寬度 */}
-      <div className="w-100">
-        <div className="container-fluid">
-          <div className="row">
-            <div className="col-12">{renderStepContent()}</div>
-          </div>
-        </div>
+      <div className="row container">
+        <div className="col-12">{renderStepContent()}</div>
       </div>
 
       {/* Bootstrap Toast */}

@@ -2,8 +2,8 @@
 
 **專案名稱**: Multilingual RAG-Powered Chatbot  
 **分支**: `001-multilingual-rag-chatbot`  
-**最後更新**: 2026-01-05  
-**總體狀態**: ✅ MVP 完成，Step 3 UI/UX 優化，Step 6 體驗升級（移除引用、顯示模型資訊），狀態重置邏輯完善
+**最後更新**: 2026-01-06  
+**總體狀態**: ✅ UI/UX 全面升級 (Chat, RAG Config, Header)，代碼清理
 
 ---
 
@@ -19,18 +19,47 @@
 - **多語言支援**: 8種語言UI切換
 - **Metrics儀表板**: 實時性能監控
 - **6步驟工作流程**: RAG配置→AI行為設定→資料上傳→內容審核→文字處理→AI對話
-- **Loading Overlay**: 全局處理狀態提示，防止重複操作
-- **工作流程狀態保留**: 步驟3/4/5/6 返回上一步時保持狀態
-- **狀態重置機制**: Step 3 上傳新資料時自動重置後續步驟 (4, 5, 6)
-- **建議氣泡功能**: AI無法回答時自動生成2-3個可點擊的建議問題
-- **Step 2 完整參數**: 回答語言、嚴格RAG模式、引用風格、檢索Top-K、相似度閾值、最大上下文Token等
-- **Step 3 UI 重構**: 2步驟嚮導模式，移除冗餘資訊，修復圖示顯示
-- **Step 5 UI 優化**: 向量化狀態顯示優化，顯示 Vector DB 技術規格
-- **Step 6 體驗優化**: 移除引用標記（[Document 1]），新增模型名稱顯示 (Gemini 2.0 Flash)
+- **UI 優化**: 全面更新聊天介面、設定介面與 Header
 
 ---
 
 ## 🎯 最近完成
+
+### 📅 2026-01-06 - UI/UX 全面升級與 RAG 設定重構
+
+**🎯 優化目標**:
+提升聊天介面的美觀度與可讀性，簡化 RAG 參數設定流程，並清理冗餘的代碼與樣式。
+
+**✨ 主要變更**:
+
+1.  **Chat UI 升級**:
+    *   **角色識別**: "助理" 文字替換為機器人圖標 (放大尺寸)，使用者移除 "您" 文字標籤。
+    *   **視覺優化**: 移除訊息時間戳記以節省空間。移除 "無法回答" 的紅色警告框，改為直接由 AI 回覆說明。
+    *   **建議氣泡 (Suggestion Bubbles)**: 全新設計，改為高對比度的白底藍框 Outline 風格，並加大字體以提升可讀性。
+    *   **檔案**: `ChatMessage.tsx`, `ChatMessage.scss`
+
+2.  **Step 1 RAG 設定重構**:
+    *   **簡化設定**: 僅保留 "Similarity Threshold" 與 "Top-K Retrieval" 兩個核心參數。
+    *   **參數遷移**: 將引用設定移至 Step 2，Re-ranking 設定整合至系統規則。
+    *   **唯讀顯示**: Chunk 相關設定 (Size, Overlap) 改為唯讀預設值顯示，避免過度複雜化。
+    *   **檔案**: `RagConfigStep.tsx`
+
+3.  **Header 清理**:
+    *   移除未定義的 `container-fluid` class，優化版面結構。
+    *   **檔案**: `Header.tsx`
+
+4.  **代碼清理**:
+    *   刪除無用的開發測試檔案 `test-system-message.html`。
+    *   **檔案**: (已刪除) `test-system-message.html`, `frontend/src/test-system-message.html`
+
+**🔧 修改的檔案**:
+- `frontend/src/components/ChatMessage/ChatMessage.tsx`
+- `frontend/src/components/ChatMessage/ChatMessage.scss`
+- `frontend/src/components/RagConfigStep/RagConfigStep.tsx`
+- `frontend/src/components/Header/Header.tsx`
+- (Deleted) `test-system-message.html`
+
+---
 
 ### 📅 2026-01-05 - Step 3 & Step 6 UI/UX 優化與狀態重置邏輯
 
@@ -38,6 +67,7 @@
 完善使用者體驗細節，確保資料更新時的流程正確性，並優化 AI 回答的閱讀體驗。
 
 **✨ 主要變更**:
+
 
 1.  **Step 3 爬蟲 UI 優化 (Crawler UI Cleanup)**:
     *   **資訊簡化**: 移除爬蟲面板中冗餘的 Tokens 和 Chunks 統計顯示，保持介面簡潔。
