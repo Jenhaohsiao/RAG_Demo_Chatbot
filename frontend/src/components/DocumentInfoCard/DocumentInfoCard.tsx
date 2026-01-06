@@ -6,6 +6,7 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getSession } from "../../services/sessionService";
+import "./DocumentInfoCard.scss";
 
 interface DocumentInfoCardProps {
   sessionId: string;
@@ -73,9 +74,8 @@ export const DocumentInfoCard: React.FC<DocumentInfoCardProps> = ({
           </h5>
         </div>
         <button
-          className="btn btn-lg btn-outline-light"
+          className="btn btn-lg btn-outline-light btn-toggle-expand"
           onClick={() => setIsExpanded(!isExpanded)}
-          style={{ border: "none" }}
         >
           <i className={`bi bi-chevron-${isExpanded ? "up" : "down"}`}></i>
         </button>

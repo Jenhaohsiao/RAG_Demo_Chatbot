@@ -4,6 +4,7 @@
  */
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import "./FixedRagFlow.scss";
 
 interface FixedRagFlowProps {
   currentStep?:
@@ -126,38 +127,12 @@ const FixedRagFlow: React.FC<FixedRagFlowProps> = ({
         <div
           className="custom-tooltip"
           style={{
-            position: "fixed",
             left: tooltip.x,
             top: tooltip.y,
-            transform: "translateX(-50%)",
-            backgroundColor: "#6c757d", // 更淡的背景色
-            color: "white",
-            padding: "8px 12px",
-            borderRadius: "6px",
-            fontSize: "0.85rem",
-            fontWeight: "400", // 字重調輕一些
-            maxWidth: "300px",
-            zIndex: 9999,
-            pointerEvents: "none",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.1)", // 陰影調淡
-            whiteSpace: "normal",
-            lineHeight: "1.4",
           }}
         >
           {tooltip.content}
-          <div
-            style={{
-              position: "absolute",
-              bottom: "100%", // 箭頭在tooltip上方
-              left: "50%",
-              transform: "translateX(-50%)",
-              width: 0,
-              height: 0,
-              borderLeft: "6px solid transparent",
-              borderRight: "6px solid transparent",
-              borderBottom: "6px solid #6c757d", // 箭頭指向上方
-            }}
-          />
+          <div className="tooltip-arrow" />
         </div>
       )}
 
@@ -177,15 +152,9 @@ const FixedRagFlow: React.FC<FixedRagFlowProps> = ({
                           isCurrent
                             ? "bg-primary text-white"
                             : isActive
-                            ? "text-white"
+                            ? "text-white step-completed"
                             : "bg-white border text-muted"
                         }`}
-                        style={{
-                          minWidth: "120px",
-                          cursor: "pointer",
-                          backgroundColor:
-                            isActive && !isCurrent ? "#d4edda" : undefined,
-                        }}
                         aria-label={`${step.titleZh}: ${step.tooltip}`}
                         onMouseEnter={(e) => handleMouseEnter(e, step)}
                         onMouseLeave={handleMouseLeave}
@@ -203,10 +172,7 @@ const FixedRagFlow: React.FC<FixedRagFlowProps> = ({
                       >
                         <div className="step-content d-flex align-items-center">
                           {isActive && !isCurrent && (
-                            <i
-                              className="bi bi-check-circle-fill text-success me-2"
-                              style={{ fontSize: "1.2rem" }}
-                            ></i>
+                            <i className="bi bi-check-circle-fill text-success me-2 step-check-icon"></i>
                           )}
                         </div>
                       </button>

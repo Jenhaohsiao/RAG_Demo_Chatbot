@@ -6,6 +6,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import type { SupportedLanguage } from "../../hooks/useLanguage";
 import ToastMessage from "../ToastMessage/ToastMessage";
+import "./Header.scss";
 
 interface HeaderProps {
   sessionId: string | null;
@@ -76,23 +77,11 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header>
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
-        <div>
+        <div className="container-fluid">
           {/* App Title */}
           <a className="navbar-brand" href="/">
-            <h3
-              className="mb-0 fw-bold"
-              style={{
-                background: "linear-gradient(135deg, #ffffff, #e8f4fd)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                textShadow: "0 0 20px rgba(255, 255, 255, 0.3)",
-                letterSpacing: "0.5px",
-              }}
-            >
-              {t("app.title")}
-            </h3>
-            <div className="small" style={{ opacity: 0.5 }}>
+            <h3 className="mb-0 fw-bold app-title">{t("app.title")}</h3>
+            <div className="small app-subtitle-container">
               <h6 className="mb-0 mt-1">用視覺說明RAG運行的原理跟流程</h6>
             </div>
           </a>
@@ -137,10 +126,7 @@ export const Header: React.FC<HeaderProps> = ({
                 title={t("labels.selectLanguage")}
               >
                 <i className="bi bi-globe me-2"></i>
-                <span
-                  className="d-none d-sm-inline text-truncate"
-                  style={{ maxWidth: "100px" }}
-                >
+                <span className="d-none d-sm-inline text-truncate language-selector-text">
                   {currentLangName}
                 </span>
               </button>
@@ -149,12 +135,11 @@ export const Header: React.FC<HeaderProps> = ({
                   {SUPPORTED_LANGUAGES.map((lang) => (
                     <li key={lang.code}>
                       <button
-                        className={`dropdown-item ${
+                        className={`dropdown-item language-option ${
                           currentLanguage === lang.code ? "active" : ""
                         }`}
                         data-testid={`language-option-${lang.code}`}
                         onClick={() => handleLanguageChange(lang.code)}
-                        style={{ cursor: "pointer" }}
                       >
                         <span className="me-2">
                           {currentLanguage === lang.code && (

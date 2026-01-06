@@ -4,6 +4,7 @@
  */
 import React from "react";
 import { useTranslation } from "react-i18next";
+import "./AboutProjectModal.scss";
 
 interface AboutProjectModalProps {
   isOpen: boolean;
@@ -24,10 +25,9 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
 
   return (
     <div
-      className="modal show d-block"
+      className="modal show d-block about-project-modal"
       tabIndex={-1}
       role="dialog"
-      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
     >
       <div
         className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"

@@ -1,0 +1,45 @@
+@import "../../styles/variables";
+
+.custom-tooltip {
+  position: fixed;
+  transform: translateX(-50%);
+  background-color: $color-secondary; // #6c757d
+  color: $color-white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 400;
+  max-width: 300px;
+  z-index: $z-index-tooltip; // 1070 or 9999 as per inline
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  white-space: normal;
+  line-height: 1.4;
+
+  .tooltip-arrow {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid $color-secondary; // #6c757d
+  }
+}
+
+.flow-step-item {
+  min-width: 120px;
+  cursor: pointer;
+
+  // Handling dynamic background color for active but not current steps
+  // logic was: isActive && !isCurrent ? "#d4edda" : undefined
+  &.step-completed {
+    background-color: $color-success-light; // #d4edda or similar variable
+  }
+}
+
+.step-check-icon {
+  font-size: 1.2rem;
+}

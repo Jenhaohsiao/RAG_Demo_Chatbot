@@ -10,6 +10,7 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 // 包含全局變數、mixins、工具類和既有CSS檔案
 import "./styles/index.scss";
 import "./main.scss"; // 主樣式檔案（已轉換為SCSS）
+import "./components/ToastMessage/ToastMessage.scss"; // 顯式導入，以供 main.tsx 使用
 import "./i18n/config";
 import { useTranslation } from "react-i18next";
 import i18n from "./i18n/config";
@@ -432,7 +433,7 @@ const App: React.FC = () => {
 
       {/* Workflow Mode Content */}
       <div
-        className={`container main-content-container xs:m-0 p-0${
+        className={`container main-content-container sm:m-0 p-0${
           isBlocked ? "position-relative" : ""
         }`}
       >
@@ -530,7 +531,7 @@ const App: React.FC = () => {
       />
 
       {/* Toast Messages */}
-      <div className="position-fixed top-0 end-0 p-3" style={{ zIndex: 9999 }}>
+      <div className="position-fixed top-0 end-0 p-3 toast-container-wrapper">
         {toasts.map((toast) => (
           <ToastMessage
             key={toast.id}

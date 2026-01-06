@@ -157,12 +157,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               )}
 
               <textarea
-                className="form-control font-monospace small"
+                className="form-control font-monospace small custom-prompt-textarea"
                 rows={6}
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
                 placeholder={t("settings.customPrompt.placeholder")}
-                style={{ fontSize: "0.85rem" }}
               />
 
               {customPrompt && (

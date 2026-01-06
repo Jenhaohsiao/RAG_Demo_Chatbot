@@ -2,8 +2,9 @@
  * ConfirmDialog Component
  * Reusable confirmation modal dialog
  */
-import React from 'react';
-import { useTranslation } from 'react-i18next';
+import React from "react";
+import { useTranslation } from "react-i18next";
+import "./ConfirmDialog.scss";
 
 interface ConfirmDialogProps {
   title: string;
@@ -19,7 +20,7 @@ interface ConfirmDialogProps {
 
 /**
  * Reusable confirmation dialog component
- * 
+ *
  * Features:
  * - Bootstrap Modal styling
  * - Async confirm handler
@@ -52,23 +53,19 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
   if (!isOpen) return null;
 
-  const confirmBtnClass = isDangerous 
-    ? 'btn-danger' 
-    : 'btn-primary';
+  const confirmBtnClass = isDangerous ? "btn-danger" : "btn-primary";
 
   return (
     <>
       {/* Modal Backdrop */}
       <div
-        className="modal-backdrop fade show"
+        className="modal-backdrop fade show confirm-dialog-backdrop"
         onClick={onCancel}
-        style={{ display: 'block' }}
       />
 
       {/* Modal */}
       <div
-        className="modal fade show"
-        style={{ display: 'block' }}
+        className="modal fade show confirm-dialog-modal"
         role="dialog"
         aria-labelledby="confirmDialogTitle"
         aria-hidden="false"
@@ -76,7 +73,9 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             {/* Header */}
-            <div className={`modal-header ${isDangerous ? 'border-danger' : ''}`}>
+            <div
+              className={`modal-header ${isDangerous ? "border-danger" : ""}`}
+            >
               <h5 className="modal-title" id="confirmDialogTitle">
                 {isDangerous && (
                   <i className="bi bi-exclamation-triangle-fill text-danger me-2"></i>
@@ -105,7 +104,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                 onClick={onCancel}
                 disabled={confirming || isLoading}
               >
-                {cancelText || t('buttons.cancel')}
+                {cancelText || t("buttons.cancel")}
               </button>
               <button
                 type="button"
@@ -120,10 +119,10 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                       role="status"
                       aria-hidden="true"
                     />
-                    {t('common.processing')}
+                    {t("common.processing")}
                   </>
                 ) : (
-                  confirmText || t('buttons.confirm')
+                  confirmText || t("buttons.confirm")
                 )}
               </button>
             </div>

@@ -490,8 +490,7 @@ const PromptVisualization: React.FC<PromptVisualizationProps> = ({
             {/* Prompt 設定 */}
             <div className="card row-mb-3 mb-3">
               <div
-                className="card-header bg-light"
-                style={{ cursor: "pointer" }}
+                className="card-header bg-light prompt-viz-card-header-clickable"
                 onClick={() => setIsResponseCollapsed(!isResponseCollapsed)}
               >
                 <div className="d-flex justify-content-between align-items-center">

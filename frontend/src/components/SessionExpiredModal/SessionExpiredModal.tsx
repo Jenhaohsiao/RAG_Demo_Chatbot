@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import "./SessionExpiredModal.scss";
 
 interface SessionExpiredModalProps {
   isOpen: boolean;
@@ -16,10 +17,9 @@ const SessionExpiredModal: React.FC<SessionExpiredModalProps> = ({
 
   return (
     <div
-      className="modal show d-block"
+      className="modal show d-block session-modal-backdrop"
       tabIndex={-1}
       role="dialog"
-      style={{ backgroundColor: "rgba(0, 0, 0, 0.5)", zIndex: 1060 }}
       aria-modal="true"
     >
       <div className="modal-dialog modal-dialog-centered" role="document">

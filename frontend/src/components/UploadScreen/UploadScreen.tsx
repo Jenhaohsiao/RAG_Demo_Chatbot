@@ -249,10 +249,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
       {hasUploadedContent && (
         <div className="upload-results-summary">
           {/* 保持與上傳介面一致的卡片外框 */}
-          <div
-            className="card shadow-sm mx-auto border-0 bg-light"
-            style={{ maxWidth: "600px" }}
-          >
+          <div className="card shadow-sm mx-auto border-0 bg-light upload-card-wrapper">
             <div className="card-body p-4">
               <h5 className="card-title text-center mb-4 fw-bold text-secondary">
                 上傳完成
@@ -375,10 +372,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
           </div>
 
           {/* 2. 卡片容器 (簡化風格) */}
-          <div
-            className="card shadow-sm mx-auto border-0 bg-light"
-            style={{ maxWidth: "600px" }}
-          >
+          <div className="card shadow-sm mx-auto border-0 bg-light upload-card-wrapper">
             <div className="card-body p-4">
               {/* 步驟 1: 參數設定 */}
               {uploadSubStep === 1 && (
@@ -585,7 +579,6 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                       onDragOver={handleDragOver}
                       onDrop={handleDrop}
                       onClick={handleBrowseClick}
-                      style={{ minHeight: "200px", borderStyle: "dashed" }}
                     >
                       <input
                         ref={fileInputRef}

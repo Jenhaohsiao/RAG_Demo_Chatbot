@@ -1141,10 +1141,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                 <h4 className="mb-0">
                   {steps[currentStep - 1].title}
                   {currentStep === 6 && (
-                    <span
-                      className="badge bg-secondary ms-2"
-                      style={{ fontSize: "0.8rem" }}
-                    >
+                    <span className="badge bg-secondary ms-2 model-badge">
                       Model: Gemini 2.0 Flash
                     </span>
                   )}
@@ -1287,9 +1284,9 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
         </div>
       </div>
 
-      {/* 步驟內容區域 - 全寬度 */}
-      <div className="row container">
-        <div className="col-12">{renderStepContent()}</div>
+      {/* renderStepContent*/}
+      <div className="container py-3 col-sm-12 col-md-10 col-lg-8 ">
+        {renderStepContent()}
       </div>
 
       {/* Bootstrap Toast */}

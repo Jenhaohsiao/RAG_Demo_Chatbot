@@ -169,7 +169,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                   {reviewProgress.currentItem || "準備開始審核..."}
                 </span>
               </div>
-              <div className="progress mb-3" style={{ height: "8px" }}>
+              <div className="progress mb-3 review-progress">
                 <div
                   className="progress-bar progress-bar-striped progress-bar-animated"
                   style={{

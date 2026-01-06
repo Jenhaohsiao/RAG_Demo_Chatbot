@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { moderateMultipleContent } from "../../services/moderationService";
 import type { ContentModerationResponse } from "../../services/moderationService";
 import { useToast } from "../../hooks/useToast";
+import "./ContentReviewStep.scss";
 
 export interface ContentReviewStepProps {
   sessionId?: string;
@@ -544,7 +545,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
           {/* 進度條 - 只在審核中顯示 */}
           {reviewProgress.isRunning && (
             <div className="mt-3">
-              <div className="progress mb-2" style={{ height: "6px" }}>
+              <div className="progress mb-2 progress-container">
                 <div
                   className="progress-bar progress-bar-striped progress-bar-animated bg-primary"
                   style={{

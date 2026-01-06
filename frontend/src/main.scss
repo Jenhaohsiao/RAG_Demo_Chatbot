@@ -47,6 +47,10 @@ body {
   cursor: not-allowed;
 }
 
+.toast-container-wrapper {
+  z-index: $z-index-loading;
+}
+
 // ========================================
 // Common Component Patterns
 // ========================================
