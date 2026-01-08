@@ -59,10 +59,14 @@ $bg-light: #f8f9fa;
 $bg-dark: #212529;
 $bg-overlay: rgba(0, 0, 0, 0.3);
 $bg-overlay-light: rgba(0, 0, 0, 0.1);
-
+$bg-card-green: #90ab8b;
+$bg-navbar: #112d4e;
+$bg-body: #dddddd;
+$bg-working-flow-active: #fce38a;
 // Border Colors - 邊框顏色
 $color-border: #e1e8ed;
 $color-border-light: #f1f3f5;
+$bg-workflow-container: #eae0cf;
 
 // ========================================
 // Spacing - 間距系統
@@ -167,7 +171,7 @@ $breakpoint-xxl: 1400px;
 $card-border-color: $color-gray-200;
 $card-border-radius: $border-radius;
 $card-padding: $spacing-4;
-
+$card-active-bg: $bg-card-green; // 確保這裡使用了正確的顏色變數
 // Buttons
 $btn-padding-y: $spacing-2;
 $btn-padding-x: $spacing-4;

@@ -1,0 +1,9 @@
+@import "@/styles/variables";
+
+.active-card-bg {
+  background-color: $card-active-bg !important;
+}
+
+.active-card-border {
+  border-color: $card-active-bg !important;
+}

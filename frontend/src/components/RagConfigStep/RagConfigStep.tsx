@@ -1,4 +1,5 @@
 ﻿import React from "react";
+import "./RagConfigStep.scss";
 interface RagConfigStepProps {
   parameters: {
     similarity_threshold: number;
@@ -37,21 +38,21 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
         <div className="col-lg-6">
           <div
             className={`card h-100 ${
-              disabled ? "border-secondary" : "border-primary"
+              disabled ? "border-secondary" : "active-card-border"
             }`}
           >
             <div
               className={`card-header ${
-                disabled ? "bg-secondary" : "bg-primary"
+                disabled ? "bg-secondary" : "active-card-bg"
               } text-white`}
             >
-              <h6 className="card-title mb-0">
+              <span className="card-title mb-0">
                 Similarity Threshold (相似度閾值)
-              </h6>
+              </span>
             </div>
             <div className="card-body">
               <div className="mb-3">
-                <label className="form-label small">
+                <label className="form-label">
                   檢索精確度:{" "}
                   <span
                     className={
@@ -91,21 +92,21 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
         <div className="col-lg-6">
           <div
             className={`card h-100 ${
-              disabled ? "border-secondary" : "border-primary"
+              disabled ? "border-secondary" : "active-card-border"
             }`}
           >
             <div
               className={`card-header ${
-                disabled ? "bg-secondary" : "bg-primary"
+                disabled ? "bg-secondary" : "active-card-bg"
               } text-white`}
             >
-              <h6 className="card-title mb-0">
+              <span className="card-title mb-0">
                 Top-K Retrieval Count (檢索數量)
-              </h6>
+              </span>
             </div>
             <div className="card-body">
               <div className="mb-3">
-                <label className="form-label small">
+                <label className="form-label">
                   檢索段落數:{" "}
                   <span
                     className={

@@ -195,10 +195,37 @@ const App: React.FC = () => {
     }
   };
 
+  // Retry count for session creation
+  const retryCountRef = React.useRef(0);
+
   // Auto-create session on component mount
   // But NOT when session has expired - wait for user to confirm modal first
   React.useEffect(() => {
+    // Check if we have a session - if so, reset retry count
+    if (sessionId) {
+      if (retryCountRef.current > 0) {
+        console.log("[App] Session established, resetting retry count");
+        retryCountRef.current = 0;
+      }
+      return;
+    }
+
     if (!sessionId && !isLoading && !isSessionExpired) {
+      // If we have an error (meaning previous attempt failed), check retry limits
+      if (error) {
+        if (retryCountRef.current >= 10) {
+          console.warn(
+            "[App] Max session creation retries reached (10), stopping attempts"
+          );
+          return;
+        }
+
+        retryCountRef.current += 1;
+        console.log(
+          `[App] Retrying session creation (${retryCountRef.current}/10)...`
+        );
+      }
+
       createSession(similarityThreshold);
     }
   }, [
@@ -207,6 +234,7 @@ const App: React.FC = () => {
     isSessionExpired,
     createSession,
     similarityThreshold,
+    error,
   ]);
 
   // Handle error messages from session and upload

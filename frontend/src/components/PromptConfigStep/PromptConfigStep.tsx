@@ -207,11 +207,9 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
               } text-dark d-flex justify-content-between align-items-center`}
             >
               <h6 className="card-title mb-0">
-                <i className="bi bi-shield-lock me-2"></i>
                 {t("step2.system.title", "系統規則")}
               </h6>
               <span className="badge bg-dark small">
-                <i className="bi bi-lock-fill me-1"></i>
                 {t("step2.badge.sessionFixed", "Session 固定")}
               </span>
             </div>

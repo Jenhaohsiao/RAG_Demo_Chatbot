@@ -81,7 +81,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           console.log(`[WorkflowStepper] 輪詢狀態更新:`, status);
           // 更新文檔的 chunks 數量 (Flow 3 不再分塊，所以 chunk_count 可能為 0，改檢查 extraction_status)
           if (
-            status.extraction_status === "completed" ||
+            status.extraction_status === "COMPLETED" ||
             status.chunk_count > 0
           ) {
             const updatedDoc = {
@@ -143,7 +143,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
       // 最終更新（確保不會意外清空documents）
       if (
-        finalStatus.extraction_status === "completed" ||
+        finalStatus.extraction_status === "COMPLETED" ||
         finalStatus.chunk_count > 0
       ) {
         console.log(
@@ -257,12 +257,13 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
       if (!isContentBlockedError) {
         // 只顯示非內容審核相關的錯誤
-        onShowMessage?.({
-          type: "error",
+        setToastContent({
+          title: "錯誤",
           message: `${
             docItem.type === "file" ? "檔案" : "URL"
           } ${identifier} 處理失敗: ${error}`,
         });
+        setShowToast(true);
       } else {
         // 內容審核錯誤只記錄日誌，不顯示 toast
         console.warn(
@@ -541,7 +542,30 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       // 步骤3：资料上传 - 需要有文档或爬虫内容才能继续
       const hasDocuments = documents && documents.length > 0;
       const hasCrawledUrls = crawledUrls && crawledUrls.length > 0;
-      return hasDocuments || hasCrawledUrls;
+
+      // 檢查文件處理狀態
+      const allDocsReady =
+        !documents ||
+        documents.every(
+          (doc) =>
+            (doc.chunks && doc.chunks > 0) ||
+            doc.extraction_status === "COMPLETED" ||
+            doc.extraction_status === "EXTRACTED" ||
+            doc.status === "COMPLETED"
+        );
+
+      // 檢查URL處理狀態
+      const allUrlsReady =
+        !crawledUrls ||
+        crawledUrls.every(
+          (url) =>
+            (url.chunks && url.chunks > 0) ||
+            url.extraction_status === "COMPLETED" ||
+            url.extraction_status === "EXTRACTED" ||
+            url.status === "COMPLETED"
+        );
+
+      return (hasDocuments || hasCrawledUrls) && allDocsReady && allUrlsReady;
     }
     if (currentStep === 4) {
       // 步骤4：内容审核 - 需要所有审核项目都通过
@@ -605,30 +629,33 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
     // 檢查步驟3是否可以進入下一步
     if (currentStep === 3 && !canProceedToNextStep()) {
-      onShowMessage?.({
-        type: "warning",
+      setToastContent({
+        title: "警告",
         message: "請先上傳檔案或設定網站爬蟲，然後才能進入下一步。",
       });
+      setShowToast(true);
       return;
     }
 
     // 檢查步驟4是否可以進入下一步
     if (currentStep === 4 && !canProceedToNextStep()) {
       if (!reviewPassed) {
-        onShowMessage?.({
-          type: "warning",
+        setToastContent({
+          title: "警告",
           message: "請先完成內容審核並通過檢查，然後才能進入下一步。",
         });
+        setShowToast(true);
       }
       return;
     }
 
     // 檢查步驟5是否可以進入下一步
     if (currentStep === 5 && !canProceedToNextStep()) {
-      onShowMessage?.({
-        type: "warning",
+      setToastContent({
+        title: "警告",
         message: "請先完成文本切割和向量化處理，然後才能進入下一步。",
       });
+      setShowToast(true);
       return;
     }
 
@@ -866,12 +893,13 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
               } catch (error) {
                 console.error("File upload failed:", error);
                 setIsGlobalLoading(false);
-                onShowMessage?.({
-                  type: "error",
+                setToastContent({
+                  title: "錯誤",
                   message: `檔案上傳失敗: ${
                     error instanceof Error ? error.message : "未知錯誤"
                   }`,
                 });
+                setShowToast(true);
               }
             }}
             onUrlUpload={async (url) => {
@@ -918,10 +946,11 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                   errorMessage.toLowerCase().includes("moderation");
 
                 if (!isContentBlockedError) {
-                  onShowMessage?.({
-                    type: "error",
+                  setToastContent({
+                    title: "錯誤",
                     message: `URL處理失敗: ${errorMessage}`,
                   });
+                  setShowToast(true);
                 } else {
                   console.warn(
                     `[WorkflowStepper] URL內容審核問題將在流程4處理: ${errorMessage}`
@@ -965,10 +994,11 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                 // 隱藏全局 Loading
                 setIsGlobalLoading(false);
 
-                onShowMessage?.({
-                  type: "success",
+                setToastContent({
+                  title: "成功",
                   message: `網站 ${url} 爬取成功，共處理 ${response.pages_found} 個頁面！`,
                 });
+                setShowToast(true);
 
                 // 網站爬取完成，用戶需手動進入下一步
               } catch (error) {
@@ -983,10 +1013,11 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                   errorMessage.toLowerCase().includes("moderation");
 
                 if (!isContentBlockedError) {
-                  onShowMessage?.({
-                    type: "error",
+                  setToastContent({
+                    title: "錯誤",
                     message: `網站爬取失敗: ${errorMessage}`,
                   });
+                  setShowToast(true);
                 } else {
                   console.warn(
                     `[WorkflowStepper] 網站內容審核問題將在流程4處理: ${errorMessage}`
@@ -1077,208 +1108,221 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   };
 
   return (
-    <div className="workflow-stepper w-100 xs:p-0">
-      {/* 步驟指示器 - 水平排列 */}
-      <div className="stepper-header">
-        <div className="d-flex justify-content-between align-items-center px-2">
-          {steps.map((step, index) => (
-            <div key={step.id} className="flex-fill mx-2">
-              <div
-                className={`stepper-item ${
-                  isStepActive(step.id) ? "active" : ""
-                } ${isStepCompleted(step.id) ? "completed" : ""} ${
-                  isStepDisabled(step.id) ? "disabled" : ""
-                } workflow-stepper-step-circle`}
-                onClick={() => handleInfoClick(step, {} as React.MouseEvent)}
-              >
-                {/* 步驟圓圈和圖示 */}
+    <div className="workflow-stepper xs:p-0">
+      <div className="card workflow-container p-3">
+        {/* 步驟指示器 - 水平排列 */}
+        <div className="stepper-header ">
+          <div className="d-flex justify-content-between align-items-center px-2">
+            {steps.map((step, index) => (
+              <div key={step.id} className="flex-fill mx-2">
                 <div
-                  className={`stepper-circle ${
-                    isStepCompleted(step.id)
-                      ? "step-completed"
-                      : isStepActive(step.id)
-                      ? "step-active"
-                      : "step-inactive"
-                  } text-white`}
+                  className={`stepper-item ${
+                    isStepActive(step.id) ? "active" : ""
+                  } ${isStepCompleted(step.id) ? "completed" : ""} ${
+                    isStepDisabled(step.id) ? "disabled" : ""
+                  } workflow-stepper-step-circle`}
+                  onClick={() => handleInfoClick(step, {} as React.MouseEvent)}
                 >
-                  <span className="fw-bold">{step.id}</span>
-                </div>
-
-                {/* 步驟文本 */}
-                <div className="stepper-text mt-2">
-                  <div className="stepper-title d-flex align-items-center justify-content-center">
-                    {isStepCompleted(step.id) && (
-                      <i className="bi bi-check-circle-fill text-success me-1 workflow-stepper-check-icon"></i>
-                    )}
-                    <span>{step.title}</span>
-                  </div>
-                </div>
-
-                {/* 連接線 (除了最後一個步驟) */}
-                {index < steps.length - 1 && (
-                  <div className="stepper-connector">
-                    <div
-                      className={`connector-line ${
-                        isStepCompleted(step.id) ? "completed" : ""
-                      }`}
-                    ></div>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 當前步驟資訊與導航按鈕同一行 */}
-      <div className="w-100">
-        <div className="current-step-info mb-2">
-          <div className="d-flex align-items-center justify-content-between">
-            {/* 左側步驟信息 - 60% */}
-            <div className="d-flex align-items-center workflow-stepper-progress-container">
-              <div className="badge bg-primary me-3">步驟 {currentStep}</div>
-              <div className="flex-grow-1">
-                <h4 className="mb-0">
-                  {steps[currentStep - 1].title}
-                  {currentStep === 6 && (
-                    <span className="badge bg-secondary ms-2 model-badge">
-                      Model: Gemini 2.0 Flash
-                    </span>
-                  )}
-                </h4>
-                <small className="text-muted">
-                  {steps[currentStep - 1].description}
-                </small>
-              </div>
-            </div>
-
-            {/* 中间重点数据显示 */}
-            <div className="text-center mx-3 workflow-stepper-progress-center">
-              {/* 步驟3：上傳完成顯示 */}
-              {currentStep === 3 &&
-                ((documents &&
-                  documents.length > 0 &&
-                  documents.every((d) => d.chunks > 0)) ||
-                  (crawledUrls &&
-                    crawledUrls.length > 0 &&
-                    crawledUrls.every((u) => u.chunks > 0))) && (
-                  <div className="d-flex align-items-center text-success">
-                    <i className="bi bi-check-circle-fill me-2"></i>
-                    <span className="fw-bold">
-                      資料上傳完成，可以進入下一步
-                    </span>
-                  </div>
-                )}
-
-              {/* 步驟4專用：內容審核執行按鈕 */}
-              {currentStep === 4 && !shouldStartReview && !reviewPassed && (
-                <button
-                  className="btn btn-warning btn-lg"
-                  onClick={() => {
-                    console.log("Starting review process...");
-                    setShouldStartReview(true);
-                  }}
-                  disabled={documents.length === 0 && crawledUrls.length === 0}
-                >
-                  <i className="bi bi-shield-check me-2"></i>
-                  開始內容審核
-                </button>
-              )}
-              {/* 步驟4：審核進行中顯示 */}
-              {currentStep === 4 && shouldStartReview && !reviewPassed && (
-                <div className="d-flex align-items-center text-warning">
+                  {/* 步驟圓圈和圖示 */}
                   <div
-                    className="spinner-border spinner-border-sm me-2"
-                    role="status"
+                    className={`stepper-circle ${
+                      isStepCompleted(step.id)
+                        ? "step-completed"
+                        : isStepActive(step.id)
+                        ? "step-active"
+                        : "step-inactive"
+                    } text-white`}
                   >
-                    <span className="visually-hidden">審核中...</span>
+                    <span className="fw-bold">{step.id}</span>
                   </div>
-                  <span className="fw-bold">內容審核中...</span>
-                </div>
-              )}
-              {/* 步驟4：審核完成顯示 */}
-              {currentStep === 4 && reviewPassed && (
-                <div className="d-flex align-items-center text-success">
-                  <i className="bi bi-check-circle-fill me-2"></i>
-                  <span className="fw-bold">審核完成，可以進入下一步</span>
-                </div>
-              )}
 
-              {/* 步驟5專用：文本處理執行按鈕 */}
-              {currentStep === 5 &&
-                !shouldStartProcessing &&
-                !textProcessingCompleted && (
+                  {/* 步驟文本 */}
+                  <div className="stepper-text mt-2">
+                    <div className="stepper-title d-flex align-items-center justify-content-center">
+                      {isStepCompleted(step.id) && (
+                        <i className="bi bi-check-circle-fill text-success me-1 workflow-stepper-check-icon"></i>
+                      )}
+                      <span>{step.title}</span>
+                    </div>
+                  </div>
+
+                  {/* 連接線 (除了最後一個步驟) */}
+                  {index < steps.length - 1 && (
+                    <div className="stepper-connector">
+                      <div
+                        className={`connector-line ${
+                          isStepCompleted(step.id) ? "completed" : ""
+                        }`}
+                      ></div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 當前步驟資訊與導航按鈕同一行 */}
+        <div className="w-100">
+          <div className="current-step-info">
+            <div className="d-flex align-items-center justify-content-between">
+              {/* 左側步驟信息 - 60% */}
+              <div className="d-flex align-items-center workflow-stepper-progress-container">
+                <div className="flex-grow-1">
+                  <h4 className="mb-0">
+                    {steps[currentStep - 1].title}
+                    {currentStep === 6 && (
+                      <span className="badge bg-secondary ms-2 model-badge">
+                        Model: Gemini 2.0 Flash
+                      </span>
+                    )}
+                  </h4>
+                  <small className="text-muted">
+                    {steps[currentStep - 1].description}
+                  </small>
+                </div>
+              </div>
+
+              {/* 中间重点数据显示 */}
+              <div className="text-center mx-3 workflow-stepper-progress-center">
+                {/* 步驟3：上傳完成顯示 */}
+                {currentStep === 3 &&
+                  ((documents &&
+                    documents.length > 0 &&
+                    documents.every((d) => d.chunks > 0)) ||
+                    (crawledUrls &&
+                      crawledUrls.length > 0 &&
+                      crawledUrls.every((u) => u.chunks > 0))) && (
+                    <div className="d-flex align-items-center text-success">
+                      <i className="bi bi-check-circle-fill me-2"></i>
+                      <span className="fw-bold">
+                        資料上傳完成，可以進入下一步
+                      </span>
+                    </div>
+                  )}
+
+                {/* 步驟4專用：內容審核執行按鈕 */}
+                {currentStep === 4 && !shouldStartReview && !reviewPassed && (
                   <button
-                    className="btn btn-success btn-lg"
+                    className="btn btn-warning btn-lg"
                     onClick={() => {
-                      console.log("Starting text processing...");
-                      setShouldStartProcessing(true);
+                      console.log("Starting review process...");
+                      setShouldStartReview(true);
                     }}
                     disabled={
                       documents.length === 0 && crawledUrls.length === 0
                     }
                   >
-                    <i className="bi bi-play me-2"></i>
-                    開始文本處理
+                    <i className="bi bi-shield-check me-2"></i>
+                    開始內容審核
                   </button>
                 )}
-              {/* 步驟5：處理進行中顯示 */}
-              {currentStep === 5 &&
-                shouldStartProcessing &&
-                !textProcessingCompleted && (
-                  <div className="d-flex align-items-center text-primary">
+                {/* 步驟4：審核進行中顯示 */}
+                {currentStep === 4 && shouldStartReview && !reviewPassed && (
+                  <div className="d-flex align-items-center text-warning">
                     <div
                       className="spinner-border spinner-border-sm me-2"
                       role="status"
                     >
-                      <span className="visually-hidden">處理中...</span>
+                      <span className="visually-hidden">審核中...</span>
                     </div>
-                    <span className="fw-bold">文本處理中...</span>
+                    <span className="fw-bold">內容審核中...</span>
                   </div>
                 )}
-              {/* 步驟5：處理完成顯示 */}
-              {currentStep === 5 && textProcessingCompleted && (
-                <div className="d-flex align-items-center text-success">
-                  <i className="bi bi-check-circle-fill me-2"></i>
-                  <span className="fw-bold">處理完成，可以進入下一步</span>
-                </div>
-              )}
-            </div>
+                {/* 步驟4：審核完成顯示 */}
+                {currentStep === 4 && reviewPassed && (
+                  <div className="d-flex align-items-center text-success">
+                    <i className="bi bi-check-circle-fill me-2"></i>
+                    <span className="fw-bold">審核完成，可以進入下一步</span>
+                  </div>
+                )}
 
-            {/* 右侧导航按钮 - 40% */}
-            <div className="d-flex align-items-center justify-content-end workflow-stepper-navigation">
-              {currentStep > 1 && (
-                <button
-                  className="btn btn-outline-secondary me-2"
-                  onClick={handlePreviousStepClick}
-                  disabled={currentStep === 1}
-                >
-                  <i className="bi bi-chevron-left me-1"></i>
-                  上一步
-                </button>
-              )}
-
-              <div className="step-counter mx-3">
-                <small className="text-muted">
-                  {currentStep} / {steps.length}
-                </small>
+                {/* 步驟5專用：文本處理執行按鈕 */}
+                {currentStep === 5 &&
+                  !shouldStartProcessing &&
+                  !textProcessingCompleted && (
+                    <button
+                      className="btn btn-success btn-lg"
+                      onClick={() => {
+                        console.log("Starting text processing...");
+                        setShouldStartProcessing(true);
+                      }}
+                      disabled={
+                        documents.length === 0 && crawledUrls.length === 0
+                      }
+                    >
+                      <i className="bi bi-play me-2"></i>
+                      開始文本處理
+                    </button>
+                  )}
+                {/* 步驟5：處理進行中顯示 */}
+                {currentStep === 5 &&
+                  shouldStartProcessing &&
+                  !textProcessingCompleted && (
+                    <div className="d-flex align-items-center text-primary">
+                      <div
+                        className="spinner-border spinner-border-sm me-2"
+                        role="status"
+                      >
+                        <span className="visually-hidden">處理中...</span>
+                      </div>
+                      <span className="fw-bold">文本處理中...</span>
+                    </div>
+                  )}
+                {/* 步驟5：處理完成顯示 */}
+                {currentStep === 5 && textProcessingCompleted && (
+                  <div className="d-flex align-items-center text-success">
+                    <i className="bi bi-check-circle-fill me-2"></i>
+                    <span className="fw-bold">處理完成，可以進入下一步</span>
+                  </div>
+                )}
               </div>
 
-              {/* 流程6不顯示下一步按鈕 */}
-              {currentStep < steps.length && (
-                <button
-                  className="btn btn-primary"
-                  onClick={handleNextStepClick}
-                  disabled={
-                    currentStep === steps.length ||
-                    !canProceedToNextStep() ||
-                    isGlobalLoading
-                  }
-                >
-                  下一步
-                  <i className="bi bi-chevron-right ms-1"></i>
-                </button>
-              )}
+              {/* 右侧导航按钮 - 40% */}
+              <div className="d-flex align-items-center justify-content-end workflow-stepper-navigation">
+                {currentStep > 1 && (
+                  <button
+                    className="btn btn-outline-secondary me-2"
+                    onClick={handlePreviousStepClick}
+                    disabled={currentStep === 1}
+                  >
+                    <i className="bi bi-chevron-left me-1"></i>
+                    上一步
+                  </button>
+                )}
+
+                <div className="step-counter mx-3">
+                  <small className="text-muted">
+                    {currentStep} / {steps.length}
+                  </small>
+                </div>
+
+                {/* 流程6不顯示下一步按鈕 */}
+                {currentStep < steps.length && (
+                  <button
+                    className={
+                      [3, 4, 5].includes(currentStep) && !canProceedToNextStep()
+                        ? "btn btn-secondary"
+                        : "btn btn-success"
+                    }
+                    onClick={handleNextStepClick}
+                    disabled={currentStep === steps.length || isGlobalLoading}
+                  >
+                    {[3, 4, 5].includes(currentStep) &&
+                    !canProceedToNextStep() ? (
+                      <>
+                        下一步
+                        <i className="bi bi-question-circle ms-1"></i>
+                      </>
+                    ) : (
+                      <>
+                        下一步
+                        <i className="bi bi-chevron-right ms-1"></i>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -1289,8 +1333,22 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
         {renderStepContent()}
       </div>
 
+      {/* Modal Backdrop for Toast */}
+      {showToast && (
+        <div
+          className="position-fixed top-0 start-0 w-100 h-100"
+          style={{
+            backgroundColor: "rgba(0,0,0,0.5)",
+            zIndex: 1080,
+          }}
+        ></div>
+      )}
+
       {/* Bootstrap Toast */}
-      <div className="toast-container position-fixed top-0 end-0 p-3">
+      <div
+        className="toast-container position-fixed top-0 end-0 p-3"
+        style={{ zIndex: 1090 }}
+      >
         <div
           className={`toast ${showToast ? "show" : ""}`}
           role="alert"

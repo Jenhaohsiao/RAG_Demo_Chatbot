@@ -1,4 +1,12 @@
+@import "../../styles/variables";
+
 /* Workflow Stepper Styles */
+
+.workflow-container {
+  background-color: $bg-workflow-container !important;
+  border-color: $color-gray-300;
+  color: $color-gray-700 !important;
+}
 
 .workflow-stepper {
   padding: 20px 0;
@@ -29,7 +37,7 @@
 }
 
 .workflow-stepper-navigation {
-  width: 40%;
+  width: 60%;
 }
 
 .stepper-header {
@@ -86,8 +94,8 @@
 }
 
 .stepper-circle {
-  width: 60px;
-  height: 60px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -108,7 +116,7 @@
 }
 
 .stepper-item.completed .stepper-circle {
-  background-color: #198754 !important;
+  background-color: #88c7a9 !important;
   border-color: #146c43;
 }
 
@@ -119,7 +127,7 @@
 }
 
 .stepper-title {
-  font-size: 13px;
+  font-size: 14px;
   margin-bottom: 5px;
   font-weight: 600;
   color: #495057;
@@ -161,7 +169,7 @@
 .connector-line {
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, #dee2e6 0%, #dee2e6 100%);
+  background: linear-gradient(90deg, #1d6fc2 0%, #2c2e31 100%);
   border-radius: 2px;
   position: relative;
 }
@@ -185,12 +193,12 @@
 
 /* 當前步驟資訊樣式 */
 .current-step-info {
-  background: linear-gradient(135deg, #b7c8eb 0%, #ffffff 100%);
-  border-radius: 0;
+  border-radius: 5px;
   padding: 10px 10px;
-  border-left: 5px solid #0d6efd;
+  border: 2px solid #f8f9fa;
   box-shadow: none;
   width: 100%;
+  background-color: #f8f9fa;
 }
 
 /* 導航按鈕樣式 */
@@ -505,7 +513,7 @@
 }
 
 .step-active {
-  background-color: #ffc107 !important; /* 黃色背景 - 執行中 */
+  background-color: $bg-working-flow-active !important; /* 黃色背景 - 執行中 */
   border: 3px solid #b8860b !important; /* 深黃/棕色邊框 */
 }
 

@@ -76,13 +76,15 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header>
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
+      <nav className="navbar navbar-expand-lg  navbar-bg ">
         <div className="container-fluid">
           {/* App Title */}
           <a className="navbar-brand" href="/">
             <h3 className="mb-0 fw-bold app-title">{t("app.title")}</h3>
             <div className="small app-subtitle-container">
-              <h6 className="mb-0 mt-1">用視覺說明RAG運行的原理跟流程</h6>
+              <h6 className="mb-0 mt-1 text-white">
+                <b>用視覺說明RAG運行的原理跟流程</b>
+              </h6>
             </div>
           </a>
 
