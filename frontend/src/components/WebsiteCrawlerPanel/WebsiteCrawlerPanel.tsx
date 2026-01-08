@@ -88,7 +88,7 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
     <div className="">
       {/* 爬蟲表單 */}
       <div className="crawler-form">
-        <p className="crawler-description">
+        <p className="crawler-description mb-3">
           {t(
             "crawler.description",
             "輸入網站 URL 自動爬取內容。設定頁面數為 1 可爬取單一頁面，設定更多頁面可深度爬取整個網站。"
@@ -96,11 +96,11 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
         </p>
 
         {/* URL 輸入 */}
-        <div className="form-group">
+        <div className="form-group mb-3">
           <input
             id="crawler-url"
             type="text"
-            className={`url-input ${displayError ? "error" : ""}`}
+            className={`form-control ${displayError ? "is-invalid" : ""}`}
             placeholder="https://example.com"
             value={url}
             onChange={(e) => {
@@ -110,12 +110,14 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
             onKeyPress={handleKeyPress}
             disabled={isLoading || disabled}
           />
-          {displayError && <div className="error-message">{displayError}</div>}
+          {displayError && (
+            <div className="invalid-feedback">{displayError}</div>
+          )}
         </div>
 
         {/* 提交按鈕 */}
         <button
-          className="btn btn-primary w-100"
+          className="btn btn-primary w-100 py-2 rounded-pill"
           onClick={handleCrawl}
           disabled={isLoading || disabled || !url.trim()}
         >
@@ -126,12 +128,12 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
                 role="status"
                 aria-hidden="true"
               ></span>
-              {t("crawler.crawling", "Crawling...")}
+              {t("crawler.crawling", "處理中...")}
             </>
           ) : (
             <>
               <i className="bi bi-play-circle me-2"></i>
-              {t("crawler.start", "Start Crawl")}
+              {t("crawler.start", "開始爬取")}
             </>
           )}
         </button>

@@ -6,6 +6,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import UploadScreen from "../UploadScreen/UploadScreen";
+import "./DataUploadStep.scss";
 
 export interface DataUploadStepProps {
   parameters: {

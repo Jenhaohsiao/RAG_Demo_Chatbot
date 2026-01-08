@@ -1,0 +1,15 @@
+@import "../../styles/variables";
+
+.active-card-bg {
+  background-color: $card-active-bg !important;
+}
+
+.active-card-border {
+  border-color: $card-active-bg !important;
+}
+
+.badge-session-fixed {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}

@@ -1169,14 +1169,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
               {/* 左側步驟信息 - 60% */}
               <div className="d-flex align-items-center workflow-stepper-progress-container">
                 <div className="flex-grow-1">
-                  <h4 className="mb-0">
-                    {steps[currentStep - 1].title}
-                    {currentStep === 6 && (
-                      <span className="badge bg-secondary ms-2 model-badge">
-                        Model: Gemini 2.0 Flash
-                      </span>
-                    )}
-                  </h4>
+                  <h4 className="mb-0">{steps[currentStep - 1].title}</h4>
                   <small className="text-muted">
                     {steps[currentStep - 1].description}
                   </small>
@@ -1185,8 +1178,9 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
               {/* 中间重点数据显示 */}
               <div className="text-center mx-3 workflow-stepper-progress-center">
-                {/* 步驟3：上傳完成顯示 */}
-                {currentStep === 3 &&
+                {/* 步驟3：上傳完成顯示 (已移除，避免與下方卡片重複) */}
+                {false &&
+                  currentStep === 3 &&
                   ((documents &&
                     documents.length > 0 &&
                     documents.every((d) => d.chunks > 0)) ||
@@ -1201,61 +1195,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                     </div>
                   )}
 
-                {/* 步驟4專用：內容審核執行按鈕 */}
-                {currentStep === 4 && !shouldStartReview && !reviewPassed && (
-                  <button
-                    className="btn btn-warning btn-lg"
-                    onClick={() => {
-                      console.log("Starting review process...");
-                      setShouldStartReview(true);
-                    }}
-                    disabled={
-                      documents.length === 0 && crawledUrls.length === 0
-                    }
-                  >
-                    <i className="bi bi-shield-check me-2"></i>
-                    開始內容審核
-                  </button>
-                )}
-                {/* 步驟4：審核進行中顯示 */}
-                {currentStep === 4 && shouldStartReview && !reviewPassed && (
-                  <div className="d-flex align-items-center text-warning">
-                    <div
-                      className="spinner-border spinner-border-sm me-2"
-                      role="status"
-                    >
-                      <span className="visually-hidden">審核中...</span>
-                    </div>
-                    <span className="fw-bold">內容審核中...</span>
-                  </div>
-                )}
-                {/* 步驟4：審核完成顯示 */}
-                {currentStep === 4 && reviewPassed && (
-                  <div className="d-flex align-items-center text-success">
-                    <i className="bi bi-check-circle-fill me-2"></i>
-                    <span className="fw-bold">審核完成，可以進入下一步</span>
-                  </div>
-                )}
-
-                {/* 步驟5專用：文本處理執行按鈕 */}
-                {currentStep === 5 &&
-                  !shouldStartProcessing &&
-                  !textProcessingCompleted && (
-                    <button
-                      className="btn btn-success btn-lg"
-                      onClick={() => {
-                        console.log("Starting text processing...");
-                        setShouldStartProcessing(true);
-                      }}
-                      disabled={
-                        documents.length === 0 && crawledUrls.length === 0
-                      }
-                    >
-                      <i className="bi bi-play me-2"></i>
-                      開始文本處理
-                    </button>
-                  )}
-                {/* 步驟5：處理進行中顯示 */}
+                {/* 步驟5：處理還在進行中顯示（完成時不顯示訊息） */}
                 {currentStep === 5 &&
                   shouldStartProcessing &&
                   !textProcessingCompleted && (
@@ -1269,13 +1209,6 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                       <span className="fw-bold">文本處理中...</span>
                     </div>
                   )}
-                {/* 步驟5：處理完成顯示 */}
-                {currentStep === 5 && textProcessingCompleted && (
-                  <div className="d-flex align-items-center text-success">
-                    <i className="bi bi-check-circle-fill me-2"></i>
-                    <span className="fw-bold">處理完成，可以進入下一步</span>
-                  </div>
-                )}
               </div>
 
               {/* 右侧导航按钮 - 40% */}

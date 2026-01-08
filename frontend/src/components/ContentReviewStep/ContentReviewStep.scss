@@ -1,9 +1,161 @@
 @import "../../styles/variables";
 
-.progress-container {
-  height: 6px;
-}
+$prof-blue: $card-active-bg; // #2b6cb0
 
-.review-progress {
-  height: 8px;
+.content-review-step {
+  padding: 0;
+
+  /* Card Styles */
+  .card {
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    background-color: #fff;
+    margin-bottom: 2rem;
+
+    .card-header {
+      background-color: $prof-blue;
+      color: white;
+      border-bottom: none;
+      padding: 1rem 1.25rem;
+      border-top-left-radius: 0.5rem;
+      border-top-right-radius: 0.5rem;
+
+      h6 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+  }
+
+  /* List Items */
+  .list-group-item {
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: #f8f9fa;
+    }
+
+    &.status-pending {
+      border-left-color: $color-secondary;
+    }
+
+    &.status-approved {
+      border-left-color: $color-success;
+      background-color: rgba($color-success, 0.05);
+    }
+
+    &.status-rejected {
+      border-left-color: $color-danger;
+      background-color: rgba($color-danger, 0.05);
+    }
+  }
+
+  /* Review Item Boxes */
+  .review-item-box {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    margin-bottom: 0.75rem;
+    transition: all 0.3s;
+
+    &.review-success {
+      background-color: rgba($color-success, 0.1);
+      border-color: rgba($color-success, 0.2);
+      color: $color-success-dark;
+    }
+
+    &.review-error {
+      background-color: rgba($color-danger, 0.1);
+      border-color: rgba($color-danger, 0.2);
+      color: $color-danger-dark;
+    }
+
+    &.review-active {
+      background-color: rgba($prof-blue, 0.1);
+      border-color: $prof-blue;
+      color: $prof-blue;
+      box-shadow: 0 0 0 2px rgba($prof-blue, 0.1);
+    }
+
+    .item-icon {
+      font-size: 1.25rem;
+      margin-right: 0.75rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .item-text {
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+  }
+
+  /* Progress Bar */
+  .progress-container {
+    height: 10px;
+    background-color: #e9ecef;
+    border-radius: 5px;
+    overflow: hidden;
+
+    .progress-bar {
+      background-color: $prof-blue;
+    }
+  }
+
+  /* Action Area */
+  .action-area {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #dee2e6;
+    text-align: center;
+  }
+
+  .btn-start-review {
+    background-color: $prof-blue;
+    border-color: $prof-blue;
+    color: white;
+    padding: 0.75rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 50px;
+    box-shadow: 0 4px 6px rgba($prof-blue, 0.2);
+    transition: all 0.3s ease;
+
+    &:hover {
+      background-color: darken($prof-blue, 10%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba($prof-blue, 0.3);
+    }
+
+    &:disabled {
+      background-color: #a0aec0;
+      border-color: #a0aec0;
+      transform: none;
+      box-shadow: none;
+    }
+  }
+
+  /* Alerts and Info */
+  .alert-standards {
+    background-color: #ebf8ff;
+    border-color: #bee3f8;
+    color: #2c5282;
+
+    i {
+      color: $prof-blue;
+    }
+  }
 }

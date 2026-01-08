@@ -1,13 +1,122 @@
 @import "../../styles/variables";
 
-.text-processing-progress-main {
-  height: 10px;
-}
+$prof-blue: $card-active-bg; // #2b6cb0
 
-.text-processing-progress-job {
-  height: 8px;
-}
+.text-processing-step {
+  padding: 0;
 
-.text-processing-progress-width-dynamic {
-  /* Dynamic width set via JavaScript */
+  /* Card Styles */
+  .card {
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    background-color: #fff;
+    margin-bottom: 2rem;
+    height: 100%;
+    transition: all 0.3s ease;
+
+    &:hover {
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .card-header {
+      background-color: $prof-blue !important; /* Force all headers to use professional blue */
+      color: white;
+      border-bottom: none;
+      padding: 1rem 1.25rem;
+      border-top-left-radius: 0.5rem;
+      border-top-right-radius: 0.5rem;
+
+      h6 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    /* Override variants to use same border color or subtle variations */
+    &.border-primary,
+    &.border-secondary,
+    &.border-success {
+      border-color: rgba($prof-blue, 0.3) !important;
+    }
+  }
+
+  /* List Items & Rows */
+  .d-flex {
+    .text-muted {
+      font-size: 0.95rem; /* Larger text size */
+    }
+
+    strong {
+      font-size: 1rem; /* Larger text size */
+    }
+
+    .small {
+      font-size: 0.9rem;
+    }
+  }
+
+  /* Info Boxes */
+  .bg-light {
+    background-color: #f8f9fa !important;
+    border: 1px solid #e9ecef !important;
+
+    small {
+      font-size: 0.9rem;
+      color: #6c757d !important;
+    }
+  }
+
+  /* Action Area */
+  .action-area {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #dee2e6;
+    text-align: center;
+  }
+
+  .btn-start-processing {
+    background-color: $prof-blue; /* Using #2b6cb0 */
+    border-color: $prof-blue;
+    color: white;
+    padding: 0.75rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 50px;
+    box-shadow: 0 4px 6px rgba($prof-blue, 0.2);
+    transition: all 0.3s ease;
+
+    &:hover {
+      background-color: darken($prof-blue, 10%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba($prof-blue, 0.3);
+    }
+
+    &:disabled {
+      background-color: #a0aec0;
+      border-color: #a0aec0;
+      transform: none;
+      box-shadow: none;
+    }
+  }
+
+  /* Success Message */
+  .alert-success {
+    background-color: rgba($color-success, 0.1);
+    border-color: rgba($color-success, 0.2);
+    color: $color-success-dark;
+
+    strong {
+      font-size: 1.1rem;
+    }
+  }
 }

@@ -36,10 +36,6 @@ body {
 // Main Layout Styles
 // ========================================
 
-.main-content-container {
-  min-height: calc(100vh - 80px);
-}
-
 .main-blocking-overlay {
   @include fixed-full;
   background-color: $bg-overlay;

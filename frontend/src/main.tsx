@@ -447,7 +447,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-vh-100 d-flex flex-column">
+    <div className=" min-vh-100 d-flex flex-column">
       <Header
         sessionId={sessionId}
         onLanguageChange={handleLanguageChange}
@@ -461,7 +461,7 @@ const App: React.FC = () => {
 
       {/* Workflow Mode Content */}
       <div
-        className={`container main-content-container sm:m-0 p-0${
+        className={`container sm:m-0 p-0${
           isBlocked ? "position-relative" : ""
         }`}
       >

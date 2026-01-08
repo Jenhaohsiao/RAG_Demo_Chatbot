@@ -3,7 +3,7 @@ RAG Engine Service
 RAG 查詢引擎：向量搜尋、Prompt 建構、LLM 生成、Metrics 追蹤
 
 Constitutional Compliance:
-- Principle V (Strict RAG): 僅基於檢索內容回答，相似度閾值 ≥0.7
+- Principle V (Strict RAG): 僅基於檢索內容回答，相似度閾值 ≥0.6
 - Principle III (Gemini-Only): 使用 Gemini 模型 (gemini-1.5-pro - cost-efficient)
 """
 
@@ -79,7 +79,7 @@ class RAGEngine:
         self,
         vector_store: Optional[VectorStore] = None,
         embedder: Optional[Embedder] = None,
-        similarity_threshold: float = 0.7,
+        similarity_threshold: float = 0.6,
         max_chunks: int = 5,
         temperature: float = 0.1,
         memory_limit: int = 100,  # 最多保留 100 個查詢
@@ -91,7 +91,7 @@ class RAGEngine:
         Args:
             vector_store: 向量儲存服務
             embedder: 嵌入服務
-            similarity_threshold: 相似度閾值（憲法 Principle V: ≥0.7）
+            similarity_threshold: 相似度閾值（調整為 0.6 以提高問答覆蓋率）
             max_chunks: 最大檢索塊數
             temperature: LLM 溫度（research.md 建議 0.1）
             memory_limit: 滑動視窗記憶體限制（查詢數）

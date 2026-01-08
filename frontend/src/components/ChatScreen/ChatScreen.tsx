@@ -102,6 +102,9 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   const [initialSuggestions, setInitialSuggestions] = useState<string[]>([]);
   const [areSuggestionsLoading, setAreSuggestionsLoading] = useState(false);
 
+  const MODEL_NAME = "Gemini 2.0 Flash";
+  const PRIMARY_COLOR = "#2b6cb0";
+
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (messages.length === 0 && sessionId) {
@@ -133,16 +136,23 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
 
     // 如果當前是中文界面（zh-TW 或 zh-CN）但摘要是英文，提供翻譯說明
     if (currentLang.startsWith("zh") && isEnglishText(summary)) {
+      // 截斷摘要至 150 字
+      const displaySummary =
+        summary.length > 150 ? summary.substring(0, 150) + "..." : summary;
+
       return {
         content: `🌐 此文件摘要以原始語言（英文）顯示。RAG 系統能夠理解和回答中文問題，無論源文件語言為何。
 
 原文摘要：
-${summary}`,
+${displaySummary}`,
         isTranslationNote: true,
       };
     }
 
-    return { content: summary, isTranslationNote: false };
+    // 截斷摘要至 150 字
+    const displaySummary =
+      summary.length > 150 ? summary.substring(0, 150) + "..." : summary;
+    return { content: displaySummary, isTranslationNote: false };
   };
 
   // 自動滾動到最新訊息
@@ -351,10 +361,17 @@ ${summary}`,
           const { content, isTranslationNote } =
             getLocalizedDocumentSummary(documentSummary);
           return (
-            <div className="document-summary-header sticky-summary">
+            <div
+              className="document-summary-header sticky-summary"
+              style={{ borderBottom: `2px solid ${PRIMARY_COLOR}` }}
+            >
               <div className="document-summary-content">
                 <div className="d-flex justify-content-between align-items-center mb-2">
-                  <h5 className="summary-title mb-0">
+                  <h5
+                    className="summary-title mb-0"
+                    style={{ color: PRIMARY_COLOR, fontWeight: "bold" }}
+                  >
+                    <i className="bi bi-file-earmark-text me-2"></i>
                     文件摘要
                     {isTranslationNote && (
                       <span
@@ -366,23 +383,31 @@ ${summary}`,
                     )}
                   </h5>
 
-                  <small className="text-muted">
-                    由AI分析生成 •{sourceType && ` ${sourceType} • `}
-                    {chunkCount && `${chunkCount} 個文本段落 • `}
-                    {tokensUsed && `${tokensUsed.toLocaleString()} Tokens`}
-                  </small>
-                  <button
-                    className="btn btn-sm btn-outline-secondary"
-                    onClick={() => setIsSummaryExpanded(!isSummaryExpanded)}
-                    title={isSummaryExpanded ? "收起" : "展開"}
-                  >
-                    <i
-                      className={`bi bi-chevron-${
-                        isSummaryExpanded ? "up" : "down"
-                      }`}
-                    ></i>
-                    {isSummaryExpanded ? "收起" : "展開"}
-                  </button>
+                  <div className="d-flex align-items-center">
+                    <span
+                      className="badge me-3"
+                      style={{ backgroundColor: PRIMARY_COLOR }}
+                    >
+                      MODEL: {MODEL_NAME}
+                    </span>
+                    <small className="text-muted me-3">
+                      {tokensUsed
+                        ? `${tokensUsed.toLocaleString()} Tokens`
+                        : ""}
+                    </small>
+                    <button
+                      className="btn btn-sm btn-link text-decoration-none"
+                      onClick={() => setIsSummaryExpanded(!isSummaryExpanded)}
+                      style={{ color: PRIMARY_COLOR }}
+                      title={isSummaryExpanded ? "收起" : "展開"}
+                    >
+                      <i
+                        className={`bi bi-chevron-${
+                          isSummaryExpanded ? "up" : "down"
+                        }`}
+                      ></i>
+                    </button>
+                  </div>
                 </div>
                 {isSummaryExpanded && (
                   <>
@@ -390,6 +415,7 @@ ${summary}`,
                       className={`summary-text ${
                         isTranslationNote ? "translation-note" : ""
                       }`}
+                      style={{ fontSize: "0.9rem", color: "#4a5568" }}
                     >
                       {content}
                     </div>

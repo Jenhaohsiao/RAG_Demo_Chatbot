@@ -158,7 +158,22 @@
   border-radius: 0;
   background: white;
   margin-bottom: 0;
-  min-height: 200px;
+  min-height: 200px; /* basic constraint */
+
+  /* Ensure scrollbar is visible and styled */
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 4px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+  }
 }
 
 .metrics-toggle-btn:hover {

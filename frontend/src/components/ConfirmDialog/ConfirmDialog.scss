@@ -8,13 +8,13 @@
 
 .confirm-dialog-modal {
   display: block !important; // Force display
-  z-index: $z-index-modal !important; 
+  z-index: $z-index-modal !important;
   background-color: transparent;
-  
+
   &.show {
     opacity: 1 !important;
   }
-  
+
   // Ensure the modal dialog content is fully opaque and visible
   .modal-dialog {
     // margin-top: 10vh; // Removed: let modal-dialog-centered handle it

@@ -1,4 +1,5 @@
 @import "../../styles/variables";
+
 /* UploadScreen specific styles */
 .upload-screen-hidden-input {
   display: none;
@@ -24,13 +25,38 @@
   }
 }
 
-/* Upload Interface Container */
-.upload-interface-container {
-  .btn-outline-primary {
+/* Professional Blue Theme Overrides */
+$prof-blue: $card-active-bg; // #2b6cb0
+
+.upload-interface-container,
+.upload-results-summary {
+  .text-primary {
+    color: $prof-blue !important;
+  }
+
+  .btn-primary {
+    background-color: $prof-blue;
+    border-color: $prof-blue;
+
     &:hover {
-      background-color: #f8f9fa;
-      color: #0d6efd;
-      border-color: #0d6efd;
+      background-color: darken($prof-blue, 10%);
+      border-color: darken($prof-blue, 10%);
+    }
+
+    &:disabled {
+      background-color: lighten($prof-blue, 20%);
+      border-color: lighten($prof-blue, 20%);
+    }
+  }
+
+  .btn-outline-primary {
+    color: $prof-blue;
+    border-color: $prof-blue;
+
+    &:hover {
+      background-color: $prof-blue;
+      color: white;
+      border-color: $prof-blue;
     }
   }
 }
@@ -41,13 +67,16 @@
     height: 6px;
 
     &::-webkit-slider-thumb {
-      background: #0d6efd;
+      background: $prof-blue;
+    }
+    &::-moz-range-thumb {
+      background: $prof-blue;
     }
   }
 
   .form-check-input:checked {
-    background-color: #0d6efd;
-    border-color: #0d6efd;
+    background-color: $prof-blue;
+    border-color: $prof-blue;
   }
 }
 
@@ -66,21 +95,22 @@
 
   &:hover {
     background-color: #e9ecef;
-    border-color: #0d6efd;
+    border-color: $prof-blue;
 
     .dropzone-icon-large i {
       transform: scale(1.1);
+      // text-primary overridden by general rule
     }
   }
 
   &.dragging {
     background-color: #e7f1ff;
-    border-color: #0d6efd;
+    border-color: $prof-blue;
     border-style: solid;
 
     .dropzone-icon-large i {
       transform: scale(1.2);
-      color: #0d6efd !important;
+      color: $prof-blue !important;
     }
   }
 
@@ -97,10 +127,5 @@
 
   .dropzone-icon-large {
     margin-bottom: 15px;
-
-    i {
-      font-size: 3rem;
-      transition: transform 0.3s ease;
-    }
   }
 }

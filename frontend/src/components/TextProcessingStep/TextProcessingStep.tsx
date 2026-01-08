@@ -277,6 +277,12 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
     return `${duration}秒`;
   };
 
+  // Determine if processing has started or completed
+  const hasStarted =
+    shouldStartProcessing ||
+    isProcessing ||
+    (jobs.length > 0 && jobs.some((j) => j.status !== "pending"));
+
   return (
     <div className="text-processing-step">
       {/* 簡化合併 - 3個 Card 在同一行 */}
@@ -286,7 +292,6 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
           <div className="card h-100 border-primary">
             <div className="card-header bg-primary text-white py-2">
               <h6 className="card-title mb-0">
-                <i className="bi bi-database-check me-2"></i>
                 {t(
                   "workflow.steps.textProcessing.vectorDbStatus.title",
                   "Vector DB 寫入狀態"
@@ -330,12 +335,8 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
                     "向量總數"
                   )}
                 </small>
-                <strong
-                  className={
-                    !shouldStartProcessing ? "text-muted" : "text-primary"
-                  }
-                >
-                  {!shouldStartProcessing
+                <strong className={!hasStarted ? "text-muted" : "text-primary"}>
+                  {!hasStarted
                     ? t(
                         "workflow.steps.textProcessing.vectorDbStatus.notExecuted",
                         "未執行, 無資料"
@@ -350,12 +351,8 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
                     "本次新增向量"
                   )}
                 </small>
-                <strong
-                  className={
-                    !shouldStartProcessing ? "text-muted" : "text-success"
-                  }
-                >
-                  {!shouldStartProcessing
+                <strong className={!hasStarted ? "text-muted" : "text-success"}>
+                  {!hasStarted
                     ? t(
                         "workflow.steps.textProcessing.vectorDbStatus.notExecuted",
                         "未執行, 無資料"
@@ -382,7 +379,6 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
           <div className="card h-100 border-secondary">
             <div className="card-header bg-secondary text-white py-2">
               <h6 className="card-title mb-0">
-                <i className="bi bi-sliders me-2"></i>
                 {t(
                   "workflow.steps.textProcessing.settingsSummary.title",
                   "向量化設定摘要"
@@ -453,7 +449,6 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
           <div className="card h-100 border-success">
             <div className="card-header bg-success text-white py-2">
               <h6 className="card-title mb-0">
-                <i className="bi bi-check-circle me-2"></i>
                 {t(
                   "workflow.steps.textProcessing.ragReadiness.title",
                   "RAG 檢索準備狀態"
@@ -470,7 +465,7 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
                 </small>
                 <strong
                   className={
-                    !shouldStartProcessing
+                    !hasStarted
                       ? "text-muted"
                       : jobs.length > 0 &&
                         jobs.every((j) => j.status === "completed")
@@ -478,7 +473,7 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
                       : "text-warning"
                   }
                 >
-                  {!shouldStartProcessing
+                  {!hasStarted
                     ? t(
                         "workflow.steps.textProcessing.ragReadiness.notExecuted",
                         "未執行"
@@ -523,7 +518,7 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
                 <strong className="text-dark">HNSW</strong>
               </div>
 
-              <div className="mt-3 p-2 bg-light rounded border border-light-subtle">
+              <div className="mt-3 p-3 bg-light rounded border border-light-subtle">
                 <small className="text-muted d-block fst-italic">
                   <i className="bi bi-shield-check me-1"></i>
                   {t(
@@ -537,18 +532,53 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
         </div>
       </div>
 
+      {/* Action Area (Moved to bottom) */}
+      {!jobs.some((j) => j.status === "completed") && !isProcessing && (
+        <div className="action-area text-center mt-4 mb-4">
+          <button
+            className="btn btn-start-processing"
+            onClick={() => {
+              if (onProcessingStatusChange) {
+                // Trigger via prop if wrapper handles logic,
+                // but local startProcessing is also available if simulated.
+                // Assuming shouldStartProcessing triggers useEffect, but let's call local start if wrapper logic is removed.
+                // Or better, set state to trigger effect or call method directly.
+                // The useEffect depends on `shouldStartProcessing`.
+                // Let's assume we need to notify parent OR handle local.
+                // Given previous logic relied on external trigger, let's look at Step 4 implementation. Step 4 had local click -> setShouldStartReview(true).
+                // But here `shouldStartProcessing` is a prop.
+                // However, the previous `WorkflowStepper` had logic to set internal state `shouldStartProcessing`.
+                // If we move button here, `TextProcessingStep` needs to be able to start it.
+                // The current component has `useEffect` on `shouldStartProcessing`.
+                // Let's modify the component to allow internal triggering or rely on parent.
+                // Actually `Step 4`'s internal button set an internal state `shouldStartReview` but here `shouldStartProcessing` is prop.
+                // Wait, Step 4 had `shouldStartReview` as prop AND internal.
+                // Let's check `TextProcessingStep` again. It has `shouldStartProcessing` prop.
+                // And `useEffect` on it.
+                // We should probably invoke `startProcessing()` directly from button click if it's cleaner.
+                startProcessing();
+              }
+            }}
+            disabled={jobs.length === 0}
+          >
+            <i className="bi bi-play-circle-fill me-2"></i>
+            {t("workflow.common.startProcessing", "開始文本處理")}
+          </button>
+        </div>
+      )}
+
       {/* 處理完成摘要 - 簡化版 */}
       {jobs.length > 0 && jobs.every((j) => j.status === "completed") && (
-        <div className="alert alert-success mb-0">
-          <div className="d-flex align-items-center">
-            <i className="bi bi-check-circle-fill me-2 fs-5"></i>
-            <strong>文本處理完成！</strong>
-            <span className="ms-3 text-muted">
+        <div className="text-center mt-4 mb-4">
+          <div className="d-inline-flex align-items-center px-4 py-3 rounded-pill bg-success-subtle text-success border border-success-subtle shadow-sm">
+            <i className="bi bi-check-circle-fill me-2 fs-4"></i>
+            <span className="fw-bold fs-5">文本處理完成！</span>
+            <span className="ms-2 small text-muted border-start border-success mx-2 ps-2">
               共處理 {jobs.length} 個文件，生成{" "}
-              {jobs.reduce((sum, j) => sum + j.chunks, 0)}{" "}
-              個文本塊，可進入下一步
+              {jobs.reduce((sum, j) => sum + j.chunks, 0)} 個文本塊
             </span>
           </div>
+          {/* 已刪除冗餘的提示文字 */}
         </div>
       )}
     </div>

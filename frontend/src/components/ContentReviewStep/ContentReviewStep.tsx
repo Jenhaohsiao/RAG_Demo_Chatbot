@@ -435,19 +435,19 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
   return (
     <div className="content-review-step">
       {/* 審核項目列表 - 保持顯示，動態更新狀態 */}
-      <div className="card mb-4">
-        <div className="card-header bg-light">
-          <h6 className="mb-0">
-            <i className="bi bi-list-check me-2"></i>
-            審核項目與結果：
+      <div className="card mb-4 shadow-sm border-0">
+        <div className="card-header py-3">
+          <h6 className="mb-0 fw-bold d-flex align-items-center">
+            <i className="bi bi-list-check me-2 fs-5"></i>
+            審核項目與結果
           </h6>
         </div>
-        <div className="card-body">
+        <div className="card-body p-4">
           {/* 審核工具與標準說明 */}
-          <div className="alert alert-info mb-3 py-2">
-            <div className="d-flex align-items-center mb-1">
-              <i className="bi bi-tools me-2"></i>
-              <strong>
+          <div className="alert alert-standards mb-4 rounded-3 border-0">
+            <div className="d-flex align-items-center mb-2">
+              <i className="bi bi-tools me-2 fs-5"></i>
+              <strong className="fs-6">
                 {t(
                   "workflow.steps.contentReview.toolUsed",
                   "審核工具：Gemini Safety API"
@@ -455,8 +455,8 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
               </strong>
             </div>
             <div className="d-flex align-items-start">
-              <i className="bi bi-shield-exclamation me-2 mt-1"></i>
-              <span>
+              <i className="bi bi-shield-exclamation me-2 mt-1 fs-5"></i>
+              <span className="fs-6">
                 {t(
                   "workflow.steps.contentReview.standards",
                   "審核標準：阻擋騷擾 (Harassment)、仇恨言論 (Hate Speech)、性相關內容 (Sexually Explicit)、危險內容 (Dangerous Content)"
@@ -465,7 +465,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
             </div>
           </div>
 
-          <div className="row">
+          <div className="row g-3">
             {[
               "檢查文件格式完整性",
               "掃描惡意軟體",
@@ -492,50 +492,31 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                 !isCurrent &&
                 reviewProgress.isRunning;
 
-              return (
-                <div key={`item-${index}`} className="col-md-6 mb-2">
-                  <div
-                    className={`d-flex align-items-center p-2 rounded ${
-                      isCompleted
-                        ? "bg-success-subtle"
-                        : isFailed
-                        ? "bg-danger-subtle"
-                        : isCurrent
-                        ? "bg-primary-subtle"
-                        : "bg-light"
-                    }`}
-                  >
-                    {isCurrent && (
-                      <div
-                        className="spinner-border spinner-border-sm text-primary me-2"
-                        role="status"
-                      >
-                        <span className="visually-hidden">處理中...</span>
-                      </div>
-                    )}
-                    {isCompleted && (
-                      <i className="bi bi-check-circle-fill text-success me-2"></i>
-                    )}
-                    {isFailed && (
-                      <i className="bi bi-x-circle-fill text-danger me-2"></i>
-                    )}
-                    {(isPending || isWaiting) && (
-                      <i className="bi bi-clock text-secondary me-2"></i>
-                    )}
+              let statusClass = "review-item-box";
+              let iconClass = "bi-circle text-muted";
 
-                    <small
-                      className={
-                        isCompleted
-                          ? "text-success fw-medium"
-                          : isFailed
-                          ? "text-danger fw-medium"
-                          : isCurrent
-                          ? "text-primary fw-medium"
-                          : "text-muted"
-                      }
-                    >
-                      {item}
-                    </small>
+              if (isCompleted) {
+                statusClass += " review-success";
+                iconClass = "bi-check-circle-fill";
+              } else if (isFailed) {
+                statusClass += " review-error";
+                iconClass = "bi-x-circle-fill";
+              } else if (isCurrent) {
+                statusClass += " review-active";
+                iconClass = "spinner-border spinner-border-sm";
+              }
+
+              return (
+                <div key={`item-${index}`} className="col-md-6">
+                  <div className={statusClass}>
+                    <div className="item-icon">
+                      {isCurrent ? (
+                        <div className={iconClass} role="status"></div>
+                      ) : (
+                        <i className={`bi ${iconClass}`}></i>
+                      )}
+                    </div>
+                    <div className="item-text">{item}</div>
                   </div>
                 </div>
               );
@@ -544,10 +525,10 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
 
           {/* 進度條 - 只在審核中顯示 */}
           {reviewProgress.isRunning && (
-            <div className="mt-3">
-              <div className="progress mb-2 progress-container">
+            <div className="mt-4">
+              <div className="progress mb-3 progress-container">
                 <div
-                  className="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                  className="progress-bar progress-bar-striped progress-bar-animated"
                   style={{
                     width: `${
                       ((reviewProgress.completed.length +
@@ -559,17 +540,17 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                 />
               </div>
               <div className="text-center">
-                <small className="text-muted">
+                <span className="text-muted fw-bold">
                   進度：
                   {reviewProgress.completed.length +
                     reviewProgress.failed.length}{" "}
                   / 6
-                </small>
+                </span>
                 {/* 特殊提示：當前在執行內容審核 */}
                 {reviewProgress.currentItem ===
                   "檢測有害內容 (僅阻擋騷擾、仇恨言論、性相關內容、危險內容)" && (
                   <div className="mt-2">
-                    <div className="badge bg-warning text-dark">
+                    <div className="badge bg-warning text-dark fs-6 px-3 py-2">
                       <i className="bi bi-shield-exclamation me-1"></i>
                       正在檢測有害內容...
                     </div>
@@ -581,14 +562,19 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
 
           {/* 審核失敗提示 */}
           {reviewProgress.isCompleted && reviewProgress.failed.length > 0 && (
-            <div className="alert alert-danger mt-3 mb-0">
-              <i className="bi bi-x-circle-fill me-2"></i>
-              <strong>審核失敗！</strong>{" "}
-              檢測到不當內容，無法進入下一步。請重新上傳符合規範的內容。
-              <div className="mt-3">
-                <small className="d-block mb-2">
-                  <strong>❌ 失敗項目：</strong>
-                </small>
+            <div className="alert alert-danger mt-4 mb-0 border-0 shadow-sm">
+              <div className="d-flex align-items-center mb-3">
+                <i className="bi bi-x-circle-fill me-2 fs-4"></i>
+                <strong className="fs-5">審核失敗</strong>
+              </div>
+              <p className="mb-3">
+                檢測到不當內容，無法進入下一步。請重新上傳符合規範的內容。
+              </p>
+
+              <div className="bg-white rounded p-3 border border-danger-subtle">
+                <h6 className="text-danger fw-bold mb-3">
+                  <i className="bi bi-exclamation-circle me-2"></i>失敗項目：
+                </h6>
                 {reviewProgress.failed.map((failure, index) => {
                   // 解析失敗原因以提供更詳細信息
                   const isContentModeration =
@@ -600,11 +586,8 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                     failure.includes("https://") || failure.includes("http://");
 
                   let detailMessage = "";
-                  let iconClass = "text-danger";
-                  let icon = "bi-x-circle-fill";
 
                   if (isContentModeration) {
-                    icon = "bi-shield-exclamation-fill";
                     if (isModerationError) {
                       detailMessage = "內容審核服務暫時無法使用，請稍後重試";
                     } else if (hasUrl) {
@@ -616,104 +599,112 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                         "上傳內容包含敏感或不當材料，不符合社區準則";
                     }
                   } else if (failure.includes("檢查文件格式")) {
-                    icon = "bi-file-earmark-x-fill";
                     detailMessage = "文件格式不支持或文件已損壞";
                   } else if (failure.includes("掃描惡意軟體")) {
-                    icon = "bi-bug-fill";
                     detailMessage = "檢測到潛在惡意軟體或病毒";
                   } else {
                     detailMessage = "審核過程中發生未知錯誤";
                   }
 
                   return (
-                    <div
-                      key={index}
-                      className="border border-danger rounded p-2 mb-2 bg-light"
-                    >
-                      <div className="d-flex align-items-start">
-                        <i
-                          className={`${icon} ${iconClass} me-2 mt-1 flex-shrink-0`}
-                        ></i>
-                        <div className="flex-grow-1">
-                          <div className="fw-bold text-danger small mb-1">
-                            {failure.split(":")[0]}
-                          </div>
-                          <div className="small text-muted">
-                            {detailMessage}
-                          </div>
-                          {failure.includes(":") && (
-                            <details className="mt-2">
-                              <summary className="small text-muted cursor-pointer">
-                                查看詳細錯誤信息
-                              </summary>
-                              <div className="small text-muted mt-1 ps-3 border-start border-secondary">
-                                {failure.split(":").slice(1).join(":").trim()}
-                              </div>
-                            </details>
-                          )}
-                        </div>
+                    <div key={index} className="mb-2 ms-2">
+                      <div className="fw-bold text-danger">
+                        {failure.split(":")[0]}
+                      </div>
+                      <div className="text-secondary small">
+                        {detailMessage}
+                        {failure.includes(":") && (
+                          <span className="ms-1 text-muted">
+                            ({failure.split(":").slice(1).join(":").trim()})
+                          </span>
+                        )}
                       </div>
                     </div>
                   );
                 })}
-                <div className="mt-3 p-3 bg-warning-subtle border border-warning rounded">
-                  <div className="mb-2">
-                    <i className="bi bi-exclamation-triangle-fill text-warning me-2"></i>
-                    <strong>建議解決方案：</strong>
-                  </div>
-                  <ul className="mb-3 ps-4 small">
-                    <li>檢查上傳內容是否符合社區準則</li>
-                    <li>確保文件來源可靠且不含惡意軟體</li>
-                    <li>避免上傳包含色情、暴力或其他不當內容的資料</li>
-                  </ul>
-                  <div className="p-2 bg-info-subtle border border-info rounded">
-                    <i className="bi bi-arrow-left-circle-fill text-info me-2"></i>
-                    <strong className="text-info">如何重新上傳？</strong>
-                    <div className="small mt-1">
-                      請點擊下方「<strong>上一步</strong>
-                      」按鈕返回上傳步驟。系統將<strong>自動清除</strong>
-                      原有內容，您可以重新上傳符合規範的資料。
-                      <br />
-                      <span className="text-muted">
-                        （流程1、2的配置也可以重新調整）
-                      </span>
+              </div>
+
+              <div className="mt-4 p-3 bg-warning-subtle rounded">
+                <div className="mb-2 text-warning-emphasis fw-bold">
+                  <i className="bi bi-lightbulb-fill me-2"></i>
+                  建議解決方案：
+                </div>
+                <ul className="mb-0 ps-4 text-warning-emphasis">
+                  <li>檢查上傳內容是否符合社區準則</li>
+                  <li>確保文件來源可靠且不含惡意軟體</li>
+                  <li>避免上傳包含色情、暴力或其他不當內容的資料</li>
+                </ul>
+              </div>
+
+              {/* 重新上傳提示 */}
+              <div className="mt-3 p-3 bg-info-subtle rounded d-flex align-items-center">
+                <i className="bi bi-arrow-left-circle-fill text-info fs-4 me-3"></i>
+                <div>
+                  <strong className="text-info d-block">如何重新上傳？</strong>
+                  <span className="text-info-emphasis">
+                    請點擊左下角「<span className="fw-bold">上一步</span>
+                    」按鈕返回上傳步驟重新選擇檔案。
+                  </span>
+                </div>
+              </div>
+
+              {/* 學術內容重試選項 */}
+              {showRetryOption && (
+                <div className="mt-3 p-3 bg-white border border-info rounded shadow-sm">
+                  <div className="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div>
+                      <div className="fw-bold text-info mb-1 fs-5">
+                        <i className="bi bi-mortarboard-fill me-2"></i>
+                        學術內容檢測
+                      </div>
+                      <p className="text-muted mb-0">
+                        檢測到這可能是學術或教育內容。學術模式會調整審核標準，允許討論敏感話題用於教育目的。
+                      </p>
                     </div>
+                    <button
+                      className="btn btn-info text-white"
+                      onClick={handleRetry}
+                      disabled={loading}
+                    >
+                      <i className="bi bi-arrow-clockwise me-1"></i>
+                      重新審核 (學術模式)
+                    </button>
                   </div>
                 </div>
+              )}
+            </div>
+          )}
 
-                {/* 學術內容重試選項 */}
-                {showRetryOption && (
-                  <div className="mt-3 p-3 bg-info-subtle border border-info rounded">
-                    <div className="d-flex align-items-center justify-content-between">
-                      <div>
-                        <div className="fw-bold text-info mb-1">
-                          <i className="bi bi-mortarboard-fill me-2"></i>
-                          學術內容檢測
-                        </div>
-                        <small className="text-muted">
-                          檢測到這可能是學術或教育內容。學術模式會調整審核標準，允許討論敏感話題用於教育目的。
-                          <br />
-                          <strong>注意：</strong>
-                          請確認您的內容確實用於學術或教育目的。
-                        </small>
-                      </div>
-                      <button
-                        className="btn btn-info btn-sm ms-3"
-                        onClick={handleRetry}
-                        disabled={loading}
-                      >
-                        <i className="bi bi-arrow-clockwise me-1"></i>
-                        重新審核
-                      </button>
-                    </div>
-                    {retryCount > 0 && (
-                      <div className="small text-muted mt-2">
-                        已重試 {retryCount} 次
-                      </div>
-                    )}
+          {/* Action Area: Start Button (Moved to Bottom) */}
+          {!hasStartedReview &&
+            !reviewProgress.isRunning &&
+            !reviewProgress.isCompleted && (
+              <div className="action-area text-center mt-4">
+                <button
+                  className="btn btn-start-review"
+                  onClick={() => startReviewProcess()}
+                  disabled={documents.length === 0 && crawledUrls.length === 0}
+                >
+                  <i className="bi bi-shield-check me-2"></i>
+                  開始內容審核
+                </button>
+                {documents.length === 0 && crawledUrls.length === 0 && (
+                  <div className="text-muted mt-2">
+                    <i className="bi bi-exclamation-circle me-1"></i>
+                    請先在「資料上傳」步驟上傳文件
                   </div>
                 )}
               </div>
+            )}
+
+          {/* Review Completed Success Message */}
+          {reviewProgress.isCompleted && reviewProgress.failed.length === 0 && (
+            <div className="mt-4 text-center">
+              <div className="d-inline-flex align-items-center px-4 py-2 rounded-pill bg-success-subtle text-success border border-success-subtle">
+                <i className="bi bi-check-circle-fill me-2 fs-5"></i>
+                <span className="fw-bold fs-6">審核完成，內容符合規範</span>
+              </div>
+              <div className="mt-3 text-muted">請點擊右下角「下一步」繼續</div>
             </div>
           )}
         </div>
