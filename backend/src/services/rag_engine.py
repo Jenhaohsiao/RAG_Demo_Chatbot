@@ -264,21 +264,30 @@ class RAGEngine:
             doc_texts = [chunk.text[:200] for chunk in retrieved_chunks[:3]]
             doc_summary = "\n".join(doc_texts)
         
-        prompt = f"""Based on the user's question and the available document content, generate 2-3 specific questions that the user might want to ask.
-
-**User's Original Question**: {user_query}
+        prompt = f"""Based on the available document content, generate 2-3 clear and grammatically correct questions that users can ask about this document.
 
 **Available Document Content** (partial):
 {doc_summary if doc_summary else "No document content available yet."}
 
-**Requirements**:
+**CRITICAL Requirements**:
 1. Generate questions in {response_language} ONLY
-2. Questions should be specific and based on the actual document topics
-3. Questions should help the user understand the document content better
-4. Return ONLY the questions, one per line, no numbering or bullets
-5. Generate exactly 2-3 questions
+2. Questions MUST be grammatically correct and natural-sounding
+3. Questions MUST use keywords and phrases that appear in the document content above
+4. Questions should help users explore specific aspects of the document
+5. Each question should be ANSWERABLE based on the document content
+6. Return ONLY the questions, one per line, no numbering or bullets
+7. Generate exactly 2-3 questions
 
-**Suggested Questions**:"""
+**Good Examples** (in Chinese):
+- 故事的主角是誰？
+- 愛麗絲在兔子洞裡遇到了什麼？
+- 紅心皇后說了什麼？
+
+**Bad Examples** (grammatically incorrect):
+- 芥末與這是護物嗎？
+- 紅龜與鷲的人物？
+
+**Your Suggested Questions** (must be grammatically correct and answerable):"""
 
         try:
             response = self._generate_with_retry(prompt, session_id)
@@ -347,9 +356,9 @@ class RAGEngine:
             }
             response_language = lang_map.get(language, lang_map.get(language.split('-')[0], 'English'))
             
-            doc_summary = "\\n".join([chunk.text[:300] for chunk in retrieved_chunks])
+            doc_summary = "\n".join([chunk.text[:300] for chunk in retrieved_chunks])
             
-            prompt = f\"\"\"Based on the following document content, generate 3 specific questions that a user might want to ask to understand the main topics.
+            prompt = f"""Based on the following document content, generate 3 specific questions that a user might want to ask to understand the main topics.
 
 **Document Content** (partial):
 {doc_summary}
@@ -361,15 +370,15 @@ class RAGEngine:
 4. Return ONLY the questions, one per line, no numbering or bullets
 5. Generate exactly 3 questions
 
-**Suggested Questions**:\"\"\"
+**Suggested Questions**:"""
 
             response = self._generate_with_retry(prompt, session_id)
             suggestions_text = response.text.strip()
             
-            suggestions = [s.strip() for s in suggestions_text.split('\\n') if s.strip()]
+            suggestions = [s.strip() for s in suggestions_text.split('\n') if s.strip()]
             cleaned = []
             for s in suggestions[:3]:
-                s = s.lstrip('0123456789.-•）) \\t')
+                s = s.lstrip('0123456789.-•）) \t')
                 if s and len(s) > 5:
                     cleaned.append(s)
             
@@ -412,6 +421,58 @@ class RAGEngine:
         
         logger.info(f"[{session_id}] RAG query: {user_query[:100]} (threshold={threshold})")
         
+        # 檢測是否為友好對話（如「你好」、「謝謝」等）
+        greeting_patterns = [
+            '你好', '您好', 'hello', 'hi', 'hey', '안녕', 'hola', 'bonjour', 'こんにちは',
+            '謝謝', '感謝', 'thank', 'thanks', '감사', 'gracias', 'merci', 'ありがとう',
+            '再見', 'bye', 'goodbye', '안녕히', 'adiós', 'au revoir', 'さようなら'
+        ]
+        is_greeting = any(pattern in user_query.lower() for pattern in greeting_patterns) and len(user_query) < 20
+        
+        # 如果是友好對話，直接返回友好回應
+        if is_greeting:
+            logger.info(f"[{session_id}] Greeting detected, returning friendly response")
+            greeting_response = self._get_greeting_response(user_query, language)
+            
+            # 即使是 greeting，也生成建議問題讓用戶快速開始
+            suggestions = None
+            try:
+                # 使用 scroll 獲取一些文檔樣本來生成建議
+                points, _ = self.vector_store.client.scroll(
+                    collection_name=collection_name,
+                    limit=3,
+                    with_payload=True,
+                    with_vectors=False
+                )
+                if points:
+                    sample_chunks = [
+                        RetrievedChunk(
+                            chunk_id=str(point.id),
+                            text=point.payload.get('text', ''),
+                            similarity_score=1.0,  # Dummy score for scroll results
+                            document_id=point.payload.get('document_id', ''),
+                            source_reference=point.payload.get('source_reference', ''),
+                            chunk_index=point.payload.get('chunk_index', 0)
+                        ) for point in points
+                    ]
+                    suggestions = self._generate_suggestions(session_id, user_query, sample_chunks, language)
+                    logger.info(f"[{session_id}] Generated {len(suggestions) if suggestions else 0} suggestions for greeting")
+            except Exception as e:
+                logger.warning(f"[{session_id}] Failed to generate suggestions for greeting: {e}")
+            
+            # 創建一個簡單的回應，不計入 metrics
+            return RAGResponse(
+                llm_response=greeting_response,
+                response_type="ANSWERED",
+                retrieved_chunks=[],
+                similarity_scores=[],
+                token_input=0,
+                token_output=0,
+                token_total=0,
+                metrics=None,
+                suggestions=suggestions
+            )
+        
         # 檢測是否為通用文件請求（如「說明文件內容」、「總結這個文件」等）
         general_query_patterns = [
             '說明', '總結', '摘要', '概述', '介紹', '描述', '解釋', '內容',
@@ -438,14 +499,14 @@ class RAGEngine:
                 score_threshold=threshold
             )
             
-            # 如果是通用查詢且沒找到結果，用較低閾值重試
-            if not search_results and is_general_query:
-                logger.info(f"[{session_id}] General query detected, retrying with lower threshold (0.3)")
+            # 如果沒找到結果，用較低閾值重試（不限於通用查詢）
+            if not search_results:
+                logger.info(f"[{session_id}] No results found, retrying with lower threshold (0.2)")
                 search_results = self.vector_store.search_similar(
                     collection_name=collection_name,
                     query_vector=query_embedding.vector,
                     limit=self.max_chunks,
-                    score_threshold=0.3  # 使用較低的閾值讓通用查詢能檢索到內容
+                    score_threshold=0.2  # 使用較低的閾值提高檢索覆蓋率
                 )
             
             # 轉換為 RetrievedChunk
@@ -523,10 +584,17 @@ class RAGEngine:
                             chunk_index=r['payload'].get('chunk_index', 0)
                         ) for r in sample_results
                     ]
+                    logger.debug(f"[{session_id}] Found {len(sample_chunks)} sample chunks for suggestion generation")
                     suggestions = self._generate_suggestions(session_id, user_query, sample_chunks, language)
+                    logger.info(f"[{session_id}] Generated {len(suggestions) if suggestions else 0} suggestions")
                 except Exception as e:
                     logger.warning(f"[{session_id}] Failed to get sample chunks for suggestions: {e}")
-                    suggestions = self._generate_suggestions(session_id, user_query, [], language)
+                    try:
+                        suggestions = self._generate_suggestions(session_id, user_query, [], language)
+                        logger.info(f"[{session_id}] Generated {len(suggestions) if suggestions else 0} fallback suggestions")
+                    except Exception as e2:
+                        logger.error(f"[{session_id}] Failed to generate fallback suggestions: {e2}")
+                        suggestions = None
             
             # 更新記憶體和 metrics
             self._update_memory(session_id, user_query, response_type, token_total)
@@ -583,75 +651,84 @@ class RAGEngine:
         try:
             # 多語言摘要提示詞（包括繁體中文和簡體中文）
             summary_prompts = {
-                "zh-TW": """請為以下文檔內容提供一段簡潔的摘要（最多 300 個字）。摘要應該：
+                "zh-TW": """請為以下文檔內容提供一段完整的摘要（約 150 字左右）。摘要應該：
 1. 使用繁體中文寫作
 2. 包含主要主題和關鍵點
 3. 簡潔清晰，適合快速瀏覽
-4. 不超過 300 字
+4. 完整描述，不要使用「...」或「等等」結尾
+5. 字數控制在 150 字左右即可，不強制限制
 
 文檔內容：
 """,
-                "zh-CN": """请为以下文档内容提供一段简洁的摘要（最多 300 个字）。摘要应该：
+                "zh-CN": """请为以下文档内容提供一段完整的摘要（约 150 字左右）。摘要应该：
 1. 使用简体中文写作
 2. 包含主要主题和关键点
 3. 简洁清晰，适合快速浏览
-4. 不超过 300 字
+4. 完整描述，不要使用「...」或「等等」结尾
+5. 字数控制在 150 字左右即可，不强制限制
 
 文档内容：
 """,
-                "zh": """請為以下文檔內容提供一段簡潔的摘要（最多 300 個字）。摘要應該：
+                "zh": """請為以下文檔內容提供一段完整的摘要（約 150 字左右）。摘要應該：
 1. 直接用中文寫作，無需翻譯聲明
 2. 包含主要主題和關鍵點
 3. 簡潔清晰，適合快速瀏覽
-4. 不超過 300 字
+4. 完整描述，不要使用「...」或「等等」結尾
+5. 字數控制在 150 字左右即可，不強制限制
 
 文檔內容：
 """,
-                "en": """Please provide a concise summary of the following document (max 300 words). The summary should:
+                "en": """Please provide a complete summary of the following document (approximately 150 words). The summary should:
 1. Be written directly in English
 2. Include main topics and key points
 3. Be clear and suitable for quick scanning
-4. Not exceed 300 words
+4. End with a complete sentence, DO NOT use "..." or "etc." at the end
+5. Target around 150 words, but no strict limit
 
 Document content:
 """,
-                "ko": """다음 문서에 대한 간단한 요약을 제공하십시오(최대 300단어). 요약은 다음과 같아야 합니다:
+                "ko": """다음 문서에 대한 완전한 요약을 제공하십시오(약 150단어). 요약은 다음과 같아야 합니다:
 1. 한국어로 직접 작성
 2. 주요 주제 및 핵심 포인트 포함
 3. 명확하고 빠른 스캔에 적합
-4. 300단어를 초과하지 않음
+4. 완전한 문장으로 끝내고, "..." 또는 "등등"으로 끝내지 마세요
+5. 약 150단어 정도로 작성하되, 엄격한 제한은 없음
 
 문서 내용:
 """,
-                "es": """Proporcione un resumen conciso del siguiente documento (máximo 300 palabras). El resumen debe:
+                "es": """Proporcione un resumen completo del siguiente documento (aproximadamente 150 palabras). El resumen debe:
 1. Ser escrito directamente en español
 2. Incluir temas principales y puntos clave
 3. Ser claro y apto para escaneo rápido
-4. No exceder 300 palabras
+4. Terminar con una oración completa, NO use "..." o "etc." al final
+5. Apuntar a unas 150 palabras, pero sin límite estricto
 
 Contenido del documento:
 """,
-                "ja": """次のドキュメントの簡潔な要約を提供してください（最大300語）。要約は次のようにしてください:
+                "ja": """次のドキュメントの完全な要約を提供してください（約150語）。要約は次のようにしてください:
 1. 日本語で直接作成
 2. 主要なトピックと重要なポイントを含める
 3. 明確で、素早いスキャンに適している
-4. 300語を超えない
+4. 完全な文で終わり、「...」や「など」で終わらせないでください
+5. 約150語を目標にしますが、厳密な制限はありません
 
 ドキュメント内容:
 """,
-                "ar": """يرجى تقديم ملخص موجز للمستند التالي (بحد أقصى 300 كلمة). يجب أن يكون الملخص:
+                "ar": """يرجى تقديم ملخص كامل للمستند التالي (حوالي 150 كلمة). يجب أن يكون الملخص:
 1. مكتوبًا مباشرة باللغة العربية
 2. يتضمن المواضيع الرئيسية والنقاط الرئيسية
 3. واضحًا ومناسبًا للمسح السريع
-4. لا يتجاوز 300 كلمة
+4. ينتهي بجملة كاملة، لا تستخدم "..." أو "إلخ" في النهاية
+5. استهدف حوالي 150 كلمة، ولكن لا يوجد حد صارم
 
 محتوى المستند:
 """,
-                "fr": """Veuillez fournir un résumé concis du document suivant (maximum 300 mots). Le résumé doit:
+                "fr": """Veuillez fournir un résumé complet du document suivant (environ 150 mots). Le résumé doit:
 1. Être écrit directement en français
 2. Inclure les sujets principaux et les points clés
 3. Être clair et approprié pour un balayage rapide
-4. Ne pas dépasser 300 mots
+4. Se terminer par une phrase complète, NE PAS utiliser "..." ou "etc." à la fin
+5. Viser environ 150 mots, mais sans limite stricte
 
 Contenu du document:
 """
@@ -834,24 +911,24 @@ Contenu du document:
         doc_def = document_definition.get(lang_key, document_definition['en'])
         
         if not retrieved_chunks:
-            # 沒有檢索到相關文檔片段時的 Prompt - STRICT RAG：明確告知無法回答
-            prompt = f"""You are a RAG (Retrieval-Augmented Generation) assistant that ONLY answers based on uploaded documents.
+            # 沒有檢索到相關文檔片段時的 Prompt - 友善地說明無法找到資訊
+            prompt = f"""You are a friendly and helpful RAG (Retrieval-Augmented Generation) assistant.
 
 {doc_def}
 
 **CRITICAL RULES - YOU MUST FOLLOW**:
-1. **Response Language**: ALWAYS respond ONLY in {response_language}. This is mandatory. DO NOT include any other language in your response. DO NOT include English translations or explanations in parentheses.
-2. **STRICT RAG POLICY**: No relevant document passages were found for this question.
-3. **DO NOT answer questions** that require knowledge not in the documents.
-4. **DO NOT make up information** or use general knowledge to answer.
-5. **Politely explain** that you cannot find relevant information in the uploaded documents.
-6. **SUGGESTION**: If the user asks general questions like "explain the document" or "summarize", suggest they ask more specific questions about particular topics in the documents.
-7. **SINGLE LANGUAGE ONLY**: Your entire response must be in {response_language} only. No bilingual content.
+1. **Response Language**: ALWAYS respond ONLY in {response_language}. This is mandatory.
+2. **Be Friendly and Apologetic**: Since no relevant document passages were found for this question, respond in a warm, friendly, and understanding tone.
+3. **Explain Politely**: Gently explain that you couldn't find information about this topic in the uploaded documents.
+4. **Offer Help**: Suggest that the user can ask questions about topics that ARE covered in the documents.
+5. **Conversational Tone**: Use a natural, conversational style - NOT formal or robotic. Be empathetic and helpful.
+6. **NO Red Flags**: Do NOT use phrases like "無法回答", "cannot answer", "找不到", "not found" - instead use softer phrases like "這個問題在文件中沒有相關資訊", "the documents don't cover this topic".
+7. **SINGLE LANGUAGE ONLY**: Your entire response must be in {response_language} only.
 
 **User Question**:
 {user_query}
 
-**Your Answer** (MUST be ONLY in {response_language}, explain that you cannot find relevant content and suggest asking specific questions):"""
+**Your Answer** (MUST be ONLY in {response_language}, use a friendly and conversational tone to explain that this topic isn't covered in the documents, and offer to help with other questions):"""
         else:
             # 有文檔時的標準 RAG Prompt - STRICT RAG with partial match handling
             prompt = f"""You are a RAG (Retrieval-Augmented Generation) assistant that ONLY answers based on uploaded documents.
@@ -862,14 +939,15 @@ Contenu du document:
 1. **Response Language**: ALWAYS respond ONLY in {response_language}. This is mandatory. DO NOT include any other language in your response. DO NOT include English translations or explanations in parentheses.
 2. **STRICT RAG POLICY**: ONLY answer based on the retrieved documents below.
 3. **DO NOT make up information** or use knowledge outside the documents.
-4. **GENERAL REQUESTS**: If the user asks to "explain", "summarize", or "describe" the document content (with or without a specific style/tone like "健身教練口氣"), provide a summary based on the retrieved document chunks below.
-5. **STYLE REQUESTS**: If the user requests a specific tone or persona (e.g., "用老師口氣", "用健身教練口氣", "用朋友口吻"), adapt your response style accordingly while still basing content ONLY on the documents.
-6. **PARTIAL MATCH HANDLING**: If the user's question is PARTIALLY related to the documents:
+4. **CONTENT TRANSFORMATION REQUESTS ARE ALLOWED**: If the user asks you to present the document content in a different way (e.g., "用5歲小孩也能懂的方式說", "simplify this", "explain like I'm 5", "用詩的形式", "make it funny"), you SHOULD do so based on the document content below. These are NOT questions asking for information outside the documents - they are requests to reformat/restyle the existing document content.
+5. **GENERAL REQUESTS**: If the user asks to "explain", "summarize", or "describe" the document content (with or without a specific style/tone like "健身教練口氣"), provide a summary based on the retrieved document chunks below.
+6. **STYLE REQUESTS**: If the user requests a specific tone, persona, audience level, or format (e.g., "用老師口氣", "用健身教練口氣", "用朋友口吻", "for a 5-year-old", "in poem format"), adapt your response style accordingly while still basing content ONLY on the documents.
+7. **PARTIAL MATCH HANDLING**: If the user's question is PARTIALLY related to the documents:
    - First acknowledge what information IS available in the documents
    - Then clearly state what specific aspect of the question is NOT covered
-7. **CITE document numbers** when using information.
-8. Be accurate and helpful.
-9. **SINGLE LANGUAGE ONLY**: Your entire response must be in {response_language} only. No bilingual content, no mixed languages.
+8. **CITE document numbers** when using information.
+9. Be accurate and helpful.
+10. **SINGLE LANGUAGE ONLY**: Your entire response must be in {response_language} only. No bilingual content, no mixed languages.
 
 **Retrieved Documents**:
 {context}
@@ -877,9 +955,61 @@ Contenu du document:
 **User Question**:
 {user_query}
 
-**Your Answer** (MUST be ONLY in {response_language}, based ONLY on the documents above. If user requests a specific style, use that style. If asking for explanation/summary, provide one based on the document chunks):"""
+**Your Answer** (MUST be ONLY in {response_language}, based ONLY on the documents above. If user requests a specific style or format transformation, apply it to the document content. If asking for explanation/summary, provide one based on the document chunks):"""
         
         return prompt
+    
+    def _get_greeting_response(self, user_query: str, language: str = "en") -> str:
+        """
+        取得友好對話回應
+        
+        Args:
+            user_query: 用戶查詢
+            language: UI 語言代碼
+        
+        Returns:
+            str: 友好回應訊息
+        """
+        # 檢測是感謝還是問候
+        is_thanks = any(word in user_query.lower() for word in ['謝謝', '感謝', 'thank', 'thanks', '감사', 'gracias', 'merci', 'ありがとう'])
+        
+        if is_thanks:
+            messages = {
+                "zh-TW": "不客氣！我很樂意協助您。如果您有任何關於已上傳文件內容的問題，隨時都可以提問喔！",
+                "zh-CN": "不客气！我很乐意协助您。如果您有任何关于已上传文件内容的问题，随时都可以提问哦！",
+                "zh": "不客氣！我很樂意協助您。如果您有任何關於已上傳文件內容的問題，隨時都可以提問喔！",
+                "en": "You're welcome! I'm happy to help. Feel free to ask me anything about the uploaded documents!",
+                "ko": "천만에요! 기꺼이 도와드리겠습니다. 업로드된 문서에 대해 궁금한 점이 있으시면 언제든지 물어보세요!",
+                "es": "¡De nada! Estoy feliz de ayudar. ¡Pregúntame cualquier cosa sobre los documentos cargados!",
+                "ja": "どういたしまして！お手伝いできて嬉しいです。アップロードされたドキュメントについて何でも聞いてください！",
+                "ar": "على الرحب والسعة! يسعدني المساعدة. لا تتردد في السؤال عن المستندات المحملة!",
+                "fr": "Je vous en prie ! Je suis heureux d'aider. N'hésitez pas à me poser des questions sur les documents téléchargés !"
+            }
+        else:
+            # 問候語
+            messages = {
+                "zh-TW": "您好！我是您的文件助理。我可以幫您回答關於已上傳文件內容的問題。請隨時提問吧！",
+                "zh-CN": "您好！我是您的文件助理。我可以帮您回答关于已上传文件内容的问题。请随时提问吧！",
+                "zh": "您好！我是您的文件助理。我可以幫您回答關於已上傳文件內容的問題。請隨時提問吧！",
+                "en": "Hello! I'm your document assistant. I can help answer questions about the content of your uploaded documents. Feel free to ask me anything!",
+                "ko": "안녕하세요! 저는 문서 도우미입니다. 업로드된 문서 내용에 대한 질문에 답변해 드릴 수 있습니다. 무엇이든 물어보세요!",
+                "es": "¡Hola! Soy tu asistente de documentos. Puedo ayudarte a responder preguntas sobre el contenido de tus documentos cargados. ¡Pregúntame lo que quieras!",
+                "ja": "こんにちは！私はドキュメントアシスタントです。アップロードされたドキュメントの内容についての質問にお答えできます。何でも聞いてください！",
+                "ar": "مرحبا! أنا مساعد المستندات الخاص بك. يمكنني المساعدة في الإجابة على الأسئلة حول محتوى المستندات المحملة. لا تتردد في السؤال!",
+                "fr": "Bonjour ! Je suis votre assistant de documents. Je peux vous aider à répondre aux questions sur le contenu de vos documents téléchargés. N'hésitez pas à me demander quoi que ce soit !"
+            }
+        
+        # 使用語言映射邏輯
+        lang_key = language
+        if language.startswith('zh'):
+            if 'CN' in language or 'Hans' in language:
+                lang_key = 'zh-CN'
+            else:
+                lang_key = 'zh-TW'
+        elif language not in messages:
+            lang_key = 'en'
+        
+        return messages.get(lang_key, messages['en'])
     
     def _get_cannot_answer_message(self, language: str = "en") -> str:
         """

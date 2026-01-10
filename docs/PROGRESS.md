@@ -2,8 +2,8 @@
 
 **專案名稱**: Multilingual RAG-Powered Chatbot  
 **分支**: `001-multilingual-rag-chatbot`  
-**最後更新**: 2026-01-06  
-**總體狀態**: ✅ UI/UX 全面升級 (Chat, RAG Config, Header)，代碼清理
+**最後更新**: 2026-01-09  
+**總體狀態**: ⚠️ Flow 3 網站爬蟲錯誤處理優化中
 
 ---
 
@@ -11,7 +11,7 @@
 
 ### ✅ 已完成功能
 - **Session 管理**: 自動建立、30分鐘TTL、語言切換、重啟功能
-- **文件上傳**: PDF、TXT、URL上傳，包含內容審核
+- **文件上傳**: PDF、TXT上傳，包含內容審核
 - **網站爬蟲**: 自動提取網頁內容，Token限制，UI 簡化
 - **內容審核**: 整合Gemini Safety API，檢測不當內容
 - **向量儲存**: Qdrant數據庫，會話隔離
@@ -21,9 +21,77 @@
 - **6步驟工作流程**: RAG配置→AI行為設定→資料上傳→內容審核→文字處理→AI對話
 - **UI 優化**: 全面更新聊天介面、設定介面與 Header
 
+### 🔄 進行中
+- **Flow 3 爬蟲錯誤處理**: 修復錯誤對話框顯示與流程狀態管理問題
+
 ---
 
 ## 🎯 最近完成
+
+### 📅 2026-01-09 - Flow 3 錯誤處理與用戶體驗改進
+
+**🎯 優化目標**:
+改善 Flow 3 (資料上傳) 的錯誤提示機制，提供更專業的對話框通知，並優化文檔摘要顯示與範例網站。
+
+**✨ 主要變更**:
+
+1. **文檔摘要優化**:
+   - **完整描述**: 後端修改 `rag_engine.py` 中 8 種語言的摘要生成提示，從「最多 300 字」改為「約 150 字左右」
+   - **移除截斷**: 前端移除 `ChatScreen.tsx` 中的 150 字符截斷邏輯與 "..." 後綴
+   - **明確指示**: 提示詞中加入「完整描述，不要使用『...』或『等等』結尾」
+   - **檔案**: `backend/src/services/rag_engine.py`, `frontend/src/components/ChatScreen/ChatScreen.tsx`
+
+2. **範例網站更新**:
+   - 將 `WebsiteCrawlerPanel.tsx` 中的範例網站從 `https://ccmbimm.ca/en/home-page` 改為 `https://www.gutenberg.org/`
+   - 更新按鈕文字與 placeholder 為 Project Gutenberg
+   - **檔案**: `frontend/src/components/WebsiteCrawlerPanel/WebsiteCrawlerPanel.tsx`
+
+3. **爬蟲錯誤提示增強**:
+   - **防爬檢測**: 增加對 "blocked", "forbidden", "403", "access denied", "robot", "empty text list" 等關鍵字的檢測
+   - **建議文字**: 所有錯誤訊息都包含「請使用其他網站或點擊下方『使用範例網站』按鈕」的建議
+   - **詳細資訊**: 文件大小錯誤顯示實際檔案大小與限制值
+   - **檔案**: `frontend/src/components/UploadScreen/UploadScreen.tsx`
+
+4. **爬蟲界面持久化**:
+   - 移除 `WebsiteCrawlerPanel.tsx` 中爬蟲完成後隱藏表單的條件渲染
+   - 確保爬蟲詳情始終可見，不會在完成後消失
+   - **檔案**: `frontend/src/components/WebsiteCrawlerPanel/WebsiteCrawlerPanel.tsx`
+
+5. **檔案格式限制**:
+   - 將支援的檔案格式從 6 種 (PDF, TXT, DOCX, MD, CSV, XLSX) 縮減為 2 種 (PDF, TXT)
+   - 簡化參數設定界面，移除不必要的檔案類型選項
+   - **檔案**: `frontend/src/components/UploadScreen/UploadScreen.tsx`
+
+6. **錯誤對話框實作**:
+   - **檔案上傳**: 實作模態對話框替代內聯錯誤提示，提供更專業的錯誤通知
+   - **爬蟲錯誤**: 將右上角 toast 通知改為中間模態對話框，保持一致的 UX
+   - **對話框樣式**: 紅色標題、警告圖標、支援多行顯示 (whiteSpace: 'pre-line')
+   - **檔案**: `frontend/src/components/UploadScreen/UploadScreen.tsx`, `frontend/src/components/WorkflowStepper/WorkflowStepper.tsx`
+
+7. **爬蟲完成畫面**:
+   - 實作爬蟲成功後的完成畫面，顯示詳細統計資訊
+   - 包含站點頁面數、總 Token 數、完成狀態等資訊卡片
+   - 自動提示「資料已自動上傳至系統，系統將自動進入下一步」
+   - **檔案**: `frontend/src/components/UploadScreen/UploadScreen.tsx`
+
+**⚠️ 已知問題**:
+
+1. **爬蟲失敗流程問題** (未解決):
+   - **問題描述**: 爬蟲失敗時，雖然顯示錯誤對話框，但畫面仍保持在成功狀態
+   - **預期行為**: 失敗時應清空 `crawlerResults` 並回到爬蟲輸入界面
+   - **已嘗試方案**: 
+     - 在 `handleCrawlerSubmit` 開始和 catch 區塊中調用 `setCrawlerResults(null)`
+     - 添加 "empty text list" 到防爬錯誤檢測列表
+   - **待解決**: 需要進一步調查為何 `isCrawlerCompleted` 在失敗後仍為 true
+
+**🔧 修改的檔案**:
+- `backend/src/services/rag_engine.py`
+- `frontend/src/components/ChatScreen/ChatScreen.tsx`
+- `frontend/src/components/WebsiteCrawlerPanel/WebsiteCrawlerPanel.tsx`
+- `frontend/src/components/UploadScreen/UploadScreen.tsx`
+- `frontend/src/components/WorkflowStepper/WorkflowStepper.tsx`
+
+---
 
 ### 📅 2026-01-06 - UI/UX 全面升級與 RAG 設定重構
 

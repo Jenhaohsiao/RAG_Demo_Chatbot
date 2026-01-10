@@ -65,6 +65,15 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
     onCrawl(normalizedUrl, maxTokens, maxPages);
   };
 
+  // 使用範例網站
+  const handleUseSampleWebsite = () => {
+    const sampleUrl = "https://www.gutenberg.org/";
+    setUrl(sampleUrl);
+    setLocalError(null);
+    // 自動開始爬取
+    onCrawl(sampleUrl, maxTokens, maxPages);
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       handleCrawl();
@@ -84,9 +93,16 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
     return tokens.toString();
   };
 
+  // 檢查爬蟲是否已完成
+  const isCrawlCompleted =
+    crawlResults &&
+    (crawlResults.crawl_status === "completed" ||
+      crawlResults.crawl_status === "token_limit_reached" ||
+      crawlResults.crawl_status === "page_limit_reached");
+
   return (
     <div className="">
-      {/* 爬蟲表單 */}
+      {/* 爬蟲表單 - 始終顯示，即使完成後也保留 */}
       <div className="crawler-form">
         <p className="crawler-description mb-3">
           {t(
@@ -101,7 +117,7 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
             id="crawler-url"
             type="text"
             className={`form-control ${displayError ? "is-invalid" : ""}`}
-            placeholder="https://example.com"
+            placeholder="https://www.gutenberg.org/"
             value={url}
             onChange={(e) => {
               setUrl(e.target.value);
@@ -117,7 +133,7 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
 
         {/* 提交按鈕 */}
         <button
-          className="btn btn-primary w-100 py-2 rounded-pill"
+          className="btn btn-primary w-100 py-2 rounded-pill mb-2"
           onClick={handleCrawl}
           disabled={isLoading || disabled || !url.trim()}
         >
@@ -137,6 +153,18 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
             </>
           )}
         </button>
+
+        {/* 範例網站按鈕 */}
+        <div className="text-center">
+          <button
+            className="btn btn-outline-secondary btn-sm"
+            onClick={handleUseSampleWebsite}
+            disabled={isLoading || disabled}
+          >
+            <i className="bi bi-globe me-2"></i>
+            使用範例網站（Project Gutenberg）
+          </button>
+        </div>
       </div>
 
       {/* 爬蟲結果 */}

@@ -13,13 +13,13 @@ import type {
 /**
  * Create a new session
  * @param language Initial UI language (default: en)
- * @param similarityThreshold RAG similarity threshold (0.0-1.0, default: 0.5)
+ * @param similarityThreshold RAG similarity threshold (0.0-1.0, default: 0.3)
  * @param customPrompt Custom prompt template (optional)
  * @returns Session details
  */
 export const createSession = async (
   language: string = 'en', 
-  similarityThreshold: number = 0.5,
+  similarityThreshold: number = 0.3,
   customPrompt?: string
 ): Promise<SessionResponse> => {
   const params: any = { language, similarity_threshold: similarityThreshold };

@@ -96,8 +96,8 @@ const App: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [chatPhase, setChatPhase] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [similarityThreshold, setSimilarityThreshold] = useState(0.5);
-  const [maxFileSizeMB, setMaxFileSizeMB] = useState(10);
+  const [similarityThreshold, setSimilarityThreshold] = useState(0.3);
+  const [maxFileSizeMB, setMaxFileSizeMB] = useState(3);
   const [supportedFileTypes, setSupportedFileTypes] = useState(["pdf", "txt"]);
   const [crawlerMaxTokens, setCrawlerMaxTokens] = useState(100000);
   const [crawlerMaxPages, setCrawlerMaxPages] = useState(10);

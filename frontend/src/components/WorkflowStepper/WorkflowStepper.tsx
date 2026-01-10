@@ -46,6 +46,9 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 }) => {
   const [showToast, setShowToast] = useState(false);
   const [toastContent, setToastContent] = useState({ title: "", message: "" });
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const [errorDialogTitle, setErrorDialogTitle] = useState<string>("");
+  const [errorDialogMessage, setErrorDialogMessage] = useState<string>("");
 
   // 全局 Loading 狀態
   const [isGlobalLoading, setIsGlobalLoading] = useState(false);
@@ -256,14 +259,29 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
         errorMessage.toLowerCase().includes("moderation");
 
       if (!isContentBlockedError) {
-        // 只顯示非內容審核相關的錯誤
-        setToastContent({
-          title: "錯誤",
-          message: `${
-            docItem.type === "file" ? "檔案" : "URL"
-          } ${identifier} 處理失敗: ${error}`,
-        });
-        setShowToast(true);
+        // 檢查是否為爬蟲相關錯誤
+        const isUrlError = docItem.type === "url";
+        const isBlockedError =
+          errorMessage.toLowerCase().includes("blocked") ||
+          errorMessage.toLowerCase().includes("forbidden") ||
+          errorMessage.toLowerCase().includes("403") ||
+          errorMessage.toLowerCase().includes("access denied") ||
+          errorMessage.toLowerCase().includes("robot") ||
+          errorMessage.toLowerCase().includes("empty text list");
+
+        let displayMessage: string;
+        if (isUrlError && isBlockedError) {
+          displayMessage = `URL ${identifier} 處理失敗: ${errorMessage}\n\n此網站可能有防爬蟲機制或內容無法提取。\n請使用其他網站或點擊「使用範例網站」按鈕。`;
+        } else if (isUrlError) {
+          displayMessage = `URL ${identifier} 處理失敗: ${errorMessage}\n\n請使用其他網站或點擊「使用範例網站」按鈕。`;
+        } else {
+          displayMessage = `檔案 ${identifier} 處理失敗: ${errorMessage}\n\n請使用其他檔案或點擊「使用範例檔案」按鈕。`;
+        }
+
+        // 只顯示非內容審核相關的錯誤，使用對話框而不是 toast
+        setErrorDialogTitle(isUrlError ? "網頁爬取失敗" : "檔案上傳失敗");
+        setErrorDialogMessage(displayMessage);
+        setShowErrorDialog(true);
       } else {
         // 內容審核錯誤只記錄日誌，不顯示 toast
         console.warn(
@@ -1109,6 +1127,42 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
   return (
     <div className="workflow-stepper xs:p-0">
+      {/* 錯誤對話框 */}
+      {showErrorDialog && (
+        <div
+          className="modal show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1100 }}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header bg-danger text-white">
+                <h5 className="modal-title">
+                  <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                  {errorDialogTitle}
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close btn-close-white"
+                  onClick={() => setShowErrorDialog(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p style={{ whiteSpace: "pre-line" }}>{errorDialogMessage}</p>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => setShowErrorDialog(false)}
+                >
+                  確定
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="card workflow-container p-3">
         {/* 步驟指示器 - 水平排列 */}
         <div className="stepper-header ">
@@ -1293,7 +1347,9 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             <strong className="me-auto">{toastContent.title}</strong>
           </div>
           <div className="toast-body">
-            <div className="mb-3">{toastContent.message}</div>
+            <div className="mb-3" style={{ whiteSpace: "pre-line" }}>
+              {toastContent.message}
+            </div>
             <div className="d-flex justify-content-end">
               <button
                 type="button"

@@ -152,24 +152,31 @@
 
 .messages-container {
   flex: 1;
-  overflow-y: auto; // 只有這裡可以滾動
+  overflow-y: scroll; // 強制顯示滾動條
+  overflow-x: hidden; // 隱藏水平滾動條
   padding: 1rem;
   border: none;
   border-radius: 0;
   background: white;
   margin-bottom: 0;
-  min-height: 200px; /* basic constraint */
+  min-height: 200px;
+  max-height: calc(100vh - 450px); // 明確設定最大高度使滾動生效
+  scrollbar-width: thin; // Firefox 滾動條寬度
+  scrollbar-color: #cbd5e0 #f1f1f1; // Firefox 滾動條顏色
 
-  /* Ensure scrollbar is visible and styled */
+  /* Ensure scrollbar is visible and styled for Webkit browsers */
   &::-webkit-scrollbar {
-    width: 8px;
+    width: 10px;
+    display: block; // 確保顯示
   }
   &::-webkit-scrollbar-track {
     background: #f1f1f1;
+    border-radius: 4px;
   }
   &::-webkit-scrollbar-thumb {
     background: #cbd5e0;
     border-radius: 4px;
+    border: 2px solid #f1f1f1; // 增加邊框使滾動條更明顯
   }
   &::-webkit-scrollbar-thumb:hover {
     background: #a0aec0;

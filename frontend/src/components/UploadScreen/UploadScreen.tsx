@@ -17,6 +17,7 @@ import {
   uploadWebsite,
 } from "../../services/uploadService";
 import WebsiteCrawlerPanel from "../WebsiteCrawlerPanel/WebsiteCrawlerPanel";
+import LoadingOverlay from "../LoadingOverlay/LoadingOverlay";
 
 export interface UploadScreenProps {
   sessionId: string;
@@ -46,7 +47,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
   sessionId,
   onFileSelected,
   onUrlSubmitted,
-  maxFileSizeMB = 10,
+  maxFileSizeMB = 3,
   supportedFileTypes = ["pdf", "txt"],
   crawlerMaxTokens = 100000,
   crawlerMaxPages = 10,
@@ -61,6 +62,10 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showErrorDialog, setShowErrorDialog] = useState(false); // 錯誤對話框狀態
+  const [errorDialogMessage, setErrorDialogMessage] = useState<string>(""); // 錯誤對話框訊息
+  const [errorDialogTitle, setErrorDialogTitle] =
+    useState<string>("檔案上傳失敗"); // 錯誤對話框標題
   const [activeTab, setActiveTab] = useState<"file" | "crawler">("file"); // 移除 URL 選項
   const [uploadSubStep, setUploadSubStep] = useState<1 | 2>(1); // 1: 參數設定, 2: 上傳介面
   const [crawlerLoading, setCrawlerLoading] = useState(false); // Added: Crawler loading state
@@ -70,6 +75,51 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
 
   // 動態檔案大小限制（根據參數設定）
   const MAX_FILE_SIZE = maxFileSizeMB * 1024 * 1024;
+
+  // 檢查爬蟲是否已完成
+  const isCrawlerCompleted =
+    crawlerResults &&
+    (crawlerResults.crawl_status === "completed" ||
+      crawlerResults.crawl_status === "token_limit_reached" ||
+      crawlerResults.crawl_status === "page_limit_reached");
+
+  // 處理使用範例文件
+  const handleUseSampleFile = async () => {
+    try {
+      setError(null);
+      // 從 public 目錄獲取範例文件
+      const response = await fetch("/docs/Alices Adventures in wonderland.txt");
+      if (!response.ok) {
+        throw new Error("無法載入範例文件");
+      }
+      const blob = await response.blob();
+      const file = new File([blob], "Alices Adventures in wonderland.txt", {
+        type: "text/plain",
+      });
+
+      // 驗證文件
+      if (!validateDynamicFileType(file)) {
+        setError(t("upload.error.type", "不支援的檔案格式"));
+        return;
+      }
+
+      if (!validateFileSize(file, MAX_FILE_SIZE)) {
+        setError(
+          t(
+            "upload.error.size",
+            `檔案大小超過限制 (${formatFileSize(MAX_FILE_SIZE)})`
+          )
+        );
+        return;
+      }
+
+      onFileSelected(file);
+      setError(null);
+    } catch (err) {
+      console.error("載入範例文件失敗:", err);
+      setError("無法載入範例文件，請手動上傳檔案");
+    }
+  };
 
   // 生成支援檔案格式顯示文字
   const getSupportedFormatsText = () => {
@@ -132,21 +182,28 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
 
       // Validate file type using dynamic validation
       if (!validateDynamicFileType(file)) {
-        setError(getFileTypeErrorMessage());
+        const errorMsg = `${getFileTypeErrorMessage()}\n\n請使用其他檔案或點擊下方「使用範例檔案」按鈕。`;
+        setErrorDialogTitle("檔案格式不支援");
+        setErrorDialogMessage(errorMsg);
+        setShowErrorDialog(true);
         return;
       }
 
       // Validate file size
       if (!validateFileSize(file, MAX_FILE_SIZE)) {
+        const maxSizeFormatted = formatFileSize(MAX_FILE_SIZE);
+        const fileSizeFormatted = formatFileSize(file.size);
+        let errorMsg: string;
+
         if (file.size === 0) {
-          setError(t("upload.error.emptyFile", "File is empty"));
+          errorMsg = `檔案是空的，無法上傳。\n\n請使用其他檔案或點擊下方「使用範例檔案」按鈕。`;
         } else {
-          setError(
-            t("upload.error.fileTooLarge", `File size exceeds {{maxSize}}`, {
-              maxSize: formatFileSize(MAX_FILE_SIZE),
-            })
-          );
+          errorMsg = `檔案太大：${fileSizeFormatted}（超過限制 ${maxSizeFormatted}）\n\n請使用其他檔案或點擊下方「使用範例檔案」按鈕。`;
         }
+
+        setErrorDialogTitle("檔案上傳失敗");
+        setErrorDialogMessage(errorMsg);
+        setShowErrorDialog(true);
         return;
       }
 
@@ -215,6 +272,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
     maxPages: number
   ) => {
     setCrawlerError(null);
+    setCrawlerResults(null); // 清空之前的結果
     setCrawlerLoading(true);
 
     try {
@@ -225,9 +283,34 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
       // Crawler has already uploaded content, now just start processing flow
       onUrlSubmitted(url); // Use crawler URL as source
     } catch (err) {
-      setCrawlerError(
-        err instanceof Error ? err.message : "Failed to crawl website"
-      );
+      // 清空爬蟲結果，確保不顯示舊的成功畫面
+      setCrawlerResults(null);
+      
+      // 增強錯誤訊息，包含防爬提示
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to crawl website";
+
+      // 檢查是否為防爬相關錯誤
+      const isBlockedError =
+        errorMessage.toLowerCase().includes("blocked") ||
+        errorMessage.toLowerCase().includes("forbidden") ||
+        errorMessage.toLowerCase().includes("403") ||
+        errorMessage.toLowerCase().includes("access denied") ||
+        errorMessage.toLowerCase().includes("robot") ||
+        errorMessage.toLowerCase().includes("empty text list");
+
+      let errorMsg: string;
+      if (isBlockedError) {
+        errorMsg = `此網站無法被爬取（網站可能有防爬蟲機制）。\n\n請使用其他網站或點擊下方「使用範例網站」按鈕。`;
+        setErrorDialogTitle("網頁爬取失敗");
+      } else {
+        errorMsg = `爬取失敗：${errorMessage}\n\n請使用其他網站或點擊下方「使用範例網站」按鈕。`;
+        setErrorDialogTitle("網頁爬取失敗");
+      }
+
+      // 使用對話框顯示錯誤
+      setErrorDialogMessage(errorMsg);
+      setShowErrorDialog(true);
     } finally {
       setCrawlerLoading(false);
     }
@@ -235,13 +318,39 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
 
   return (
     <div className=" p-0">
-      {/* Error messages */}
-      {error && (
-        <div className="alert alert-danger" role="alert">
-          <small>
-            <i className="bi bi-exclamation-triangle-fill text-danger me-2"></i>
-            {error}
-          </small>
+      {/* 錯誤對話框 */}
+      {showErrorDialog && (
+        <div
+          className="modal show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header bg-danger text-white">
+                <h5 className="modal-title">
+                  <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                  {errorDialogTitle}
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close btn-close-white"
+                  onClick={() => setShowErrorDialog(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p style={{ whiteSpace: "pre-line" }}>{errorDialogMessage}</p>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => setShowErrorDialog(false)}
+                >
+                  確定
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -350,7 +459,9 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                 setUploadSubStep(1);
                 onTabChange?.("file");
               }}
-              disabled={disabled}
+              disabled={
+                disabled || (activeTab === "crawler" && isCrawlerCompleted)
+              }
             >
               <i className="bi bi-file-earmark-arrow-up me-2"></i>
               {t("upload.tab.file", "檔案上傳")}
@@ -364,7 +475,9 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                 setUploadSubStep(1);
                 onTabChange?.("crawler");
               }}
-              disabled={disabled}
+              disabled={
+                disabled || (activeTab === "file" && isCrawlerCompleted)
+              }
             >
               <i className="bi bi-globe me-2"></i>
               {t("upload.tab.crawler", "網站爬蟲")}
@@ -397,7 +510,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                             type="range"
                             className="form-range flex-grow-1"
                             min="1"
-                            max="10"
+                            max="3"
                             step="1"
                             value={
                               parameters?.max_file_size_mb || maxFileSizeMB
@@ -423,46 +536,44 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                           支援檔案類型
                         </label>
                         <div className="row g-2">
-                          {["pdf", "txt", "docx", "md", "csv", "xlsx"].map(
-                            (fileType) => (
-                              <div key={fileType} className="col-6">
-                                <div className="form-check">
-                                  <input
-                                    className="form-check-input"
-                                    type="checkbox"
-                                    checked={(
-                                      parameters?.supported_file_types ||
-                                      supportedFileTypes
-                                    ).includes(fileType)}
-                                    onChange={(e) => {
-                                      if (onParameterChange && parameters) {
-                                        const updatedTypes = e.target.checked
-                                          ? [
-                                              ...parameters.supported_file_types,
-                                              fileType,
-                                            ]
-                                          : parameters.supported_file_types.filter(
-                                              (type) => type !== fileType
-                                            );
-                                        onParameterChange(
-                                          "supported_file_types",
-                                          updatedTypes
-                                        );
-                                      }
-                                    }}
-                                    id={`fileType-${fileType}`}
-                                    disabled={!onParameterChange}
-                                  />
-                                  <label
-                                    className="form-check-label"
-                                    htmlFor={`fileType-${fileType}`}
-                                  >
-                                    {fileType.toUpperCase()}
-                                  </label>
-                                </div>
+                          {["pdf", "txt"].map((fileType) => (
+                            <div key={fileType} className="col-6">
+                              <div className="form-check">
+                                <input
+                                  className="form-check-input"
+                                  type="checkbox"
+                                  checked={(
+                                    parameters?.supported_file_types ||
+                                    supportedFileTypes
+                                  ).includes(fileType)}
+                                  onChange={(e) => {
+                                    if (onParameterChange && parameters) {
+                                      const updatedTypes = e.target.checked
+                                        ? [
+                                            ...parameters.supported_file_types,
+                                            fileType,
+                                          ]
+                                        : parameters.supported_file_types.filter(
+                                            (type) => type !== fileType
+                                          );
+                                      onParameterChange(
+                                        "supported_file_types",
+                                        updatedTypes
+                                      );
+                                    }
+                                  }}
+                                  id={`fileType-${fileType}`}
+                                  disabled={!onParameterChange}
+                                />
+                                <label
+                                  className="form-check-label"
+                                  htmlFor={`fileType-${fileType}`}
+                                >
+                                  {fileType.toUpperCase()}
+                                </label>
                               </div>
-                            )
-                          )}
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </div>
@@ -480,7 +591,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                             type="range"
                             className="form-range flex-grow-1"
                             min="1000"
-                            max="200000"
+                            max="100000"
                             step="1000"
                             value={
                               parameters?.crawler_max_tokens || crawlerMaxTokens
@@ -512,7 +623,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                             type="range"
                             className="form-range flex-grow-1"
                             min="1"
-                            max="30"
+                            max="10"
                             step="1"
                             value={
                               parameters?.crawler_max_pages || crawlerMaxPages
@@ -555,73 +666,175 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
               {uploadSubStep === 2 && (
                 <div className="step-upload fade-in">
                   <div className="d-flex align-items-center mb-4">
-                    <button
-                      className="btn btn-link text-decoration-none p-0 me-3 text-secondary"
-                      onClick={() => setUploadSubStep(1)}
-                      title="返回設定"
-                    >
-                      <i className="bi bi-arrow-left fs-4"></i>
-                    </button>
+                    {/* 只在爬蟲未完成時顯示返回按鈕 */}
+                    {!(activeTab === "crawler" && isCrawlerCompleted) && (
+                      <button
+                        className="btn btn-link text-decoration-none p-0 me-3 text-secondary"
+                        onClick={() => setUploadSubStep(1)}
+                        title="返回設定"
+                      >
+                        <i className="bi bi-arrow-left fs-4"></i>
+                      </button>
+                    )}
                     <h5 className="card-title mb-0 fw-bold text-primary">
                       {activeTab === "file"
                         ? "步驟 2/2: 上傳檔案"
+                        : isCrawlerCompleted
+                        ? "爬取完成"
                         : "步驟 2/2: 開始爬取"}
                     </h5>
                   </div>
 
-                  {activeTab === "file" ? (
-                    <div
-                      className={`file-upload-dropzone bg-white ${
-                        isDragging ? "dragging" : ""
-                      } ${disabled ? "disabled" : ""}`}
-                      onDragEnter={handleDragEnter}
-                      onDragLeave={handleDragLeave}
-                      onDragOver={handleDragOver}
-                      onDrop={handleDrop}
-                      onClick={handleBrowseClick}
-                    >
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept={getAcceptAttribute()}
-                        onChange={handleFileInputChange}
-                        disabled={disabled}
-                        className="upload-screen-hidden-input"
-                      />
-
-                      <div className="dropzone-content text-center">
-                        <div className="dropzone-icon-large mb-3">
-                          <i className="bi bi-cloud-upload-fill text-primary fs-1"></i>
+                  {/* 爬蟲完成時顯示結果摘要 */}
+                  {activeTab === "crawler" && isCrawlerCompleted && (
+                    <div className="crawler-completed-summary">
+                      <div className="alert alert-success d-flex align-items-center mb-4">
+                        <i className="bi bi-check-circle-fill me-2 fs-4"></i>
+                        <div>
+                          <strong>網站爬取成功！</strong>
+                          <p className="mb-0 mt-1">
+                            已成功爬取 {crawlerResults.pages_found} 個頁面，共{" "}
+                            {(crawlerResults.total_tokens / 1000).toFixed(1)}K
+                            tokens。
+                            資料已上傳至系統，請點擊下方「下一步」按鈕繼續處理流程。
+                          </p>
                         </div>
-                        <p className="mb-2 fw-medium">
-                          {isDragging
-                            ? t("upload.dropzone.drop", "拖放檔案到此區域")
-                            : t(
-                                "upload.dropzone.dragOrClick",
-                                "拖放檔案到此區域，或點擊進入"
-                              )}
-                        </p>
-                        <small className="text-muted d-block">
-                          {getSupportedFormatsText()}
-                        </small>
+                      </div>
+
+                      <div className="card mb-3 border shadow-sm">
+                        <div className="card-header bg-light border-bottom">
+                          <h6 className="mb-0 fw-bold">
+                            <i className="bi bi-file-earmark-text me-2"></i>
+                            爬取結果詳情
+                          </h6>
+                        </div>
+                        <div className="card-body">
+                          <div className="row">
+                            <div className="col-md-4 mb-3">
+                              <div className="text-center p-3 bg-light rounded">
+                                <i className="bi bi-globe text-primary fs-3"></i>
+                                <div className="mt-2 fw-bold">站點頁面</div>
+                                <div className="fs-4 text-primary">
+                                  {crawlerResults.pages_found}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="col-md-4 mb-3">
+                              <div className="text-center p-3 bg-light rounded">
+                                <i className="bi bi-file-text text-info fs-3"></i>
+                                <div className="mt-2 fw-bold">總 TOKEN 數</div>
+                                <div className="fs-4 text-info">
+                                  {(crawlerResults.total_tokens / 1000).toFixed(
+                                    1
+                                  )}
+                                  K
+                                </div>
+                              </div>
+                            </div>
+                            <div className="col-md-4 mb-3">
+                              <div className="text-center p-3 bg-light rounded">
+                                <i className="bi bi-check-circle text-success fs-3"></i>
+                                <div className="mt-2 fw-bold">狀態</div>
+                                <div className="fs-6 text-success">
+                                  {crawlerResults.crawl_status ===
+                                    "completed" && "完成"}
+                                  {crawlerResults.crawl_status ===
+                                    "token_limit_reached" && "達到 Token 限制"}
+                                  {crawlerResults.crawl_status ===
+                                    "page_limit_reached" && "達到頁面限制"}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 完成提示 */}
+                      <div className="text-center mt-4">
+                        <div className="alert alert-info">
+                          <i className="bi bi-info-circle me-2"></i>
+                          資料已自動上傳至系統，系統將自動進入下一步「內容審核」流程。
+                        </div>
                       </div>
                     </div>
-                  ) : (
-                    <div className="bg-white p-3 rounded shadow-sm">
-                      <WebsiteCrawlerPanel
-                        onCrawl={handleCrawlerSubmit}
-                        isLoading={crawlerLoading}
-                        error={crawlerError}
-                        crawlResults={crawlerResults}
-                        maxTokens={
-                          parameters?.crawler_max_tokens || crawlerMaxTokens
-                        }
-                        maxPages={
-                          parameters?.crawler_max_pages || crawlerMaxPages
-                        }
-                        disabled={disabled}
-                      />
-                    </div>
+                  )}
+
+                  {/* 爬蟲未完成或文件上傳時顯示原有界面 */}
+                  {!(activeTab === "crawler" && isCrawlerCompleted) && (
+                    <>
+                      {activeTab === "file" && (
+                        <div
+                          className={`file-upload-dropzone bg-white ${
+                            isDragging ? "dragging" : ""
+                          } ${disabled ? "disabled" : ""}`}
+                          onDragEnter={handleDragEnter}
+                          onDragLeave={handleDragLeave}
+                          onDragOver={handleDragOver}
+                          onDrop={handleDrop}
+                          onClick={handleBrowseClick}
+                        >
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept={getAcceptAttribute()}
+                            onChange={handleFileInputChange}
+                            disabled={disabled}
+                            className="upload-screen-hidden-input"
+                          />
+
+                          <div className="dropzone-content text-center">
+                            <div className="dropzone-icon-large mb-3">
+                              <i className="bi bi-cloud-upload-fill text-primary fs-1"></i>
+                            </div>
+                            <p className="mb-2 fw-medium">
+                              {isDragging
+                                ? t("upload.dropzone.drop", "拖放檔案到此區域")
+                                : t(
+                                    "upload.dropzone.dragOrClick",
+                                    "拖放檔案到此區域，或點擊進入"
+                                  )}
+                            </p>
+                            <small className="text-muted d-block">
+                              {getSupportedFormatsText()}
+                            </small>
+                          </div>
+                        </div>
+                      )}
+
+                      {activeTab === "file" && (
+                        <div className="text-center mt-3">
+                          <button
+                            className="btn btn-outline-secondary btn-sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleUseSampleFile();
+                            }}
+                            disabled={disabled}
+                          >
+                            <i className="bi bi-file-text me-2"></i>
+                            使用範例文件（Alice in Wonderland）
+                          </button>
+                        </div>
+                      )}
+
+                      {activeTab === "crawler" && (
+                        <div className="bg-white p-3 rounded shadow-sm">
+                          <WebsiteCrawlerPanel
+                            onCrawl={handleCrawlerSubmit}
+                            isLoading={crawlerLoading}
+                            error={crawlerError}
+                            crawlResults={crawlerResults}
+                            maxTokens={
+                              parameters?.crawler_max_tokens || crawlerMaxTokens
+                            }
+                            maxPages={
+                              parameters?.crawler_max_pages || crawlerMaxPages
+                            }
+                            disabled={disabled}
+                          />
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               )}
@@ -629,6 +842,12 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
           </div>
         </div>
       )}
+
+      {/* 爬蟲執行中的 Loading Overlay */}
+      <LoadingOverlay
+        isVisible={crawlerLoading}
+        message="正在爬取網站內容，請稍候..."
+      />
     </div>
   );
 };

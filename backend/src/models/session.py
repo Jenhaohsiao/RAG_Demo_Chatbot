@@ -30,7 +30,7 @@ class Session(BaseModel):
     document_count: int = Field(default=0, ge=0)
     vector_count: int = Field(default=0, ge=0)
     language: str = Field(default="en", pattern="^(en|zh-TW|ko|es|ja|ar|fr|zh-CN)$")
-    similarity_threshold: float = Field(default=0.5, ge=0.0, le=1.0, description="RAG similarity threshold (0.0-1.0)")
+    similarity_threshold: float = Field(default=0.3, ge=0.0, le=1.0, description="RAG similarity threshold (0.0-1.0)")
     custom_prompt: str | None = Field(default=None, description="Custom prompt template for RAG responses")
     
     def __init__(self, **data):
@@ -74,7 +74,7 @@ class Session(BaseModel):
                 "document_count": 0,
                 "vector_count": 0,
                 "language": "en",
-                "similarity_threshold": 0.5,
+                "similarity_threshold": 0.3,
                 "custom_prompt": None
             }
         }

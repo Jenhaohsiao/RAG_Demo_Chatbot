@@ -136,23 +136,17 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
 
     // 如果當前是中文界面（zh-TW 或 zh-CN）但摘要是英文，提供翻譯說明
     if (currentLang.startsWith("zh") && isEnglishText(summary)) {
-      // 截斷摘要至 150 字
-      const displaySummary =
-        summary.length > 150 ? summary.substring(0, 150) + "..." : summary;
-
       return {
         content: `🌐 此文件摘要以原始語言（英文）顯示。RAG 系統能夠理解和回答中文問題，無論源文件語言為何。
 
 原文摘要：
-${displaySummary}`,
+${summary}`,
         isTranslationNote: true,
       };
     }
 
-    // 截斷摘要至 150 字
-    const displaySummary =
-      summary.length > 150 ? summary.substring(0, 150) + "..." : summary;
-    return { content: displaySummary, isTranslationNote: false };
+    // 顯示完整摘要，不進行截斷
+    return { content: summary, isTranslationNote: false };
   };
 
   // 自動滾動到最新訊息
