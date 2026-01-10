@@ -285,7 +285,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
     } catch (err) {
       // 清空爬蟲結果，確保不顯示舊的成功畫面
       setCrawlerResults(null);
-      
+
       // 增強錯誤訊息，包含防爬提示
       const errorMessage =
         err instanceof Error ? err.message : "Failed to crawl website";
