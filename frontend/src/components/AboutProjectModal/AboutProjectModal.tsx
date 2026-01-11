@@ -30,7 +30,9 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
               </div>
               <div>
                 <h5 className="modal-title mb-1">關於本專案</h5>
-                <p className="header-subtitle mb-0">AI 不再有幻覺，回答也可以很專注</p>
+                <p className="header-subtitle mb-0">
+                  AI 不再有幻覺，回答也可以很專注
+                </p>
               </div>
             </div>
             <button
@@ -92,7 +94,9 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
                     設定 AI 能做與不做的事：不憑空推斷外部知識，找不到就拒答
                   </p>
                   <div className="card-highlight">
-                    <span className="highlight-text">定義如何做事，非只是說話</span>
+                    <span className="highlight-text">
+                      定義如何做事，非只是說話
+                    </span>
                   </div>
                 </div>
               </div>
@@ -127,7 +131,11 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
               <i className="bi bi-tag me-1"></i>
               版本: 1.0 · 更新日: 2026-01-11
             </div>
-            <button type="button" className="btn btn-primary cta-button" onClick={onClose}>
+            <button
+              type="button"
+              className="btn btn-primary cta-button"
+              onClick={onClose}
+            >
               <i className="bi bi-check-circle me-2"></i>
               開始使用
             </button>
