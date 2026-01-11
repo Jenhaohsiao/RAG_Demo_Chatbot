@@ -466,31 +466,34 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       id: 1,
       key: "rag-config",
       title: "RAG 參數配置",
+      infoTitle: "什麼是 RAG?",
       icon: "bi-gear",
       description: "設定檢索增強生成參數",
       color: "primary",
       detailMessage:
-        "配置相似度閾值、檢索段落數、Chunk分割大小等核心參數。這些設定直接影響AI回答的準確度和相關性，建議根據您的文檔類型和期望的回答精度來調整這些參數。",
+        "RAG（Retrieval-Augmented Generation，檢索增強生成）是 AI 工程中常用的一種技術框架，特別適用於大型語言模型（LLM）如 GPT 或 Llama，用來改善生成內容的準確性、相關性和事實性。它通過從外部知識庫中檢索相關資訊，來『增強』模型的輸入提示，從而減少幻覺（hallucination）和提高回應品質。RAG 常用在問答系統、聊天機器人、知識檢索應用等場景。\n\nRAG 的核心流程通常分為三個階段：檢索（Retrieval）、增強（Augmentation） 和 生成（Generation）。",
     },
     {
       id: 2,
       key: "prompt-config",
       title: "System Prompt",
+      infoTitle: "何為 System Prompt ?",
       icon: "bi-chat-dots",
       description: "定義模型行為、角色、能力範圍與安全規則",
       color: "info",
       detailMessage:
-        "設定AI助手的角色定位、回答風格和行為準則。您可以定義AI的專業領域、語氣風格、回答長度等，讓AI更符合您的使用需求和品牌形象。",
+        "系統提示詞 (System Prompt ) 跟一般使用者在對話框使用的 Prompt不同。一般 prompt 讓模型「盡量憑自己記憶/理解」把事情做好。 而配合RAG的使用, system prompt 通常是專門設計來強制或引導 LLM 真的只能「看文件回答」，目的是大幅降低幻覺（hallucination）並提高事實正確性以及可信度。",
     },
     {
       id: 3,
       key: "data-upload",
       title: "資料上傳",
+      infoTitle: "上傳使用者指定的資料",
       icon: "bi-cloud-upload",
       description: "上傳文檔或爬取網站資料",
       color: "orange",
       detailMessage:
-        "支援多種格式文檔上傳（PDF、Word、TXT等）或網站內容爬取。系統會自動提取文本內容，這些資料將作為AI回答問題的知識庫基礎。",
+        "這個動作讓您自己上傳文字檔案，或使用網站爬蟲來擷取網站內容。系統會自動提取文本內容，這些資料將作為AI回答問題的知識庫基礎。AI 將只會針對資料內容與您進行交流。",
     },
     {
       id: 4,
@@ -510,7 +513,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       description: "將文件分塊、轉換為向量，並寫入 Vector DB 以供後續檢索",
       color: "purple",
       detailMessage:
-        "將文檔內容切分成適當大小的段落，並轉換為高維向量表示。這個過程讓AI能夠理解和檢索相關內容，是實現精準問答的關鍵技術步驟。",
+        "「向量化」這個動作是把文字變成一串數字（像密碼），讓電腦能去比較「意思有多像」。\n而「Vector DB（向量資料庫）」是一個超強的倉庫，專門存這些數字密碼，還能秒速找到跟你問題「意思最像」的內容。\n\n傳統資料庫，例如 MySQL、PostgreSQL、MongoDB 擅長找「完全一樣」或「符合規則」的東西；而 Vector DB 專門找「意思最像、感覺最接近」的東西。因為人類問問題時，常常不是用一模一樣的關鍵字，而是用「類似的意思」來表達，所以需要這種「找相似」的超能力。",
     },
     {
       id: 6,
@@ -547,7 +550,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
   const handleInfoClick = (step: any, event: React.MouseEvent) => {
     setToastContent({
-      title: step.title,
+      title: step.infoTitle || step.title,
       message: step.detailMessage,
     });
     setShowToast(true);
@@ -1415,48 +1418,44 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
         {renderStepContent()}
       </div>
 
-      {/* Modal Backdrop for Toast */}
+      {/* 中央資訊對話框（取代 Toast） */}
       {showToast && (
         <div
-          className="position-fixed top-0 start-0 w-100 h-100"
-          style={{
-            backgroundColor: "rgba(0,0,0,0.5)",
-            zIndex: 1080,
-          }}
-        ></div>
-      )}
-
-      {/* Bootstrap Toast */}
-      <div
-        className="toast-container position-fixed top-0 end-0 p-3"
-        style={{ zIndex: 1090 }}
-      >
-        <div
-          className={`toast ${showToast ? "show" : ""}`}
-          role="alert"
-          aria-live="assertive"
-          aria-atomic="true"
+          className="modal show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1090 }}
         >
-          <div className="toast-header">
-            <i className="bi bi-info-circle text-primary me-2"></i>
-            <strong className="me-auto">{toastContent.title}</strong>
-          </div>
-          <div className="toast-body">
-            <div className="mb-3" style={{ whiteSpace: "pre-line" }}>
-              {toastContent.message}
-            </div>
-            <div className="d-flex justify-content-end">
-              <button
-                type="button"
-                className="btn btn-primary btn-sm"
-                onClick={() => setShowToast(false)}
-              >
-                確定
-              </button>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header bg-primary text-white">
+                <h5 className="modal-title d-flex align-items-center mb-0">
+                  <i className="bi bi-info-circle-fill me-2"></i>
+                  {toastContent.title}
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close btn-close-white"
+                  aria-label="Close"
+                  onClick={() => setShowToast(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p className="mb-0" style={{ whiteSpace: "pre-line" }}>
+                  {toastContent.message}
+                </p>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => setShowToast(false)}
+                >
+                  了解
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* 全局 Loading Overlay */}
       <LoadingOverlay isVisible={isGlobalLoading} message={loadingMessage} />

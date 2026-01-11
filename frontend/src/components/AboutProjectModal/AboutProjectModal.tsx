@@ -1,9 +1,4 @@
-/**
- * About Project Modal Component
- * 顯示專案目標和特色的對話框
- */
 import React from "react";
-import { useTranslation } from "react-i18next";
 import "./AboutProjectModal.scss";
 
 interface AboutProjectModalProps {
@@ -11,16 +6,10 @@ interface AboutProjectModalProps {
   onClose: () => void;
 }
 
-/**
- * 關於本專案對話框組件
- * 顯示專案的主要目標、技術特色與AI工程原則
- */
 const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { t } = useTranslation();
-
   if (!isOpen) return null;
 
   return (
@@ -47,221 +36,80 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
             ></button>
           </div>
           <div className="modal-body">
-            {/* 專案目標 */}
             <div className="mb-4">
-              <h6 className="text-primary mb-3">
-                <i className="bi bi-target me-2"></i>
-                專案目標
-              </h6>
-              <div className="card border-primary border-opacity-25">
-                <div className="card-body">
-                  <p className="card-text mb-3">
-                    打造一個<strong>多語言RAG對話機器人系統</strong>
-                    ，展示完整的AI工程實踐與現代化架構設計。
-                  </p>
-                  <ul className="list-unstyled">
-                    <li className="mb-2">
-                      <i className="bi bi-check-circle-fill text-success me-2"></i>
-                      實現嚴格的RAG架構，杜絕模型幻覺
-                    </li>
-                    <li className="mb-2">
-                      <i className="bi bi-check-circle-fill text-success me-2"></i>
-                      展示企業級AI安全與內容審核機制
-                    </li>
-                    <li className="mb-2">
-                      <i className="bi bi-check-circle-fill text-success me-2"></i>
-                      提供可測試的模組化系統架構
-                    </li>
-                    <li>
-                      <i className="bi bi-check-circle-fill text-success me-2"></i>
-                      支援多語言用戶體驗與國際化
-                    </li>
+              <h1 className="fw-bold mb-2">AI不再有幻覺，回答也可以很專注。</h1>
+              <p className="mb-3">
+                這示範專案不是要製作另一個 ChatGPT，而是表達一件很重要的AI
+                工程概念：AI 是可以「只根據你的資料」來回答問題的,
+                有資料時才回答，沒資料時就說不知道。
+              </p>
+            </div>
+
+            <div className="mb-4">
+              <h6 className="text-primary mb-3">四個角色，如何一起工作？</h6>
+              <div className="vstack gap-3">
+                <div className="p-3 border rounded">
+                  <h3 className="mb-2">(1) RAG：決定「該不該回答」</h3>
+                  <p className="mb-2">RAG 就像一道門禁系統。</p>
+                  <ul className="mb-2">
+                    <li>在回答之前，先確認資料夠不夠</li>
+                    <li>找不到相關內容時，AI 會直接說「我不知道」</li>
+                    <li>不再憑空猜答案，也不硬湊回應</li>
                   </ul>
+                  <p className="mb-0 fw-semibold">
+                    👉 負責讓 AI 誠實，而不是健談
+                  </p>
+                </div>
+
+                <div className="p-3 border rounded">
+                  <h3 className="mb-2">(2) Vector DB：AI 的專屬記憶庫</h3>
+                  <p className="mb-2">你上傳的文件不會直接丟給 AI。</p>
+                  <p className="mb-2">
+                    它們會先被轉成向量，存進 Vector DB，變成：
+                  </p>
+                  <ul className="mb-2">
+                    <li>可搜尋</li>
+                    <li>可比對</li>
+                    <li>可驗證的知識來源</li>
+                  </ul>
+                  <p className="mb-0 fw-semibold">
+                    👉 AI 的每一句回答，都必須「找得到根據」
+                  </p>
+                </div>
+
+                <div className="p-3 border rounded">
+                  <h3 className="mb-2">(3) System Prompt：AI 的行為規則</h3>
+                  <p className="mb-2">AI 在這個系統裡有清楚的底線：</p>
+                  <ul className="mb-2">
+                    <li>只能根據你的資料回答</li>
+                    <li>不能自行補充外部知識</li>
+                    <li>找不到，就拒答，而不是亂編</li>
+                  </ul>
+                  <p className="mb-0 fw-semibold">
+                    👉 Prompt 不只是怎麼說話，而是怎麼做事
+                  </p>
+                </div>
+
+                <div className="p-3 border rounded">
+                  <h3 className="mb-2">(4) LLM：最後才出場的說話者</h3>
+                  <p className="mb-2">語言模型不是主角，而是最後一棒。</p>
+                  <p className="mb-2">它的工作只有一件事：</p>
+                  <p className="mb-2">
+                    把已經檢索到的資料，用人類看得懂的方式說出來。
+                  </p>
+                  <p className="mb-0 fw-semibold">👉 沒有魔法，只有流程</p>
                 </div>
               </div>
             </div>
 
-            {/* 核心特色 */}
-            <div className="mb-4">
-              <h6 className="text-primary mb-3">
-                <i className="bi bi-star me-2"></i>
-                核心特色
-              </h6>
-              <div className="row g-3">
-                <div className="col-md-6">
-                  <div className="feature-item border rounded p-3">
-                    <div className="d-flex align-items-center mb-2">
-                      <div className="feature-icon text-primary me-3">
-                        <i className="bi bi-robot fs-4"></i>
-                      </div>
-                      <h6 className="mb-0">嚴格RAG架構</h6>
-                    </div>
-                    <p className="text-muted small mb-0">
-                      基於文檔檢索的問答系統，確保回答基於真實內容，避免AI幻覺問題
-                    </p>
-                  </div>
-                </div>
-                <div className="col-md-6">
-                  <div className="feature-item border rounded p-3">
-                    <div className="d-flex align-items-center mb-2">
-                      <div className="feature-icon text-success me-3">
-                        <i className="bi bi-shield-check fs-4"></i>
-                      </div>
-                      <h6 className="mb-0">內容安全審核</h6>
-                    </div>
-                    <p className="text-muted small mb-0">
-                      整合Gemini Safety API，實時檢測有害內容，保障用戶安全
-                    </p>
-                  </div>
-                </div>
-                <div className="col-md-6">
-                  <div className="feature-item border rounded p-3">
-                    <div className="d-flex align-items-center mb-2">
-                      <div className="feature-icon text-info me-3">
-                        <i className="bi bi-vector-pen fs-4"></i>
-                      </div>
-                      <h6 className="mb-0">向量語意搜尋</h6>
-                    </div>
-                    <p className="text-muted small mb-0">
-                      使用Qdrant向量數據庫，提供精準的語意檢索與相似度匹配
-                    </p>
-                  </div>
-                </div>
-                <div className="col-md-6">
-                  <div className="feature-item border rounded p-3">
-                    <div className="d-flex align-items-center mb-2">
-                      <div className="feature-icon text-warning me-3">
-                        <i className="bi bi-globe fs-4"></i>
-                      </div>
-                      <h6 className="mb-0">多語言支援</h6>
-                    </div>
-                    <p className="text-muted small mb-0">
-                      支援8種語言界面，提供全球化用戶體驗
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 技術架構 */}
-            <div className="mb-4">
-              <h6 className="text-primary mb-3">
-                <i className="bi bi-diagram-3 me-2"></i>
-                技術架構
-              </h6>
-              <div className="row g-2">
-                <div className="col-auto">
-                  <span className="badge bg-primary">FastAPI</span>
-                </div>
-                <div className="col-auto">
-                  <span className="badge bg-info">React + TypeScript</span>
-                </div>
-                <div className="col-auto">
-                  <span className="badge bg-success">Qdrant Vector DB</span>
-                </div>
-                <div className="col-auto">
-                  <span className="badge bg-warning">Gemini AI</span>
-                </div>
-                <div className="col-auto">
-                  <span className="badge bg-secondary">Docker</span>
-                </div>
-                <div className="col-auto">
-                  <span className="badge bg-dark">Bootstrap 5</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Session 系統配置 */}
-            <div className="mb-4">
-              <h6 className="text-info mb-3">
-                <i className="bi bi-gear me-2"></i>
-                Session 系統配置
-              </h6>
-              <div className="row g-3">
-                <div className="col-md-6">
-                  <div className="config-item border rounded p-3">
-                    <div className="d-flex align-items-center mb-2">
-                      <div className="config-icon text-info me-3">
-                        <i className="bi bi-clock fs-4"></i>
-                      </div>
-                      <h6 className="mb-0">Session 存活時間</h6>
-                    </div>
-                    <p className="text-muted small mb-2">
-                      系統預設 30 分鐘自動清理無活動的會話，確保資源有效利用
-                    </p>
-                    <div className="badge bg-info-subtle text-info">
-                      <i className="bi bi-info-circle me-1"></i>
-                      30 分鐘 TTL
-                    </div>
-                  </div>
-                </div>
-                <div className="col-md-6">
-                  <div className="config-item border rounded p-3">
-                    <div className="d-flex align-items-center mb-2">
-                      <div className="config-icon text-warning me-3">
-                        <i className="bi bi-database fs-4"></i>
-                      </div>
-                      <h6 className="mb-0">集合隔離</h6>
-                    </div>
-                    <p className="text-muted small mb-2">
-                      每個 Session 獨立的 Qdrant
-                      向量資料庫集合，確保資料隱私安全
-                    </p>
-                    <div className="badge bg-warning-subtle text-warning">
-                      <i className="bi bi-shield-check me-1"></i>
-                      完全隔離
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* AI工程原則 */}
             <div>
-              <h6 className="text-primary mb-3">
-                <i className="bi bi-gear me-2"></i>
-                AI工程原則
-              </h6>
-              <div className="border rounded p-3 bg-light">
-                <div className="row g-2">
-                  <div className="col-md-6">
-                    <div className="principle-item">
-                      <i className="bi bi-check-circle text-success me-2"></i>
-                      <small>Strict RAG (No Hallucination)</small>
-                    </div>
-                  </div>
-                  <div className="col-md-6">
-                    <div className="principle-item">
-                      <i className="bi bi-check-circle text-success me-2"></i>
-                      <small>Session Isolation & TTL</small>
-                    </div>
-                  </div>
-                  <div className="col-md-6">
-                    <div className="principle-item">
-                      <i className="bi bi-check-circle text-success me-2"></i>
-                      <small>Moderation-First Pipeline</small>
-                    </div>
-                  </div>
-                  <div className="col-md-6">
-                    <div className="principle-item">
-                      <i className="bi bi-check-circle text-success me-2"></i>
-                      <small>Constitutional AI Compliance</small>
-                    </div>
-                  </div>
-                  <div className="col-md-6">
-                    <div className="principle-item">
-                      <i className="bi bi-check-circle text-success me-2"></i>
-                      <small>Testable Modular Architecture</small>
-                    </div>
-                  </div>
-                  <div className="col-md-6">
-                    <div className="principle-item">
-                      <i className="bi bi-check-circle text-success me-2"></i>
-                      <small>Performance Metrics Tracking</small>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <h6 className="text-primary mb-3">🎯 這個專案適合誰？</h6>
+              <ul className="mb-0">
+                <li>想真正理解 RAG 是怎麼運作 的人</li>
+                <li>想打造「不亂講話」AI 的開發者</li>
+                <li>想在作品集中展示 AI 系統設計思維 的工程師</li>
+                <li>對「AI 為什麼有時候不回答」感到好奇的人</li>
+              </ul>
             </div>
           </div>
           <div className="modal-footer">
