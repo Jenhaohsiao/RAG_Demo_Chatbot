@@ -344,7 +344,6 @@ def process_document(document: Document):
                 "ko": f"문서가 업로드되고 처리되었습니다. 콘텐츠 미리보기: {content_preview}...",
                 "es": f"Documento cargado y procesado exitosamente. Vista previa: {content_preview}...",
                 "ja": f"ドキュメントがアップロードおよび処理されました。プレビュー: {content_preview}...",
-                "ar": f"تم تحميل المستند ومعالجته بنجاح. معاينة: {content_preview}...",
                 "fr": f"Document téléchargé et traité avec succès. Aperçu: {content_preview}..."
             }
             document.summary = fallback_messages.get(language, fallback_messages["en"])
@@ -628,12 +627,22 @@ async def upload_website(
         # 提取爬蟲的頁面
         crawled_pages = crawl_result.get('pages', [])
         
+        # 檢查爬蟲結果是否有效
+        if not crawled_pages or len(crawled_pages) == 0:
+            logger.error(f"Website crawl returned empty pages for {request.url}")
+            raise Exception("Cannot embed empty text list - no pages were successfully crawled")
+        
         # 為爬蟲結果建立主 Document
         # 將所有頁面的內容合併為一個文件
         combined_content = "\n\n---\n\n".join([
             f"# {page.get('title', 'Untitled')}\nURL: {page.get('url')}\n\n{page.get('content', '')}"
             for page in crawled_pages
         ])
+        
+        # 再次檢查合併後的內容是否為空
+        if not combined_content or combined_content.strip() == "":
+            logger.error(f"Website crawl resulted in empty combined content for {request.url}")
+            raise Exception("Cannot embed empty text list - crawled pages have no text content")
         
         crawl_document = Document(
             session_id=session_id,

@@ -1,6 +1,6 @@
 /**
  * i18n (internationalization) configuration
- * 支援 8 種語言: en, zh-TW, ko, es, ja, ar, fr, zh-CN
+ * 支援 7 種語言: en, zh-TW, ko, es, ja, fr, zh-CN
  */
 
 import i18n from 'i18next';
@@ -13,7 +13,6 @@ import zhTW from './locales/zh-TW.json';
 import ko from './locales/ko.json';
 import es from './locales/es.json';
 import ja from './locales/ja.json';
-import ar from './locales/ar.json';
 import fr from './locales/fr.json';
 import zhCN from './locales/zh-CN.json';
 
@@ -24,7 +23,6 @@ export const supportedLanguages = {
   ko: { nativeName: '한국어', dir: 'ltr' },
   es: { nativeName: 'Español', dir: 'ltr' },
   ja: { nativeName: '日本語', dir: 'ltr' },
-  ar: { nativeName: 'العربية', dir: 'rtl' }, // 阿拉伯文是 RTL
   fr: { nativeName: 'Français', dir: 'ltr' },
   'zh-CN': { nativeName: '简体中文', dir: 'ltr' },
 };
@@ -40,7 +38,6 @@ i18n
       ko: { translation: ko },
       es: { translation: es },
       ja: { translation: ja },
-      ar: { translation: ar },
       fr: { translation: fr },
       'zh-CN': { translation: zhCN },
     },

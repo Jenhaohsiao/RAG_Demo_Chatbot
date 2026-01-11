@@ -10,7 +10,7 @@ import sessionService from '../services/sessionService';
 
 const LANGUAGE_STORAGE_KEY = 'rag-chatbot-language';
 
-const SUPPORTED_LANGUAGES = ['en', 'zh-TW', 'zh-CN', 'ko', 'es', 'ja', 'ar', 'fr'] as const;
+const SUPPORTED_LANGUAGES = ['en', 'zh-TW', 'zh-CN', 'ko', 'es', 'ja', 'fr'] as const;
 export type SupportedLanguage = typeof SUPPORTED_LANGUAGES[number];
 
 interface UseLanguageReturn {
@@ -29,7 +29,7 @@ interface UseLanguageReturn {
  * - Persist to localStorage
  * - Backend API sync (PUT /session/{sessionId}/language)
  * - Type-safe language codes
- * - RTL support for Arabic
+ * - Type-safe language codes
  * - Error handling for backend sync
  */
 export const useLanguage = (): UseLanguageReturn => {

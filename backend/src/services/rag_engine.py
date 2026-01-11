@@ -254,7 +254,7 @@ class RAGEngine:
         lang_map = {
             'zh-TW': '繁體中文', 'zh-CN': '简体中文', 'en': 'English',
             'ko': '한국어', 'es': 'Español', 'ja': '日本語',
-            'ar': 'العربية', 'fr': 'Français'
+            'fr': 'Français'
         }
         response_language = lang_map.get(language, lang_map.get(language.split('-')[0], 'English'))
         
@@ -352,7 +352,7 @@ class RAGEngine:
             lang_map = {
                 'zh-TW': '繁體中文', 'zh-CN': '简体中文', 'en': 'English',
                 'ko': '한국어', 'es': 'Español', 'ja': '日本語',
-                'ar': 'العربية', 'fr': 'Français'
+                'fr': 'Français'
             }
             response_language = lang_map.get(language, lang_map.get(language.split('-')[0], 'English'))
             
@@ -714,15 +714,6 @@ Contenido del documento:
 
 ドキュメント内容:
 """,
-                "ar": """يرجى تقديم ملخص كامل للمستند التالي (حوالي 150 كلمة). يجب أن يكون الملخص:
-1. مكتوبًا مباشرة باللغة العربية
-2. يتضمن المواضيع الرئيسية والنقاط الرئيسية
-3. واضحًا ومناسبًا للمسح السريع
-4. ينتهي بجملة كاملة، لا تستخدم "..." أو "إلخ" في النهاية
-5. استهدف حوالي 150 كلمة، ولكن لا يوجد حد صارم
-
-محتوى المستند:
-""",
                 "fr": """Veuillez fournir un résumé complet du document suivant (environ 150 mots). Le résumé doit:
 1. Être écrit directement en français
 2. Inclure les sujets principaux et les points clés
@@ -807,7 +798,6 @@ Contenu du document:
                 "ko": "Korean (한국어)",
                 "es": "Spanish (Español)",
                 "ja": "Japanese (日本語)",
-                "ar": "Arabic (العربية)",
                 "fr": "French (Français)"
             }
             response_language = language_names.get(language, language_names.get(language.split('-')[0], "English"))
@@ -840,7 +830,6 @@ Contenu du document:
             "ko": "Korean (한국어)",
             "es": "Spanish (Español)",
             "ja": "Japanese (日本語)",
-            "ar": "Arabic (العربية)",
             "fr": "French (Français)"
         }
         
@@ -861,7 +850,7 @@ Contenu du document:
         # 建構 Prompt（嚴格基於文檔內容回答 - Strict RAG）
         # 定義術語（用於幫助LLM理解"文檔"的定義）
         # 獲取語言對應的 key（支援 zh-TW -> zh 映射）
-        lang_key = language if language in ["en", "zh", "ko", "es", "ja", "ar", "fr"] else (language.split('-')[0] if '-' in language else "en")
+        lang_key = language if language in ["en", "zh", "ko", "es", "ja", "fr"] else (language.split('-')[0] if '-' in language else "en")
         
         document_definition = {
             "zh": """**術語定義**:
@@ -899,9 +888,6 @@ Contenu du document:
 **重要な指示**:
 - 回答に引用マーカー（例：[Document 1]）を含めないでください。
 - 質問に直接回答してください。""",
-            "ar": """**تعريف المصطلحات**:
-- **المستندات**: المحتوى الذي حمله المستخدم إلى النظام (صفحات الويب وملفات PDF وملفات نصية وما إلى ذلك) الذي تم استخراجه وتنظيفه وتقسيمه وفهرسته.
-- **القطع**: فقرات صغيرة يتم تقسيم المستندات إليها للبحث الدلالي.""",
             "fr": """**Définitions des termes**:
 - **Documents**: Contenu téléchargé par l'utilisateur (pages web, PDF, fichiers texte, etc.) qui a été extrait, nettoyé, divisé en chunks et indexé.
 - **Chunks**: Petits passages dans lesquels les documents sont divisés pour la recherche sémantique."""
@@ -982,7 +968,6 @@ Contenu du document:
                 "ko": "천만에요! 기꺼이 도와드리겠습니다. 업로드된 문서에 대해 궁금한 점이 있으시면 언제든지 물어보세요!",
                 "es": "¡De nada! Estoy feliz de ayudar. ¡Pregúntame cualquier cosa sobre los documentos cargados!",
                 "ja": "どういたしまして！お手伝いできて嬉しいです。アップロードされたドキュメントについて何でも聞いてください！",
-                "ar": "على الرحب والسعة! يسعدني المساعدة. لا تتردد في السؤال عن المستندات المحملة!",
                 "fr": "Je vous en prie ! Je suis heureux d'aider. N'hésitez pas à me poser des questions sur les documents téléchargés !"
             }
         else:
@@ -995,7 +980,6 @@ Contenu du document:
                 "ko": "안녕하세요! 저는 문서 도우미입니다. 업로드된 문서 내용에 대한 질문에 답변해 드릴 수 있습니다. 무엇이든 물어보세요!",
                 "es": "¡Hola! Soy tu asistente de documentos. Puedo ayudarte a responder preguntas sobre el contenido de tus documentos cargados. ¡Pregúntame lo que quieras!",
                 "ja": "こんにちは！私はドキュメントアシスタントです。アップロードされたドキュメントの内容についての質問にお答えできます。何でも聞いてください！",
-                "ar": "مرحبا! أنا مساعد المستندات الخاص بك. يمكنني المساعدة في الإجابة على الأسئلة حول محتوى المستندات المحملة. لا تتردد في السؤال!",
                 "fr": "Bonjour ! Je suis votre assistant de documents. Je peux vous aider à répondre aux questions sur le contenu de vos documents téléchargés. N'hésitez pas à me demander quoi que ce soit !"
             }
         
@@ -1029,7 +1013,6 @@ Contenu du document:
             "ko": "죄송합니다. 업로드된 문서에서 관련 정보를 찾을 수 없습니다.",
             "es": "Lo siento, no pude encontrar información relevante en los documentos cargados.",
             "ja": "申し訳ありませんが、アップロードされた文書に関連する情報が見つかりませんでした。",
-            "ar": "عذرًا، لم أتمكن من العثور على معلومات ذات صلة في المستندات المحملة.",
             "fr": "Désolé, je n'ai pas pu trouver d'informations pertinentes dans les documents téléchargés."
         }
         # 嘗試完整語言代碼，再嘗試語言前綴

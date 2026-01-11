@@ -7,7 +7,6 @@
  * - Click button to toggle dropdown menu
  * - Language text animates with smooth transition
  * - Shows checkmark for currently selected language
- * - Supports RTL (Arabic) layout
  */
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -20,7 +19,6 @@ const LANGUAGE_LABELS: Record<SupportedLanguage, string> = {
   ko: "한국어",
   es: "Español",
   ja: "日本語",
-  ar: "العربية",
   fr: "Français",
   "zh-CN": "简体中文",
 };
@@ -31,7 +29,6 @@ const LANGUAGE_ORDER: SupportedLanguage[] = [
   "ko",
   "es",
   "ja",
-  "ar",
   "fr",
   "zh-CN",
 ];
@@ -52,7 +49,6 @@ interface LanguageSelectorProps {
  * - Click to select language from dropdown
  * - Shows checkmark for currently selected language
  * - Syncs with session language preference
- * - Supports RTL layout for Arabic
  */
 export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   onLanguageChange,

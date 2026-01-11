@@ -46,8 +46,8 @@ class Session(BaseModel):
     @field_validator('language')
     @classmethod
     def validate_language(cls, v: str) -> str:
-        """Validate language code is one of the 8 supported languages"""
-        valid_languages = ["en", "zh-TW", "ko", "es", "ja", "ar", "fr", "zh-CN"]
+        """Validate language code is one of the 7 supported languages"""
+        valid_languages = ["en", "zh-TW", "ko", "es", "ja", "fr", "zh-CN"]
         if v not in valid_languages:
             raise ValueError(f"Language must be one of {valid_languages}")
         return v

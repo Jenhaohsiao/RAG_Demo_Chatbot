@@ -120,7 +120,6 @@ Document content:
         "ko": "Korean (한국어)",
         "es": "Spanish (Español)",
         "ja": "Japanese (日本語)",
-        "ar": "Arabic (العربية)",
         "fr": "French (Français)"
     }
 
@@ -196,7 +195,6 @@ async def get_current_session_prompt(
         "ko": "Korean (한국어)",
         "es": "Spanish (Español)",
         "ja": "Japanese (日本語)",
-        "ar": "Arabic (العربية)",
         "fr": "French (Français)"
     }
     

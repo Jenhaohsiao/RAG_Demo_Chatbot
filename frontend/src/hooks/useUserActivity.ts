@@ -50,7 +50,7 @@ export const useUserActivity = (options: UseUserActivityOptions = {}): UseUserAc
       onActivity();
     }
     
-    console.log('User activity detected, heartbeat triggered');
+    // console.log('User activity detected, heartbeat triggered');
   }, [onActivity, throttleTime]);
 
   /**

@@ -130,9 +130,7 @@ const WorkflowMain: React.FC<WorkflowMainProps> = ({
   useEffect(() => {
     if (sessionId) {
       // Session ID 變化時重置工作流程到第一步
-      console.log(
-        "[WorkflowMain] SessionId changed, resetting workflow to step 1"
-      );
+      // console.log("[WorkflowMain] SessionId changed, resetting workflow to step 1");
       setCurrentStep(1);
       setWorkflowComplete(false);
       setDocuments([]);
@@ -143,7 +141,7 @@ const WorkflowMain: React.FC<WorkflowMainProps> = ({
   // 監聽重置工作流程信號
   useEffect(() => {
     if (onResetWorkflow) {
-      console.log("[WorkflowMain] Reset workflow signal received");
+      // console.log("[WorkflowMain] Reset workflow signal received");
       setCurrentStep(1);
       setWorkflowComplete(false);
       setDocuments([]);

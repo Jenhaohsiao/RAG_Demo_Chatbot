@@ -26,7 +26,6 @@
 // ========================================
 @import "./badges";
 @import "./responsive";
-@import "./rtl";
 @import "./professional-header";
 
 // ========================================
@@ -43,7 +42,6 @@ frontend/src/styles/
 ├── _utilities.scss           - 通用工具類（flex、spacing、text等）
 ├── _badges.scss              - 徽章樣式
 ├── _responsive.scss          - 響應式工具
-├── _rtl.scss                 - RTL（阿拉伯語）支援
 ├── _professional-header.scss - 頭部樣式
 ├── _components.scss          - 所有組件樣式（hero、toast、upload等）
 └── index.scss                - 統一導入入口（本檔案）

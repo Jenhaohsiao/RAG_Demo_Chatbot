@@ -21,6 +21,8 @@ export interface DataUploadStepProps {
   onFileUpload?: (file: File) => void;
   onUrlUpload?: (url: string) => void;
   onCrawlerUpload?: (url: string, maxTokens: number, maxPages: number) => void;
+  // 新增：處理爬蟲成功的回調
+  onCrawlerSuccess?: (result: any) => void;
   documents?: any[]; // 已上傳文件列表
   crawledUrls?: any[]; // 已爬取URL列表
 }
@@ -32,6 +34,7 @@ const DataUploadStep: React.FC<DataUploadStepProps> = ({
   onFileUpload,
   onUrlUpload,
   onCrawlerUpload,
+  onCrawlerSuccess,
   documents = [],
   crawledUrls = [],
 }) => {
@@ -54,12 +57,12 @@ const DataUploadStep: React.FC<DataUploadStepProps> = ({
   const hasUploadedContent =
     hasAnyContent && allFilesProcessed && allCrawlsProcessed;
 
-  console.log("[DataUploadStep] hasUploadedContent:", hasUploadedContent, {
-    documents: documents?.length || 0,
-    crawledUrls: crawledUrls?.length || 0,
-    allFilesProcessed,
-    allCrawlsProcessed,
-  });
+  // console.log("[DataUploadStep] hasUploadedContent:", hasUploadedContent, {
+  //   documents: documents?.length || 0,
+  //   crawledUrls: crawledUrls?.length || 0,
+  //   allFilesProcessed,
+  //   allCrawlsProcessed,
+  // });
 
   return (
     <div className="data-upload-step">
@@ -74,6 +77,10 @@ const DataUploadStep: React.FC<DataUploadStepProps> = ({
           onUrlSubmitted={(url) => {
             console.log("URL submitted:", url);
             onUrlUpload?.(url);
+          }}
+          onCrawlerSuccess={(result) => {
+            console.log("Crawler success callback:", result);
+            onCrawlerSuccess?.(result);
           }}
           maxFileSizeMB={parameters.max_file_size_mb}
           supportedFileTypes={parameters.supported_file_types}

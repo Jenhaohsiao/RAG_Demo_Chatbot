@@ -19,6 +19,36 @@
 
 .language-option {
   cursor: pointer;
+  color: #212529 !important;  // 深色文字
+
+  &:hover,
+  &:focus {
+    background-color: #e9ecef !important;
+    color: #000 !important;
+  }
+
+  &.active {
+    background-color: $color-primary !important;
+    color: white !important;
+  }
+}
+
+// 語言下拉選單樣式
+.dropdown-menu {
+  .language-option {
+    color: #212529 !important;
+
+    &:hover,
+    &:focus {
+      background-color: #e9ecef !important;
+      color: #000 !important;
+    }
+
+    &.active {
+      background-color: $color-primary !important;
+      color: white !important;
+    }
+  }
 }
 
 .navbar-bg {

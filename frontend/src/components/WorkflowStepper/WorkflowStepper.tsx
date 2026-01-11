@@ -50,6 +50,11 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   const [errorDialogTitle, setErrorDialogTitle] = useState<string>("");
   const [errorDialogMessage, setErrorDialogMessage] = useState<string>("");
 
+  // 成功對話框狀態（用於爬蟲成功等）
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [successDialogTitle, setSuccessDialogTitle] = useState<string>("");
+  const [successDialogMessage, setSuccessDialogMessage] = useState<string>("");
+
   // 全局 Loading 狀態
   const [isGlobalLoading, setIsGlobalLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("處理中，請稍候...");
@@ -71,17 +76,17 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     onComplete?: () => void
   ) => {
     try {
-      console.log(`[WorkflowStepper] 開始輪詢文檔狀態`, {
-        documentId,
-        identifier,
-        docItem,
-      });
+      // console.log(`[WorkflowStepper] 開始輪詢文檔狀態`, {
+      //   documentId,
+      //   identifier,
+      //   docItem,
+      // });
 
       const finalStatus = await pollUploadStatus(
         sessionId!,
         documentId,
         (status) => {
-          console.log(`[WorkflowStepper] 輪詢狀態更新:`, status);
+          // console.log(`[WorkflowStepper] 輪詢狀態更新:`, status);
           // 更新文檔的 chunks 數量 (Flow 3 不再分塊，所以 chunk_count 可能為 0，改檢查 extraction_status)
           if (
             status.extraction_status === "COMPLETED" ||
@@ -110,11 +115,11 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
               const isMatch = filenameMatch || (typeMatch && timeMatch);
 
               if (isMatch) {
-                console.log(`[WorkflowStepper] 輪詢更新匹配文檔:`, {
-                  original: doc,
-                  updated: updatedDoc,
-                  matchReason: filenameMatch ? "filename" : "type+time",
-                });
+                // console.log(`[WorkflowStepper] 輪詢更新匹配文檔:`, {
+                //   original: doc,
+                //   updated: updatedDoc,
+                //   matchReason: filenameMatch ? "filename" : "type+time",
+                // });
                 docUpdated = true;
                 return updatedDoc;
               }
@@ -123,10 +128,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
             // 如果沒有找到匹配的文檔，不要丟失原有documents
             if (docUpdated) {
-              console.log(
-                `[WorkflowStepper] 輪詢更新成功，新documents:`,
-                updatedDocs
-              );
+              // console.log(`[WorkflowStepper] 輪詢更新成功，新documents:`, updatedDocs);
               onDocumentsUpdate?.(updatedDocs);
             } else {
               console.warn(
@@ -149,13 +151,39 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
         finalStatus.extraction_status === "COMPLETED" ||
         finalStatus.chunk_count > 0
       ) {
-        console.log(
-          `[WorkflowStepper] 輪詢完成，最終chunks:`,
-          finalStatus.chunk_count
-        );
-        console.log(`[WorkflowStepper] 當前documents:`, documents);
-        console.log(`[WorkflowStepper] docItem:`, docItem);
-        console.log(`[WorkflowStepper] identifier:`, identifier);
+        // 檢查 token 數量是否足夠（最少 50 tokens）
+        const MIN_TOKENS_REQUIRED = 50;
+        const tokensUsed = finalStatus.tokens_used || 0;
+
+        if (tokensUsed > 0 && tokensUsed < MIN_TOKENS_REQUIRED) {
+          // Token 數量過少，顯示錯誤對話框
+          const isUrlType = docItem.type === "url";
+          setErrorDialogTitle("資料量不足");
+          setErrorDialogMessage(
+            `${
+              isUrlType ? "網頁" : "檔案"
+            }內容過少（僅 ${tokensUsed} tokens），無法形成有效的資料建檔。\n\n` +
+              `請提供內容更豐富的${
+                isUrlType ? "網頁" : "檔案"
+              }，或點擊下方「使用範例${isUrlType ? "網站" : "檔案"}」按鈕。`
+          );
+          setShowErrorDialog(true);
+
+          // 移除該文檔
+          const filteredDocs = documents.filter((doc) => {
+            const filenameMatch =
+              doc.filename === identifier || doc.filename === docItem.filename;
+            return !filenameMatch;
+          });
+          onDocumentsUpdate?.(filteredDocs);
+          onComplete?.();
+          return;
+        }
+
+        // console.log(`[WorkflowStepper] 輪詢完成，最終chunks:`, finalStatus.chunk_count);
+        // console.log(`[WorkflowStepper] 當前documents:`, documents);
+        // console.log(`[WorkflowStepper] docItem:`, docItem);
+        // console.log(`[WorkflowStepper] identifier:`, identifier);
 
         const finalDoc = {
           ...docItem,
@@ -179,11 +207,11 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           const isMatch = filenameMatch || (typeMatch && timeMatch);
 
           if (isMatch) {
-            console.log(`[WorkflowStepper] 最終更新找到匹配文檔:`, {
-              original: doc,
-              updated: finalDoc,
-              matchReason: filenameMatch ? "filename" : "type+time",
-            });
+            // console.log(`[WorkflowStepper] 最終更新找到匹配文檔:`, {
+            //   original: doc,
+            //   updated: finalDoc,
+            //   matchReason: filenameMatch ? "filename" : "type+time",
+            // });
             docFound = true;
             return finalDoc;
           }
@@ -192,10 +220,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
         // 如果沒有找到匹配的文檔，直接添加（但要避免重複）
         if (!docFound) {
-          console.log(
-            `[WorkflowStepper] 未找到匹配文檔，檢查是否需要添加:`,
-            finalDoc
-          );
+          // console.log(`[WorkflowStepper] 未找到匹配文檔，檢查是否需要添加:`, finalDoc);
 
           // 檢查是否已經存在相同文檔（避免重複添加）
           const existingDoc = finalDocs.find(
@@ -209,10 +234,10 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           );
 
           if (!existingDoc) {
-            console.log(`[WorkflowStepper] 添加新文檔:`, finalDoc);
+            // console.log(`[WorkflowStepper] 添加新文檔:`, finalDoc);
             finalDocs.push(finalDoc);
           } else {
-            console.log(`[WorkflowStepper] 文檔已存在，不重複添加`);
+            // console.log(`[WorkflowStepper] 文檔已存在，不重複添加`);
           }
         }
 
@@ -230,7 +255,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           return; // 不執行可能清空documents的更新
         }
 
-        console.log(`[WorkflowStepper] 最終documents更新:`, finalDocs);
+        // console.log(`[WorkflowStepper] 最終documents更新:`, finalDocs);
         onDocumentsUpdate?.(finalDocs);
 
         // 只在這裡顯示最終的成功訊息，包含chunks信息
@@ -266,20 +291,38 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           errorMessage.toLowerCase().includes("forbidden") ||
           errorMessage.toLowerCase().includes("403") ||
           errorMessage.toLowerCase().includes("access denied") ||
-          errorMessage.toLowerCase().includes("robot") ||
-          errorMessage.toLowerCase().includes("empty text list");
+          errorMessage.toLowerCase().includes("robot");
 
+        // 檢查是否為資料量不足錯誤
+        const isEmptyContentError =
+          errorMessage.toLowerCase().includes("empty text list") ||
+          errorMessage.toLowerCase().includes("empty text") ||
+          errorMessage.toLowerCase().includes("no content");
+
+        let displayTitle: string;
         let displayMessage: string;
-        if (isUrlError && isBlockedError) {
+
+        if (isEmptyContentError) {
+          // 資料量不足錯誤
+          displayTitle = "資料量不足";
+          if (isUrlError) {
+            displayMessage = `網頁內容過少，無法形成有效的資料建檔。\n\n請提供內容更豐富的網頁，或點擊下方「使用範例網站」按鈕。`;
+          } else {
+            displayMessage = `檔案內容過少，無法形成有效的資料建檔。\n\n請提供內容更豐富的檔案，或點擊下方「使用範例檔案」按鈕。`;
+          }
+        } else if (isUrlError && isBlockedError) {
+          displayTitle = "網頁爬取失敗";
           displayMessage = `URL ${identifier} 處理失敗: ${errorMessage}\n\n此網站可能有防爬蟲機制或內容無法提取。\n請使用其他網站或點擊「使用範例網站」按鈕。`;
         } else if (isUrlError) {
+          displayTitle = "網頁爬取失敗";
           displayMessage = `URL ${identifier} 處理失敗: ${errorMessage}\n\n請使用其他網站或點擊「使用範例網站」按鈕。`;
         } else {
+          displayTitle = "檔案上傳失敗";
           displayMessage = `檔案 ${identifier} 處理失敗: ${errorMessage}\n\n請使用其他檔案或點擊「使用範例檔案」按鈕。`;
         }
 
         // 只顯示非內容審核相關的錯誤，使用對話框而不是 toast
-        setErrorDialogTitle(isUrlError ? "網頁爬取失敗" : "檔案上傳失敗");
+        setErrorDialogTitle(displayTitle);
         setErrorDialogMessage(displayMessage);
         setShowErrorDialog(true);
       } else {
@@ -325,7 +368,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   // 監聽 sessionId 變化，重置所有狀態
   React.useEffect(() => {
     if (sessionId) {
-      console.log("[WorkflowStepper] SessionId changed, resetting all states");
+      // console.log("[WorkflowStepper] SessionId changed, resetting all states");
       setStepCompletion({
         1: false,
         2: false,
@@ -346,9 +389,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
   // 輔助函數：當上傳新資料時，重置後續步驟狀態
   const resetDownstreamSteps = () => {
-    console.log(
-      "[WorkflowStepper] New data uploaded, resetting downstream steps (4, 5, 6)"
-    );
+    // console.log("[WorkflowStepper] New data uploaded, resetting downstream steps (4, 5, 6)");
     setReviewPassed(false);
     setShouldStartReview(false);
     setSavedReviewResults(null);
@@ -391,7 +432,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   React.useEffect(() => {
     if (currentStep === 4 && reviewPassed) {
       // 審核完成時重置shouldStartReview狀態
-      console.log("[WorkflowStepper] 審核完成，重置shouldStartReview狀態");
+      // console.log("[WorkflowStepper] 審核完成，重置shouldStartReview狀態");
       setShouldStartReview(false);
     }
   }, [currentStep, reviewPassed]);
@@ -402,10 +443,10 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     const hasCrawledUrls = crawledUrls && crawledUrls.length > 0;
 
     if (hasDocuments || hasCrawledUrls) {
-      console.log("[WorkflowStepper] 檢測到已上傳內容，標記步驟3完成", {
-        documents: documents?.length || 0,
-        crawledUrls: crawledUrls?.length || 0,
-      });
+      // console.log("[WorkflowStepper] 檢測到已上傳內容，標記步驟3完成", {
+      //   documents: documents?.length || 0,
+      //   crawledUrls: crawledUrls?.length || 0,
+      // });
 
       setStepCompletion((prev) => ({
         ...prev,
@@ -687,7 +728,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             "../../services/sessionService"
           );
           await updateCustomPrompt(sessionId, customPrompt);
-          console.log("[WorkflowStepper] Custom prompt updated for step 6");
+          // console.log("[WorkflowStepper] Custom prompt updated for step 6");
         }
       } catch (error) {
         console.warn(
@@ -842,12 +883,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   };
 
   const renderStepContent = () => {
-    console.log(
-      "Current step rendering:",
-      currentStep,
-      "shouldDisableConfigSteps:",
-      shouldDisableConfigSteps
-    );
+    // console.log("Current step rendering:", currentStep, "shouldDisableConfigSteps:", shouldDisableConfigSteps);
 
     switch (currentStep) {
       case 1:
@@ -878,13 +914,13 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             crawledUrls={crawledUrls}
             onFileUpload={async (file) => {
               try {
-                console.log("Starting file upload:", file.name);
+                // console.log("Starting file upload:", file.name);
                 // 顯示全局 Loading
                 setIsGlobalLoading(true);
                 setLoadingMessage(`正在上傳檔案: ${file.name}...`);
 
                 const response = await uploadFile(sessionId!, file);
-                console.log("File upload successful:", response);
+                // console.log("File upload successful:", response);
 
                 // 創建初始文檔項目
                 const newDoc = {
@@ -977,8 +1013,9 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
               }
             }}
             onCrawlerUpload={async (url, maxTokens, maxPages) => {
+              // 保持之前的邏輯（雖然現在主要由 UploadScreen 處理，但為了相容性保留）
               try {
-                console.log("Starting crawler upload:", {
+                console.log("Starting crawler upload (legacy path):", {
                   url,
                   maxTokens,
                   maxPages,
@@ -1012,36 +1049,58 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                 // 隱藏全局 Loading
                 setIsGlobalLoading(false);
 
-                setToastContent({
-                  title: "成功",
-                  message: `網站 ${url} 爬取成功，共處理 ${response.pages_found} 個頁面！`,
-                });
-                setShowToast(true);
-
-                // 網站爬取完成，用戶需手動進入下一步
+                // 使用中間對話框顯示成功訊息
+                setSuccessDialogTitle("成功");
+                setSuccessDialogMessage(
+                  `網站 ${url} 爬取成功，共處理 ${response.pages_found} 個頁面！`
+                );
+                setShowSuccessDialog(true);
               } catch (error) {
                 console.error("Website crawl failed:", error);
                 setIsGlobalLoading(false);
 
-                // 檢查是否為內容審核錯誤
+                // 錯誤處理...
                 const errorMessage =
                   error instanceof Error ? error.message : String(error);
-                const isContentBlockedError =
-                  errorMessage.toLowerCase().includes("content blocked") ||
-                  errorMessage.toLowerCase().includes("moderation");
 
-                if (!isContentBlockedError) {
-                  setToastContent({
-                    title: "錯誤",
-                    message: `網站爬取失敗: ${errorMessage}`,
-                  });
-                  setShowToast(true);
-                } else {
-                  console.warn(
-                    `[WorkflowStepper] 網站內容審核問題將在流程4處理: ${errorMessage}`
-                  );
-                }
+                setToastContent({
+                  title: "錯誤",
+                  message: `網站爬取失敗: ${errorMessage}`,
+                });
+                setShowToast(true);
               }
+            }}
+            onCrawlerSuccess={(result) => {
+              // 新增：處理來自 UploadScreen 的成功回調
+              // 不需要再次呼叫 API，只更新狀態
+              console.log(
+                "Crawler success received from UploadScreen:",
+                result
+              );
+
+              const url =
+                result.source_reference || result.url || "Unknown URL";
+
+              const newUrl = {
+                url: url,
+                content_size: result.content_size || 0,
+                crawl_time: new Date().toISOString(),
+                chunks: result.chunk_count || 0,
+                summary: result.summary || "網站內容摘要...",
+                pages_found: result.pages_found || 1,
+                extraction_status: "EXTRACTED", // 標記為已提取，讓 canProceedToNextStep 判斷通過
+                status: "COMPLETED",
+              };
+
+              onCrawledUrlsUpdate?.([...crawledUrls, newUrl]);
+              resetDownstreamSteps();
+
+              // 使用中間對話框顯示成功訊息
+              setSuccessDialogTitle("成功");
+              setSuccessDialogMessage(
+                `網站 ${url} 爬取成功，共處理 ${result.pages_found} 個頁面！`
+              );
+              setShowSuccessDialog(true);
             }}
           />
         );
@@ -1154,6 +1213,42 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                   type="button"
                   className="btn btn-primary"
                   onClick={() => setShowErrorDialog(false)}
+                >
+                  確定
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 成功對話框 */}
+      {showSuccessDialog && (
+        <div
+          className="modal show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1100 }}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header bg-success text-white">
+                <h5 className="modal-title">
+                  <i className="bi bi-check-circle-fill me-2"></i>
+                  {successDialogTitle}
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close btn-close-white"
+                  onClick={() => setShowSuccessDialog(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p style={{ whiteSpace: "pre-line" }}>{successDialogMessage}</p>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-success"
+                  onClick={() => setShowSuccessDialog(false)}
                 >
                   確定
                 </button>

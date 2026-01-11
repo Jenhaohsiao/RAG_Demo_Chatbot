@@ -32,6 +32,8 @@ export interface UploadScreenProps {
   uploadedFiles?: any[]; // 已上傳文件列表
   crawledUrls?: any[]; // 已爬取URL列表
   onTabChange?: (tab: "file" | "crawler") => void; // tab 切換回調
+  // 新增：僅用於更新爬蟲結果狀態的回調
+  onCrawlerSuccess?: (result: any) => void;
   // 新增：參數設定相關 props
   parameters?: {
     session_ttl_minutes: number;
@@ -56,6 +58,9 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
   uploadedFiles = [],
   crawledUrls = [],
   onTabChange,
+
+  onCrawlerSuccess,
+
   parameters,
   onParameterChange,
 }) => {
@@ -71,17 +76,35 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
   const [crawlerLoading, setCrawlerLoading] = useState(false); // Added: Crawler loading state
   const [crawlerError, setCrawlerError] = useState<string | null>(null); // Added: Crawler error
   const [crawlerResults, setCrawlerResults] = useState<any | null>(null); // Added: Crawler results
+  const [hasCrawlerFailed, setHasCrawlerFailed] = useState(false); // 標記爬蟲是否失敗
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 動態檔案大小限制（根據參數設定）
   const MAX_FILE_SIZE = maxFileSizeMB * 1024 * 1024;
 
-  // 檢查爬蟲是否已完成
+  // 檢查爬蟲是否已完成且有有效內容
   const isCrawlerCompleted =
     crawlerResults &&
+    // 必須是成功狀態，不能是 FAILED
+    crawlerResults.extraction_status !== "FAILED" &&
+    crawlerResults.error_code !== "ERR_PROCESSING_FAILED" &&
+    crawlerResults.crawled_pages &&
+    crawlerResults.crawled_pages.length > 0 &&
+    crawlerResults.total_tokens > 0 &&
     (crawlerResults.crawl_status === "completed" ||
       crawlerResults.crawl_status === "token_limit_reached" ||
       crawlerResults.crawl_status === "page_limit_reached");
+
+  // Log crawler state
+  console.log("=== isCrawlerCompleted 狀態 ===");
+  console.log("crawlerResults:", crawlerResults);
+  console.log("isCrawlerCompleted:", isCrawlerCompleted);
+  console.log("hasCrawlerFailed:", hasCrawlerFailed);
+  console.log("showErrorDialog:", showErrorDialog);
+  console.log(
+    "應顯示成功畫面:",
+    isCrawlerCompleted && !hasCrawlerFailed && !showErrorDialog
+  );
 
   // 處理使用範例文件
   const handleUseSampleFile = async () => {
@@ -273,22 +296,137 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
   ) => {
     setCrawlerError(null);
     setCrawlerResults(null); // 清空之前的結果
+    setHasCrawlerFailed(false); // 清除失敗標記
     setCrawlerLoading(true);
 
     try {
       const response = await uploadWebsite(sessionId, url, maxTokens, maxPages);
+
+      console.log("=== 爬蟲 API 響應 ===");
+      console.log("extraction_status:", response.extraction_status);
+      console.log("error_code:", response.error_code);
+      console.log("error_message:", response.error_message);
+      console.log("crawled_pages:", response.crawled_pages);
+      console.log("total_tokens:", response.total_tokens);
+      console.log("完整響應:", response);
+
+      // 驗證爬蟲結果 - 優先檢查 extraction_status 和 error_code
+      // 確保大小寫不敏感
+      const status = response.extraction_status?.toUpperCase();
+      const isFailed = status === "FAILED";
+      const hasErrorCode = response.error_code === "ERR_PROCESSING_FAILED";
+
+      // 檢查是否有有效內容 (必須要有頁面且 Token > 0)
+      // 放寬檢查：如果有 pages_found > 0 也視為有頁面（兼容後端可能未返回 crawled_pages 的情況）
+      const hasPages =
+        (response.crawled_pages && response.crawled_pages.length > 0) ||
+        (response.pages_found && response.pages_found > 0);
+
+      const totalTokens = response.total_tokens || 0;
+      const hasTokens = totalTokens > 0;
+
+      // 最小 token 數量檢查 (至少需要 50 tokens 才能形成有效的向量資料庫)
+      const MIN_TOKENS_REQUIRED = 50;
+      const hasSufficientTokens = totalTokens >= MIN_TOKENS_REQUIRED;
+
+      const noCrawledPages = !hasPages;
+      const noTokens = !hasTokens;
+      const insufficientTokens = hasTokens && !hasSufficientTokens;
+
+      console.log("=== 驗證結果詳細檢查 ===");
+      console.log("Status:", status);
+      console.log("isFailed:", isFailed);
+      console.log("hasErrorCode:", hasErrorCode);
+      console.log(
+        "hasPages:",
+        hasPages,
+        "Count:",
+        response.crawled_pages?.length,
+        "Found:",
+        response.pages_found
+      );
+      console.log("hasTokens:", hasTokens, "Count:", totalTokens);
+      console.log(
+        "hasSufficientTokens:",
+        hasSufficientTokens,
+        "Min required:",
+        MIN_TOKENS_REQUIRED
+      );
+
+      // 檢查資料量是否過少（有 tokens 但不足最低要求）
+      if (insufficientTokens) {
+        console.log("❌ 資料量過少，拋出錯誤");
+        setCrawlerResults(null);
+        throw new Error(`INSUFFICIENT_DATA:${totalTokens}`);
+      }
+
+      if (isFailed || hasErrorCode || noCrawledPages || noTokens) {
+        // 爬蟲失敗或沒有獲取到有效內容，視為失敗
+        // 使用 API 返回的錯誤訊息，如果沒有則使用默認訊息
+        // 構建詳細的錯誤原因以便調試
+        const failureReasons = [];
+        if (isFailed) failureReasons.push(`Status: ${status}`);
+        if (hasErrorCode) failureReasons.push(`Error: ${response.error_code}`);
+        if (noCrawledPages)
+          failureReasons.push(
+            `No pages found (found: ${response.pages_found}, list: ${response.crawled_pages?.length})`
+          );
+        if (noTokens) failureReasons.push(`No tokens (count: ${totalTokens})`);
+
+        const debugInfo =
+          failureReasons.length > 0 ? ` (${failureReasons.join(", ")})` : "";
+        const errorMsg =
+          (response.error_message || "Cannot embed empty text list") +
+          debugInfo;
+
+        console.log("❌ 驗證失敗，拋出錯誤:", errorMsg);
+        console.log("❌ 不會調用 onUrlSubmitted()");
+        console.log("❌ 不會設置 crawlerResults");
+
+        // 確保清除先前的結果
+        setCrawlerResults(null);
+        throw new Error(errorMsg);
+      }
+
+      // 只有驗證通過後才設置成功狀態
+      console.log("✅ 驗證通過，設置成功狀態");
       setCrawlerResults(response);
 
       // Auto-submit crawler results for processing
       // Crawler has already uploaded content, now just start processing flow
-      onUrlSubmitted(url); // Use crawler URL as source
+      console.log("✅ 調用 onCrawlerSuccess()");
+
+      // 優先使用 onCrawlerSuccess 回調（如果父組件有提供）以避免重複 API 呼叫
+      if (onCrawlerSuccess) {
+        onCrawlerSuccess(response);
+      } else {
+        // 向後兼容：如果沒有 onCrawlerSuccess，才調用 onUrlSubmitted
+        // 但注意這可能會觸發父組件的 uploadUrl API 造成錯誤
+        console.warn(
+          "⚠️ 沒有 onCrawlerSuccess 回調，降級使用 onUrlSubmitted (可能導致錯誤)"
+        );
+        onUrlSubmitted(url);
+      }
     } catch (err) {
+      console.log("❌ === 進入 catch 區塊 ===");
+      console.log("錯誤:", err);
+
+      // 設置失敗標記
+      setHasCrawlerFailed(true);
+
       // 清空爬蟲結果，確保不顯示舊的成功畫面
+      console.log("清空 crawlerResults");
       setCrawlerResults(null);
 
       // 增強錯誤訊息，包含防爬提示
       const errorMessage =
         err instanceof Error ? err.message : "Failed to crawl website";
+
+      console.log("錯誤訊息:", errorMessage);
+
+      // 檢查是否為資料量過少錯誤
+      const isInsufficientDataError =
+        errorMessage.startsWith("INSUFFICIENT_DATA:");
 
       // 檢查是否為防爬相關錯誤
       const isBlockedError =
@@ -300,7 +438,12 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
         errorMessage.toLowerCase().includes("empty text list");
 
       let errorMsg: string;
-      if (isBlockedError) {
+      if (isInsufficientDataError) {
+        // 解析實際的 token 數量
+        const actualTokens = errorMessage.split(":")[1] || "少於 50";
+        errorMsg = `爬取的網頁內容過少（僅 ${actualTokens} tokens），無法形成有效的資料建檔。\n\n請提供內容更豐富的網頁，或點擊下方「使用範例網站」按鈕。`;
+        setErrorDialogTitle("資料量不足");
+      } else if (isBlockedError) {
         errorMsg = `此網站無法被爬取（網站可能有防爬蟲機制）。\n\n請使用其他網站或點擊下方「使用範例網站」按鈕。`;
         setErrorDialogTitle("網頁爬取失敗");
       } else {
@@ -308,12 +451,30 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
         setErrorDialogTitle("網頁爬取失敗");
       }
 
+      console.log("顯示錯誤對話框:", errorMsg);
       // 使用對話框顯示錯誤
       setErrorDialogMessage(errorMsg);
       setShowErrorDialog(true);
+
+      console.log("❌ 不調用 onUrlSubmitted (避免設置父組件成功狀態)");
+      // 不調用 onUrlSubmitted，避免設置父組件的成功狀態
     } finally {
       setCrawlerLoading(false);
     }
+  };
+
+  /**
+   * 關閉錯誤對話框
+   */
+  const handleCloseErrorDialog = () => {
+    console.log("=== 關閉錯誤對話框 ===");
+    console.log("關閉前 crawlerResults:", crawlerResults);
+    setShowErrorDialog(false);
+    setCrawlerResults(null); // 清除爬蟲結果
+    setCrawlerError(null); // 清除爬蟲錯誤
+    setHasCrawlerFailed(false); // 清除失敗標記
+    console.log("已清除 crawlerResults 和 crawlerError");
+    // 確保回到初始的爬蟲輸入界面，不顯示任何成功訊息
   };
 
   return (
@@ -334,7 +495,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                 <button
                   type="button"
                   className="btn-close btn-close-white"
-                  onClick={() => setShowErrorDialog(false)}
+                  onClick={handleCloseErrorDialog}
                 ></button>
               </div>
               <div className="modal-body">
@@ -344,7 +505,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={() => setShowErrorDialog(false)}
+                  onClick={handleCloseErrorDialog}
                 >
                   確定
                 </button>
@@ -459,9 +620,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                 setUploadSubStep(1);
                 onTabChange?.("file");
               }}
-              disabled={
-                disabled || (activeTab === "crawler" && isCrawlerCompleted)
-              }
+              disabled={disabled || isCrawlerCompleted}
             >
               <i className="bi bi-file-earmark-arrow-up me-2"></i>
               {t("upload.tab.file", "檔案上傳")}
@@ -475,9 +634,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                 setUploadSubStep(1);
                 onTabChange?.("crawler");
               }}
-              disabled={
-                disabled || (activeTab === "file" && isCrawlerCompleted)
-              }
+              disabled={disabled || isCrawlerCompleted}
             >
               <i className="bi bi-globe me-2"></i>
               {t("upload.tab.crawler", "網站爬蟲")}
@@ -667,7 +824,12 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                 <div className="step-upload fade-in">
                   <div className="d-flex align-items-center mb-4">
                     {/* 只在爬蟲未完成時顯示返回按鈕 */}
-                    {!(activeTab === "crawler" && isCrawlerCompleted) && (
+                    {!(
+                      activeTab === "crawler" &&
+                      isCrawlerCompleted &&
+                      !hasCrawlerFailed &&
+                      !showErrorDialog
+                    ) && (
                       <button
                         className="btn btn-link text-decoration-none p-0 me-3 text-secondary"
                         onClick={() => setUploadSubStep(1)}
@@ -679,85 +841,93 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                     <h5 className="card-title mb-0 fw-bold text-primary">
                       {activeTab === "file"
                         ? "步驟 2/2: 上傳檔案"
-                        : isCrawlerCompleted
+                        : isCrawlerCompleted &&
+                          !hasCrawlerFailed &&
+                          !showErrorDialog
                         ? "爬取完成"
                         : "步驟 2/2: 開始爬取"}
                     </h5>
                   </div>
 
                   {/* 爬蟲完成時顯示結果摘要 */}
-                  {activeTab === "crawler" && isCrawlerCompleted && (
-                    <div className="crawler-completed-summary">
-                      <div className="alert alert-success d-flex align-items-center mb-4">
-                        <i className="bi bi-check-circle-fill me-2 fs-4"></i>
-                        <div>
-                          <strong>網站爬取成功！</strong>
-                          <p className="mb-0 mt-1">
-                            已成功爬取 {crawlerResults.pages_found} 個頁面，共{" "}
-                            {(crawlerResults.total_tokens / 1000).toFixed(1)}K
-                            tokens。
-                            資料已上傳至系統，請點擊下方「下一步」按鈕繼續處理流程。
-                          </p>
+                  {activeTab === "crawler" &&
+                    isCrawlerCompleted &&
+                    !hasCrawlerFailed &&
+                    !showErrorDialog && (
+                      <div className="crawler-completed-summary">
+                        <div className="alert alert-success d-flex align-items-center mb-4">
+                          <i className="bi bi-check-circle-fill me-2 fs-4"></i>
+                          <div>
+                            <strong>網站爬取成功！</strong>
+                            <p className="mb-0 mt-1">
+                              已成功爬取 {crawlerResults.pages_found} 個頁面，共{" "}
+                              {(crawlerResults.total_tokens / 1000).toFixed(1)}K
+                              tokens。
+                              資料已上傳至系統，請點擊下方「下一步」按鈕繼續處理流程。
+                            </p>
+                          </div>
                         </div>
-                      </div>
 
-                      <div className="card mb-3 border shadow-sm">
-                        <div className="card-header bg-light border-bottom">
-                          <h6 className="mb-0 fw-bold">
-                            <i className="bi bi-file-earmark-text me-2"></i>
-                            爬取結果詳情
-                          </h6>
-                        </div>
-                        <div className="card-body">
-                          <div className="row">
-                            <div className="col-md-4 mb-3">
-                              <div className="text-center p-3 bg-light rounded">
-                                <i className="bi bi-globe text-primary fs-3"></i>
-                                <div className="mt-2 fw-bold">站點頁面</div>
-                                <div className="fs-4 text-primary">
-                                  {crawlerResults.pages_found}
+                        <div className="card mb-3 border shadow-sm">
+                          <div className="card-header bg-light border-bottom">
+                            <h6 className="mb-0 fw-bold">
+                              <i className="bi bi-file-earmark-text me-2"></i>
+                              爬取結果詳情
+                            </h6>
+                          </div>
+                          <div className="card-body">
+                            <div className="row">
+                              <div className="col-md-4 mb-3">
+                                <div className="text-center p-3 bg-light rounded">
+                                  <i className="bi bi-globe text-primary fs-3"></i>
+                                  <div className="mt-2 fw-bold">站點頁面</div>
+                                  <div className="fs-4 text-primary">
+                                    {crawlerResults.pages_found}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                            <div className="col-md-4 mb-3">
-                              <div className="text-center p-3 bg-light rounded">
-                                <i className="bi bi-file-text text-info fs-3"></i>
-                                <div className="mt-2 fw-bold">總 TOKEN 數</div>
-                                <div className="fs-4 text-info">
-                                  {(crawlerResults.total_tokens / 1000).toFixed(
-                                    1
-                                  )}
-                                  K
+                              <div className="col-md-4 mb-3">
+                                <div className="text-center p-3 bg-light rounded">
+                                  <i className="bi bi-file-text text-info fs-3"></i>
+                                  <div className="mt-2 fw-bold">
+                                    總 TOKEN 數
+                                  </div>
+                                  <div className="fs-4 text-info">
+                                    {(
+                                      crawlerResults.total_tokens / 1000
+                                    ).toFixed(1)}
+                                    K
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                            <div className="col-md-4 mb-3">
-                              <div className="text-center p-3 bg-light rounded">
-                                <i className="bi bi-check-circle text-success fs-3"></i>
-                                <div className="mt-2 fw-bold">狀態</div>
-                                <div className="fs-6 text-success">
-                                  {crawlerResults.crawl_status ===
-                                    "completed" && "完成"}
-                                  {crawlerResults.crawl_status ===
-                                    "token_limit_reached" && "達到 Token 限制"}
-                                  {crawlerResults.crawl_status ===
-                                    "page_limit_reached" && "達到頁面限制"}
+                              <div className="col-md-4 mb-3">
+                                <div className="text-center p-3 bg-light rounded">
+                                  <i className="bi bi-check-circle text-success fs-3"></i>
+                                  <div className="mt-2 fw-bold">狀態</div>
+                                  <div className="fs-6 text-success">
+                                    {crawlerResults.crawl_status ===
+                                      "completed" && "完成"}
+                                    {crawlerResults.crawl_status ===
+                                      "token_limit_reached" &&
+                                      "達到 Token 限制"}
+                                    {crawlerResults.crawl_status ===
+                                      "page_limit_reached" && "達到頁面限制"}
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           </div>
                         </div>
-                      </div>
 
-                      {/* 完成提示 */}
-                      <div className="text-center mt-4">
-                        <div className="alert alert-info">
-                          <i className="bi bi-info-circle me-2"></i>
-                          資料已自動上傳至系統，系統將自動進入下一步「內容審核」流程。
+                        {/* 完成提示 */}
+                        <div className="text-center mt-4">
+                          <div className="alert alert-info">
+                            <i className="bi bi-info-circle me-2"></i>
+                            資料已自動上傳至系統，系統將自動進入下一步「內容審核」流程。
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
                   {/* 爬蟲未完成或文件上傳時顯示原有界面 */}
                   {!(activeTab === "crawler" && isCrawlerCompleted) && (

@@ -99,7 +99,7 @@ export const restartSession = async (sessionId: string): Promise<SessionResponse
  */
 export const updateLanguage = async (
   sessionId: string, 
-  language: 'en' | 'zh-TW' | 'zh-CN' | 'ko' | 'es' | 'ja' | 'ar' | 'fr'
+  language: 'en' | 'zh-TW' | 'zh-CN' | 'ko' | 'es' | 'ja' | 'fr'
 ): Promise<SessionResponse> => {
   const payload: LanguageUpdateRequest = { language };
   const response = await api.put<SessionResponse>(

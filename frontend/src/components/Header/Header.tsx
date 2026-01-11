@@ -28,7 +28,6 @@ const SUPPORTED_LANGUAGES: { code: SupportedLanguage; name: string }[] = [
   { code: "ja", name: "日本語" },
   { code: "es", name: "Español" },
   { code: "ko", name: "한국어" },
-  { code: "ar", name: "العربية" },
   { code: "fr", name: "Français" },
   { code: "zh-CN", name: "简体中文" },
 ];
@@ -57,6 +56,24 @@ export const Header: React.FC<HeaderProps> = ({
       (i18n.language as SupportedLanguage) || "en"
     );
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  // 點擊外部關閉下拉選單
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    if (dropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [dropdownOpen]);
 
   React.useEffect(() => {
     // Update state when i18n language changes
@@ -118,7 +135,7 @@ export const Header: React.FC<HeaderProps> = ({
             )}
 
             {/* Language Dropdown Selector - Moved to rightmost */}
-            <div className="dropdown">
+            <div className="dropdown" ref={dropdownRef}>
               <button
                 className="btn btn-sm btn-outline-light border dropdown-toggle"
                 type="button"

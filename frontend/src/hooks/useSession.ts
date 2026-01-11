@@ -25,7 +25,7 @@ interface UseSessionReturn {
   createSession: (similarityThreshold?: number, customPrompt?: string) => Promise<void>;
   closeSession: () => Promise<void>;
   restartSession: () => Promise<void>;
-  updateLanguage: (newLanguage: 'en' | 'zh-TW' | 'zh-CN' | 'ko' | 'es' | 'ja' | 'ar' | 'fr', passedSessionId?: string | null) => Promise<void>;
+  updateLanguage: (newLanguage: 'en' | 'zh-TW' | 'zh-CN' | 'ko' | 'es' | 'ja' | 'fr', passedSessionId?: string | null) => Promise<void>;
   setOnSessionExpired: (callback: (() => void) | undefined) => void;
   resetSessionExpired: () => void;
 }
@@ -126,7 +126,7 @@ export const useSession = (): UseSessionReturn => {
     // If we expire locally first, we show modal.
     // If backend expires first, next request fails with 404 -> show modal.
     
-    console.log(`[Session] Setting expiration timer for ${timeUntilExpiration}ms`);
+    // console.log(`[Session] Setting expiration timer for ${timeUntilExpiration}ms`);
     
     if (timeUntilExpiration > 0) {
       expirationCheckRef.current = setTimeout(() => {
@@ -155,7 +155,7 @@ export const useSession = (): UseSessionReturn => {
         setError(null);
         errorSetRef.current = false;
       }
-      console.log(`Activity-triggered heartbeat sent for session ${sessionId}`);
+      // console.log(`Activity-triggered heartbeat sent for session ${sessionId}`);
     } catch (err: any) {
       console.error('Activity heartbeat failed:', err);
       
@@ -214,7 +214,7 @@ export const useSession = (): UseSessionReturn => {
           setError(null);
           errorSetRef.current = false;
         }
-        console.log(`Auto heartbeat sent for session ${currentSessionId}`);
+        // console.log(`Auto heartbeat sent for session ${currentSessionId}`);
       } catch (err) {
         console.error('Heartbeat failed:', err);
         if (!errorSetRef.current) {
@@ -230,7 +230,7 @@ export const useSession = (): UseSessionReturn => {
     }, HEARTBEAT_INTERVAL);
     */
     
-    console.log(`Heartbeat timer disabled - only user activity will trigger heartbeat for session ${currentSessionId}`);
+    // console.log(`Heartbeat timer disabled - only user activity will trigger heartbeat for session ${currentSessionId}`);
   }, [error, handleSessionExpiration, startExpirationCheck]);
 
   /**
@@ -257,7 +257,7 @@ export const useSession = (): UseSessionReturn => {
       startHeartbeat(response.session_id);
       startExpirationCheck(newExpiresAt, lastActivity);
       
-      console.log('Session created:', response.session_id);
+      // console.log('Session created:', response.session_id);
     } catch (err: any) {
       setError(err.message || 'Failed to create session');
       console.error('Create session error:', err);
@@ -326,7 +326,7 @@ export const useSession = (): UseSessionReturn => {
   /**
    * Update session language
    */
-  const updateLanguage = useCallback(async (newLanguage: 'en' | 'zh-TW' | 'zh-CN' | 'ko' | 'es' | 'ja' | 'ar' | 'fr', passedSessionId?: string | null) => {
+  const updateLanguage = useCallback(async (newLanguage: 'en' | 'zh-TW' | 'zh-CN' | 'ko' | 'es' | 'ja' | 'fr', passedSessionId?: string | null) => {
     const targetSessionId = passedSessionId !== undefined ? passedSessionId : sessionId;
 
     if (!targetSessionId) {

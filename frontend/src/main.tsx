@@ -117,27 +117,13 @@ const App: React.FC = () => {
   const lastErrorRef = React.useRef<string | null>(null);
   const [workflowReset, setWorkflowReset] = useState(false); // 工作流程重置信號
 
-  // T074: Setup RTL support for Arabic language
+  // T074: Setup language direction (simplified - no RTL languages)
   React.useEffect(() => {
     const handleLanguageChanged = (lng: string) => {
-      // RTL support for Arabic
-      const isRTL = lng === "ar";
-      document.documentElement.dir = isRTL ? "rtl" : "ltr";
+      // All supported languages are LTR
+      document.documentElement.dir = "ltr";
       document.documentElement.lang = lng;
-
-      // Also apply to body for some CSS properties
-      if (isRTL) {
-        document.body.classList.add("rtl-layout");
-      } else {
-        document.body.classList.remove("rtl-layout");
-      }
-
-      console.log(
-        "[RTL] Language changed to:",
-        lng,
-        "Direction:",
-        isRTL ? "rtl" : "ltr"
-      );
+      document.body.classList.remove("rtl-layout");
     };
 
     // Initial setup based on current language
