@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+**/node_modules/
+**/__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Builds & coverage
+build/
+dist/
+frontend/dist/
+frontend/build/
+coverage/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment & secrets
+.env
+.env.*
+
+# VCS & tooling
+.git
+.vscode/
+.idea/
+Dockerfile*
+.dockerignore
+
+# Logs & temp
+*.log*
+logs/
+*.tmp
+*.swp

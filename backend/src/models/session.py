@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 from uuid import UUID, uuid4
 from src.core.config import settings
+from src.core.api_validator import get_default_api_key_status
 
 
 class SessionState(str, Enum):
@@ -32,6 +33,9 @@ class Session(BaseModel):
     language: str = Field(default="en", pattern="^(en|zh-TW|ko|es|ja|ar|fr|zh-CN)$")
     similarity_threshold: float = Field(default=0.3, ge=0.0, le=1.0, description="RAG similarity threshold (0.0-1.0)")
     custom_prompt: str | None = Field(default=None, description="Custom prompt template for RAG responses")
+    gemini_api_key: str | None = Field(default=None, exclude=True)
+    has_valid_api_key: bool = Field(default=False)
+    api_key_source: str = Field(default="none", description="none|env|user")
     
     def __init__(self, **data):
         super().__init__(**data)
@@ -42,6 +46,10 @@ class Session(BaseModel):
             # Remove hyphens from UUID for valid collection name
             clean_id = str(self.session_id).replace("-", "")
             self.qdrant_collection_name = f"session_{clean_id}"
+        # 初始化 API Key 狀態
+        if settings.gemini_api_key and get_default_api_key_status():
+            self.has_valid_api_key = True
+            self.api_key_source = "env"
     
     @field_validator('language')
     @classmethod
@@ -93,6 +101,8 @@ class SessionResponse(BaseModel):
     document_count: int = 0
     vector_count: int = 0
     custom_prompt: str | None = None
+    has_valid_api_key: bool = False
+    api_key_source: str | None = None
     
     class Config:
         json_schema_extra = {

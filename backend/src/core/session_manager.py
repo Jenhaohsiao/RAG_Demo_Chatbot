@@ -9,6 +9,7 @@ import logging
 
 from src.models.session import Session, SessionState, SessionResponse
 from src.core.config import settings
+from src.core.api_validator import get_default_api_key_status
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +44,10 @@ class SessionManager:
             custom_prompt=custom_prompt,
             state=SessionState.INITIALIZING
         )
+
+        # 設定預設 API Key 狀態（來自環境變數）
+        session.has_valid_api_key = get_default_api_key_status()
+        session.api_key_source = "env" if session.has_valid_api_key else "none"
         
         self._sessions[session.session_id] = session
         
@@ -167,6 +172,34 @@ class SessionManager:
         session.vector_count = count
         logger.debug(f"Session {session_id} vector_count: {count}")
         return True
+
+    def set_api_key(self, session_id: UUID, api_key: str) -> bool:
+        """
+        Store a user-provided Gemini API key for this session.
+
+        Args:
+            session_id: UUID of the session
+            api_key: validated Gemini API key
+
+        Returns:
+            bool: True if stored, False if session not found
+        """
+        session = self.get_session(session_id)
+        if not session:
+            return False
+
+        session.gemini_api_key = api_key
+        session.has_valid_api_key = True
+        session.api_key_source = "user"
+        logger.info(f"Session {session_id} stored user API key (masked)")
+        return True
+
+    def get_effective_api_key(self, session_id: UUID) -> str | None:
+        """Return user-provided key if present, otherwise default env key."""
+        session = self.get_session(session_id)
+        if session and session.gemini_api_key:
+            return session.gemini_api_key
+        return settings.gemini_api_key
     
     def close_session(self, session_id: UUID) -> bool:
         """
@@ -236,7 +269,9 @@ class SessionManager:
             similarity_threshold=session.similarity_threshold,
             document_count=session.document_count,
             vector_count=session.vector_count,
-            custom_prompt=session.custom_prompt
+            custom_prompt=session.custom_prompt,
+            has_valid_api_key=session.has_valid_api_key,
+            api_key_source=session.api_key_source
         )
 
 

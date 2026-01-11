@@ -2,4 +2,27 @@
 
 .about-project-modal {
   background-color: $bg-overlay; // rgba(0, 0, 0, 0.5) or similar from variables
+
+  .modal-dialog {
+    max-width: 1000px;
+  }
+
+  .modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-bottom: none;
+  }
+
+  .modal-body {
+    max-height: 75vh;
+    overflow-y: auto;
+
+    .border {
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
 }

@@ -2,8 +2,25 @@
 
 **專案名稱**: Multilingual RAG-Powered Chatbot  
 **分支**: `001-multilingual-rag-chatbot`  
-**最後更新**: 2026-01-10  
-**總體狀態**: ✅ 多語言系統優化 - 移除阿拉伯文、最低資料門檻、UI 體驗改進
+**最後更新**: 2026-01-11  
+**總體狀態**: ✅ 多語言系統優化、RAG 流程對話與文案更新
+
+---
+
+## 📅 2026-01-11 - RAG Flow 說明對話與文案刷新 ✅
+
+**🎯 本次更新重點**:
+1. 流程步驟提示從側邊 Toast 改為置中對話框，閱讀性提升
+2. RAG 流程說明文案更新：
+	 - Step 1「RAG 參數配置」：新增「什麼是 RAG?」解說（含檢索、增強、生成三階段）
+	 - Step 2「System Prompt」：說明 system prompt 與一般 prompt 的差異及其在 RAG 中的約束作用
+	 - Step 3「資料上傳」：強調使用者上傳檔案或爬蟲內容、AI 僅針對資料內容應答
+	 - Step 5「資料向量化, 寫入 Vector DB」：以易懂比喻解釋向量化與 Vector DB 與傳統 DB 的差異
+
+### ✏️ 主要修改檔案
+- `frontend/src/components/WorkflowStepper/WorkflowStepper.tsx`：
+	- 將步驟說明由 Toast 改為置中 modal
+	- 更新步驟 1/2/3/5 的標題與說明文案
 
 ---
 

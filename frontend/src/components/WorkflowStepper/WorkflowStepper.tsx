@@ -131,14 +131,6 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
               // console.log(`[WorkflowStepper] 輪詢更新成功，新documents:`, updatedDocs);
               onDocumentsUpdate?.(updatedDocs);
             } else {
-              console.warn(
-                `[WorkflowStepper] 輪詢更新時未找到匹配文檔，保持原有documents`,
-                {
-                  currentDocs: documents,
-                  targetDoc: docItem,
-                  identifier,
-                }
-              );
             }
           }
         },
@@ -243,15 +235,6 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
         // 安全檢查：確保不會意外清空documents
         if (finalDocs.length === 0 && documents.length > 0) {
-          console.error(
-            `[WorkflowStepper] 警告：最終更新將清空documents！保持原有documents`,
-            {
-              originalDocs: documents,
-              finalDocs,
-              docItem,
-              identifier,
-            }
-          );
           return; // 不執行可能清空documents的更新
         }
 
@@ -272,7 +255,6 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       // 輪詢完成，調用回調
       onComplete?.();
     } catch (error) {
-      console.error(`[WorkflowStepper] 文檔狀態輪詢失敗:`, error);
       // 錯誤時也要調用回調
       onComplete?.();
 
@@ -327,9 +309,6 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
         setShowErrorDialog(true);
       } else {
         // 內容審核錯誤只記錄日誌，不顯示 toast
-        console.warn(
-          `[WorkflowStepper] 內容審核問題將在流程4處理: ${errorMessage}`
-        );
       }
     }
   };
@@ -734,10 +713,6 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           // console.log("[WorkflowStepper] Custom prompt updated for step 6");
         }
       } catch (error) {
-        console.warn(
-          "[WorkflowStepper] Failed to update custom prompt:",
-          error
-        );
         // 不阻擋進入步驟6
       }
     }
@@ -948,7 +923,6 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
                 // 檔案上傳完成，用戶需手動進入下一步
               } catch (error) {
-                console.error("File upload failed:", error);
                 setIsGlobalLoading(false);
                 setToastContent({
                   title: "錯誤",
@@ -961,14 +935,11 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             }}
             onUrlUpload={async (url) => {
               try {
-                console.log("Starting URL upload:", url);
                 // 顯示全局 Loading
                 setIsGlobalLoading(true);
                 setLoadingMessage(`正在處理URL: ${url}...`);
 
                 const response = await uploadUrl(sessionId!, url);
-                console.log("URL upload successful:", response);
-
                 // 創建初始文檔項目
                 const newDoc = {
                   filename: url,
@@ -992,7 +963,6 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
                 // URL處理完成，用戶需手動進入下一步
               } catch (error) {
-                console.error("URL upload failed:", error);
                 setIsGlobalLoading(false);
 
                 // 檢查是否為內容審核錯誤
@@ -1009,20 +979,12 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                   });
                   setShowToast(true);
                 } else {
-                  console.warn(
-                    `[WorkflowStepper] URL內容審核問題將在流程4處理: ${errorMessage}`
-                  );
                 }
               }
             }}
             onCrawlerUpload={async (url, maxTokens, maxPages) => {
               // 保持之前的邏輯（雖然現在主要由 UploadScreen 處理，但為了相容性保留）
               try {
-                console.log("Starting crawler upload (legacy path):", {
-                  url,
-                  maxTokens,
-                  maxPages,
-                });
                 // 顯示全局 Loading
                 setIsGlobalLoading(true);
                 setLoadingMessage(`正在爬取網站: ${url}...`);
@@ -1033,8 +995,6 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                   maxTokens,
                   maxPages
                 );
-                console.log("Website crawl successful:", response);
-
                 // 更新crawledUrls狀態
                 const newUrl = {
                   url: url,
@@ -1059,7 +1019,6 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                 );
                 setShowSuccessDialog(true);
               } catch (error) {
-                console.error("Website crawl failed:", error);
                 setIsGlobalLoading(false);
 
                 // 錯誤處理...
@@ -1076,11 +1035,6 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             onCrawlerSuccess={(result) => {
               // 新增：處理來自 UploadScreen 的成功回調
               // 不需要再次呼叫 API，只更新狀態
-              console.log(
-                "Crawler success received from UploadScreen:",
-                result
-              );
-
               const url =
                 result.source_reference || result.url || "Unknown URL";
 
@@ -1147,9 +1101,6 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             shouldStartProcessing={shouldStartProcessing}
             onProcessingComplete={() => {
               // 更新狀態並標記步驟完成
-              console.log(
-                "TextProcessing completed, marking step 5 as complete"
-              );
               setTextProcessingCompleted(true);
               setStepCompletion((prev) => ({ ...prev, 5: true }));
             }}
@@ -1165,9 +1116,6 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           />
         );
       case 6:
-        console.log(
-          "Rendering case 6 - AI Chat with flow diagram (PRODUCTION MODE)"
-        );
         return (
           <div className="ai-chat-step-container">
             {/* AI 聊天界面 - 剩餘空間 - 使用正式組件 */}
@@ -1182,7 +1130,6 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           </div>
         );
       default:
-        console.log("Invalid step:", currentStep);
         return <div>Invalid step: {currentStep}</div>;
     }
   };

@@ -83,8 +83,6 @@ const App: React.FC = () => {
     setCurrentStep(1);
     setChatPhase(false);
     resetUpload();
-
-    console.log("Session expired, reset to step 1");
   }, [resetUpload]);
 
   // 設置session過期回調
@@ -108,7 +106,7 @@ const App: React.FC = () => {
   // T084-T085: Session control confirmation dialogs
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [showRestartConfirm, setShowRestartConfirm] = useState(false);
-  const [showAboutModal, setShowAboutModal] = useState(false);
+  const [showAboutModal, setShowAboutModal] = useState(true);
   const [systemMessage, setSystemMessage] = useState<{
     type: "error" | "warning" | "info" | "success";
     message: string;
@@ -176,7 +174,6 @@ const App: React.FC = () => {
         setRagFallbackMode(value);
         break;
       default:
-        console.log(`RAG 參數變更: ${parameter} = ${value}`);
         break;
     }
   };
@@ -190,7 +187,6 @@ const App: React.FC = () => {
     // Check if we have a session - if so, reset retry count
     if (sessionId) {
       if (retryCountRef.current > 0) {
-        console.log("[App] Session established, resetting retry count");
         retryCountRef.current = 0;
       }
       return;
@@ -200,16 +196,10 @@ const App: React.FC = () => {
       // If we have an error (meaning previous attempt failed), check retry limits
       if (error) {
         if (retryCountRef.current >= 10) {
-          console.warn(
-            "[App] Max session creation retries reached (10), stopping attempts"
-          );
           return;
         }
 
         retryCountRef.current += 1;
-        console.log(
-          `[App] Retrying session creation (${retryCountRef.current}/10)...`
-        );
       }
 
       createSession(similarityThreshold);
@@ -272,41 +262,24 @@ const App: React.FC = () => {
 
   // Modal 確認按鈕
   const handleModalConfirm = async () => {
-    console.log("[handleModalConfirm] Called", { isFailed, isCompleted });
-
     if (isFailed) {
       // 失敗時回到上傳畫面
-      console.log("[handleModalConfirm] Upload failed, resetting");
       setShowModal(false);
       resetUpload();
     } else if (isCompleted) {
       // 直接進入聊天畫面，不需要等待狀態更新
       // 因為文件處理完成後，後端已經將狀態設置為 READY_FOR_CHAT
-      console.log("[handleModalConfirm] Upload completed, entering chat phase");
       setShowModal(false);
       setChatPhase(true);
     } else {
-      console.log(
-        "[handleModalConfirm] Unexpected state - not failed and not completed"
-      );
     }
   };
 
   const handleLanguageChange = async (newLanguage: SupportedLanguage) => {
     try {
-      console.log(
-        "[handleLanguageChange] Changing language to:",
-        newLanguage,
-        "with sessionId:",
-        sessionId
-      );
-
       // T075: Pass sessionId for backend sync
       await updateLanguage(newLanguage, sessionId);
-
-      console.log("[handleLanguageChange] Language change successful");
     } catch (err) {
-      console.error("[handleLanguageChange] Error:", err);
       // Error is already handled in useSession.updateLanguage
     }
   };
@@ -331,7 +304,6 @@ const App: React.FC = () => {
         message: "Session 更新成功！",
       });
     } catch (err) {
-      console.error("[handleRestartSession] Error:", err);
       // 显示错误提示
       setSystemMessage({
         type: "error",
@@ -351,9 +323,7 @@ const App: React.FC = () => {
       resetUpload();
       setChatPhase(false);
       setShowLeaveConfirm(false);
-    } catch (err) {
-      console.error("[handleConfirmLeave] Error:", err);
-    }
+    } catch (err) {}
   };
 
   // T087: Restart button handler - shows confirmation dialog
@@ -379,7 +349,6 @@ const App: React.FC = () => {
         message: "Session 重新啟動成功！系統已重置為初始狀態。",
       });
     } catch (err) {
-      console.error("[handleConfirmRestart] Error:", err);
       // 显示错误提示
       setSystemMessage({
         type: "error",

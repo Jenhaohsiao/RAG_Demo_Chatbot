@@ -71,15 +71,12 @@ const DataUploadStep: React.FC<DataUploadStepProps> = ({
         <UploadScreen
           sessionId={sessionId}
           onFileSelected={(file) => {
-            console.log("File selected:", file);
             onFileUpload?.(file);
           }}
           onUrlSubmitted={(url) => {
-            console.log("URL submitted:", url);
             onUrlUpload?.(url);
           }}
           onCrawlerSuccess={(result) => {
-            console.log("Crawler success callback:", result);
             onCrawlerSuccess?.(result);
           }}
           maxFileSizeMB={parameters.max_file_size_mb}

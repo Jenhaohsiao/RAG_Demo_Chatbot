@@ -62,18 +62,11 @@ const AiChatStep: React.FC<AiChatStepProps> = ({
     }
 
     try {
-      console.log("[AiChatStep] Fetching documents for session:", sessionId);
       // 獲取文件列表和摘要
       const documents = await listDocuments(sessionId);
-      console.log("[AiChatStep] Received documents:", documents);
-
       if (documents.length > 0) {
         // 使用第一個文件的信息（如果有多個文件，可以考慮合併摘要）
         const firstDoc = documents[0];
-
-        console.log("[AiChatStep] First document:", firstDoc);
-        console.log("[AiChatStep] Document summary:", firstDoc.summary);
-
         setDocumentSummary(firstDoc.summary || "");
         setDocumentInfo({
           sourceReference: firstDoc.source_reference || "",
@@ -99,7 +92,6 @@ const AiChatStep: React.FC<AiChatStepProps> = ({
           indexSize: `${(totalTokens / 1000).toFixed(1)} KB`,
         });
       } else {
-        console.log("[AiChatStep] No documents found, using default state");
         // 沒有文件時的默認狀態
         setSystemStats({
           documentsCount: 0,
@@ -111,11 +103,7 @@ const AiChatStep: React.FC<AiChatStepProps> = ({
 
       setIsReady(true);
     } catch (error) {
-      console.error("[AiChatStep] Failed to load document information:", error);
-
       // 為了測試，提供模擬的文件摘要
-      console.log("[AiChatStep] Providing mock document summary for testing");
-
       // 根據當前語言提供合適的模擬摘要
       const mockSummary = i18n.language.startsWith("zh")
         ? "這是一個測試文件摘要。本系統是一個多語言RAG聊天機器人，支援文檔上傳、文本分析和智能問答功能。該系統集成了向量數據庫技術，能夠快速檢索相關內容並提供準確的回答。系統支持多種文件格式，包括PDF、文本文件和網頁爬蟲等，為用戶提供全面的知識檢索體驗。"
@@ -167,7 +155,6 @@ const AiChatStep: React.FC<AiChatStepProps> = ({
                 // 調用真實的聊天服務，傳遞當前語言
                 return await submitQuery(sessionId, query, i18n.language);
               } catch (error) {
-                console.error("Failed to submit query:", error);
                 // 如果真實API失敗，返回錯誤回應而不是模擬回應
                 return {
                   message_id: `msg_${Date.now()}`,

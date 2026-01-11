@@ -42,8 +42,6 @@ export class ErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // T093: Log error information for debugging
-    console.error("React Error Boundary caught an error:", error, errorInfo);
-
     // Update state with error details
     this.setState({
       error,

@@ -53,20 +53,26 @@ class Embedder:
     
     def __init__(self):
         """初始化 Embedder 服務"""
-        # 配置 Gemini API
-        genai.configure(api_key=settings.gemini_api_key)
-        
         # 模型設定
         self.model_name = "models/text-embedding-004"
         self.dimension = 768
         
         logger.info(f"Embedder initialized with model: {self.model_name}")
+
+    def _configure_api_key(self, api_key: Optional[str]) -> str:
+        """設定當前請求要使用的 API key"""
+        effective_key = api_key or settings.gemini_api_key
+        if not effective_key:
+            raise EmbeddingError("Gemini API key is missing")
+        genai.configure(api_key=effective_key)
+        return effective_key
     
     def embed_text(
         self, 
         text: str, 
         task_type: str = "retrieval_document",
-        source_reference: Optional[str] = None
+        source_reference: Optional[str] = None,
+        api_key: Optional[str] = None
     ) -> EmbeddingResult:
         """
         將單一文字轉換為嵌入向量
@@ -94,6 +100,7 @@ class Embedder:
             raise EmbeddingError("Cannot embed empty text")
         
         try:
+            effective_key = self._configure_api_key(api_key)
             # 記錄嵌入請求
             text_preview = text[:100] + "..." if len(text) > 100 else text
             source_info = f" from {source_reference}" if source_reference else ""
@@ -135,8 +142,15 @@ class Embedder:
             error_msg = f"Failed to embed text{source_info}: {str(e)}"
             logger.error(error_msg, exc_info=True)
             raise EmbeddingError(error_msg) from e
+        finally:
+            # 如果使用者提供 key，使用完後恢復預設 key（若存在）
+            if api_key and settings.gemini_api_key and api_key != settings.gemini_api_key:
+                try:
+                    genai.configure(api_key=settings.gemini_api_key)
+                except Exception:
+                    logger.debug("Failed to reset Gemini API key after override")
     
-    def embed_query(self, query: str) -> EmbeddingResult:
+    def embed_query(self, query: str, api_key: Optional[str] = None) -> EmbeddingResult:
         """
         為查詢文字生成嵌入向量（便捷方法）
         
@@ -160,14 +174,16 @@ class Embedder:
         return self.embed_text(
             text=query,
             task_type="retrieval_query",
-            source_reference="user_query"
+            source_reference="user_query",
+            api_key=api_key
         )
     
     def embed_batch(
         self, 
         texts: List[str], 
         task_type: str = "retrieval_document",
-        source_reference: Optional[str] = None
+        source_reference: Optional[str] = None,
+        api_key: Optional[str] = None
     ) -> List[EmbeddingResult]:
         """
         批次嵌入多個文字（提升效能）
@@ -212,7 +228,8 @@ class Embedder:
                 result = self.embed_text(
                     text=text,
                     task_type=task_type,
-                    source_reference=ref
+                    source_reference=ref,
+                    api_key=api_key
                 )
                 results.append(result)
             except EmbeddingError as e:

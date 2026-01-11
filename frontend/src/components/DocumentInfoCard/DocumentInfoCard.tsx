@@ -40,7 +40,6 @@ export const DocumentInfoCard: React.FC<DocumentInfoCardProps> = ({
           vector_count: data.vector_count,
         });
       } catch (err) {
-        console.error("Failed to fetch session info:", err);
       }
     };
 
@@ -57,13 +56,6 @@ export const DocumentInfoCard: React.FC<DocumentInfoCardProps> = ({
   }
 
   // Debug: 檢查 props
-  console.log("[DocumentInfoCard] Props:", {
-    hasDocumentSummary: !!documentSummary,
-    documentSummaryLength: documentSummary?.length,
-    documentSummary: documentSummary?.substring(0, 100),
-    sessionInfo,
-  });
-
   return (
     <div className="card mb-3 border-primary">
       <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">

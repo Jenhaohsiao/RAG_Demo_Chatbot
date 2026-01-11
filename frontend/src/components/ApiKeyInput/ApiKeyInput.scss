@@ -1,0 +1,191 @@
+// API Key Input Component Styles
+.api-key-input-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+}
+
+.api-key-card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  width: 100%;
+  overflow: hidden;
+  animation: slideIn 0.3s ease-out;
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+.api-key-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem;
+  text-align: center;
+
+  i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  h3 {
+    margin: 0;
+    font-weight: 600;
+  }
+}
+
+.api-key-body {
+  padding: 2rem;
+}
+
+.status-message {
+  .alert {
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+
+    i {
+      font-size: 1.2rem;
+    }
+  }
+}
+
+.info-section {
+  h5 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  a {
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.input-section {
+  label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .input-group {
+    input {
+      font-family: monospace;
+      letter-spacing: 0.5px;
+
+      &:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+      }
+    }
+
+    button {
+      &:focus {
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+      }
+    }
+  }
+
+  .text-danger {
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+  }
+}
+
+.security-note {
+  display: flex;
+  align-items: flex-start;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 0.5rem;
+  border-left: 4px solid #28a745;
+
+  i {
+    margin-top: 0.1rem;
+  }
+
+  small {
+    line-height: 1.5;
+  }
+}
+
+.button-section {
+  .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 0.75rem;
+    font-weight: 600;
+    transition: transform 0.2s;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  .btn-link {
+    color: #6c757d;
+    text-decoration: none;
+
+    &:hover:not(:disabled) {
+      color: #495057;
+      text-decoration: underline;
+    }
+  }
+}
+
+// 響應式設計
+@media (max-width: 576px) {
+  .api-key-input-container {
+    padding: 1rem;
+  }
+
+  .api-key-card {
+    border-radius: 0.75rem;
+  }
+
+  .api-key-header {
+    padding: 1.5rem;
+
+    i {
+      font-size: 2.5rem;
+    }
+
+    h3 {
+      font-size: 1.25rem;
+    }
+  }
+
+  .api-key-body {
+    padding: 1.5rem;
+  }
+}

@@ -88,7 +88,6 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
 
   // 重試處理
   const handleRetry = async () => {
-    console.log("[ContentReview] Retrying content review");
     setRetryCount((prev) => prev + 1);
     setShowRetryOption(false);
 
@@ -113,9 +112,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
 
   // 開始審核過程
   const startReviewProcess = async () => {
-    console.log("startReviewProcess called");
     if (!sessionId) {
-      console.error("No sessionId provided for content review");
       return;
     }
 
@@ -151,14 +148,9 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
             : doc.filename,
         source_reference: doc.filename || `Document ${index + 1}`,
       }));
-
-      console.log("[ContentReview] Content to moderate:", contentToModerate);
-
       // 逐項執行審核
       for (let i = 0; i < reviewItems.length; i++) {
         const item = reviewItems[i];
-        console.log(`[ContentReview] Starting item ${i + 1}: ${item}`);
-
         setReviewProgress((prev) => ({
           ...prev,
           currentItem: item,
@@ -173,16 +165,11 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
         // 檢查每個審核項目
         if (i === 0 || i === 1 || i === 3 || i === 4 || i === 5) {
           // 檢查文件格式完整性、掃描惡意軟體、驗證文檔結構、分析內容品質、檢查版權限制 - 基本檢查總是通過
-          console.log(`[ContentReview] Processing basic check: ${item}`);
           await new Promise((resolve) => setTimeout(resolve, 1500));
           // ✅ 基本檢查總是通過，避免隨機失敗
           passed = true;
         } else if (i === 2) {
           // 檢測有害內容 - 只阻擋真正有害的內容
-          console.log(
-            `[ContentReview] Starting harmful content detection for ${contentToModerate.length} items`
-          );
-
           if (contentToModerate.length > 0) {
             try {
               const moderationResults = await moderateMultipleContent(
@@ -190,12 +177,6 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                 contentToModerate,
                 false // 不使用學術模式，因為新的邏輯已經夠寬鬆
               );
-
-              console.log(
-                `[ContentReview] Moderation results:`,
-                moderationResults
-              );
-
               // 檢查是否有任何內容被阻擋
               const blockedContent = moderationResults.filter(
                 (result) => !result.is_approved
@@ -214,11 +195,6 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                 failureReason = `檢測到有害內容 (${blockedSources}): ${blockedCategories.join(
                   ", "
                 )}`;
-                console.warn(
-                  "[ContentReview] Content blocked by moderation:",
-                  blockedContent
-                );
-
                 // 顯示明確的有害內容警告
                 showToast({
                   type: "error",
@@ -227,27 +203,13 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                   duration: 5000,
                 });
               } else {
-                console.log(
-                  "[ContentReview] All content passed harmful content detection"
-                );
               }
             } catch (error) {
-              console.error(
-                "[ContentReview] Content moderation failed:",
-                error
-              );
               // ⚠️ API 調用失敗 - 將錯誤記錄但不阻擋用戶
               // 這避免了因網絡問題或 API 錯誤而阻止合法內容
               passed = true;
               const errorMsg =
                 error instanceof Error ? error.message : String(error);
-              console.warn(
-                `[ContentReview] Moderation API error (defaulting to PASS): ${errorMsg}`
-              );
-              console.log(
-                "[ContentReview] Moderation error, defaulting to PASS to avoid false blocks"
-              );
-
               // 顯示警告但不阻止繼續
               showToast({
                 type: "warning",
@@ -257,17 +219,9 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
             }
           } else {
             // 沒有內容需要審核，直接通過
-            console.log("[ContentReview] No content to moderate, passing");
             await new Promise((resolve) => setTimeout(resolve, 1500));
           }
         }
-
-        console.log(
-          `[ContentReview] Item ${i + 1} completed: ${item} - ${
-            passed ? "PASSED" : "FAILED"
-          }`
-        );
-
         // 更新進度狀態
         setReviewProgress((prev) => {
           const newState = {
@@ -281,15 +235,11 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                 ]
               : prev.failed,
           };
-          console.log(`[ContentReview] Updated state:`, newState);
           return newState;
         });
 
         // 如果是有害內容檢測失敗，我們仍然繼續其他檢查，但會在最後標記為需要人工審核
         if (!passed && i === 2) {
-          console.log(
-            "[ContentReview] Content moderation failed, but continuing with other checks"
-          );
           // 不要 break，繼續執行其他檢查項目
         }
 
@@ -298,8 +248,6 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
       }
 
       // 完成審核
-      console.log("[ContentReview] All review items completed");
-
       setReviewProgress((prev) => {
         const finalState = {
           ...prev,
@@ -307,9 +255,6 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
           isCompleted: true,
           isRunning: false,
         };
-
-        console.log(`[ContentReview] Final state:`, finalState);
-
         // 保存審核結果到父組件
         onSaveReviewResults?.({
           completed: finalState.completed,
@@ -319,9 +264,6 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
         // 通知父組件審核完成
         // 🚨 安全準則：如果有任何審核失敗項目，必須阻止用戶繼續
         const canProceed = prev.failed.length === 0;
-        console.log(`[ContentReview] Can proceed:`, canProceed);
-        console.log(`[ContentReview] Failed items:`, prev.failed);
-
         // 通知父組件結束 loading
         if (onLoadingChange) {
           onLoadingChange(false);
@@ -336,8 +278,6 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
         return finalState;
       });
     } catch (error) {
-      console.error("Review process failed:", error);
-
       // 通知父組件結束 loading（錯誤情況）
       if (onLoadingChange) {
         onLoadingChange(false);
@@ -362,18 +302,6 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
 
   // 監聽外部觸發信號
   React.useEffect(() => {
-    console.log("[ContentReview] shouldStartReview effect:", {
-      shouldStartReview,
-      hasStartedReview,
-      isRunning: reviewProgress.isRunning,
-      sessionId,
-      willTrigger:
-        shouldStartReview &&
-        !hasStartedReview &&
-        !reviewProgress.isRunning &&
-        sessionId,
-    });
-
     // 添加 sessionId 檢查，避免在沒有 sessionId 時執行
     // 使用 ref 來追蹤是否已經開始審核，避免重複執行
     if (
@@ -382,17 +310,12 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
       !reviewProgress.isRunning &&
       sessionId
     ) {
-      console.log("shouldStartReview triggered, starting review process...");
       startReviewProcess();
     }
   }, [shouldStartReview]); // 只依賴外部觸發信號，避免因內部狀態變化導致重複執行
 
   // 轉換props數據為組件需要的格式
   const documents = React.useMemo(() => {
-    console.log("[ContentReview] Converting props to documents:", {
-      propDocuments,
-      crawledUrls,
-    });
     const result: DocumentInfo[] = [];
 
     // 處理propDocuments
@@ -408,7 +331,6 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
           preview: doc.content || doc.preview || "文檔內容預覽...",
           chunks: doc.chunks || 5,
         };
-        console.log(`[ContentReview] Document ${index}:`, documentInfo);
         result.push(documentInfo);
       });
     }

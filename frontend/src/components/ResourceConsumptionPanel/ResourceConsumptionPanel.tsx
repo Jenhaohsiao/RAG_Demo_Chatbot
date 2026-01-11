@@ -35,16 +35,6 @@ const ResourceConsumptionPanel: React.FC<ResourceConsumptionPanelProps> = ({
   const { t } = useTranslation();
 
   // 調試信息 - 臨時添加
-  console.log("[ResourceConsumptionPanel] Props:", {
-    sourceType,
-    tokensUsed,
-    chunkCount,
-    processingTimeMs,
-    crawlDurationSeconds,
-    avgTokensPerPage,
-    totalTokenLimit,
-  });
-
   // 計算資源百分比
   const tokenPercent = Math.min(100, (tokensUsed / totalTokenLimit) * 100);
 

@@ -27,7 +27,6 @@ apiClient.interceptors.request.use(
     return config;
   },
   (error: AxiosError) => {
-    console.error('[API Request Error]', error);
     return Promise.reject(error);
   }
 );
@@ -44,13 +43,6 @@ apiClient.interceptors.response.use(
       // Server responded with error status
       const status = error.response.status;
       const data = error.response.data as { detail?: string };
-
-      console.error(`[API Error ${status}]`, {
-        url: error.config?.url,
-        method: error.config?.method,
-        detail: data?.detail || error.message,
-      });
-
       // Handle specific status codes
       switch (status) {
         case 400:
@@ -68,11 +60,9 @@ apiClient.interceptors.response.use(
       }
     } else if (error.request) {
       // Request made but no response received
-      console.error('[API Network Error]', error.request);
       throw new Error('Network error. Please check your connection.');
     } else {
       // Error in request setup
-      console.error('[API Setup Error]', error.message);
       throw new Error('Request failed. Please try again.');
     }
   }

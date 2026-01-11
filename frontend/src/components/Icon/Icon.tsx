@@ -83,7 +83,6 @@ export const Icon: React.FC<IconProps> = ({
   // Use internal SVG path
   const path = iconPaths[name];
   if (!path) {
-    console.warn(`Icon "${name}" not found`);
     return null;
   }
 

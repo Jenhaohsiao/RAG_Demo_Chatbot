@@ -32,7 +32,6 @@ export const getSessionMetrics = async (sessionId: string): Promise<SessionMetri
     );
     return response.data;
   } catch (error) {
-    console.error('Error fetching metrics:', error);
     // 返回默認值而不是拋出錯誤
     return {
       session_id: sessionId,

@@ -17,6 +17,11 @@ from typing import Dict, Any
 from .core.config import settings
 from .core.scheduler import scheduler
 from .core.logger import logger, configure_logging  # T091: Import logger
+from .core.api_validator import (
+    validate_gemini_api_key,
+    set_default_api_key_status,
+    get_default_api_key_status,
+)
 from .models.errors import ErrorCode
 
 # T091: Configure logging at startup
@@ -43,13 +48,17 @@ async def lifespan(app: FastAPI):
     logger.info("Starting up RAG Demo Chatbot backend...")
     try:
         if settings.gemini_api_key:
-            genai.configure(api_key=settings.gemini_api_key)
-            # Test API key by listing models
-            models = genai.list_models()
-            logger.info(f"Gemini API configured successfully. Available models: {len(list(models))}")
+            default_valid = validate_gemini_api_key(settings.gemini_api_key)
+            set_default_api_key_status(default_valid)
+            if default_valid:
+                logger.info("Gemini API configured successfully with default key")
+            else:
+                logger.warning("Default Gemini API key appears invalid - UI input required")
         else:
+            set_default_api_key_status(False)
             logger.warning("Gemini API key not provided - API calls will require user input")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
+        set_default_api_key_status(False)
         logger.error(f"Gemini API configuration issue: {e}")
         logger.warning("API key may be invalid - user will need to provide valid key via UI")
     

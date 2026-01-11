@@ -81,8 +81,6 @@ export const useSession = (): UseSessionReturn => {
    * Handle session expiration
    */
   const handleSessionExpiration = useCallback(() => {
-    console.log('🔴 [useSession] Session expired, triggering cleanup');
-    console.log('🔴 [useSession] Setting isSessionExpired = true');
     setIsSessionExpired(true);
     stopHeartbeat();
     
@@ -93,7 +91,6 @@ export const useSession = (): UseSessionReturn => {
     
     // 觸發回調
     if (onSessionExpiredRef.current) {
-      console.log('🔴 [useSession] Calling onSessionExpired callback');
       onSessionExpiredRef.current();
     }
   }, [stopHeartbeat]);
@@ -157,8 +154,6 @@ export const useSession = (): UseSessionReturn => {
       }
       // console.log(`Activity-triggered heartbeat sent for session ${sessionId}`);
     } catch (err: any) {
-      console.error('Activity heartbeat failed:', err);
-      
       // Robust 404 detection - check both axios response and error message
       const status = err?.response?.status;
       const errorMessage = err?.message || '';
@@ -174,7 +169,6 @@ export const useSession = (): UseSessionReturn => {
         errorMessage.includes('ERR_SESSION_NOT_FOUND');
       
       if (isSessionNotFound) {
-        console.log('[useSession] Session not found/expired, triggering expiration handler...');
         handleSessionExpiration();
       }
     }
@@ -216,7 +210,6 @@ export const useSession = (): UseSessionReturn => {
         }
         // console.log(`Auto heartbeat sent for session ${currentSessionId}`);
       } catch (err) {
-        console.error('Heartbeat failed:', err);
         if (!errorSetRef.current) {
           if (err instanceof Error && (err.message.includes('404') || err.message.includes('410'))) {
             handleSessionExpiration();
@@ -260,7 +253,6 @@ export const useSession = (): UseSessionReturn => {
       // console.log('Session created:', response.session_id);
     } catch (err: any) {
       setError(err.message || 'Failed to create session');
-      console.error('Create session error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -282,11 +274,8 @@ export const useSession = (): UseSessionReturn => {
       setSessionId(null);
       setSessionState(null);
       setExpiresAt(null);
-      
-      console.log('Session closed:', sessionId);
     } catch (err: any) {
       setError(err.message || 'Failed to close session');
-      console.error('Close session error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -313,11 +302,8 @@ export const useSession = (): UseSessionReturn => {
       setLanguage(response.language);
       
       startHeartbeat(response.session_id);
-      
-      console.log('Session restarted:', response.session_id);
     } catch (err: any) {
       setError(err.message || 'Failed to restart session');
-      console.error('Restart session error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -330,7 +316,6 @@ export const useSession = (): UseSessionReturn => {
     const targetSessionId = passedSessionId !== undefined ? passedSessionId : sessionId;
 
     if (!targetSessionId) {
-      console.log('[updateLanguage] No session ID, updating local state only');
       setLanguage(newLanguage);
       i18n.changeLanguage(newLanguage);
       return;
@@ -340,18 +325,13 @@ export const useSession = (): UseSessionReturn => {
     setError(null);
 
     try {
-      console.log('[updateLanguage] Updating language to:', newLanguage, 'for session:', targetSessionId);
-      
       const response = await sessionService.updateLanguage(targetSessionId, newLanguage);
       
       setLanguage(response.language);
       i18n.changeLanguage(response.language);
-      
-      console.log('[updateLanguage] Language successfully updated:', newLanguage);
     } catch (err: any) {
       const errorMsg = err.message || 'Failed to update language';
       setError(errorMsg);
-      console.error('[updateLanguage] Error:', errorMsg);
       throw err;
     } finally {
       setIsLoading(false);
@@ -384,7 +364,6 @@ export const useSession = (): UseSessionReturn => {
    * Reset session expired state (called when user confirms the expired modal)
    */
   const resetSessionExpired = useCallback(() => {
-    console.log('🟢 [useSession] Resetting isSessionExpired to false');
     setIsSessionExpired(false);
   }, []);
 

@@ -113,7 +113,6 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
           const suggs = await getChatSuggestions(sessionId, i18n.language);
           setInitialSuggestions(suggs);
         } catch (err) {
-          console.error("Failed to fetch suggestions", err);
         } finally {
           setAreSuggestionsLoading(false);
         }
@@ -173,7 +172,6 @@ ${summary}`,
     const updateMetrics = async () => {
       // 如果連續失敗超過3次，停止輪詢
       if (errorCount >= 3) {
-        console.warn("Metrics API failed too many times, stopping polling");
         if (interval) {
           clearInterval(interval);
           interval = null;
@@ -192,7 +190,6 @@ ${summary}`,
           setError(null);
         }
       } catch (err: any) {
-        console.error("Failed to update metrics:", err);
         errorCount++;
         setMetricsErrorCount(errorCount);
         // 檢查是否為Session過期錯誤，且尚未通知過
@@ -227,7 +224,6 @@ ${summary}`,
     const fetchSessionInfo = async () => {
       // 如果連續失敗超過3次，停止輪詢
       if (errorCount >= 3) {
-        console.warn("Session API failed too many times, stopping polling");
         if (interval) {
           clearInterval(interval);
           interval = null;
@@ -249,7 +245,6 @@ ${summary}`,
           setError(null);
         }
       } catch (err: any) {
-        console.error("Failed to fetch session info:", err);
         errorCount++;
         setSessionErrorCount(errorCount);
         // 檢查是否為Session過期錯誤，且尚未通知過
@@ -341,7 +336,6 @@ ${summary}`,
       } else if (!sessionExpiredNotified) {
         setError(err.response?.data?.detail || t("chat.error.sendFailed"));
       }
-      console.error("Query failed:", err);
     } finally {
       setIsLoading(false);
     }

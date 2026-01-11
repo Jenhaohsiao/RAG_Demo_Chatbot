@@ -33,8 +33,6 @@ export const moderateContent = async (
   request: ContentModerationRequest
 ): Promise<ContentModerationResponse> => {
   try {
-    console.log(`[ModerationService] Checking content safety for ${request.source_reference}${request.academic_mode ? ' (Academic Mode)' : ''}`);
-    
     const response = await axios.post<ContentModerationResponse>(
       `${API_BASE_URL}/api/v1/upload/${sessionId}/moderate`,
       {
@@ -43,13 +41,9 @@ export const moderateContent = async (
         academic_mode: request.academic_mode || false
       }
     );
-
-    console.log(`[ModerationService] Moderation result:`, response.data);
     return response.data;
     
   } catch (error: any) {
-    console.error(`[ModerationService] Moderation failed:`, error);
-    
     const moderationError: ModerationError = new Error(
       error.response?.data?.detail || error.message || 'Content moderation failed'
     );
@@ -81,7 +75,6 @@ export const moderateMultipleContent = async (
         source_reference: item.source_reference
       });
     } catch (error) {
-      console.error(`Failed to moderate ${item.source_reference}:`, error);
       // 如果單個項目失敗，標記為已阻擋
       results.push({
         status: 'BLOCKED',

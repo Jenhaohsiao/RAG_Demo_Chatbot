@@ -5,6 +5,7 @@ Handles session lifecycle endpoints
 T089: Enhanced error handling with appropriate HTTP status codes
 """
 from fastapi import APIRouter, HTTPException, status, Request
+from pydantic import BaseModel
 from uuid import UUID
 import logging
 
@@ -17,10 +18,29 @@ from src.models.session import (
 from src.models.metrics import Metrics
 from src.models.errors import ErrorCode
 from src.core.logger import session_activity_logger
+from src.core.api_validator import validate_gemini_api_key, get_default_api_key_status
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+
+class ApiKeyRequest(BaseModel):
+    """使用者提交的 API Key"""
+    api_key: str
+
+
+class ApiKeyValidationResponse(BaseModel):
+    """API Key 驗證回應"""
+    valid: bool
+    message: str | None = None
+
+
+class ApiKeyStatusResponse(BaseModel):
+    """API Key 狀態回應"""
+    status: str  # valid | missing | invalid
+    source: str  # env | user | none
+    has_valid_api_key: bool
 
 
 @router.post("/create", response_model=SessionResponse, status_code=status.HTTP_201_CREATED)
@@ -307,3 +327,128 @@ async def update_custom_prompt(session_id: UUID, custom_prompt: str | None = Non
     logger.info(f"Session {session_id} custom_prompt updated (has_prompt: {bool(custom_prompt)})")
     
     return session_manager.to_response(session)
+
+
+@router.get("/{session_id}/api-key/status", response_model=ApiKeyStatusResponse)
+async def get_api_key_status(session_id: UUID):
+    """
+    檢查目前 Session 的 Gemini API Key 狀態。
+    如果存在使用者提供的 key，直接返回已驗證狀態；
+    否則回傳預設 key 的狀態。
+    """
+    session = session_manager.get_session(session_id)
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Session {session_id} not found"
+        )
+
+    # 優先使用使用者提供的 key 狀態
+    if session.gemini_api_key and session.has_valid_api_key:
+        return ApiKeyStatusResponse(
+            status="valid",
+            source="user",
+            has_valid_api_key=True
+        )
+
+    # 退回到預設 key 狀態
+    if get_default_api_key_status():
+        return ApiKeyStatusResponse(
+            status="valid",
+            source="env",
+            has_valid_api_key=True
+        )
+
+    return ApiKeyStatusResponse(
+        status="missing",
+        source="none",
+        has_valid_api_key=False
+    )
+
+
+@router.post("/{session_id}/api-key", response_model=ApiKeyStatusResponse)
+async def set_api_key(session_id: UUID, request: ApiKeyRequest):
+    """
+    讓使用者在 Session 層級提供 Gemini API Key。
+    會先做輕量驗證，成功後僅儲存在記憶體，不回傳給前端。
+    """
+    session = session_manager.get_session(session_id)
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Session {session_id} not found"
+        )
+
+    # 驗證 key
+    is_valid = validate_gemini_api_key(request.api_key)
+    if not is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=ErrorCode.API_KEY_INVALID.value
+        )
+
+    session_manager.set_api_key(session_id, request.api_key)
+
+    return ApiKeyStatusResponse(
+        status="valid",
+        source="user",
+        has_valid_api_key=True
+    )
+
+
+@router.get("/api-key/status", response_model=ApiKeyStatusResponse)
+async def get_api_key_status():
+    """
+    檢查當前 API Key 狀態（環境變數）
+    此端點不需要 session_id，用於應用啟動時檢查
+    
+    Returns:
+        ApiKeyStatusResponse: API Key 狀態資訊
+    """
+    default_key_valid = get_default_api_key_status()
+    
+    if default_key_valid:
+        return ApiKeyStatusResponse(
+            status="valid",
+            source="env",
+            has_valid_api_key=True
+        )
+
+    return ApiKeyStatusResponse(
+        status="missing",
+        source="none",
+        has_valid_api_key=False
+    )
+
+
+@router.post("/api-key/validate", response_model=ApiKeyValidationResponse)
+async def validate_api_key(request: ApiKeyRequest):
+    """
+    驗證使用者提供的 Gemini API Key
+    此端點不需要 session_id，用於註冊前驗證
+    
+    Args:
+        request: 包含 api_key 的請求體
+        
+    Returns:
+        ApiKeyValidationResponse: 驗證結果
+    """
+    try:
+        is_valid = validate_gemini_api_key(request.api_key)
+        
+        if is_valid:
+            return ApiKeyValidationResponse(
+                valid=True,
+                message="API key is valid"
+            )
+        else:
+            return ApiKeyValidationResponse(
+                valid=False,
+                message="API key validation failed"
+            )
+    except Exception as e:
+        logger.error(f"API key validation error: {e}")
+        return ApiKeyValidationResponse(
+            valid=False,
+            message=f"Validation error: {str(e)}"
+        )

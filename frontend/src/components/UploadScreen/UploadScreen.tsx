@@ -96,16 +96,6 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
       crawlerResults.crawl_status === "page_limit_reached");
 
   // Log crawler state
-  console.log("=== isCrawlerCompleted 狀態 ===");
-  console.log("crawlerResults:", crawlerResults);
-  console.log("isCrawlerCompleted:", isCrawlerCompleted);
-  console.log("hasCrawlerFailed:", hasCrawlerFailed);
-  console.log("showErrorDialog:", showErrorDialog);
-  console.log(
-    "應顯示成功畫面:",
-    isCrawlerCompleted && !hasCrawlerFailed && !showErrorDialog
-  );
-
   // 處理使用範例文件
   const handleUseSampleFile = async () => {
     try {
@@ -139,7 +129,6 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
       onFileSelected(file);
       setError(null);
     } catch (err) {
-      console.error("載入範例文件失敗:", err);
       setError("無法載入範例文件，請手動上傳檔案");
     }
   };
@@ -301,15 +290,6 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
 
     try {
       const response = await uploadWebsite(sessionId, url, maxTokens, maxPages);
-
-      console.log("=== 爬蟲 API 響應 ===");
-      console.log("extraction_status:", response.extraction_status);
-      console.log("error_code:", response.error_code);
-      console.log("error_message:", response.error_message);
-      console.log("crawled_pages:", response.crawled_pages);
-      console.log("total_tokens:", response.total_tokens);
-      console.log("完整響應:", response);
-
       // 驗證爬蟲結果 - 優先檢查 extraction_status 和 error_code
       // 確保大小寫不敏感
       const status = response.extraction_status?.toUpperCase();
@@ -332,30 +312,8 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
       const noCrawledPages = !hasPages;
       const noTokens = !hasTokens;
       const insufficientTokens = hasTokens && !hasSufficientTokens;
-
-      console.log("=== 驗證結果詳細檢查 ===");
-      console.log("Status:", status);
-      console.log("isFailed:", isFailed);
-      console.log("hasErrorCode:", hasErrorCode);
-      console.log(
-        "hasPages:",
-        hasPages,
-        "Count:",
-        response.crawled_pages?.length,
-        "Found:",
-        response.pages_found
-      );
-      console.log("hasTokens:", hasTokens, "Count:", totalTokens);
-      console.log(
-        "hasSufficientTokens:",
-        hasSufficientTokens,
-        "Min required:",
-        MIN_TOKENS_REQUIRED
-      );
-
       // 檢查資料量是否過少（有 tokens 但不足最低要求）
       if (insufficientTokens) {
-        console.log("❌ 資料量過少，拋出錯誤");
         setCrawlerResults(null);
         throw new Error(`INSUFFICIENT_DATA:${totalTokens}`);
       }
@@ -378,52 +336,34 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
         const errorMsg =
           (response.error_message || "Cannot embed empty text list") +
           debugInfo;
-
-        console.log("❌ 驗證失敗，拋出錯誤:", errorMsg);
-        console.log("❌ 不會調用 onUrlSubmitted()");
-        console.log("❌ 不會設置 crawlerResults");
-
         // 確保清除先前的結果
         setCrawlerResults(null);
         throw new Error(errorMsg);
       }
 
       // 只有驗證通過後才設置成功狀態
-      console.log("✅ 驗證通過，設置成功狀態");
       setCrawlerResults(response);
 
       // Auto-submit crawler results for processing
       // Crawler has already uploaded content, now just start processing flow
-      console.log("✅ 調用 onCrawlerSuccess()");
-
       // 優先使用 onCrawlerSuccess 回調（如果父組件有提供）以避免重複 API 呼叫
       if (onCrawlerSuccess) {
         onCrawlerSuccess(response);
       } else {
         // 向後兼容：如果沒有 onCrawlerSuccess，才調用 onUrlSubmitted
         // 但注意這可能會觸發父組件的 uploadUrl API 造成錯誤
-        console.warn(
-          "⚠️ 沒有 onCrawlerSuccess 回調，降級使用 onUrlSubmitted (可能導致錯誤)"
-        );
         onUrlSubmitted(url);
       }
     } catch (err) {
-      console.log("❌ === 進入 catch 區塊 ===");
-      console.log("錯誤:", err);
-
       // 設置失敗標記
       setHasCrawlerFailed(true);
 
       // 清空爬蟲結果，確保不顯示舊的成功畫面
-      console.log("清空 crawlerResults");
       setCrawlerResults(null);
 
       // 增強錯誤訊息，包含防爬提示
       const errorMessage =
         err instanceof Error ? err.message : "Failed to crawl website";
-
-      console.log("錯誤訊息:", errorMessage);
-
       // 檢查是否為資料量過少錯誤
       const isInsufficientDataError =
         errorMessage.startsWith("INSUFFICIENT_DATA:");
@@ -450,13 +390,9 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
         errorMsg = `爬取失敗：${errorMessage}\n\n請使用其他網站或點擊下方「使用範例網站」按鈕。`;
         setErrorDialogTitle("網頁爬取失敗");
       }
-
-      console.log("顯示錯誤對話框:", errorMsg);
       // 使用對話框顯示錯誤
       setErrorDialogMessage(errorMsg);
       setShowErrorDialog(true);
-
-      console.log("❌ 不調用 onUrlSubmitted (避免設置父組件成功狀態)");
       // 不調用 onUrlSubmitted，避免設置父組件的成功狀態
     } finally {
       setCrawlerLoading(false);
@@ -467,13 +403,10 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
    * 關閉錯誤對話框
    */
   const handleCloseErrorDialog = () => {
-    console.log("=== 關閉錯誤對話框 ===");
-    console.log("關閉前 crawlerResults:", crawlerResults);
     setShowErrorDialog(false);
     setCrawlerResults(null); // 清除爬蟲結果
     setCrawlerError(null); // 清除爬蟲錯誤
     setHasCrawlerFailed(false); // 清除失敗標記
-    console.log("已清除 crawlerResults 和 crawlerError");
     // 確保回到初始的爬蟲輸入界面，不顯示任何成功訊息
   };
 

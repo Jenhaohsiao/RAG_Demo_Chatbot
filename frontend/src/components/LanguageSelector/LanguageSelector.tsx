@@ -90,7 +90,6 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         onLanguageChange(selectedLanguage);
       }
     } catch (error) {
-      console.error("[LanguageSelector] Error changing language:", error);
       // Don't close dropdown on error so user can retry
     }
   };

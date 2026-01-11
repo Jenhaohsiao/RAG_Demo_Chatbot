@@ -42,6 +42,8 @@ export interface UploadResponse {
   chunk_count?: number;
   content_size?: number;
   preview?: string;
+  error_code?: string;
+  error_message?: string;
 }
 
 /**
@@ -203,13 +205,6 @@ export const getUploadStatus = async (
   );
 
   // 調試日誌：檢查摘要是否在響應中（一定會顯示）
-  console.warn('[getUploadStatus] Response Summary Check:', {
-    hasSummary: !!response.data.summary,
-    summaryLength: response.data.summary?.length,
-    summary: response.data.summary?.substring(0, 100),
-    processing_progress: response.data.processing_progress
-  });
-
   return response.data;
 };
 
@@ -260,11 +255,6 @@ export const pollUploadStatus = async (
 
     // 檢查是否完成
     if (status.processing_progress === 100) {
-      console.warn('[pollUploadStatus] COMPLETED - Returning:', {
-        hasSummary: !!status.summary,
-        summaryLength: status.summary?.length,
-        summary: status.summary?.substring(0, 50)
-      });
       return status;
     }
 

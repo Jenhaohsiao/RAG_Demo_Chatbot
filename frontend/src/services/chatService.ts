@@ -15,8 +15,6 @@ export async function submitQuery(
   language?: string
 ): Promise<ChatResponse> {
   const lang = language || 'en';
-  console.log('[chatService] Submitting query with language:', lang);
-  
   const response = await api.post<ChatResponse>(
     `/chat/${sessionId}/query`,
     { 

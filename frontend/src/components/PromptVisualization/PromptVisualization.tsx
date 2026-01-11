@@ -127,23 +127,16 @@ const PromptVisualization: React.FC<PromptVisualizationProps> = ({
   // 獲取系統 Prompt 模板
   const fetchSystemPrompts = async () => {
     try {
-      console.log("[PromptVisualization] Fetching system prompts...");
       setLoading(true);
       const response = await fetch(
         "http://localhost:8000/api/v1/prompt/system-prompts"
-      );
-      console.log(
-        "[PromptVisualization] System prompts response status:",
-        response.status
       );
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
       const data = await response.json();
-      console.log("[PromptVisualization] System prompts data:", data);
       setSystemPrompts(data);
     } catch (err) {
-      console.error("[PromptVisualization] System prompts error:", err);
       setError(
         err instanceof Error ? err.message : "Failed to load system prompts"
       );
@@ -155,7 +148,6 @@ const PromptVisualization: React.FC<PromptVisualizationProps> = ({
   // 獲取當前 Session Prompt
   const fetchCurrentPrompt = async () => {
     try {
-      console.log("[PromptVisualization] Fetching current prompt...");
       setLoading(true);
       const params = new URLSearchParams({
         language: currentLanguage,
@@ -166,20 +158,13 @@ const PromptVisualization: React.FC<PromptVisualizationProps> = ({
       }
 
       const url = `http://localhost:8000/api/v1/prompt/current-session-prompt?${params}`;
-      console.log("[PromptVisualization] Current prompt URL:", url);
       const response = await fetch(url);
-      console.log(
-        "[PromptVisualization] Current prompt response status:",
-        response.status
-      );
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
       const data = await response.json();
-      console.log("[PromptVisualization] Current prompt data:", data);
       setCurrentPrompt(data);
     } catch (err) {
-      console.error("[PromptVisualization] Current prompt error:", err);
       setError(
         err instanceof Error ? err.message : "Failed to load current prompt"
       );
@@ -189,7 +174,6 @@ const PromptVisualization: React.FC<PromptVisualizationProps> = ({
   };
 
   useEffect(() => {
-    console.log("[PromptVisualization] Component mounted, fetching data...");
     fetchSystemPrompts();
     fetchCurrentPrompt();
   }, [sessionId, currentLanguage, hasDocuments]);
