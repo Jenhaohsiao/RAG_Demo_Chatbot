@@ -3,11 +3,82 @@
 **專案名稱**: Multilingual RAG-Powered Chatbot  
 **分支**: `001-multilingual-rag-chatbot`  
 **最後更新**: 2026-01-11  
-**總體狀態**: ✅ 多語言系統優化、RAG 流程對話與文案更新
+**總體狀態**: ✅ 代碼清理完成、About Project Modal UI 優化完成
 
 ---
 
-## 📅 2026-01-11 - RAG Flow 說明對話與文案刷新 ✅
+## 📅 2026-01-11 - 代碼清理與 About Project Modal UI 重構 ✅
+
+**🎯 本次更新重點**:
+1. 移除所有前端 console.log 語句（21個檔案）
+2. About Project Modal 完整 UI 改版：對話框加寬、2x2 網格佈局、文字置中
+3. 修復 TypeScript 類型錯誤
+4. 設定對話框每次啟動自動顯示
+
+### 🧹 代碼清理
+
+**移除的內容**:
+- 所有單行 `console.log()`、`console.error()`、`console.warn()` 語句
+- 共處理 21 個 TypeScript/TSX 檔案
+
+**技術細節**:
+- 使用 Node.js 腳本確保 UTF-8 編碼正確處理中文字元
+- 避免 PowerShell 預設編碼導致的字元損壞問題
+
+**修改的檔案**:
+```
+frontend/src/components/: AiChatStep, ApiKeyInput, ChatScreen, ContentReviewStep, 
+  DataUploadStep, DocumentInfoCard, ErrorBoundary, Icon, LanguageSelector,
+  PromptVisualization, ResourceConsumptionPanel, UploadScreen, WorkflowStepper
+frontend/src/hooks/: useLanguage, useMetrics, useSession
+frontend/src/services/: api, chatService, metricsService, moderationService, uploadService
+frontend/src/main.tsx
+```
+
+### 🎨 About Project Modal UI 重構
+
+**對話框設計改進**:
+- **寬度**: `modal-lg` → `modal-xl` (1000px)
+- **佈局**: 垂直堆疊 → 2x2 網格佈局
+- **對齊**: 所有標題和按鈕置中對齊
+- **樣式**: 漸層背景、懸停效果
+
+**內容優化**:
+- 主標題: "AI 不再有幻覺，回答也可以很專注"
+- 副標題: 簡化為兩行說明
+- 四個核心角色卡片:
+  1. **RAG 檢索增強生成** - 讓 AI 誠實，而非健談
+  2. **Vector DB 向量資料庫** - 每句回答都有根據
+  3. **System Prompt 行為規則** - 定義如何做事，非只是說話
+  4. **LLM 語言模型** - 沒有魔法，只有流程
+- Footer: 版本信息 (1.0 · 2026-01-11) + 置中按鈕 "開始使用"
+
+**自動顯示設定**:
+- `main.tsx`: `useState(true)` 確保每次啟動都顯示對話框
+- 移除 localStorage 持久化邏輯
+
+**修改的檔案**:
+- `frontend/src/components/AboutProjectModal/AboutProjectModal.tsx` - 結構、內容、佈局
+- `frontend/src/components/AboutProjectModal/AboutProjectModal.scss` - 樣式增強
+- `frontend/src/main.tsx` - 初始狀態設定
+
+### 🔧 TypeScript 類型修復
+
+**問題**: `WebsiteUploadResponse` 缺少 `error_code` 和 `error_message` 屬性
+
+**解決方案**:
+- 在 `UploadResponse` 介面新增可選屬性:
+  ```typescript
+  error_code?: string;
+  error_message?: string;
+  ```
+
+**修改的檔案**:
+- `frontend/src/services/uploadService.ts`
+
+---
+
+## 📅 2026-01-11 (稍早) - RAG Flow 說明對話與文案刷新 ✅
 
 **🎯 本次更新重點**:
 1. 流程步驟提示從側邊 Toast 改為置中對話框，閱讀性提升
@@ -105,14 +176,32 @@
 | **內容審核** | 整合Gemini Safety API，檢測不當內容 |
 | **向量儲存** | Qdrant數據庫，會話隔離 |
 | **RAG查詢** | 語義搜索，嚴格基於上傳內容回答 |
-| **多語言支援** | 7種語言UI切換（移除阿拉伯文） |
+| **多語言支援** | 7種語言UI切換（en, zh-TW, zh-CN, ko, ja, es, fr） |
 | **Metrics儀表板** | 實時性能監控 |
 | **6步驟工作流程** | RAG配置→AI行為設定→資料上傳→內容審核→文字處理→AI對話 |
-| **UI 優化** | 聊天介面、設定介面、Header、語言選單點擊外部關閉 |
+| **UI 優化** | About Project Modal 2x2佈局、聊天介面、設定介面、Header |
+| **代碼品質** | 移除所有 console.log，TypeScript 類型完整 |
 | **錯誤處理** | 爬蟲錯誤檢測，防爬機制識別，資料量不足統一提示 |
 
 ### 🎯 系統穩定性
-所有核心功能運行正常，錯誤處理機制完善，最低資料門檻確保 RAG 品質。
+所有核心功能運行正常，代碼清理完成，UI 體驗優化，錯誤處理機制完善。
+
+---
+
+## 🎯 最近更新摘要 (2026-01-11)
+
+### ✅ 完成項目
+1. **代碼清理**: 移除 21 個檔案中的所有 console.log 語句
+2. **About Project Modal**: 完整 UI 重構（2x2網格、置中、寬版）
+3. **類型安全**: 修復 UploadResponse 類型定義
+4. **用戶體驗**: 對話框設為啟動時自動顯示
+
+### 📝 歷史功能記錄
+- **2026-01-11 (稍早)**: RAG Flow 說明對話與文案優化
+- **2026-01-10**: 多語言系統優化（移除阿拉伯文、最低 Token 門檻）
+- **2026-01-09**: Flow 3 錯誤處理與爬蟲優化
+- **2026-01-06**: Chat UI 升級與 RAG 設定重構
+- **2026-01-01 ~ 01-05**: 工作流程建立、各步驟 UI 實作
 
 ---
 
