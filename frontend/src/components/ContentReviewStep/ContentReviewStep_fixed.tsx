@@ -149,7 +149,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
     <div className="content-review-step">
       {/* 審核進度區域 */}
       {reviewProgress.isRunning && (
-        <div className="card mb-4 border-primary">
+        <div className="card mb-4 border-primary ">
           <div className="card-header bg-primary text-white">
             <h6 className="mb-0">
               <i className="bi bi-shield-check me-2"></i>

@@ -289,245 +289,155 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
   return (
     <div className="text-processing-step">
       <div className="row g-3 mb-4 processing-panels">
-        {/* A. Vector DB 寫入結果 (Vector DB Write Status) */}
-        <div className="col-md-4">
-          <div className="card surface-card h-100 border-0">
-            <div className="card-header py-2">
-              <h6 className="card-title mb-0">
-                {t(
-                  "workflow.steps.textProcessing.vectorDbStatus.title",
-                  "Vector DB 寫入狀態"
-                )}
-              </h6>
+        {/* 整合狀態面板 - 更緊湊的設計 */}
+        <div className="col-12">
+          <div className="card surface-card border-0">
+            <div
+              className="card-header bg-gradient py-3"
+              style={{
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              }}
+            >
+              <h4 className="card-title mb-0">Vector DB 狀態總覽</h4>
             </div>
-            <div className="card-body p-3">
-              <div className="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
-                <small className="text-muted">
-                  {t(
-                    "workflow.steps.textProcessing.vectorDbStatus.type",
-                    "Vector DB 類型"
-                  )}
-                </small>
-                <strong className="text-dark">Qdrant</strong>
-              </div>
-              <div className="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
-                <small className="text-muted">
-                  {t(
-                    "workflow.steps.textProcessing.vectorDbStatus.collection",
-                    "Collection 名稱"
-                  )}
-                </small>
-                <strong className="text-dark small">
-                  session_{sessionId?.substring(0, 8) || "xxxx"}
-                </strong>
-              </div>
-              <div className="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
-                <small className="text-muted">
-                  {t(
-                    "workflow.steps.textProcessing.vectorDbStatus.sourceDocs",
-                    "來源文件數"
-                  )}
-                </small>
-                <strong className="text-dark">{jobs.length}</strong>
-              </div>
-              <div className="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
-                <small className="text-muted">
-                  {t(
-                    "workflow.steps.textProcessing.vectorDbStatus.vectorCount",
-                    "向量總數"
-                  )}
-                </small>
-                <strong className={!hasStarted ? "text-muted" : "text-primary"}>
-                  {!hasStarted
-                    ? t(
-                        "workflow.steps.textProcessing.vectorDbStatus.notExecuted",
-                        "未執行, 無資料"
-                      )
-                    : jobs.reduce((sum, j) => sum + j.chunks, 0)}
-                </strong>
-              </div>
-              <div className="d-flex justify-content-between align-items-center">
-                <small className="text-muted">
-                  {t(
-                    "workflow.steps.textProcessing.vectorDbStatus.newVectors",
-                    "本次新增向量"
-                  )}
-                </small>
-                <strong className={!hasStarted ? "text-muted" : "text-success"}>
-                  {!hasStarted
-                    ? t(
-                        "workflow.steps.textProcessing.vectorDbStatus.notExecuted",
-                        "未執行, 無資料"
-                      )
-                    : `+${jobs.reduce((sum, j) => sum + j.chunks, 0)}`}
-                </strong>
+            <div className="card-body p-4">
+              {/* 上半部：關鍵指標 */}
+              <div className="row g-3 mb-4">
+                <div className="col-md-3 col-6">
+                  <div className="p-3 bg-light rounded border">
+                    <div className="d-flex align-items-center mb-1">
+                      <i className="bi bi-collection text-primary me-2"></i>
+                      <small className="text-muted">Collection</small>
+                    </div>
+                    <div className="fw-bold text-dark small">
+                      session_{sessionId?.substring(0, 8) || "xxxx"}
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-3 col-6">
+                  <div className="p-3 bg-light rounded border">
+                    <div className="d-flex align-items-center mb-1">
+                      <i className="bi bi-file-earmark-text text-info me-2"></i>
+                      <small className="text-muted">來源文件</small>
+                    </div>
+                    <div className="fw-bold text-dark">{jobs.length} 個</div>
+                  </div>
+                </div>
+                <div className="col-md-3 col-6">
+                  <div className="p-3 bg-light rounded border">
+                    <div className="d-flex align-items-center mb-1">
+                      <i className="bi bi-vector-pen text-success me-2"></i>
+                      <small className="text-muted">向量總數</small>
+                    </div>
+                    <div
+                      className={`fw-bold ${
+                        !hasStarted ? "text-muted" : "text-primary"
+                      }`}
+                    >
+                      {!hasStarted
+                        ? "未執行"
+                        : jobs.reduce((sum, j) => sum + j.chunks, 0)}
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-3 col-6">
+                  <div className="p-3 bg-light rounded border">
+                    <div className="d-flex align-items-center mb-1">
+                      <i className="bi bi-check-circle text-success me-2"></i>
+                      <small className="text-muted">狀態</small>
+                    </div>
+                    <div
+                      className={`fw-bold ${
+                        !hasStarted
+                          ? "text-muted"
+                          : jobs.length > 0 &&
+                            jobs.every((j) => j.status === "completed")
+                          ? "text-success"
+                          : "text-warning"
+                      }`}
+                    >
+                      {!hasStarted
+                        ? "未執行"
+                        : jobs.length > 0 &&
+                          jobs.every((j) => j.status === "completed")
+                        ? "✅ 已就緒"
+                        : "⏳ 處理中"}
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="mt-3 p-2 bg-light rounded border border-light-subtle">
-                <small className="text-muted d-block fst-italic">
-                  <i className="bi bi-lightbulb me-1"></i>
-                  {t(
-                    "workflow.steps.textProcessing.vectorDbStatus.edu",
-                    "AI 將從這裡檢索記憶，而非憑空捏造"
-                  )}
-                </small>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* B. 向量化設定摘要 (Vectorization Settings Summary) */}
-        <div className="col-md-4">
-          <div className="card surface-card h-100 border-0">
-            <div className="card-header py-2">
-              <h6 className="card-title mb-0">
-                {t(
-                  "workflow.steps.textProcessing.settingsSummary.title",
-                  "向量化設定摘要"
-                )}
-              </h6>
-            </div>
-            <div className="card-body p-3">
-              <div className="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
-                <small className="text-muted">
-                  {t(
-                    "workflow.steps.textProcessing.settingsSummary.embeddingModel",
-                    "Embedding Model"
-                  )}
-                </small>
-                <strong className="text-dark small">text-embedding-004</strong>
-              </div>
-              <div className="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
-                <small className="text-muted">
-                  {t(
-                    "workflow.steps.textProcessing.settingsSummary.chunkSize",
-                    "Chunk Size"
-                  )}
-                </small>
-                <strong className="text-dark">{parameters.chunk_size}</strong>
-              </div>
-              <div className="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
-                <small className="text-muted">
-                  {t(
-                    "workflow.steps.textProcessing.settingsSummary.chunkOverlap",
-                    "Chunk Overlap"
-                  )}
-                </small>
-                <strong className="text-dark">
-                  {parameters.chunk_overlap}
-                </strong>
-              </div>
-              <div className="d-flex justify-content-between align-items-center">
-                <small className="text-muted">
-                  {t(
-                    "workflow.steps.textProcessing.settingsSummary.language",
-                    "語言"
-                  )}
-                </small>
-                <strong className="text-dark">
-                  {parameters.answer_language === "en"
-                    ? "English"
-                    : parameters.answer_language === "zh-TW"
-                    ? "繁體中文"
-                    : "Auto"}
-                </strong>
+              {/* 中間部：配置詳情 */}
+              <div className="row g-3 mb-3">
+                <div className="col-md-6">
+                  <div className="border-start border-primary border-3 ps-3">
+                    <h6 className="text-primary mb-2">
+                      <i className="bi bi-gear-fill me-2"></i>向量化設定
+                    </h6>
+                    <div className="small">
+                      <div className="d-flex justify-content-between mb-1">
+                        <span className="text-muted">Embedding Model:</span>
+                        <strong>text-embedding-004</strong>
+                      </div>
+                      <div className="d-flex justify-content-between mb-1">
+                        <span className="text-muted">Chunk Size:</span>
+                        <strong>{parameters.chunk_size}</strong>
+                      </div>
+                      <div className="d-flex justify-content-between mb-1">
+                        <span className="text-muted">Chunk Overlap:</span>
+                        <strong>{parameters.chunk_overlap}</strong>
+                      </div>
+                      <div className="d-flex justify-content-between">
+                        <span className="text-muted">語言:</span>
+                        <strong>
+                          {parameters.answer_language === "en"
+                            ? "English"
+                            : parameters.answer_language === "zh-TW"
+                            ? "繁體中文"
+                            : "Auto"}
+                        </strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <div className="border-start border-info border-3 ps-3">
+                    <h6 className="text-info mb-2">
+                      <i className="bi bi-search me-2"></i>檢索配置
+                    </h6>
+                    <div className="small">
+                      <div className="d-flex justify-content-between mb-1">
+                        <span className="text-muted">Vector DB:</span>
+                        <strong>Qdrant</strong>
+                      </div>
+                      <div className="d-flex justify-content-between mb-1">
+                        <span className="text-muted">距離度量:</span>
+                        <strong>Cosine</strong>
+                      </div>
+                      <div className="d-flex justify-content-between mb-1">
+                        <span className="text-muted">向量維度:</span>
+                        <strong>768</strong>
+                      </div>
+                      <div className="d-flex justify-content-between">
+                        <span className="text-muted">索引類型:</span>
+                        <strong>HNSW</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="mt-3 p-2 bg-light rounded border border-light-subtle">
-                <small className="text-muted d-block fst-italic">
-                  <i className="bi bi-info-circle me-1"></i>
-                  {t(
-                    "workflow.steps.textProcessing.settingsSummary.edu",
-                    "適當的分塊與重疊能確保上下文連貫性"
-                  )}
-                </small>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* C. RAG 可檢索狀態 (RAG Retrieval Readiness) */}
-        <div className="col-md-4">
-          <div className="card surface-card h-100 border-0">
-            <div className="card-header py-2">
-              <h6 className="card-title mb-0">
-                {t(
-                  "workflow.steps.textProcessing.ragReadiness.title",
-                  "RAG 檢索準備狀態"
-                )}
-              </h6>
-            </div>
-            <div className="card-body p-3">
-              <div className="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
-                <small className="text-muted">
-                  {t(
-                    "workflow.steps.textProcessing.ragReadiness.status",
-                    "可檢索狀態"
-                  )}
-                </small>
-                <strong
-                  className={
-                    !hasStarted
-                      ? "text-muted"
-                      : jobs.length > 0 &&
-                        jobs.every((j) => j.status === "completed")
-                      ? "text-success"
-                      : "text-warning"
-                  }
-                >
-                  {!hasStarted
-                    ? t(
-                        "workflow.steps.textProcessing.ragReadiness.notExecuted",
-                        "未執行"
-                      )
-                    : jobs.length > 0 &&
-                      jobs.every((j) => j.status === "completed")
-                    ? t(
-                        "workflow.steps.textProcessing.ragReadiness.ready",
-                        "✅ 已就緒"
-                      )
-                    : t(
-                        "workflow.steps.textProcessing.ragReadiness.processing",
-                        "⏳ 處理中..."
-                      )}
-                </strong>
-              </div>
-              <div className="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
-                <small className="text-muted">
-                  {t(
-                    "workflow.steps.textProcessing.ragReadiness.distanceMetric",
-                    "距離度量"
-                  )}
-                </small>
-                <strong className="text-dark">Cosine</strong>
-              </div>
-              <div className="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
-                <small className="text-muted">
-                  {t(
-                    "workflow.steps.textProcessing.ragReadiness.dimensions",
-                    "向量維度"
-                  )}
-                </small>
-                <strong className="text-dark">768</strong>
-              </div>
-              <div className="d-flex justify-content-between align-items-center">
-                <small className="text-muted">
-                  {t(
-                    "workflow.steps.textProcessing.ragReadiness.indexType",
-                    "索引類型"
-                  )}
-                </small>
-                <strong className="text-dark">HNSW</strong>
-              </div>
-
-              <div className="mt-3 p-3 bg-light rounded border border-light-subtle">
-                <small className="text-muted d-block fst-italic">
-                  <i className="bi bi-shield-check me-1"></i>
-                  {t(
-                    "workflow.steps.textProcessing.ragReadiness.edu",
-                    "嚴格模式下，若相似度低於門檻將拒絕回答"
-                  )}
-                </small>
+              {/* 下半部：提示信息 */}
+              <div className="alert alert-info mb-0 d-flex align-items-start">
+                <i className="bi bi-lightbulb-fill me-2 mt-1"></i>
+                <div className="small">
+                  <strong>重要提示：</strong>
+                  <ul className="mb-0 ps-3 mt-1">
+                    <li>AI 將從 Vector DB 檢索記憶，而非憑空捏造答案</li>
+                    <li>適當的分塊與重疊能確保上下文連貫性</li>
+                    <li>嚴格模式下，若相似度低於門檻將拒絕回答</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>

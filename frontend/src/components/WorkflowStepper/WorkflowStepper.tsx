@@ -7,7 +7,7 @@ import ContentReviewStep from "../ContentReviewStep/ContentReviewStep";
 import TextProcessingStep from "../TextProcessingStep/TextProcessingStep";
 import AiChatStep from "../AiChatStep/AiChatStep";
 import LoadingOverlay from "../LoadingOverlay/LoadingOverlay";
-// import TestStep6 from "../TestStep6/TestStep6"; // 測試組件已替?�為�??組件
+// import TestStep6 from "../TestStep6/TestStep6"; // 測試組件已替換為真實組件
 import FixedRagFlow from "../FixedRagFlow/FixedRagFlow";
 import {
   uploadFile,
@@ -58,6 +58,9 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   // 全局 Loading 狀態
   const [isGlobalLoading, setIsGlobalLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("處理中，請稍候..");
+
+  // RAG 總結對話框
+  const [showRagSummaryDialog, setShowRagSummaryDialog] = useState(false);
 
   const [stepCompletion, setStepCompletion] = useState({
     1: false,
@@ -124,21 +127,21 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             }
           }
         },
-        2000, // 2秒輪詢�?�?
-        30 // ?�多輪�?0次�?1?��?�?
+        2000, // 2秒輪詢一次
+        30 // 最多輪詢30次（1分鐘）
       );
 
-      // ?�終更?��?確�?不�??��?清空documents�?
+      // 最終更新，確保不會意外清空documents
       if (
         finalStatus.extraction_status === "COMPLETED" ||
         finalStatus.chunk_count > 0
       ) {
-        // 檢查 token ?��??�否足�?（�?�?50 tokens�?
+        // 檢查 token 數量是否足夠（至少50 tokens）
         const MIN_TOKENS_REQUIRED = 50;
         const tokensUsed = finalStatus.tokens_used || 0;
 
         if (tokensUsed > 0 && tokensUsed < MIN_TOKENS_REQUIRED) {
-          // Token ?��??��?，顯示錯誤�?話�?
+          // Token 數量不足，顯示錯誤對話框
           const isUrlType = docItem.type === "url";
           setErrorDialogTitle("Insufficient content");
           setErrorDialogMessage(
@@ -219,14 +222,14 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
         onDocumentsUpdate?.(finalDocs);
 
-        // ?�在?�裡顯示?�終�??��?訊息，�??�chunks信息
+        // 現在在這裡顯示最終處理訊息，包含chunks信息
         // onShowMessage?.({
         //   type: "success",
         //   message: `${
-        //     docItem.type === "file" ? "檔�?" : "URL"
-        //   } ${identifier} ?��?完�?！產??${
+        //     docItem.type === "file" ? "檔案" : "URL"
+        //   } ${identifier} 處理完成！產生${
         //     finalStatus.chunk_count
-        //   } ?��?字段?�。`,
+        //   } 個文字段落。`,
         // });
       }
 
@@ -236,7 +239,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       // 錯誤也要調用回調
       onComplete?.();
 
-      // 檢查?�否?�內容審?�錯�?- 如�??��?不在流�?3顯示?�誤（�??��?�?審核?��??��?�?
+      // 檢查是否為內容審核錯誤 - 如果是則不在流程3顯示錯誤（改為審核步驟處理）
       const errorMessage =
         error instanceof Error ? error.message : String(error);
       const isContentBlockedError =
@@ -253,7 +256,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           errorMessage.toLowerCase().includes("access denied") ||
           errorMessage.toLowerCase().includes("robot");
 
-        // 檢查?�否?��??��?不足?�誤
+        // 檢查是否為內容不足錯誤
         const isEmptyContentError =
           errorMessage.toLowerCase().includes("empty text list") ||
           errorMessage.toLowerCase().includes("empty text") ||
@@ -278,17 +281,17 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           displayMessage = `File ${identifier} failed: ${errorMessage}\n\nPlease try another file or use the sample file.`;
         }
 
-        // ?�顯示�??�容審核?��??�錯誤�?使用對話框而�???toast
+        // 對顯示非內容審核類的錯誤，使用對話框而非toast
         setErrorDialogTitle(displayTitle);
         setErrorDialogMessage(displayMessage);
         setShowErrorDialog(true);
       } else {
-        // ?�容審核?�誤?��??�日誌�?不顯�?toast
+        // 內容審核錯誤僅記錄日誌，不顯示toast
       }
     }
   };
 
-  // ?�件?�?�輪詢函??
+  // 文件狀態輪詢函數
   const pollFileStatus = async (
     documentId: string,
     docItem: any,
@@ -298,28 +301,28 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     return pollDocumentStatus(documentId, docItem, filename, onComplete);
   };
 
-  // 添�?審核?�?�管??
+  // 添加審核狀態管理
   const [reviewPassed, setReviewPassed] = useState(false);
   const [shouldStartReview, setShouldStartReview] = useState(false);
 
-  // 保�?審核結�?，用?��??��?�??�恢復�???
+  // 保存審核結果，用於從其他步驟恢復時還原
   const [savedReviewResults, setSavedReviewResults] = useState<{
     completed: string[];
     failed: string[];
   } | null>(null);
 
-  // 添�??�本?��??�?�管??
+  // 添加文本處理狀態管理
   const [textProcessingCompleted, setTextProcessingCompleted] = useState(false);
   const [shouldStartProcessing, setShouldStartProcessing] = useState(false);
 
-  // 保�??�本?��?結�?，用?��??��?�??�恢復�???
+  // 保存文本處理結果，用於從其他步驟恢復時還原
   const [savedProcessingResults, setSavedProcessingResults] =
     useState<any>(null);
 
-  // 保�??�天記�?，用?��??��?�??�恢復�???
+  // 保存聊天記錄，用於從其他步驟恢復時還原
   const [savedChatMessages, setSavedChatMessages] = useState<any[]>([]);
 
-  // ??�� sessionId 變�?，�?置�??��???
+  // 當下 sessionId 變更，重置所有狀態
   React.useEffect(() => {
     if (sessionId) {
       setStepCompletion({
@@ -340,7 +343,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     }
   }, [sessionId]);
 
-  // 輔助?�數：當上傳?��??��?，�?置�?續步驟�???
+  // 輔助函數：當上傳等改變，重置後續步驟狀態
   const resetDownstreamSteps = () => {
     setReviewPassed(false);
     setShouldStartReview(false);
@@ -358,37 +361,37 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     }));
   };
 
-  // 計�?流�?1???�否?�該被�???
-  // ?��?流�?3?��??��??��?documents ??crawledUrls 不為空�?，就禁用流�?1???��?�?
+  // 計算流程1是否應該被禁用
+  // 只要流程3上傳成功有documents 或crawledUrls 不為空，就禁用流程1的部分配置
   const shouldDisableConfigSteps = React.useMemo(() => {
     const hasDocuments = documents && documents.length > 0;
     const hasCrawledUrls = crawledUrls && crawledUrls.length > 0;
     return hasDocuments || hasCrawledUrls;
   }, [documents, crawledUrls]);
 
-  // ??��步�?變�?
-  // 注�?：�??��?置審?��??��??�?��?保�?已�??��??�??
+  // 處理步驟變更
+  // 注意：不要設置審核成功旗標，確保已審核不會重複
   React.useEffect(() => {
-    // ?�在?�入步�??��??��??��?作�?但�??�置已�??��??�??
+    // 切入步驟後不做任何操作，但不設置已審核旗標
     if (currentStep === 4 && !reviewPassed) {
-      // ?�入步�?4但�??��??�審?��?，可?��?要�?始審??
-      // 注�?：shouldStartReview ?��??�控?��?不自?��???
+      // 切入步驟4但不明確審核，可能需要開始審核
+      // 注意：shouldStartReview 由其他控制，不自動開始
     }
     if (currentStep === 5 && !textProcessingCompleted) {
-      // ?�入步�?5但�??��??��??��?，可?��?要�?始�???
-      // 注�?：shouldStartProcessing ?��??�控?��?不自?��???
+      // 切入步驟5但不明確處理，可能需要開始處理
+      // 注意：shouldStartProcessing 由其他控制，不自動開始
     }
   }, [currentStep, reviewPassed, textProcessingCompleted]);
 
-  // ??��審核完�??�?��??�置shouldStartReview
+  // 當審核完成後，重置shouldStartReview
   React.useEffect(() => {
     if (currentStep === 4 && reviewPassed) {
-      // 審核完�??��?置shouldStartReview?�??
+      // 審核完成則設置shouldStartReview為false
       setShouldStartReview(false);
     }
   }, [currentStep, reviewPassed]);
 
-  // ??��?��?上傳?�?��??��?標�?步�?3完�?
+  // 當有上傳成功則標記步驟3完成
   React.useEffect(() => {
     const hasDocuments = documents && documents.length > 0;
     const hasCrawledUrls = crawledUrls && crawledUrls.length > 0;
@@ -403,7 +406,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
         3: true,
       }));
     } else {
-      // 如�?沒�?上傳?�容，�?消步�??��??��???
+      // 如果沒有上傳內容，取消步驟標記完成
       setStepCompletion((prev) => ({
         ...prev,
         3: false,
@@ -549,14 +552,14 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     }
   };
 
-  // 检?�步骤是?�可以继�?
+  // 检查步骤是否可以继续
   const canProceedToNextStep = () => {
     if (currentStep === 3) {
-      // 步骤3：�??��?�?- ?�要�??�档?�爬?��?容�??�继�?
+      // 步骤3：資料上傳 - 需要文档或爬蟲內容才可继续
       const hasDocuments = documents && documents.length > 0;
       const hasCrawledUrls = crawledUrls && crawledUrls.length > 0;
 
-      // 檢查?�件?��??�??
+      // 檢查文件是否就緒
       const allDocsReady =
         !documents ||
         documents.every(
@@ -567,7 +570,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             doc.status === "COMPLETED"
         );
 
-      // 檢查URL?��??�??
+      // 檢查URL是否就緒
       const allUrlsReady =
         !crawledUrls ||
         crawledUrls.every(
@@ -581,31 +584,31 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       return (hasDocuments || hasCrawledUrls) && allDocsReady && allUrlsReady;
     }
     if (currentStep === 4) {
-      // 步骤4：�?容审??- ?�要�??�审?�项?�都?��?
+      // 步骤4：內容審核 - 需要所有審核項目都通過
       return reviewPassed;
     }
     if (currentStep === 5) {
-      // 步骤5：�??��???- ?�要�??��??��??��??��???
+      // 步骤5：資料處理 - 需要所有資料處理已完成
       return textProcessingCompleted;
     }
-    // ?��?步骤?�时?�许继续
+    // 其他步骤暂时允许继续
     return true;
   };
 
-  // ?��?上�?步�???
+  // 處理上一步點擊
   const handlePreviousStepClick = () => {
-    // 如�?從�?�?（內容審?��?返�?流�?3（�??��??��?，�?審核失�?
+    // 如果從步驟（內容審核）返回流程3（資料上傳），重置審核失敗
     if (
       currentStep === 4 &&
       reviewPassed === false &&
       savedReviewResults?.failed &&
       savedReviewResults.failed.length > 0
     ) {
-      // 清除?�?��??��???
+      // 清除已上傳資料
       onDocumentsUpdate?.([]);
       onCrawledUrlsUpdate?.([]);
 
-      // ?�置審核?�??
+      // 重置審核狀態
       setReviewPassed(false);
       setSavedReviewResults(null);
       setShouldStartReview(false);
@@ -617,16 +620,16 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           "Existing content detected. Please confirm parameters before proceeding.",
       });
 
-      // ?�到上�?�?
+      // 返回上一步
       onStepChange(currentStep - 1);
       return;
     }
 
-    // ?��??��??�接?�到上�?步�?保�??�?�已上傳?��??��?�?
+    // 否則直接返回上一步驟，保留已上傳資料狀態
     onStepChange(currentStep - 1);
   };
   const handleNextStepClick = async () => {
-    // 檢查?�否�?��?��?�?
+    // 檢查是否正在處理
     if (isGlobalLoading) {
       onShowMessage?.({
         type: "info",
@@ -635,7 +638,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       return;
     }
 
-    // 檢查?�否已到?��?後�?�?
+    // 檢查是否已到最後一步
     if (currentStep === steps.length) {
       return;
     }
@@ -776,43 +779,43 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       citationMap[citation_style] || citationMap["inline"];
     const responseLanguage = languageMap[answer_language] || "{{language}}";
 
-    // ?��?完整??custom_prompt
-    return `你是一??RAG (Retrieval-Augmented Generation) ?��???
+    // 組合完整的custom_prompt
+    return `你是一個RAG (Retrieval-Augmented Generation) 助理。
 
-**角色設�? (PERSONA)**: ${personaInstruction}
+**角色設定 (PERSONA)**: ${personaInstruction}
 
-**?��?風格 (RESPONSE STYLE)**: ${styleInstruction}
+**回答風格 (RESPONSE STYLE)**: ${styleInstruction}
 
-**?��?語氣 (RESPONSE TONE)**: ${toneInstruction}
+**回答語氣 (RESPONSE TONE)**: ${toneInstruction}
 
-**引用?��? (CITATION)**: ${citationInstruction}
+**引用規範 (CITATION)**: ${citationInstruction}
 
-**?��??��? (INFERENCE)**: ${inferencePolicy}
+**推論政策 (INFERENCE)**: ${inferencePolicy}
 
-**?�格 RAG ?��?**: ${strictRagPolicy}
+**嚴格 RAG 模式**: ${strictRagPolicy}
 
-**?��??�度?�制**: 將�?答控?�在�?${max_response_tokens || 2048} tokens 以內??
+**回答長度限制**: 將回答控制在約${max_response_tokens || 2048} tokens 以內。
 
-**檢索設�?**: Top-K=${retrieval_top_k || 5}, ?�似度閾??${
+**檢索設定**: Top-K=${retrieval_top_k || 5}, 相似度閾值=${
       similarity_threshold || 0.7
     }
 
-**?�鍵規�?**:
-1. **?��?語�?**: 一律使??${responseLanguage} ?��??�整?��?答�??�是?��?種�?言??
-2. **?�格 RAG**: ?�能?��?下方檢索?��??�件?�容?��???
-3. **禁止?��?*: 不可編造�?訊�?使用?�件以�??�知識�?
-4. **?��??��??��?**: 如�??��??��??��??��?件相?��?
-   - ?�說?��?件中?�哪些相?��?�?
-   - ?��?確�??��?題�??�個部?�找不到資�?
-5. **?��??��???*: ?�確?�知使用?��?並建議可?��??�代?��???
+**關鍵規則**:
+1. **回答語言**: 一律使用${responseLanguage} 進行完整回答，不論使用何種語言。
+2. **嚴格 RAG**: 只能依靠下方檢索到的文件內容回答。
+3. **禁止虛構**: 不可編造資訊，使用文件以外知識。
+4. **部分回答策略**: 如果只有部分與文件相關：
+   - 先說明文件中有哪些相關內容
+   - 再明確表示問題的哪個部分找不到資料
+5. **完全未知處理**: 明確告知使用者並建議可能的替代問法。
 
-**檢索?��??�件 (Retrieved Documents)**:
+**檢索到的文件 (Retrieved Documents)**:
 {{context}}
 
-**使用?��?�?(User Question)**:
+**使用者問題(User Question)**:
 {{query}}
 
-**你�??��?** (請遵循�?述�??�、風?��?語氣設�?):`;
+**你的回答** (請遵循上述角色、風格與語氣設定):`;
   };
 
   const handleStepComplete = (stepId: number) => {
@@ -821,12 +824,12 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       [stepId]: true,
     }));
 
-    // 步�?4（內容審?��?完�?後�??��?跳�?，�?待用?��??��???下�?�?
+    // 步驟4（內容審核）完成後不自動跳轉，等待用戶點擊下一步
     if (stepId === 4) {
-      return; // 不自?�跳轉�?讓用?��??�控??
+      return; // 不自動跳轉，讓用戶控制
     }
 
-    // ?��?步�??��?跳�??��?一�?
+    // 其他步驟自動跳到下一步
     if (stepId < steps.length) {
       onStepChange(stepId + 1);
     }
@@ -874,28 +877,28 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                   size: file.size,
                   uploadTime: new Date().toISOString(),
                   type: "file",
-                  chunks: 0, // ?��???0，�?待輪詢更??
-                  preview: response.preview || "?��?�?..",
+                  chunks: 0, // 初始化0，等待輪詢更新
+                  preview: response.preview || "處理中..",
                   status: "processing",
                 };
                 onDocumentsUpdate?.([...documents, newDoc]);
 
-                // ?�置後�?步�??�??
+                // 重置後續步驟狀態
                 resetDownstreamSteps();
 
-                // ?��?輪詢?��??�?�以?��??�終�? chunks ?��?（�??��??��??�輪詢�??��?顯示�?
+                // 開始輪詢以獲取最終的 chunks 數量（因為不能在輪詢中更新顯示）
                 pollFileStatus(response.document_id, newDoc, file.name, () => {
-                  // 輪詢完�?後隱?�全局 Loading
+                  // 輪詢完成後隱藏全局 Loading
                   setIsGlobalLoading(false);
                 });
 
-                // 檔�?上傳完�?，用?��??��??�入下�?�?
+                // 檔案上傳完成，用戶可手動進入下一步
               } catch (error) {
                 setIsGlobalLoading(false);
                 setToastContent({
-                  title: "?�誤",
-                  message: `檔�?上傳失�?: ${
-                    error instanceof Error ? error.message : "?�知?�誤"
+                  title: "錯誤",
+                  message: `檔案上傳失敗: ${
+                    error instanceof Error ? error.message : "未知錯誤"
                   }`,
                 });
                 setShowToast(true);
@@ -969,40 +972,40 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                   content_size: response.content_size || 0,
                   crawl_time: new Date().toISOString(),
                   chunks: response.chunk_count || 0,
-                  summary: response.summary || "網�??�容?��?...",
+                  summary: response.summary || "網站內容處理...",
                   pages_found: response.pages_found || 1,
                 };
                 onCrawledUrlsUpdate?.([...crawledUrls, newUrl]);
 
-                // ?�置後�?步�??�??
+                // 重置後續步驟狀態
                 resetDownstreamSteps();
 
-                // ?��??��? Loading
+                // 關閉全局 Loading
                 setIsGlobalLoading(false);
 
-                // 使用中�?對話框顯示�??��???
-                setSuccessDialogTitle("?��?");
+                // 使用中文對話框顯示成功訊息
+                setSuccessDialogTitle("成功");
                 setSuccessDialogMessage(
-                  `網�? ${url} ?��??��?，共?��? ${response.pages_found} ?��??��?`
+                  `網站 ${url} 爬取成功，共爬取 ${response.pages_found} 個頁面`
                 );
                 setShowSuccessDialog(true);
               } catch (error) {
                 setIsGlobalLoading(false);
 
-                // ?�誤?��?...
+                // 處理錯誤...
                 const errorMessage =
                   error instanceof Error ? error.message : String(error);
 
                 setToastContent({
-                  title: "?�誤",
-                  message: `網�??��?失�?: ${errorMessage}`,
+                  title: "錯誤",
+                  message: `網站爬取失敗: ${errorMessage}`,
                 });
                 setShowToast(true);
               }
             }}
             onCrawlerSuccess={(result) => {
-              // ?��?：�??��???UploadScreen ?��??��?�?
-              // 不�?要�?次呼??API，只?�新?�??
+              // 注意：這裡由UploadScreen 直接調用
+              // 不需要再次呼叫API，只更新狀態
               const url =
                 result.source_reference || result.url || "Unknown URL";
 
@@ -1011,19 +1014,19 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                 content_size: result.content_size || 0,
                 crawl_time: new Date().toISOString(),
                 chunks: result.chunk_count || 0,
-                summary: result.summary || "網�??�容?��?...",
+                summary: result.summary || "網站內容處理...",
                 pages_found: result.pages_found || 1,
-                extraction_status: "EXTRACTED", // 標�??�已?��?，�? canProceedToNextStep ?�斷?��?
+                extraction_status: "EXTRACTED", // 標記為已提取，供 canProceedToNextStep 判斷使用
                 status: "COMPLETED",
               };
 
               onCrawledUrlsUpdate?.([...crawledUrls, newUrl]);
               resetDownstreamSteps();
 
-              // 使用中�?對話框顯示�??��???
-              setSuccessDialogTitle("?��?");
+              // 使用中文對話框顯示成功訊息
+              setSuccessDialogTitle("成功");
               setSuccessDialogMessage(
-                `網�? ${url} ?��??��?，共?��? ${result.pages_found} ?��??��?`
+                `網站 ${url} 爬取成功，共爬取 ${result.pages_found} 個頁面`
               );
               setShowSuccessDialog(true);
             }}
@@ -1035,13 +1038,13 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             sessionId={sessionId}
             onReviewComplete={() => {
               handleStepComplete(4);
-              // 審核完�?後�?置�???
+              // 審核完成後重置狀態
               setShouldStartReview(false);
             }}
             onReviewStatusChange={(passed) => {
               setReviewPassed(passed);
               if (passed) {
-                // 審核?��??��??��?置shouldStartReview?�??
+                // 審核通過後重置shouldStartReview為false
                 setShouldStartReview(false);
               }
             }}
@@ -1068,7 +1071,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             crawledUrls={crawledUrls}
             shouldStartProcessing={shouldStartProcessing}
             onProcessingComplete={() => {
-              // ?�新?�?�並標�?步�?完�?
+              // 更新狀態並標記步驟完成
               setTextProcessingCompleted(true);
               setStepCompletion((prev) => ({ ...prev, 5: true }));
             }}
@@ -1086,7 +1089,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       case 6:
         return (
           <div className="ai-chat-step-container">
-            {/* AI ?�天?�面 - ?��?空�? - 使用�??組件 */}
+            {/* AI 聊天界面 - 不留空白 - 使用真實組件 */}
             <div className="ai-chat-content">
               <AiChatStep
                 sessionId={sessionId}
@@ -1104,7 +1107,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
   return (
     <div className="workflow-stepper xs:p-0">
-      {/* ?�誤對話�?*/}
+      {/* 錯誤對話框*/}
       {showErrorDialog && (
         <div
           className="modal show d-block"
@@ -1132,7 +1135,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                   className="btn btn-primary"
                   onClick={() => setShowErrorDialog(false)}
                 >
-                  確�?
+                  確認
                 </button>
               </div>
             </div>
@@ -1140,7 +1143,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
         </div>
       )}
 
-      {/* ?��?對話�?*/}
+      {/* 成功對話框*/}
       {showSuccessDialog && (
         <div
           className="modal show d-block"
@@ -1177,7 +1180,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       )}
 
       <div className="card workflow-container p-3">
-        {/* 步�??�示??- 水平?��? */}
+        {/* 步驟顯示區 - 水平排列 */}
         <div className="stepper-header ">
           <div className="d-flex justify-content-between align-items-center px-2">
             {steps.map((step, index) => (
@@ -1190,7 +1193,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                   } workflow-stepper-step-circle`}
                   onClick={() => handleInfoClick(step, {} as React.MouseEvent)}
                 >
-                  {/* 步�??��??��?�?*/}
+                  {/* 步驟圓圈區域*/}
                   <div
                     className={`stepper-circle ${
                       isStepCompleted(step.id)
@@ -1203,7 +1206,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                     <span className="fw-bold">{step.id}</span>
                   </div>
 
-                  {/* 步�??�本 */}
+                  {/* 步驟文本 */}
                   <div className="stepper-text mt-2">
                     <div className="stepper-title d-flex align-items-center justify-content-center">
                       {isStepCompleted(step.id) && (
@@ -1213,7 +1216,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                     </div>
                   </div>
 
-                  {/* ??���?(?��??�後�??�步�? */}
+                  {/* 連接線（只顯示最後一個步驟 */}
                   {index < steps.length - 1 && (
                     <div className="stepper-connector">
                       <div
@@ -1260,6 +1263,18 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
               {currentStep} / {steps.length}
             </div>
 
+            {/* 步驟6顯示「總結」按鈕 */}
+            {currentStep === 6 && (
+              <button
+                className="btn btn-info me-2"
+                onClick={() => setShowRagSummaryDialog(true)}
+                disabled={isGlobalLoading}
+              >
+                總結
+              </button>
+            )}
+
+            {/* 非最後步驟顯示「下一步」按鈕 */}
             {currentStep < steps.length && (
               <button
                 className={
@@ -1292,7 +1307,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
         {renderStepContent()}
       </div>
 
-      {/* 中央資�?對話框�??�代 Toast�?*/}
+      {/* 中央資訊對話框，取代 Toast*/}
       {showToast && (
         <div
           className="modal show d-block"
@@ -1331,7 +1346,186 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
         </div>
       )}
 
-      {/* ?��? Loading Overlay */}
+      {/* RAG 總結對話框 */}
+      {showRagSummaryDialog && (
+        <div
+          className="modal show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1100 }}
+        >
+          <div className="modal-dialog modal-xl modal-dialog-centered">
+            <div className="modal-content">
+              <div
+                className="modal-header"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  color: "white",
+                }}
+              >
+                <h3 className="modal-title text-white">總結 RAG 技術</h3>
+                <button
+                  type="button"
+                  className="btn-close btn-close-white"
+                  onClick={() => setShowRagSummaryDialog(false)}
+                ></button>
+              </div>
+              <div className="modal-body p-4">
+                {/* 使用 Card Grid 布局 */}
+                <div className="row g-3">
+                  {/* 主題 1: 進步空間（新增，放第一位）*/}
+                  <div className="col-md-6">
+                    <div className="card h-100 border-warning shadow-sm">
+                      <div className="card-header bg-warning bg-opacity-10 border-warning">
+                        <h3 className="card-title text-warning mb-0 fw-bold">
+                          還有進步空間
+                        </h3>
+                        <small className="text-muted">
+                          此專案與商業實用之間距離
+                        </small>
+                      </div>
+                      <div className="card-body">
+                        <p className="card-text mb-2">
+                          <strong className="text-danger">
+                            缺少企業級功能：
+                          </strong>
+                          未實現用戶權限管理、多租戶隔離、審計日誌等企業必需功能。
+                        </p>
+                        <p className="card-text mb-2">
+                          <strong className="text-danger">
+                            可擴展性不足：
+                          </strong>
+                          單機部署架構，未考慮分散式向量庫、負載均衡、容錯機制。
+                        </p>
+                        <p className="card-text mb-2">
+                          <strong className="text-danger">
+                            成本控制缺失：
+                          </strong>
+                          無 Token 用量監控、配額管理、成本分析等營運必備工具。
+                        </p>
+                        <p className="card-text mb-0">
+                          <strong className="text-danger">
+                            測試覆蓋有限：
+                          </strong>
+                          缺少完整的單元測試、集成測試、性能測試與 A/B
+                          測試框架。
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 主題 2: RAG 的好處 */}
+                  <div className="col-md-6">
+                    <div className="card h-100 border-success shadow-sm">
+                      <div className="card-header bg-success bg-opacity-10 border-success">
+                        <h3 className="card-title text-success mb-0 fw-bold">
+                          RAG 帶來的好處
+                        </h3>
+                        <small className="text-muted">為何選擇 RAG 架構</small>
+                      </div>
+                      <div className="card-body">
+                        <p className="card-text mb-2">
+                          <strong className="text-success">
+                            減少幻覺，提升準確性：
+                          </strong>
+                          RAG 透過檢索真實文件確保回答有明確來源，大幅降低 LLM
+                          憑空想像的幻覺問題。
+                        </p>
+                        <p className="card-text mb-2">
+                          <strong className="text-success">
+                            即時知識更新：
+                          </strong>
+                          只需更新向量資料庫文件即可反映最新資訊，無需重新訓練模型。
+                        </p>
+                        <p className="card-text mb-0">
+                          <strong className="text-success">
+                            可追溯性與安全性：
+                          </strong>
+                          明確標示答案來源，便於驗證。企業資料存於自建資料庫，符合隱私法規。
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 主題 3: RAG 的短處 */}
+                  <div className="col-md-6">
+                    <div className="card h-100 border-danger shadow-sm">
+                      <div className="card-header bg-danger bg-opacity-10 border-danger">
+                        <h3 className="card-title text-danger mb-0 fw-bold">
+                          RAG 並非萬能
+                        </h3>
+                        <small className="text-muted">需要注意的局限性</small>
+                      </div>
+                      <div className="card-body">
+                        <p className="card-text mb-2">
+                          <strong className="text-danger">
+                            檢索品質決定一切：
+                          </strong>
+                          向量搜尋若錯過關鍵資訊或檢索不當，會導致錯誤答案。閾值設定、模型選擇、切塊策略都影響結果。
+                        </p>
+                        <p className="card-text mb-2">
+                          <strong className="text-danger">延遲與成本：</strong>
+                          需先檢索再生成，增加延遲。大規模部署時資料庫與 LLM
+                          並發壓力高。
+                        </p>
+                        <p className="card-text mb-0">
+                          <strong className="text-danger">
+                            複雜推理限制：
+                          </strong>
+                          擅長查找回答，但不擅長多步驟推理或跨文件整合的複雜分析。
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 主題 4: Agentic RAG */}
+                  <div className="col-md-6">
+                    <div className="card h-100 border-info shadow-sm">
+                      <div className="card-header bg-info bg-opacity-10 border-info">
+                        <h3 className="card-title text-info mb-0 fw-bold">
+                          可以更智能! Agentic RAG
+                        </h3>
+                        <small className="text-muted">
+                          從被動檢索到主動推理
+                        </small>
+                      </div>
+                      <div className="card-body">
+                        <p className="card-text mb-2">
+                          <strong className="text-info">多輪自主檢索：</strong>
+                          評估結果充分性，自動調整策略直到找到滿意答案。
+                        </p>
+                        <p className="card-text mb-2">
+                          <strong className="text-info">工具呼叫整合：</strong>
+                          可執行代碼、查詢
+                          API、訪問資料庫，實現複雜計算與即時查詢。
+                        </p>
+                        <p className="card-text mb-2">
+                          <strong className="text-info">任務分解：</strong>
+                          將複雜問題拆解成子任務獨立執行，最終整合結果。
+                        </p>
+                        <div className="alert alert-info mb-0 py-2 small">
+                          <strong>應用案例：</strong>
+                          客服代理、研究助手、程式碼助手
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => setShowRagSummaryDialog(false)}
+                >
+                  了解
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 全局 Loading Overlay */}
       <LoadingOverlay isVisible={isGlobalLoading} message={loadingMessage} />
     </div>
   );

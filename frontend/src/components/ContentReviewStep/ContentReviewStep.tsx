@@ -364,13 +364,12 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
   return (
     <div className="content-review-step">
       <div className="card mb-4 shadow-sm border-0 surface-card active-card-border">
-        <div className="card-header py-3">
-          <h6 className="mb-0 fw-bold d-flex align-items-center">
-            <i className="bi bi-list-check me-2 fs-5"></i>
+        <div className="card-header py-2">
+          <h4 className="mb-0 fw-bold d-flex align-items-center">
             審核項目與結果
-          </h6>
+          </h4>
         </div>
-        <div className="card-body p-4">
+        <div className="card-body py-2">
           {/* 審核工具與標準說明 */}
           <div className="alert alert-standards mb-4 rounded-3 border-0">
             <div className="d-flex align-items-center mb-2">

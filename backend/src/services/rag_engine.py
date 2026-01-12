@@ -294,7 +294,11 @@ class RAGEngine:
 
         try:
             response = self._generate_with_retry(prompt, session_id)
-            suggestions_text = response.text.strip()
+            # 使用 candidates API 避免 UTF-16 編碼問題
+            try:
+                suggestions_text = response.candidates[0].content.parts[0].text.strip()
+            except (IndexError, AttributeError):
+                suggestions_text = response.text.strip()
             
             # 解析建議問題
             suggestions = [s.strip() for s in suggestions_text.split('\n') if s.strip()]
@@ -321,35 +325,57 @@ class RAGEngine:
         Used for "Default Question Bubbles" feature.
         """
         try:
-            # 1. Get context (summary/overview)
-            # Embed "summary" to find relevant chunks
-            query_embedding = self.embedder.embed_text("summary main points overview")
-            
-            # Remove hyphens from session_id for valid Qdrant collection name
+            # 1. Get comprehensive document context
+            # Use scroll to get diverse chunks from the entire document
+            # This ensures questions can be generated from any part of the document
             clean_session_id = str(session_id).replace("-", "")
             collection_name = f"session_{clean_session_id}"
             
-            # Search with low threshold to ensure we get something
-            results = self.vector_store.search_similar(
-                collection_name=collection_name,
-                query_vector=query_embedding.vector,
-                limit=5,
-                score_threshold=0.0
-            )
-            
-            if not results:
-                return []
-                
-            retrieved_chunks = [
-                RetrievedChunk(
-                    chunk_id=r.payload['chunk_id'],
-                    text=r.payload['text'],
-                    similarity_score=r.score,
-                    document_id=r.payload['document_id'],
-                    source_reference=r.payload['source_reference'],
-                    chunk_index=r.payload['chunk_index']
-                ) for r in results
-            ]
+            # Use scroll to get a diverse sample of document chunks
+            # This is better than searching for "summary" which may miss specific details
+            try:
+                points, _ = self.vector_store.client.scroll(
+                    collection_name=collection_name,
+                    limit=15,  # Get more chunks for better coverage
+                    with_payload=True,
+                    with_vectors=False
+                )
+                if not points:
+                    return []
+                    
+                retrieved_chunks = [
+                    RetrievedChunk(
+                        chunk_id=str(point.id),
+                        text=point.payload.get('text', ''),
+                        similarity_score=1.0,  # Scroll doesn't provide similarity scores
+                        document_id=point.payload.get('document_id', ''),
+                        source_reference=point.payload.get('source_reference', ''),
+                        chunk_index=point.payload.get('chunk_index', 0)
+                    ) for point in points
+                ]
+            except Exception as scroll_error:
+                logger.warning(f"[{session_id}] Scroll failed, falling back to search: {scroll_error}")
+                # Fallback: search with generic query
+                query_embedding = self.embedder.embed_text("main content overview details")
+                results = self.vector_store.search_similar(
+                    collection_name=collection_name,
+                    query_vector=query_embedding.vector,
+                    limit=15,
+                    score_threshold=0.0
+                )
+                if not results:
+                    return []
+                    
+                retrieved_chunks = [
+                    RetrievedChunk(
+                        chunk_id=str(r['id']),
+                        text=r['payload'].get('text', ''),
+                        similarity_score=r['score'],
+                        document_id=r['payload'].get('document_id', ''),
+                        source_reference=r['payload'].get('source_reference', ''),
+                        chunk_index=r['payload'].get('chunk_index', 0)
+                    ) for r in results
+                ]
             
             # 2. Generate suggestions
             lang_map = {
@@ -359,36 +385,65 @@ class RAGEngine:
             }
             response_language = lang_map.get(language, lang_map.get(language.split('-')[0], 'English'))
             
-            # 增加每個chunk的長度以提供更多上下文
-            doc_summary = "\n\n".join([chunk.text[:500] for chunk in retrieved_chunks])
+            # Use full chunk text (up to 2000 chars) for maximum context
+            # This ensures generated questions have complete information
+            doc_summary = "\n\n--- Section ---\n\n".join([chunk.text[:2000] for chunk in retrieved_chunks])
             
-            prompt = f"""Based on the following document content, generate 3 specific questions that a user might want to ask to understand the main topics.
+            prompt = f"""You are generating questions for a RAG chatbot. The questions you generate WILL BE ASKED BACK TO YOU, and you must be able to answer them using ONLY the document content provided below.
 
-**Document Content** (partial):
+**Document Content**:
 {doc_summary}
 
-**Requirements**:
+**CRITICAL Requirements**:
 1. Generate questions in {response_language} ONLY
-2. Questions MUST use EXACT keywords and phrases from the document content above
-3. Questions should be DIRECTLY ANSWERABLE by quoting the content above
-4. Focus on specific facts, characters, events, or details mentioned in the document
-5. Return ONLY the questions, one per line, no numbering or bullets
-6. Generate exactly 3 questions
-7. IMPORTANT: Questions must be specific enough that they can be answered with the document content
+2. Questions MUST be DIRECTLY ANSWERABLE using ONLY the content shown above
+3. Each question should ask about SPECIFIC FACTS that appear EXPLICITLY in the document:
+   - Names of people, places, or things mentioned MULTIPLE times
+   - Specific actions or events that are CLEARLY described
+   - Concrete details that appear in MULTIPLE sections
+   - Direct quotes or statements that are PROMINENTLY featured
+4. Questions must be ROBUST to different phrasings:
+   - The answer should be findable even if the question is asked differently
+   - Focus on CENTRAL facts that appear in multiple chunks
+   - Avoid obscure details mentioned only once
+5. DO NOT ask about:
+   - Themes, meanings, or interpretations
+   - Information not present in the document
+   - Opinions or analysis
+   - General summaries or overviews
+   - Obscure details mentioned only once
+   - Minor side characters or events
+6. Before finalizing each question, verify:
+   ✓ Can I find the EXACT answer in MULTIPLE places in the document?
+   ✓ Is this a CENTRAL fact that the document emphasizes?
+   ✓ Would different phrasings of this question still find the answer?
+   ✓ Is the answer a specific fact, not a general concept?
+7. Return 5 questions (we will test and select the best 3), one per line, no numbering or bullets
 
-**Good Examples** (specific and answerable):
-- 文中提到的主要角色有哪些？
-- 故事發生在什麼地方？
-- 文中描述了什麼重要事件？
+**Good Examples** (central, prominent facts):
+- 愛麗絲用什麼東西扇風？（如果文中多次提到扇子/葉子）
+- 故事的主角叫什麼名字？（主要人物，頻繁出現）
+- 愛麗絲喝了什麼變小了？（關鍵情節）
 
-**Bad Examples** (too vague):
-- 這篇文章的主題是什麼？
-- 作者想表達什麼？
+**Bad Examples** (obscure or one-time mentions):
+- 控訴書連面寫的是誰偷了餡餅？（可能只提到一次，容易遺漏）
+- 第三個僕人穿什麼顏色的衣服？（次要細節）
+
+**Bad Examples** (too vague or interpretive):
+- 這個故事在講什麼？
+- 愛麗絲的心情如何？
+- 這段文字的主題是什麼？
+
+**IMPORTANT**: These questions will be tested automatically. Only questions with clear answers in the document above will pass validation.
 
 **Suggested Questions**:"""
 
             response = self._generate_with_retry(prompt, session_id)
-            suggestions_text = response.text.strip()
+            # 使用 candidates API 避免 UTF-16 編碼問題
+            try:
+                suggestions_text = response.candidates[0].content.parts[0].text.strip()
+            except (IndexError, AttributeError):
+                suggestions_text = response.text.strip()
             
             suggestions = [s.strip() for s in suggestions_text.split('\n') if s.strip()]
             cleaned = []
@@ -397,7 +452,68 @@ class RAGEngine:
                 if s and len(s) > 5:
                     cleaned.append(s)
             
-            return cleaned[:3] if cleaned else []
+            # Validate questions by ACTUALLY TESTING if they can be answered
+            # This is the most reliable way to ensure question quality
+            validated_questions = []
+            for question in cleaned[:5]:  # Test up to 5 to get best 3
+                try:
+                    logger.debug(f"[{session_id}] Testing question: {question[:50]}...")
+                    
+                    # Test 1: Quick keyword check (fast filter)
+                    common_words = {'什麼', '哪', '誰', '為什麼', '如何', '是', '的', '了', '在', '用', '有', '嗎',
+                                   'what', 'who', 'where', 'when', 'why', 'how', 'is', 'are', 'the', 'a', 'an', 'do', 'does'}
+                    question_terms = set(question.lower().replace('？', '').replace('?', '').split())
+                    key_terms = question_terms - common_words
+                    
+                    doc_text_lower = doc_summary.lower()
+                    has_keyword_match = any(term in doc_text_lower for term in key_terms if len(term) > 1)
+                    
+                    if not has_keyword_match:
+                        logger.warning(f"[{session_id}] Question rejected (no keyword match): {question[:50]}...")
+                        continue
+                    
+                    # Test 2: Actually try to answer the question with RAG (most reliable)
+                    # Use SAME threshold as actual query to ensure consistency
+                    # Embed the question and search for relevant content
+                    test_embedding = self.embedder.embed_query(question)
+                    test_results = self.vector_store.search_similar(
+                        collection_name=collection_name,
+                        query_vector=test_embedding.vector,
+                        limit=5,
+                        score_threshold=self.similarity_threshold  # Use same threshold as actual queries!
+                    )
+                    
+                    # Require STRONG evidence that the question is answerable
+                    if test_results and len(test_results) >= 3:  # Need at least 3 chunks
+                        # Check if we have HIGH quality matches
+                        top_score = test_results[0]['score']
+                        avg_top3_score = sum(r['score'] for r in test_results[:3]) / 3
+                        
+                        # Stricter validation: require both high top score AND good average
+                        if top_score >= 0.45 and avg_top3_score >= 0.38:
+                            validated_questions.append(question)
+                            logger.info(f"[{session_id}] Question validated (top={top_score:.3f}, avg={avg_top3_score:.3f}): {question[:50]}...")
+                            
+                            # Stop when we have 3 good questions
+                            if len(validated_questions) >= 3:
+                                break
+                        else:
+                            logger.warning(f"[{session_id}] Question rejected (top={top_score:.3f}, avg={avg_top3_score:.3f}): {question[:50]}...")
+                    else:
+                        logger.warning(f"[{session_id}] Question rejected (insufficient results={len(test_results)}): {question[:50]}...")
+                        
+                except Exception as val_error:
+                    logger.warning(f"[{session_id}] Question validation error: {val_error}")
+                    # Don't include if validation fails - better safe than sorry
+                    continue
+            
+            if not validated_questions:
+                logger.warning(f"[{session_id}] No questions passed validation, returning best effort suggestions")
+                # Fallback: return original suggestions with warning
+                return cleaned[:3] if cleaned else []
+            
+            logger.info(f"[{session_id}] Successfully validated {len(validated_questions)}/5 questions")
+            return validated_questions[:3]
             
         except Exception as e:
             logger.warning(f"[{session_id}] Failed to generate initial suggestions: {e}")
@@ -514,14 +630,15 @@ class RAGEngine:
                 score_threshold=threshold
             )
             
-            # 如果沒找到結果，用較低閾值重試（不限於通用查詢）
-            if not search_results:
-                logger.info(f"[{session_id}] No results found, retrying with lower threshold (0.2)")
+            # 如果沒找到結果或結果太少，用較低閾值重試
+            if not search_results or len(search_results) < 3:
+                retry_threshold = 0.2 if not search_results else 0.3
+                logger.info(f"[{session_id}] Found only {len(search_results)} results, retrying with threshold {retry_threshold}")
                 search_results = self.vector_store.search_similar(
                     collection_name=collection_name,
                     query_vector=query_embedding.vector,
                     limit=self.max_chunks,
-                    score_threshold=0.2  # 使用較低的閾值提高檢索覆蓋率
+                    score_threshold=retry_threshold
                 )
             
             # 轉換為 RetrievedChunk
@@ -552,7 +669,13 @@ class RAGEngine:
             logger.debug(f"[{session_id}] Generating LLM response...")
             response = self._generate_with_retry(prompt, session_id)
             
-            llm_response = response.text
+            # 修復 Unicode 編碼問題：使用 candidates API 而非 response.text
+            # response.text 可能有 UTF-16 代理對錯誤導致 emoji 替換中文字
+            try:
+                llm_response = response.candidates[0].content.parts[0].text
+            except (IndexError, AttributeError):
+                # Fallback 到 response.text 如果結構不同
+                llm_response = response.text
             
             # 提取 token 使用量
             token_input = response.usage_metadata.prompt_token_count if hasattr(response, 'usage_metadata') else 0
@@ -565,13 +688,33 @@ class RAGEngine:
             )
             
             # 判斷回應類型：是否為「無法回答」
-            cannot_answer_indicators = [
-                "無法", "找不到", "沒有找到", "抱歉", "無關", "不包含",
-                "cannot find", "no relevant", "unable to", "sorry",
-                "nicht finden", "찾을 수 없", "見つかりません"
+            # 更精確的判斷：需要同時滿足「系統無法回答」的表述，而非內容中的「無法」描述
+            cannot_answer_patterns = [
+                # 中文：明確的系統無法回答表述
+                "文件中沒有提到", "文件中未提到", "文件中找不到", "文件中沒有相關", 
+                "文件中無相關", "無法從文件", "無法在文件", "未能找到", "沒有找到相關",
+                "抱歉.*無法", "抱歉.*找不到", "對不起.*無法", "對不起.*找不到",
+                # 英文
+                "document does not mention", "document doesn't mention", 
+                "cannot find.*document", "no relevant.*found", "unable to find",
+                "sorry.*cannot", "sorry.*unable",
+                # 德文
+                "nicht finden",
+                # 韓文
+                "찾을 수 없",
+                # 日文
+                "見つかりません"
             ]
-            # 改進邏輯：有 indicator 就算 CANNOT_ANSWER（不再要求 len(retrieved_chunks) == 0）
-            has_cannot_answer_indicator = any(ind in llm_response.lower() for ind in cannot_answer_indicators)
+            
+            import re
+            # 使用正則表達式匹配更精確的模式
+            has_cannot_answer_indicator = any(
+                re.search(pattern, llm_response, re.IGNORECASE) 
+                for pattern in cannot_answer_patterns
+            )
+            
+            # 如果檢索到內容但回應中有明確的「無法回答」表述，才標記為 CANNOT_ANSWER
+            # 如果完全沒檢索到內容，也標記為 CANNOT_ANSWER
             is_cannot_answer = has_cannot_answer_indicator or len(retrieved_chunks) == 0
             response_type = "CANNOT_ANSWER" if is_cannot_answer else "ANSWERED"
             
@@ -758,7 +901,11 @@ Contenu du document:
             # Note: _generate_with_retry already handles temperature as 0.1,
             # but for summary we might want to pass it as parameter in future
             
-            summary = response.text.strip()
+            # 使用 candidates API 避免 UTF-16 編碼問題
+            try:
+                summary = response.candidates[0].content.parts[0].text.strip()
+            except (IndexError, AttributeError):
+                summary = response.text.strip()
             
             # 提取 token 使用量（用於日誌記錄）
             token_usage = 0
