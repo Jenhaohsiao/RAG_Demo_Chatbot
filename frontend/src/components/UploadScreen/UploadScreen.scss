@@ -6,7 +6,179 @@
 }
 
 .upload-card-wrapper {
-  max-width: 600px;
+  max-width: 820px;
+}
+
+.upload-hero-panel {
+  background: linear-gradient(135deg, #22376b 0%, #4e6dc6 60%, #7c91e0 100%);
+  color: $color-white;
+  border-radius: $border-radius-lg;
+
+  .card-body,
+  .hero-text,
+  h4,
+  p,
+  .eyebrow,
+  .status-chip,
+  .status-chip * {
+    color: $color-white !important;
+  }
+
+  .eyebrow {
+    letter-spacing: 1.2px;
+    font-size: $font-size-xs;
+    color: rgba($color-white, 0.75);
+  }
+
+  p {
+    color: rgba($color-white, 0.82) !important;
+  }
+}
+
+.upload-mode-toggle {
+  .mode-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 18px;
+    border-radius: 14px;
+    border: 1px solid $color-gray-300;
+    background: $color-white;
+    color: $color-gray-800;
+    font-weight: 600;
+    box-shadow: $shadow-sm;
+    transition: all 0.2s ease;
+
+    .icon-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba($card-active-bg, 0.08);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: $card-active-bg;
+      font-size: 1rem;
+    }
+
+    &.active {
+      border-color: $card-active-bg;
+      background: linear-gradient(
+        120deg,
+        rgba($card-active-bg, 0.12),
+        rgba($card-active-bg, 0.05)
+      );
+      color: $card-active-bg;
+      box-shadow: 0 8px 20px rgba($card-active-bg, 0.12);
+
+      .icon-circle {
+        background: $card-active-bg;
+        color: $color-white;
+      }
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+    }
+  }
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: $font-size-sm;
+  font-weight: 600;
+  background: rgba($color-white, 0.14);
+  color: $color-white;
+  border: 1px solid rgba($color-white, 0.2);
+
+  &.pill-soft {
+    background: rgba($color-white, 0.12);
+  }
+
+  &.pill-outline {
+    background: rgba($color-white, 0.06);
+    border-color: rgba($color-white, 0.35);
+    color: $color-white;
+  }
+
+  &.pill-light {
+    background: rgba($card-active-bg, 0.08);
+    border-color: rgba($card-active-bg, 0.25);
+    color: $card-active-bg;
+  }
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: $border-radius;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  box-shadow: $shadow-md;
+
+  &.chip-live {
+    background: linear-gradient(120deg, #22d3ee 0%, #6366f1 100%);
+    color: $color-white;
+  }
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-3;
+
+  .eyebrow {
+    font-size: $font-size-xs;
+    letter-spacing: 1px;
+    color: $color-gray-500;
+  }
+}
+
+.surface-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f7f9ff 100%);
+  border: 1px solid $color-gray-200;
+  border-radius: $border-radius-lg;
+  padding: $spacing-3;
+  box-shadow: $shadow-sm;
+}
+
+.value-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: rgba($card-active-bg, 0.1);
+  color: $card-active-bg;
+  font-weight: 700;
+  border: 1px solid rgba($card-active-bg, 0.2);
+}
+
+.next-btn {
+  box-shadow: 0 10px 24px rgba($card-active-bg, 0.2);
+}
+
+.substep-bar {
+  padding: $spacing-2 $spacing-3;
+  background: #f7f9fb;
+  border-radius: $border-radius-lg;
+  border: 1px solid $color-gray-200;
+}
+
+.upload-card {
+  border-radius: $border-radius-lg;
 }
 
 /* Animation */

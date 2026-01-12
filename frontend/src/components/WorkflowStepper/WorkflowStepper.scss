@@ -40,6 +40,60 @@
   width: 60%;
 }
 
+.step-action-hero {
+  background: linear-gradient(135deg, #263c83 0%, #b1bce5 100%);
+  color: $color-white;
+  border-radius: $border-radius-lg;
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-3;
+  box-shadow: $shadow-md;
+
+  .eyebrow {
+    font-size: $font-size-xs;
+    letter-spacing: 1.2px;
+    color: rgba($color-white, 0.75);
+  }
+
+  h5 {
+    color: $color-white;
+    font-weight: 700;
+  }
+
+  .text-muted {
+    color: rgba($color-white, 0.8) !important;
+  }
+
+  .action-right .btn {
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+  }
+
+  .btn-outline-light {
+    color: $color-white;
+    border-color: rgba($color-white, 0.6);
+
+    &:hover {
+      background: rgba($color-white, 0.12);
+      color: $color-white;
+    }
+  }
+}
+
+.step-counter-pill {
+  background: rgba($color-white, 0.12);
+  color: $color-white;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  border: 1px solid rgba($color-white, 0.2);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .stepper-header {
   position: relative;
   width: 100%;

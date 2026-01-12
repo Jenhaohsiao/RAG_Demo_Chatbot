@@ -4,6 +4,7 @@ node_modules/
 **/__pycache__/
 *.py[cod]
 *.egg-info/
+.venv/
 
 # Builds & coverage
 build/
@@ -11,6 +12,8 @@ dist/
 frontend/dist/
 frontend/build/
 coverage/
+.coverage
+.coverage.*
 .pytest_cache/
 .coverage
 htmlcov/
@@ -18,6 +21,7 @@ htmlcov/
 # Environment & secrets
 .env
 .env.*
+.env.local
 
 # VCS & tooling
 .git

@@ -2,35 +2,137 @@
 
 $prof-blue: $card-active-bg; // #2b6cb0
 
+.processing-hero {
+  background: linear-gradient(135deg, #22376b 0%, #4e6dc6 60%, #7c91e0 100%);
+  color: $color-white;
+  border-radius: $border-radius-lg;
+
+  .eyebrow {
+    letter-spacing: 1.2px;
+    font-size: $font-size-xs;
+    color: rgba($color-white, 0.8);
+  }
+
+  .chip-row .pill,
+  .chip-row .status-chip,
+  h4,
+  p {
+    color: $color-white;
+  }
+
+  .chip-row .pill {
+    background: rgba($color-white, 0.14);
+    border-color: rgba($color-white, 0.24);
+  }
+
+  .status-chip {
+    background: rgba($color-white, 0.12);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: $font-size-sm;
+  font-weight: 600;
+  background: rgba($color-white, 0.14);
+  color: $color-white;
+  border: 1px solid rgba($color-white, 0.2);
+
+  &.pill-soft {
+    background: rgba($prof-blue, 0.1);
+    border-color: rgba($prof-blue, 0.2);
+    color: $prof-blue;
+  }
+
+  &.pill-outline {
+    background: rgba($color-gray-100, 0.8);
+    border-color: rgba($color-gray-300, 0.8);
+    color: $color-gray-800;
+  }
+
+  &.pill-light {
+    background: rgba($prof-blue, 0.08);
+    border-color: rgba($prof-blue, 0.25);
+    color: $prof-blue;
+  }
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: $border-radius;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  box-shadow: $shadow-md;
+
+  &.chip-live {
+    background: linear-gradient(120deg, #22d3ee 0%, #6366f1 100%);
+    color: $color-white;
+  }
+}
+
+.surface-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f7f9ff 100%);
+  border: 1px solid $color-gray-200;
+  border-radius: $border-radius-lg;
+  padding: $spacing-3;
+  box-shadow: $shadow-sm;
+
+  .card-header {
+    background: transparent;
+    border: none;
+    padding-bottom: $spacing-2;
+
+    h6 {
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+  }
+}
+
 .text-processing-step {
   padding: 0;
 
   /* Card Styles */
   .card {
-    border: 1px solid rgba(0, 0, 0, 0.125);
-    border-radius: 0.5rem;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: $border-radius-lg;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
     background-color: #fff;
     margin-bottom: 2rem;
     height: 100%;
     transition: all 0.3s ease;
 
     &:hover {
-      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.12);
       transform: translateY(-2px);
     }
 
     .card-header {
-      background-color: $prof-blue !important; /* Force all headers to use professional blue */
-      color: white;
+      background-color: transparent;
+      color: $color-gray-900;
       border-bottom: none;
       padding: 1rem 1.25rem;
-      border-top-left-radius: 0.5rem;
-      border-top-right-radius: 0.5rem;
+      border-top-left-radius: $border-radius-lg;
+      border-top-right-radius: $border-radius-lg;
 
       h6 {
         margin: 0;
-        font-weight: 600;
+        font-weight: 700;
         font-size: 1rem;
         display: flex;
         align-items: center;
@@ -40,13 +142,6 @@ $prof-blue: $card-active-bg; // #2b6cb0
 
     .card-body {
       padding: 1.5rem;
-    }
-
-    /* Override variants to use same border color or subtle variations */
-    &.border-primary,
-    &.border-secondary,
-    &.border-success {
-      border-color: rgba($prof-blue, 0.3) !important;
     }
   }
 

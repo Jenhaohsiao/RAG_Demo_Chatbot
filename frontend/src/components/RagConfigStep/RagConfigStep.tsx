@@ -23,6 +23,24 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
   onComplete,
   disabled = false,
 }) => {
+  const statusLabel = disabled ? "已鎖定" : "即時可調";
+  const statusTone = disabled
+    ? "資料上傳後鎖定，確保檢索一致性"
+    : "調整後立即套用於檢索結果";
+
+  const chunkMaxPercent = Math.min(
+    100,
+    Math.max(0, ((parameters.chunk_max_size - 500) / (4000 - 500)) * 100)
+  );
+  const chunkMinPercent = Math.min(
+    100,
+    Math.max(0, ((parameters.chunk_min_size - 100) / (1000 - 100)) * 100)
+  );
+  const chunkOverlapPercent = Math.min(
+    100,
+    Math.max(0, ((parameters.chunk_overlap_size - 50) / (500 - 50)) * 100)
+  );
+
   return (
     <div className={`rag-config-step ${disabled ? "disabled-step" : ""}`}>
       {/* 禁用狀態提示 */}
@@ -32,204 +50,157 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
           資料已上傳處理，RAG 參數配置已鎖定，無法修改。
         </div>
       )}
-      {/* 設定項目卡片網格 */}
       <div className="row g-3">
         {/* 相似度閾值卡片 */}
         <div className="col-lg-6">
           <div
-            className={`card h-100 ${
+            className={`card h-100 config-card ${
               disabled ? "border-secondary" : "active-card-border"
             }`}
           >
-            <div
-              className={`card-header ${
-                disabled ? "bg-secondary" : "active-card-bg"
-              } text-white`}
-            >
-              <span className="card-title mb-0">
-                Similarity Threshold (相似度閾值)
-              </span>
-            </div>
             <div className="card-body">
-              <div className="mb-3">
-                <label className="form-label">
-                  檢索精確度:{" "}
-                  <span
-                    className={
-                      disabled
-                        ? "text-secondary fw-bold"
-                        : "text-primary fw-bold"
-                    }
-                  >
-                    {parameters.similarity_threshold}
-                  </span>
-                </label>
-                <input
-                  type="range"
-                  className="form-range"
-                  min="0.1"
-                  max="0.9"
-                  step="0.1"
-                  value={parameters.similarity_threshold}
-                  disabled={disabled}
-                  onChange={(e) =>
-                    onParameterChange(
-                      "similarity_threshold",
-                      parseFloat(e.target.value)
-                    )
-                  }
-                />
-                <div className="d-flex justify-content-between small text-muted">
-                  <span>0.1 (寬鬆)</span>
-                  <span>0.9 (嚴格)</span>
+              <div className="d-flex align-items-center justify-content-between mb-2">
+                <div>
+                  <div className="eyebrow">搜索嚴謹度</div>
+                  <h6 className="card-title mb-0">
+                    Similarity Threshold (相似度閾值)
+                  </h6>
                 </div>
+                <span className="pill pill-ghost">
+                  {parameters.similarity_threshold.toFixed(1)}
+                </span>
+              </div>
+              <p className="text-muted small mb-3">
+                控制模型引用內容的信心門檻。越高越嚴謹，越低越包容。
+              </p>
+              <input
+                type="range"
+                className="form-range glossy-range"
+                min="0.1"
+                max="0.9"
+                step="0.1"
+                value={parameters.similarity_threshold}
+                disabled={disabled}
+                onChange={(e) =>
+                  onParameterChange(
+                    "similarity_threshold",
+                    parseFloat(e.target.value)
+                  )
+                }
+              />
+              <div className="d-flex justify-content-between small text-muted">
+                <span>0.1 (寬鬆)</span>
+                <span>0.9 (嚴格)</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Top-K檢索卡片 (合併了 context_window 概念) */}
+        {/* Top-K檢索卡片 */}
         <div className="col-lg-6">
           <div
-            className={`card h-100 ${
+            className={`card h-100 config-card ${
               disabled ? "border-secondary" : "active-card-border"
             }`}
           >
-            <div
-              className={`card-header ${
-                disabled ? "bg-secondary" : "active-card-bg"
-              } text-white`}
-            >
-              <span className="card-title mb-0">
-                Top-K Retrieval Count (檢索數量)
-              </span>
-            </div>
             <div className="card-body">
-              <div className="mb-3">
-                <label className="form-label">
-                  檢索段落數:{" "}
-                  <span
-                    className={
-                      disabled
-                        ? "text-secondary fw-bold"
-                        : "text-primary fw-bold"
-                    }
-                  >
-                    {parameters.rag_top_k}
-                  </span>
-                </label>
-                <input
-                  type="range"
-                  className="form-range"
-                  min="1"
-                  max="20"
-                  step="1"
-                  value={parameters.rag_top_k}
-                  disabled={disabled}
-                  onChange={(e) =>
-                    onParameterChange("rag_top_k", parseInt(e.target.value))
-                  }
-                />
-                <div className="d-flex justify-content-between small text-muted">
-                  <span>1 (精簡)</span>
-                  <span>20 (詳盡)</span>
+              <div className="d-flex align-items-center justify-content-between mb-2">
+                <div>
+                  <div className="eyebrow">檢索覆蓋度</div>
+                  <h6 className="card-title mb-0">
+                    Top-K Retrieval Count (檢索數量)
+                  </h6>
                 </div>
+                <span className="pill pill-ghost">{parameters.rag_top_k}</span>
+              </div>
+              <p className="text-muted small mb-3">
+                控制每次回應拉取的段落數，平衡「資訊量」與「精準度」。
+              </p>
+              <input
+                type="range"
+                className="form-range glossy-range"
+                min="1"
+                max="20"
+                step="1"
+                value={parameters.rag_top_k}
+                disabled={disabled}
+                onChange={(e) =>
+                  onParameterChange("rag_top_k", parseInt(e.target.value, 10))
+                }
+              />
+              <div className="d-flex justify-content-between small text-muted">
+                <span>1 (精簡)</span>
+                <span>20 (詳盡)</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <hr className="my-4" />
+      <div className="section-heading d-flex align-items-center justify-content-between mt-4 mb-3">
+        <div>
+          <div className="eyebrow text-uppercase">Chunking Strategy</div>
+          <h6 className="mb-0">預設分塊策略 (唯讀)</h6>
+        </div>
+        <span className="pill pill-outline">Best-practice defaults</span>
+      </div>
 
-      {/* Chunk Settings (Read-Only Defaults) */}
-      <h6 className="text-muted mb-3">
-        Chunking Strategy Defaults (Read-Only)
-      </h6>
       <div className="row g-3">
-        {/* Chunk大小卡片 */}
-        <div className="col-lg-4">
-          <div className="card h-100 bg-light border-secondary">
-            <div className="card-header bg-secondary text-white">
-              <h6 className="card-title mb-0">Chunk Start Size</h6>
-            </div>
-            <div className="card-body">
-              <div className="mb-0">
-                <label className="form-label small">
-                  Max Size:{" "}
-                  <span className="text-dark fw-bold">
-                    {parameters.chunk_max_size}
-                  </span>{" "}
-                  chars
-                </label>
-                <input
-                  type="range"
-                  className="form-range"
-                  min="500"
-                  max="4000"
-                  step="500"
-                  value={parameters.chunk_max_size}
-                  disabled={true}
-                />
+        <div className="col-lg-4 col-md-6">
+          <div className="stat-card">
+            <div className="stat-header">
+              <div className="icon-bubble">
+                <i className="bi bi-aspect-ratio"></i>
               </div>
+              <span className="badge bg-secondary">Locked</span>
+            </div>
+            <div className="stat-value">{parameters.chunk_max_size} chars</div>
+            <div className="stat-label">Chunk Start Size</div>
+            <div className="stat-meter">
+              <div
+                className="stat-meter-fill"
+                style={{ width: `${chunkMaxPercent}%` }}
+              ></div>
             </div>
           </div>
         </div>
 
-        {/* Chunk最小值卡片 */}
-        <div className="col-lg-4">
-          <div className="card h-100 bg-light border-secondary">
-            <div className="card-header bg-secondary text-white">
-              <h6 className="card-title mb-0">Chunk Min Size</h6>
-            </div>
-            <div className="card-body">
-              <div className="mb-0">
-                <label className="form-label small">
-                  Min Size:{" "}
-                  <span className="text-dark fw-bold">
-                    {parameters.chunk_min_size}
-                  </span>{" "}
-                  chars
-                </label>
-                <input
-                  type="range"
-                  className="form-range"
-                  min="100"
-                  max="1000"
-                  step="100"
-                  value={parameters.chunk_min_size}
-                  disabled={true}
-                />
+        <div className="col-lg-4 col-md-6">
+          <div className="stat-card">
+            <div className="stat-header">
+              <div className="icon-bubble">
+                <i className="bi bi-sliders"></i>
               </div>
+              <span className="badge bg-secondary">Locked</span>
+            </div>
+            <div className="stat-value">{parameters.chunk_min_size} chars</div>
+            <div className="stat-label">Chunk Min Size</div>
+            <div className="stat-meter">
+              <div
+                className="stat-meter-fill"
+                style={{ width: `${chunkMinPercent}%` }}
+              ></div>
             </div>
           </div>
         </div>
 
-        {/* Chunk重疊卡片 */}
-        <div className="col-lg-4">
-          <div className="card h-100 bg-light border-secondary">
-            <div className="card-header bg-secondary text-white">
-              <h6 className="card-title mb-0">Chunk Overlap</h6>
-            </div>
-            <div className="card-body">
-              <div className="mb-0">
-                <label className="form-label small">
-                  Overlap:{" "}
-                  <span className="text-dark fw-bold">
-                    {parameters.chunk_overlap_size}
-                  </span>{" "}
-                  chars
-                </label>
-                <input
-                  type="range"
-                  className="form-range"
-                  min="50"
-                  max="500"
-                  step="50"
-                  value={parameters.chunk_overlap_size}
-                  disabled={true}
-                />
+        <div className="col-lg-4 col-md-6">
+          <div className="stat-card">
+            <div className="stat-header">
+              <div className="icon-bubble">
+                <i className="bi bi-layers"></i>
               </div>
+              <span className="badge bg-secondary">Locked</span>
+            </div>
+            <div className="stat-value">
+              {parameters.chunk_overlap_size} chars
+            </div>
+            <div className="stat-label">Chunk Overlap</div>
+            <div className="stat-meter">
+              <div
+                className="stat-meter-fill"
+                style={{ width: `${chunkOverlapPercent}%` }}
+              ></div>
             </div>
           </div>
         </div>

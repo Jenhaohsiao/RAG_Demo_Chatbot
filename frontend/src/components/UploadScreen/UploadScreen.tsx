@@ -65,13 +65,20 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
   onParameterChange,
 }) => {
   const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState<"file" | "crawler">("file"); // 移除 URL 選項
+  const tabTitle = activeTab === "file" ? "檔案上傳" : "網站爬蟲";
+  const tabDescription =
+    activeTab === "file"
+      ? "快速設定檔案限制並上傳文件，確保格式與大小符合規範。"
+      : "設定爬蟲安全範圍與抓取上限，輸入網址即可開始擷取內容。";
+  const cardWrapperClasses =
+    "card shadow-sm mx-auto upload-card-wrapper active-card-border";
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showErrorDialog, setShowErrorDialog] = useState(false); // 錯誤對話框狀態
   const [errorDialogMessage, setErrorDialogMessage] = useState<string>(""); // 錯誤對話框訊息
   const [errorDialogTitle, setErrorDialogTitle] =
     useState<string>("檔案上傳失敗"); // 錯誤對話框標題
-  const [activeTab, setActiveTab] = useState<"file" | "crawler">("file"); // 移除 URL 選項
   const [uploadSubStep, setUploadSubStep] = useState<1 | 2>(1); // 1: 參數設定, 2: 上傳介面
   const [crawlerLoading, setCrawlerLoading] = useState(false); // Added: Crawler loading state
   const [crawlerError, setCrawlerError] = useState<string | null>(null); // Added: Crawler error
@@ -452,7 +459,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
       {hasUploadedContent && (
         <div className="upload-results-summary">
           {/* 保持與上傳介面一致的卡片外框 */}
-          <div className="card shadow-sm mx-auto active-card-border upload-card-wrapper">
+          <div className={cardWrapperClasses}>
             <div className="card-body p-4">
               <h5 className="card-title text-center mb-4 fw-bold text-primary">
                 上傳完成
@@ -469,28 +476,50 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                   </div>
                   <div className="card-body pt-0 bg-white">
                     <div className="list-group list-group-flush">
-                      {uploadedFiles.map((file, index) => (
-                        <div
-                          key={index}
-                          className="list-group-item px-0 py-2 border-0"
-                        >
-                          <div className="d-flex justify-content-between align-items-center">
-                            <div className="flex-grow-1">
-                              <div className="fw-medium text-truncate">
-                                {file.filename}
+                      {uploadedFiles.map((file, index) => {
+                        const fileName =
+                          file.filename || file.name || "未命名檔案";
+                        const uploadedAt =
+                          file.uploadTime ||
+                          file.upload_time ||
+                          file.upload_timestamp;
+                        const typeLabel = file.type === "url" ? "URL" : "檔案";
+                        const sizeLabel =
+                          typeof file.size === "number"
+                            ? formatFileSize(file.size)
+                            : typeof file.file_size === "number"
+                            ? formatFileSize(file.file_size)
+                            : null;
+                        const metaParts = [
+                          typeLabel,
+                          sizeLabel ? `大小 ${sizeLabel}` : null,
+                          uploadedAt
+                            ? new Date(uploadedAt).toLocaleString()
+                            : null,
+                        ].filter(Boolean);
+
+                        return (
+                          <div
+                            key={index}
+                            className="list-group-item px-0 py-2 border-0"
+                          >
+                            <div className="d-flex justify-content-between align-items-center">
+                              <div className="flex-grow-1">
+                                <div className="fw-medium text-truncate">
+                                  {fileName}
+                                </div>
+                                <small className="text-muted">
+                                  {metaParts.join(" • ") || "已完成"}
+                                </small>
                               </div>
-                              <small className="text-muted">
-                                {formatFileSize(file.size)} •{" "}
-                                {new Date(file.uploadTime).toLocaleString()}
-                              </small>
+                              <span className="badge bg-success rounded-pill ms-2">
+                                <i className="bi bi-check-lg"></i>
+                              </span>
                             </div>
-                            <span className="badge bg-success rounded-pill ms-2">
-                              <i className="bi bi-check-lg"></i>
-                            </span>
+                            {/* 移除預覽文字 */}
                           </div>
-                          {/* 移除預覽文字 */}
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -542,12 +571,11 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
       {/* 如果沒有上傳內容，顯示上傳界面 */}
       {!hasUploadedContent && (
         <div className="upload-interface-container">
-          {/* 1. 切換按鈕 (取代 Tabs) */}
-          <div className="d-flex justify-content-center gap-3 mb-4">
+          <div className="upload-mode-toggle d-flex justify-content-center gap-3 mb-4">
             <button
-              className={`btn ${
-                activeTab === "file" ? "btn-primary" : "btn-outline-primary"
-              } px-4 py-2 rounded-pill`}
+              className={`mode-toggle-btn ${
+                activeTab === "file" ? "active" : ""
+              }`}
               onClick={() => {
                 setActiveTab("file");
                 setUploadSubStep(1);
@@ -555,13 +583,15 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
               }}
               disabled={disabled || isCrawlerCompleted}
             >
-              <i className="bi bi-file-earmark-arrow-up me-2"></i>
-              {t("upload.tab.file", "檔案上傳")}
+              <span className="icon-circle">
+                <i className="bi bi-file-earmark-arrow-up"></i>
+              </span>
+              <span>{t("upload.tab.file", "檔案上傳")}</span>
             </button>
             <button
-              className={`btn ${
-                activeTab === "crawler" ? "btn-primary" : "btn-outline-primary"
-              } px-4 py-2 rounded-pill`}
+              className={`mode-toggle-btn ${
+                activeTab === "crawler" ? "active" : ""
+              }`}
               onClick={() => {
                 setActiveTab("crawler");
                 setUploadSubStep(1);
@@ -569,28 +599,34 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
               }}
               disabled={disabled || isCrawlerCompleted}
             >
-              <i className="bi bi-globe me-2"></i>
-              {t("upload.tab.crawler", "網站爬蟲")}
+              <span className="icon-circle">
+                <i className="bi bi-globe"></i>
+              </span>
+              <span>{t("upload.tab.crawler", "網站爬蟲")}</span>
             </button>
           </div>
 
           {/* 2. 卡片容器 (簡化風格) */}
-          <div className="card shadow-sm mx-auto active-card-border upload-card-wrapper">
-            <div className="card-body p-4">
+          <div className={cardWrapperClasses}>
+            <div className="card-body p-4 ">
               {/* 步驟 1: 參數設定 */}
               {uploadSubStep === 1 && (
                 <div className="step-parameters fade-in">
-                  <h5 className="card-title text-center mb-4 fw-bold text-primary">
-                    {activeTab === "file"
-                      ? "步驟 1/2: 檔案參數設定"
-                      : "步驟 1/2: 爬蟲參數設定"}
-                  </h5>
+                  <div className="section-header mb-4">
+                    <div>
+                      <div className="eyebrow text-uppercase">
+                        Step 3 · Configure
+                      </div>
+                      <h5 className="mb-0 fw-bold">{tabTitle} 基本參數</h5>
+                    </div>
+                    <span className="pill pill-light">步驟 1 / 2</span>
+                  </div>
 
                   {activeTab === "file" ? (
                     // 檔案參數
                     <div className="parameter-content">
                       {/* 檔案大小限制 */}
-                      <div className="mb-4 bg-white p-3 rounded shadow-sm border">
+                      <div className="surface-card mb-4">
                         <label className="form-label fw-bold text-dark mb-2">
                           <i className="bi bi-hdd me-2"></i>
                           單檔大小限制
@@ -613,15 +649,15 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                             }
                             disabled={!onParameterChange}
                           />
-                          <span className="badge bg-secondary fs-6">
+                          <span className="value-chip">
                             {parameters?.max_file_size_mb || maxFileSizeMB} MB
                           </span>
                         </div>
                       </div>
 
                       {/* 支援檔案類型 */}
-                      <div className="mb-3 bg-white p-3 rounded shadow-sm border">
-                        <label className="form-label fw-bold text-dark mb-3">
+                      <div className="surface-card mb-3">
+                        <label className="form-label fw-bold text-dark mb-3 d-flex align-items-center gap-2">
                           <i className="bi bi-file-earmark-check me-2"></i>
                           支援檔案類型
                         </label>
@@ -671,7 +707,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                     // 爬蟲參數
                     <div className="parameter-content">
                       {/* 最大 Token 數 */}
-                      <div className="mb-4 bg-white p-3 rounded shadow-sm border">
+                      <div className="surface-card mb-4">
                         <label className="form-label fw-bold text-dark mb-2">
                           <i className="bi bi-cpu me-2"></i>
                           最大 Token 數
@@ -694,7 +730,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                             }
                             disabled={!onParameterChange}
                           />
-                          <span className="badge bg-secondary fs-6">
+                          <span className="value-chip">
                             {(
                               parameters?.crawler_max_tokens || crawlerMaxTokens
                             ).toLocaleString()}
@@ -703,7 +739,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                       </div>
 
                       {/* 最大頁面數 */}
-                      <div className="mb-3 bg-white p-3 rounded shadow-sm border">
+                      <div className="surface-card mb-3">
                         <label className="form-label fw-bold text-dark mb-2">
                           <i className="bi bi-layers me-2"></i>
                           最大頁面數
@@ -726,7 +762,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                             }
                             disabled={!onParameterChange}
                           />
-                          <span className="badge bg-secondary fs-6">
+                          <span className="value-chip">
                             {parameters?.crawler_max_pages || crawlerMaxPages}{" "}
                             頁
                           </span>
@@ -737,7 +773,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
 
                   <div className="text-center mt-4">
                     <button
-                      className="btn btn-primary w-100 py-2 rounded-pill"
+                      className="btn btn-primary w-100 py-2 rounded-pill next-btn"
                       onClick={() => setUploadSubStep(2)}
                       disabled={
                         activeTab === "file" &&
@@ -755,7 +791,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
               {/* 步驟 2: 上傳介面 */}
               {uploadSubStep === 2 && (
                 <div className="step-upload fade-in">
-                  <div className="d-flex align-items-center mb-4">
+                  <div className="substep-bar d-flex align-items-center mb-4 justify-content-between">
                     {/* 只在爬蟲未完成時顯示返回按鈕 */}
                     {!(
                       activeTab === "crawler" &&

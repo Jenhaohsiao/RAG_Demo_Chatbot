@@ -84,12 +84,12 @@ export const useSession = (): UseSessionReturn => {
     setIsSessionExpired(true);
     stopHeartbeat();
     
-    // 重置所有session狀態
+    // ?�置?�?�session?�??
     setSessionId(null);
     setSessionState(null);
     setExpiresAt(null);
     
-    // 觸發回調
+    // 觸發?�調
     if (onSessionExpiredRef.current) {
       onSessionExpiredRef.current();
     }
@@ -123,7 +123,6 @@ export const useSession = (): UseSessionReturn => {
     // If we expire locally first, we show modal.
     // If backend expires first, next request fails with 404 -> show modal.
     
-    // console.log(`[Session] Setting expiration timer for ${timeUntilExpiration}ms`);
     
     if (timeUntilExpiration > 0) {
       expirationCheckRef.current = setTimeout(() => {
@@ -152,7 +151,6 @@ export const useSession = (): UseSessionReturn => {
         setError(null);
         errorSetRef.current = false;
       }
-      // console.log(`Activity-triggered heartbeat sent for session ${sessionId}`);
     } catch (err: any) {
       // Robust 404 detection - check both axios response and error message
       const status = err?.response?.status;
@@ -174,7 +172,7 @@ export const useSession = (): UseSessionReturn => {
     }
   }, [sessionId, error, handleSessionExpiration, startExpirationCheck]);
   
-  // 監聽用戶活動並觸發heartbeat
+  // ??��?�戶活�?並觸?�heartbeat
   useUserActivity({
     onActivity: triggerHeartbeat,
     throttleTime: ACTIVITY_THROTTLE
@@ -183,19 +181,19 @@ export const useSession = (): UseSessionReturn => {
   /**
    * Start heartbeat timer
    * 
-   * ⚠️ 已禁用自動定時器 - 只通過用戶活動觸發 heartbeat
-   * 原因：如果用戶沒有操作，會話應該在20分鐘後自然過期
-   * 如需恢復自動 heartbeat，取消下方代碼的註釋
+   * ?��? 已�??�自?��??�器 - ?�通�??�戶活�?觸發 heartbeat
+   * ?��?：�??�用?��??��?作�??�話?�該??0?��?後自?��???
+   * 如�??�復?��? heartbeat，�?消�??�代碼�?註�?
    */
   const startHeartbeat = useCallback((currentSessionId: string) => {
-    // 清除舊的定時器（如果存在）
+    // 清除?��?定�??��?如�?存在�?
     if (heartbeatTimerRef.current) {
       clearInterval(heartbeatTimerRef.current);
       heartbeatTimerRef.current = null;
     }
 
-    // ⛔ 禁用自動定時器 - 用戶無操作時應讓會話自然過期
-    // 如需恢復，取消下方代碼的註釋：
+    // ??禁用?��?定�???- ?�戶?��?作�??��??�話?�然?��?
+    // 如�??�復，�?消�??�代碼�?註�?�?
     /*
     heartbeatTimerRef.current = setInterval(async () => {
       try {
@@ -208,13 +206,12 @@ export const useSession = (): UseSessionReturn => {
           setError(null);
           errorSetRef.current = false;
         }
-        // console.log(`Auto heartbeat sent for session ${currentSessionId}`);
       } catch (err) {
         if (!errorSetRef.current) {
           if (err instanceof Error && (err.message.includes('404') || err.message.includes('410'))) {
             handleSessionExpiration();
           } else {
-            const errorMsg = '無法維持會話連線，請檢查網路連線';
+            const errorMsg = '?��?維�??�話???，�?檢查網路???';
             setError(errorMsg);
             errorSetRef.current = true;
           }
@@ -223,7 +220,6 @@ export const useSession = (): UseSessionReturn => {
     }, HEARTBEAT_INTERVAL);
     */
     
-    // console.log(`Heartbeat timer disabled - only user activity will trigger heartbeat for session ${currentSessionId}`);
   }, [error, handleSessionExpiration, startExpirationCheck]);
 
   /**
@@ -250,7 +246,6 @@ export const useSession = (): UseSessionReturn => {
       startHeartbeat(response.session_id);
       startExpirationCheck(newExpiresAt, lastActivity);
       
-      // console.log('Session created:', response.session_id);
     } catch (err: any) {
       setError(err.message || 'Failed to create session');
     } finally {

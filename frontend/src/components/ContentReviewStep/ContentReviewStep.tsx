@@ -354,10 +354,16 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
     return result;
   }, [propDocuments, crawledUrls]);
 
+  const totalChecklistItems = 6;
+  const completedCount =
+    reviewProgress.completed.length + reviewProgress.failed.length;
+  const progressPercent = Math.round(
+    (completedCount / totalChecklistItems) * 100
+  );
+
   return (
     <div className="content-review-step">
-      {/* 審核項目列表 - 保持顯示，動態更新狀態 */}
-      <div className="card mb-4 shadow-sm border-0">
+      <div className="card mb-4 shadow-sm border-0 surface-card active-card-border">
         <div className="card-header py-3">
           <h6 className="mb-0 fw-bold d-flex align-items-center">
             <i className="bi bi-list-check me-2 fs-5"></i>

@@ -1,6 +1,6 @@
 /**
  * Step 3: Data Upload Component
- * 資訊上傳步驟 - 整合參數設定和檔案上傳
+ * 資�?上傳步�? - ?��??�數設�??��?案�???
  */
 
 import React from "react";
@@ -21,10 +21,10 @@ export interface DataUploadStepProps {
   onFileUpload?: (file: File) => void;
   onUrlUpload?: (url: string) => void;
   onCrawlerUpload?: (url: string, maxTokens: number, maxPages: number) => void;
-  // 新增：處理爬蟲成功的回調
+  // ?��?：�??�爬?��??��??�調
   onCrawlerSuccess?: (result: any) => void;
-  documents?: any[]; // 已上傳文件列表
-  crawledUrls?: any[]; // 已爬取URL列表
+  documents?: any[]; // 已�??��?件�?�?
+  crawledUrls?: any[]; // 已爬?�URL?�表
 }
 
 const DataUploadStep: React.FC<DataUploadStepProps> = ({
@@ -40,12 +40,12 @@ const DataUploadStep: React.FC<DataUploadStepProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  // 檢查是否有上傳內容（必須有文件且所有文件都已完成處理）
+  // 檢查?�否?��??�內容�?必�??��?件�??�?��?件都已�??��??��?
   const hasAnyContent =
     (documents && documents.length > 0) ||
     (crawledUrls && crawledUrls.length > 0);
 
-  // 檢查所有文件是否都已完成處理（chunks > 0 表示處理完成）
+  // 檢查?�?��?件是?�都已�??��??��?chunks > 0 表示?��?完�?�?
   const allFilesProcessed = documents.every(
     (doc) => doc.chunks && doc.chunks > 0
   );
@@ -53,11 +53,10 @@ const DataUploadStep: React.FC<DataUploadStepProps> = ({
     (url) => url.chunks && url.chunks > 0
   );
 
-  // 只有在有內容且全部處理完成時才顯示「上傳完成」
+  // ?��??��??�容且全?��??��??��??�顯示「�??��??��?
   const hasUploadedContent =
     hasAnyContent && allFilesProcessed && allCrawlsProcessed;
 
-  // console.log("[DataUploadStep] hasUploadedContent:", hasUploadedContent, {
   //   documents: documents?.length || 0,
   //   crawledUrls: crawledUrls?.length || 0,
   //   allFilesProcessed,
@@ -66,7 +65,7 @@ const DataUploadStep: React.FC<DataUploadStepProps> = ({
 
   return (
     <div className="data-upload-step">
-      {/* 直接顯示 UploadScreen，參數設定已整合到各 tab */}
+      {/* ?�接顯示 UploadScreen，�??�設定已?��??��? tab */}
       {sessionId && (
         <UploadScreen
           sessionId={sessionId}
@@ -86,7 +85,7 @@ const DataUploadStep: React.FC<DataUploadStepProps> = ({
           hasUploadedContent={hasUploadedContent}
           uploadedFiles={documents}
           crawledUrls={crawledUrls}
-          // 傳遞參數設定相關 props
+          // ?��??�數設�??��? props
           parameters={parameters}
           onParameterChange={onParameterChange}
         />

@@ -283,14 +283,16 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
     isProcessing ||
     (jobs.length > 0 && jobs.some((j) => j.status !== "pending"));
 
+  const vectorTotal = jobs.reduce((sum, j) => sum + j.chunks, 0);
+  const progressLabel = Math.round(overallProgress);
+
   return (
     <div className="text-processing-step">
-      {/* 簡化合併 - 3個 Card 在同一行 */}
-      <div className="row g-3 mb-4">
+      <div className="row g-3 mb-4 processing-panels">
         {/* A. Vector DB 寫入結果 (Vector DB Write Status) */}
         <div className="col-md-4">
-          <div className="card h-100 border-primary">
-            <div className="card-header bg-primary text-white py-2">
+          <div className="card surface-card h-100 border-0">
+            <div className="card-header py-2">
               <h6 className="card-title mb-0">
                 {t(
                   "workflow.steps.textProcessing.vectorDbStatus.title",
@@ -376,8 +378,8 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
 
         {/* B. 向量化設定摘要 (Vectorization Settings Summary) */}
         <div className="col-md-4">
-          <div className="card h-100 border-secondary">
-            <div className="card-header bg-secondary text-white py-2">
+          <div className="card surface-card h-100 border-0">
+            <div className="card-header py-2">
               <h6 className="card-title mb-0">
                 {t(
                   "workflow.steps.textProcessing.settingsSummary.title",
@@ -446,8 +448,8 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
 
         {/* C. RAG 可檢索狀態 (RAG Retrieval Readiness) */}
         <div className="col-md-4">
-          <div className="card h-100 border-success">
-            <div className="card-header bg-success text-white py-2">
+          <div className="card surface-card h-100 border-0">
+            <div className="card-header py-2">
               <h6 className="card-title mb-0">
                 {t(
                   "workflow.steps.textProcessing.ragReadiness.title",

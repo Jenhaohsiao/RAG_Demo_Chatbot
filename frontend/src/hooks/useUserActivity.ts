@@ -1,12 +1,12 @@
 /**
  * useUserActivity Hook
- * 監聽用戶活動（滑鼠移動、點擊、鍵盤等）
+ * ??��?�戶活�?（�?鼠移?�、�??�、鍵?��?�?
  */
 import { useEffect, useRef, useCallback } from 'react';
 
 interface UseUserActivityOptions {
   onActivity?: () => void;
-  throttleTime?: number; // 節流時間，避免過於頻繁觸發
+  throttleTime?: number; // 節流�??��??��??�於?��?觸發
 }
 
 interface UseUserActivityReturn {
@@ -22,7 +22,7 @@ interface UseUserActivityReturn {
  * - Trigger heartbeat on any user activity
  */
 export const useUserActivity = (options: UseUserActivityOptions = {}): UseUserActivityReturn => {
-  const { onActivity, throttleTime = 60000 } = options; // 預設1分鐘節流
+  const { onActivity, throttleTime = 60000 } = options; // ?�設1?��?節�?
   
   const lastActivityRef = useRef<number>(Date.now());
   const throttleTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -33,24 +33,23 @@ export const useUserActivity = (options: UseUserActivityOptions = {}): UseUserAc
   const handleActivity = useCallback(() => {
     const now = Date.now();
     
-    // 檢查是否在節流期間內
+    // 檢查?�否?��?流�??�內
     if (now - lastActivityRef.current < throttleTime) {
       return;
     }
     
     lastActivityRef.current = now;
     
-    // 清除之前的節流計時器
+    // 清除之�??��?流�??�器
     if (throttleTimerRef.current) {
       clearTimeout(throttleTimerRef.current);
     }
     
-    // 觸發活動回調
+    // 觸發活�??�調
     if (onActivity) {
       onActivity();
     }
     
-    // console.log('User activity detected, heartbeat triggered');
   }, [onActivity, throttleTime]);
 
   /**
@@ -66,12 +65,12 @@ export const useUserActivity = (options: UseUserActivityOptions = {}): UseUserAc
       'click'
     ];
 
-    // 添加事件監聽器
+    // 添�?事件??��??
     events.forEach(event => {
       document.addEventListener(event, handleActivity, { passive: true });
     });
 
-    // 清理函數
+    // 清�??�數
     return () => {
       events.forEach(event => {
         document.removeEventListener(event, handleActivity);
@@ -84,6 +83,6 @@ export const useUserActivity = (options: UseUserActivityOptions = {}): UseUserAc
   }, [handleActivity]);
 
   return {
-    isActive: true // 簡化實現，總是返回true
+    isActive: true // 簡�?實現，總?��??�true
   };
 };

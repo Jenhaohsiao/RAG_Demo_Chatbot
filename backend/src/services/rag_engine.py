@@ -258,11 +258,12 @@ class RAGEngine:
         }
         response_language = lang_map.get(language, lang_map.get(language.split('-')[0], 'English'))
         
-        # 構建文檔內容摘要供分析
+        # 構建文檔內容摘要供分析 - 增加長度以提供更多上下文
         doc_summary = ""
         if retrieved_chunks:
-            doc_texts = [chunk.text[:200] for chunk in retrieved_chunks[:3]]
-            doc_summary = "\n".join(doc_texts)
+            # 增加每個chunk的字符數從200到500，總共使用前5個chunks
+            doc_texts = [chunk.text[:500] for chunk in retrieved_chunks[:5]]
+            doc_summary = "\n\n".join(doc_texts)
         
         prompt = f"""Based on the available document content, generate 2-3 clear and grammatically correct questions that users can ask about this document.
 
@@ -272,22 +273,24 @@ class RAGEngine:
 **CRITICAL Requirements**:
 1. Generate questions in {response_language} ONLY
 2. Questions MUST be grammatically correct and natural-sounding
-3. Questions MUST use keywords and phrases that appear in the document content above
-4. Questions should help users explore specific aspects of the document
-5. Each question should be ANSWERABLE based on the document content
+3. Questions MUST use EXACT keywords and phrases that appear in the document content above
+4. Questions should be DIRECTLY ANSWERABLE by quoting or paraphrasing the content above
+5. Focus on specific facts, names, events, or details mentioned in the document
 6. Return ONLY the questions, one per line, no numbering or bullets
 7. Generate exactly 2-3 questions
+8. IMPORTANT: Make questions specific enough that they can be answered with the content above
 
-**Good Examples** (in Chinese):
-- 故事的主角是誰？
-- 愛麗絲在兔子洞裡遇到了什麼？
-- 紅心皇后說了什麼？
+**Good Examples** (specific and answerable):
+- 故事的主角叫什麼名字？
+- 愛麗絲在花園裡遇到了哪些角色？
+- 瘋帽匠的茶會上發生了什麼事？
 
-**Bad Examples** (grammatically incorrect):
-- 芥末與這是護物嗎？
-- 紅龜與鷲的人物？
+**Bad Examples** (too vague or not answerable from content):
+- 這個故事想表達什麼？
+- 作者為什麼這樣寫？
+- 這本書的主題是什麼？
 
-**Your Suggested Questions** (must be grammatically correct and answerable):"""
+**Your Suggested Questions** (must be specific and directly answerable from the content above):"""
 
         try:
             response = self._generate_with_retry(prompt, session_id)
@@ -356,7 +359,8 @@ class RAGEngine:
             }
             response_language = lang_map.get(language, lang_map.get(language.split('-')[0], 'English'))
             
-            doc_summary = "\n".join([chunk.text[:300] for chunk in retrieved_chunks])
+            # 增加每個chunk的長度以提供更多上下文
+            doc_summary = "\n\n".join([chunk.text[:500] for chunk in retrieved_chunks])
             
             prompt = f"""Based on the following document content, generate 3 specific questions that a user might want to ask to understand the main topics.
 
@@ -365,10 +369,21 @@ class RAGEngine:
 
 **Requirements**:
 1. Generate questions in {response_language} ONLY
-2. Questions should be specific and based on the actual document topics
-3. Questions should cover the 3 most important concepts
-4. Return ONLY the questions, one per line, no numbering or bullets
-5. Generate exactly 3 questions
+2. Questions MUST use EXACT keywords and phrases from the document content above
+3. Questions should be DIRECTLY ANSWERABLE by quoting the content above
+4. Focus on specific facts, characters, events, or details mentioned in the document
+5. Return ONLY the questions, one per line, no numbering or bullets
+6. Generate exactly 3 questions
+7. IMPORTANT: Questions must be specific enough that they can be answered with the document content
+
+**Good Examples** (specific and answerable):
+- 文中提到的主要角色有哪些？
+- 故事發生在什麼地方？
+- 文中描述了什麼重要事件？
+
+**Bad Examples** (too vague):
+- 這篇文章的主題是什麼？
+- 作者想表達什麼？
 
 **Suggested Questions**:"""
 

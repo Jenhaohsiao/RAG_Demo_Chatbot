@@ -25,14 +25,8 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
         <div className="modal-content">
           <div className="modal-header">
             <div className="header-content">
-              <div className="info-badge">
-                <i className="bi bi-info-circle"></i>
-              </div>
               <div>
                 <h5 className="modal-title mb-1">關於本專案</h5>
-                <p className="header-subtitle mb-0">
-                  AI 不再有幻覺，回答也可以很專注
-                </p>
               </div>
             </div>
             <button
@@ -44,14 +38,18 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
           </div>
           <div className="modal-body">
             <div className="intro-section">
+              <h1 className="header-subtitle mb-3">
+                使用RAG讓 AI 減少幻覺，回答專注
+              </h1>
               <p className="intro-text">
-                本專案展示 AI 工程重要的一環，如何「只根據您的資料」來回答問題
+                本專案展示 AI
+                工程重要的一環，RAG如何「只根據您的資料」來回答問題
               </p>
             </div>
 
-            <div className="section-divider">
-              <span className="divider-text">四個核心之間的協作</span>
-            </div>
+            <span className="section-divider">
+              <span className="divider-text">四個RAG核心之間的協作</span>
+            </span>
 
             <div className="cards-container">
               <div className="feature-card rag-card">
@@ -61,7 +59,7 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
                 <div className="card-content">
                   <h5 className="card-title">RAG 檢索增強生成</h5>
                   <p className="card-description">
-                    在回答前先搜尋資料庫，確保相關內容才回答；找不到就誠實表達「不知道」
+                    前先搜尋資料庫，確保相關內容才回答；或誠實表達無法回答
                   </p>
                   <div className="card-highlight">
                     <span className="highlight-text">讓 AI 誠實，而非健談</span>
