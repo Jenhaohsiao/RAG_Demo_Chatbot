@@ -418,14 +418,14 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     {
       id: 1,
       key: "rag-config",
-      title: "RAG 參數配置",
-      infoTitle: "什麼是 RAG?",
+      title: "檢索策略設定",
+      infoTitle: "什麼是檢索策略（Retrieval Strategy）？",
       icon: "bi-gear",
       description:
         "微調相似度與 Top-K，讓查詢更精準更涵蓋全面，並可以設定切塊大小與安全範圍。",
       color: "primary",
       detailMessage:
-        "RAG（Retrieval-Augmented Generation，檢索增強生成）是 AI 工具中常見的一種技術，特別適用於大型語言模型（LLM）像 GPT 或 Llama，用來改善其內容的準確性、相關性及事實性。它會從既有知識庫中檢索相關資訊來『增強』模型的輸入提示，以降低幻覺（hallucination）並提升品質。RAG 常用於問答系統、聊天機器人及知識檢索等情境。\n\nRAG 的核心流程通常分為三個階段：檢索（Retrieval）、增強（Augmentation）及生成（Generation）。",
+        "檢索策略用來設定 AI 在回答問題前，要如何從 Vector DB 中找出最相關的資料內容。\n\n透過調整相似度門檻與檢索數量，可以控制：\n\nAI 回答時「只使用高度相關的資料」\n\n或在必要時擴大搜尋範圍，避免漏掉重要資訊\n\n此步驟只影響 資料檢索（Retrieval），不涉及 AI 的回答方式或語言生成。",
     },
     {
       id: 2,
@@ -1266,10 +1266,11 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             {/* 步驟6顯示「總結」按鈕 */}
             {currentStep === 6 && (
               <button
-                className="btn btn-info me-2"
+                className="btn btn-summary-pro me-2"
                 onClick={() => setShowRagSummaryDialog(true)}
                 disabled={isGlobalLoading}
               >
+                <i className="bi bi-journal-text me-2"></i>
                 總結
               </button>
             )}
@@ -1362,7 +1363,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                   color: "white",
                 }}
               >
-                <h3 className="modal-title text-white">總結 RAG 技術</h3>
+                <h3 className="modal-title text-white">RAG 技術總結 </h3>
                 <button
                   type="button"
                   className="btn-close btn-close-white"

@@ -164,6 +164,7 @@
   color: $card-active-bg;
   font-weight: 700;
   border: 1px solid rgba($card-active-bg, 0.2);
+  white-space: nowrap;
 }
 
 .next-btn {

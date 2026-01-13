@@ -19,7 +19,7 @@
   .modal-header {
     background: linear-gradient(135deg, #1e3a8a 0%, #0891b2 100%);
     border-bottom: none;
-    padding: 2rem 2rem 1.5rem;
+    padding: 1.3rem;
     position: relative;
     overflow: hidden;
 
@@ -116,7 +116,7 @@
 
     .intro-section {
       text-align: center;
-      margin-bottom: 2rem;
+      margin-bottom: 1rem;
 
       .intro-text {
         font-size: 1.1rem;
@@ -128,27 +128,15 @@
     }
 
     .section-divider {
-      display: flex;
-      align-items: center;
-      text-align: center;
-      margin: 2.5rem 0 2rem;
-      position: relative;
+      border-bottom: 2px solid #e2e8f0;
+      border-top: none;
+      opacity: 1;
+    }
 
-      &::before,
-      &::after {
-        content: "";
-        flex: 1;
-        border-bottom: 2px solid #e2e8f0;
-      }
-
-      .divider-text {
-        padding: 0 1.5rem;
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: #0891b2;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-      }
+    .divider-text {
+      color: #0891b2 !important;
+      font-weight: 600;
+      width: 80%;
     }
 
     .cards-container {
@@ -198,9 +186,9 @@
       }
 
       .card-icon {
-        width: 56px;
-        height: 56px;
-        border-radius: 12px;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -208,7 +196,7 @@
         transition: transform 0.3s ease;
 
         i {
-          font-size: 1.75rem;
+          font-size: 1.25rem;
           color: white;
         }
       }
@@ -229,20 +217,51 @@
         background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
       }
 
+      // RAG 技術總結卡片顏色
+      &.warning-card .card-icon.warning-icon {
+        background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+      }
+
+      &.success-card .card-icon.success-icon {
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      }
+
+      &.danger-card .card-icon.danger-icon {
+        background: linear-gradient(135deg, #dc2626 0%, #f87171 100%);
+      }
+
+      &.info-card .card-icon.info-icon {
+        background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+      }
+
       .card-content {
         .card-title {
           font-size: 1.15rem;
           font-weight: 700;
           color: #2d3748;
-          margin-bottom: 0.75rem;
+          margin-bottom: 0.5rem;
           letter-spacing: -0.01em;
+        }
+
+        .card-subtitle {
+          font-size: 0.85rem;
+          color: #718096;
+          margin-bottom: 0.75rem;
         }
 
         .card-description {
           font-size: 0.95rem;
           color: #718096;
           line-height: 1.6;
-          margin-bottom: 1rem;
+
+          strong {
+            color: #2d3748;
+            font-weight: 600;
+          }
+
+          p {
+            margin-bottom: 0.5rem;
+          }
         }
 
         .card-highlight {
@@ -293,6 +312,39 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    .footer-left {
+      display: flex;
+      align-items: center;
+
+      .btn-outline-primary {
+        color: #0891b2;
+        border-color: #0891b2;
+        padding: 0.6rem 1.5rem;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+
+        i {
+          font-size: 1rem;
+        }
+
+        &:hover {
+          background: #0891b2;
+          color: white;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(8, 145, 178, 0.3);
+        }
+      }
+    }
+
+    .footer-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
 
     .version-info {
       display: flex;
@@ -345,7 +397,7 @@
 @media (max-width: 768px) {
   .about-project-modal {
     .modal-header {
-      padding: 1.5rem;
+      padding: 1rem;
 
       .header-content {
         .info-badge {
