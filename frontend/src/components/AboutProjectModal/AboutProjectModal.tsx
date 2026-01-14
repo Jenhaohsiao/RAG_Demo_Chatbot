@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./AboutProjectModal.scss";
 
 interface AboutProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialView?: "about" | "summary"; // 新增：初始視圖參數
 }
 
 type ViewMode = "about" | "summary";
@@ -11,8 +12,16 @@ type ViewMode = "about" | "summary";
 const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
   isOpen,
   onClose,
+  initialView = "about", // 預設為 "about"
 }) => {
-  const [viewMode, setViewMode] = useState<ViewMode>("about");
+  const [viewMode, setViewMode] = useState<ViewMode>(initialView);
+
+  // 當 initialView 改變時，更新 viewMode
+  useEffect(() => {
+    if (isOpen) {
+      setViewMode(initialView);
+    }
+  }, [isOpen, initialView]);
 
   if (!isOpen) return null;
 

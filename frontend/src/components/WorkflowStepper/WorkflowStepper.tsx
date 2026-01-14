@@ -30,6 +30,7 @@ interface WorkflowStepperProps {
     type: "error" | "warning" | "info" | "success";
     message: string;
   }) => void;
+  onShowRagSummary?: () => void; // 新增：通知父組件顯示 RAG 總結
 }
 
 const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
@@ -43,6 +44,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   onDocumentsUpdate,
   onCrawledUrlsUpdate,
   onShowMessage,
+  onShowRagSummary,
 }) => {
   const [showToast, setShowToast] = useState(false);
   const [toastContent, setToastContent] = useState({ title: "", message: "" });
@@ -59,8 +61,8 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   const [isGlobalLoading, setIsGlobalLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("處理中，請稍候..");
 
-  // RAG 總結對話框
-  const [showRagSummaryDialog, setShowRagSummaryDialog] = useState(false);
+  // RAG 總結對話框 - 移除本地狀態，改用父組件的 AboutProjectModal
+  // const [showRagSummaryDialog, setShowRagSummaryDialog] = useState(false);
 
   const [stepCompletion, setStepCompletion] = useState({
     1: false,
@@ -1267,7 +1269,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             {currentStep === 6 && (
               <button
                 className="btn btn-summary-pro me-2"
-                onClick={() => setShowRagSummaryDialog(true)}
+                onClick={() => onShowRagSummary?.()}
                 disabled={isGlobalLoading}
               >
                 <i className="bi bi-journal-text me-2"></i>
@@ -1348,7 +1350,8 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       )}
 
       {/* RAG 總結對話框 */}
-      {showRagSummaryDialog && (
+      {/* 移除本地的 RAG 總結對話框，改用父組件的 AboutProjectModal */}
+      {false && (
         <div
           className="modal show d-block"
           style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1100 }}
@@ -1367,7 +1370,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                 <button
                   type="button"
                   className="btn-close btn-close-white"
-                  onClick={() => setShowRagSummaryDialog(false)}
+                  onClick={() => {}}
                 ></button>
               </div>
               <div className="modal-body p-4">
@@ -1516,7 +1519,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={() => setShowRagSummaryDialog(false)}
+                  onClick={() => {}}
                 >
                   了解
                 </button>

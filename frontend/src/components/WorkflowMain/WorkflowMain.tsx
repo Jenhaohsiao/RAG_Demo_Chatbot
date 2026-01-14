@@ -20,6 +20,7 @@ export interface WorkflowMainProps {
   ragContextWindow?: number;
   ragCitationStyle?: string;
   ragFallbackMode?: string;
+  onShowRagSummary?: () => void; // 新增
 }
 
 const WorkflowMain: React.FC<WorkflowMainProps> = ({
@@ -35,6 +36,7 @@ const WorkflowMain: React.FC<WorkflowMainProps> = ({
   ragContextWindow = 5,
   ragCitationStyle = "numbered",
   ragFallbackMode = "flexible",
+  onShowRagSummary,
 }) => {
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
@@ -84,6 +86,9 @@ const WorkflowMain: React.FC<WorkflowMainProps> = ({
 
     chunk_size: 1000,
     chunk_overlap: 200,
+    chunk_max_size: 2000,
+    chunk_min_size: 500,
+    chunk_overlap_size: 200,
   });
   useEffect(() => {
     setParameters((prev) => ({
@@ -152,6 +157,7 @@ const WorkflowMain: React.FC<WorkflowMainProps> = ({
           crawledUrls={crawledUrls}
           onDocumentsUpdate={setDocuments}
           onCrawledUrlsUpdate={setCrawledUrls}
+          onShowRagSummary={onShowRagSummary}
         />
       </div>
     </div>

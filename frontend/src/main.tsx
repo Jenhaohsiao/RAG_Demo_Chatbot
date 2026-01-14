@@ -107,6 +107,9 @@ const App: React.FC = () => {
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [showRestartConfirm, setShowRestartConfirm] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(true);
+  const [aboutModalInitialView, setAboutModalInitialView] = useState<
+    "about" | "summary"
+  >("about");
   const [systemMessage, setSystemMessage] = useState<{
     type: "error" | "warning" | "info" | "success";
     message: string;
@@ -408,7 +411,10 @@ const App: React.FC = () => {
         onLanguageChange={handleLanguageChange}
         onLeave={handleLeaveClick}
         onRestart={handleRestartClick}
-        onAboutClick={() => setShowAboutModal(true)}
+        onAboutClick={() => {
+          setAboutModalInitialView("about");
+          setShowAboutModal(true);
+        }}
         systemMessage={systemMessage}
         onDismissMessage={handleDismissMessage}
         onRestartSession={handleRestartSession}
@@ -438,6 +444,10 @@ const App: React.FC = () => {
           ragContextWindow={ragContextWindow}
           ragCitationStyle={ragCitationStyle}
           ragFallbackMode={ragFallbackMode}
+          onShowRagSummary={() => {
+            setAboutModalInitialView("summary");
+            setShowAboutModal(true);
+          }}
         />
       </div>
 
@@ -511,6 +521,7 @@ const App: React.FC = () => {
       <AboutProjectModal
         isOpen={showAboutModal}
         onClose={() => setShowAboutModal(false)}
+        initialView={aboutModalInitialView}
       />
 
       {/* Toast Messages */}

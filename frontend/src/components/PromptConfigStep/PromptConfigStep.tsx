@@ -80,55 +80,43 @@ const RESPONSE_STYLE_OPTIONS = [
 const RESPONSE_TONE_OPTIONS = [
   {
     value: "formal",
-    label: "正式專業",
+    label: "專業簡潔",
     labelKey: "step2.policy.tone.formal",
-    description: "專業術語，正式口吻",
-  },
-  {
-    value: "friendly",
-    label: "親切友善",
-    labelKey: "step2.policy.tone.friendly",
-    description: "溫暖親近，易於理解",
+    description: "專業術語，簡明扼要",
   },
   {
     value: "casual",
-    label: "輕鬆活潑",
+    label: "友善活潑",
     labelKey: "step2.policy.tone.casual",
     description: "口語化，輕鬆有趣",
   },
   {
-    value: "academic",
-    label: "嚴謹學術",
-    labelKey: "step2.policy.tone.academic",
-    description: "學術語言，嚴謹準確",
+    value: "hesitant",
+    label: "猶豫不決",
+    labelKey: "step2.policy.tone.hesitant",
+    description: "反覆斟酌，多角度思考",
   },
 ];
 
 // Persona 選項
 const PERSONA_OPTIONS = [
   {
-    value: "professor",
-    label: "大學教授",
-    labelKey: "step2.persona.professor",
-    description: "學術嚴謹、引用文獻",
+    value: "host",
+    label: "節目主持人",
+    labelKey: "step2.persona.host",
+    description: "生動有趣、互動性強",
   },
   {
-    value: "expert",
-    label: "職場專家",
-    labelKey: "step2.persona.expert",
-    description: "務實導向、重點明確",
+    value: "receptionist",
+    label: "酒店櫃檯",
+    labelKey: "step2.persona.receptionist",
+    description: "服務親切、細心周到",
   },
   {
-    value: "educator",
-    label: "兒童教育者",
-    labelKey: "step2.persona.educator",
-    description: "淺顯易懂、舉例說明",
-  },
-  {
-    value: "neighbor",
-    label: "市場大媽大伯",
-    labelKey: "step2.persona.neighbor",
-    description: "口語化、生活化比喻",
+    value: "teacher",
+    label: "高中老師",
+    labelKey: "step2.persona.teacher",
+    description: "循序漸進、耐心解說",
   },
 ];
 
@@ -267,17 +255,10 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
             }`}
           >
             <div className="card-body">
-              <div className="d-flex align-items-center justify-content-between mb-3">
-                <div>
-                  <div className="eyebrow">System Rules</div>
-                  <h6 className="card-title mb-0">
-                    {t("step2.system.title", "系統規則")}
-                  </h6>
-                </div>
-                <span className="pill pill-ghost">
-                  {t("step2.badge.sessionFixed", "Session 固定")}
-                </span>
-              </div>
+              <h4 className="card-title mb-3">
+                {t("step2.system.title", "系統規則")}
+              </h4>
+
               {/* 回答語言 */}
               <div className="mb-3">
                 <label className="form-label fw-bold">
@@ -433,19 +414,10 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
             }`}
           >
             <div className="card-body">
-              <div className="d-flex align-items-center justify-content-between mb-3">
-                <div>
-                  <div className="eyebrow">Response Policy</div>
-                  <h6 className="card-title mb-0">
-                    <i className="bi bi-chat-square-text me-2"></i>
-                    {t("step2.policy.title", "回答政策")}
-                  </h6>
-                </div>
-                <span className="pill pill-ghost">
-                  <i className="bi bi-pencil me-1"></i>
-                  {t("step2.badge.chatAdjustable", "對話中可調整")}
-                </span>
-              </div>
+              <h4 className="card-title mb-3">
+                {t("step2.policy.title", "回答政策")}
+              </h4>
+
               {/* 回答風格 */}
               <div className="mb-3">
                 <label className="form-label fw-bold">

@@ -59,19 +59,18 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
             }`}
           >
             <div className="card-body">
-              <div className="d-flex align-items-center justify-content-between mb-2">
-                <div>
-                  <div className="eyebrow">搜索嚴謹度</div>
-                  <h6 className="card-title mb-0">
-                    Similarity Threshold (相似度閾值)
-                  </h6>
+              <div className="d-flex align-items-start justify-content-between mb-3">
+                <div className="flex-grow-1">
+                  <h4 className="card-title mb-1">
+                    相似度閾值 (Similarity Threshold)
+                  </h4>
                 </div>
-                <span className="pill pill-ghost">
+                <div className="value-badge">
                   {parameters.similarity_threshold.toFixed(1)}
-                </span>
+                </div>
               </div>
-              <p className="text-muted small mb-3">
-                控制模型引用內容的信心門檻。越高越嚴謹，越低越包容。
+              <p className="small mb-3">
+                搜索嚴謹度，控制模型引用內容的信心門檻。越高越嚴謹，越低越包容。
               </p>
               <input
                 type="range"
@@ -104,17 +103,17 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
             }`}
           >
             <div className="card-body">
-              <div className="d-flex align-items-center justify-content-between mb-2">
-                <div>
-                  <div className="eyebrow">檢索覆蓋度</div>
-                  <h6 className="card-title mb-0">
-                    Top-K Retrieval Count (檢索數量)
-                  </h6>
+              <div className="d-flex align-items-start justify-content-between mb-3">
+                <div className="flex-grow-1">
+                  　
+                  <h4 className="card-title mb-1">
+                    檢索數量 (Top-K Retrieval Count)
+                  </h4>
                 </div>
-                <span className="pill pill-ghost">{parameters.rag_top_k}</span>
+                <div className="value-badge">{parameters.rag_top_k}</div>
               </div>
-              <p className="text-muted small mb-3">
-                控制每次回應拉取的段落數，平衡「資訊量」與「精準度」。
+              <p className="small mb-3">
+                檢索覆蓋度，控制每次回應拉取的段落數，平衡「資訊量」與「精準度」。
               </p>
               <input
                 type="range"
@@ -139,68 +138,73 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
 
       <div className="section-heading d-flex align-items-center justify-content-between mt-4 mb-3">
         <div>
-          <div className="eyebrow text-uppercase">Chunking Strategy</div>
-          <h6 className="mb-0">預設分塊策略 (唯讀)</h6>
+          <h4 className="eyebrow text-uppercase m-0">文本分塊策略</h4>
         </div>
-        <span className="pill pill-outline">Best-practice defaults</span>
       </div>
 
       <div className="row g-3">
-        <div className="col-lg-4 col-md-6">
-          <div className="stat-card">
-            <div className="stat-header">
-              <div className="icon-bubble">
-                <i className="bi bi-aspect-ratio"></i>
+        <div className="col-12">
+          <div className="card border-secondary bg-light">
+            <div className="card-body">
+              <div className="row align-items-center mb-3">
+                <div className="col-auto">
+                  <span className="pill pill-warning">
+                    目前調整至最佳，不開放修改
+                  </span>
+                </div>
+                <div className="col">
+                  <h6 className="mb-1 fw-bold">自動文本分塊處理</h6>
+                  <p className="text-muted small mb-0">
+                    系統會將上傳的文檔自動切分為適當大小的片段並存入向量資料庫，確保檢索的準確性與效率
+                  </p>
+                </div>
               </div>
-              <span className="badge bg-secondary">Locked</span>
-            </div>
-            <div className="stat-value">{parameters.chunk_max_size} chars</div>
-            <div className="stat-label">Chunk Start Size</div>
-            <div className="stat-meter">
-              <div
-                className="stat-meter-fill"
-                style={{ width: `${chunkMaxPercent}%` }}
-              ></div>
-            </div>
-          </div>
-        </div>
 
-        <div className="col-lg-4 col-md-6">
-          <div className="stat-card">
-            <div className="stat-header">
-              <div className="icon-bubble">
-                <i className="bi bi-sliders"></i>
-              </div>
-              <span className="badge bg-secondary">Locked</span>
-            </div>
-            <div className="stat-value">{parameters.chunk_min_size} chars</div>
-            <div className="stat-label">Chunk Min Size</div>
-            <div className="stat-meter">
-              <div
-                className="stat-meter-fill"
-                style={{ width: `${chunkMinPercent}%` }}
-              ></div>
-            </div>
-          </div>
-        </div>
+              <hr className="my-3" />
 
-        <div className="col-lg-4 col-md-6">
-          <div className="stat-card">
-            <div className="stat-header">
-              <div className="icon-bubble">
-                <i className="bi bi-layers"></i>
+              <div className="row g-4">
+                <div className="col-md-4">
+                  <div className="d-flex align-items-start">
+                    <div className="flex-grow-1">
+                      <div className="small text-muted mb-1">最大分塊大小</div>
+                      <div className="fs-5 fw-bold  text-muted ">
+                        {parameters.chunk_max_size || 2000}
+                      </div>
+                      <div className="small text-muted">
+                        字元 (約 500 個中文字)
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="col-md-4">
+                  <div className="d-flex align-items-start">
+                    <div className="flex-grow-1">
+                      <div className="small text-muted mb-1">最小分塊大小</div>
+                      <div className="fs-5 fw-bold   text-muted">
+                        {parameters.chunk_min_size || 500}
+                      </div>
+                      <div className="small text-muted">
+                        字元 (約 125 個中文字)
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="col-md-4">
+                  <div className="d-flex align-items-start">
+                    <div className="flex-grow-1">
+                      <div className="small text-muted mb-1">重疊區域大小</div>
+                      <div className="fs-5 fw-bold text-muted">
+                        {parameters.chunk_overlap_size || 200}
+                      </div>
+                      <div className="small text-muted">
+                        字元 (約 50 個中文字)
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <span className="badge bg-secondary">Locked</span>
-            </div>
-            <div className="stat-value">
-              {parameters.chunk_overlap_size} chars
-            </div>
-            <div className="stat-label">Chunk Overlap</div>
-            <div className="stat-meter">
-              <div
-                className="stat-meter-fill"
-                style={{ width: `${chunkOverlapPercent}%` }}
-              ></div>
             </div>
           </div>
         </div>
