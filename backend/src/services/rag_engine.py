@@ -261,36 +261,46 @@ class RAGEngine:
         # 構建文檔內容摘要供分析 - 增加長度以提供更多上下文
         doc_summary = ""
         if retrieved_chunks:
-            # 增加每個chunk的字符數從200到500，總共使用前5個chunks
-            doc_texts = [chunk.text[:500] for chunk in retrieved_chunks[:5]]
-            doc_summary = "\n\n".join(doc_texts)
+            # 增加每個chunk的字符數從500到800，總共使用前8個chunks，提供更豐富的上下文
+            doc_texts = [chunk.text[:800] for chunk in retrieved_chunks[:8]]
+            doc_summary = "\n\n--- Section ---\n\n".join(doc_texts)
         
-        prompt = f"""Based on the available document content, generate 2-3 clear and grammatically correct questions that users can ask about this document.
+        prompt = f"""You are generating suggested questions for a RAG chatbot. These questions WILL BE ASKED BACK TO YOU, so they MUST be answerable using ONLY the document content provided below.
 
-**Available Document Content** (partial):
+**Available Document Content**:
 {doc_summary if doc_summary else "No document content available yet."}
 
 **CRITICAL Requirements**:
 1. Generate questions in {response_language} ONLY
 2. Questions MUST be grammatically correct and natural-sounding
-3. Questions MUST use EXACT keywords and phrases that appear in the document content above
-4. Questions should be DIRECTLY ANSWERABLE by quoting or paraphrasing the content above
-5. Focus on specific facts, names, events, or details mentioned in the document
-6. Return ONLY the questions, one per line, no numbering or bullets
-7. Generate exactly 2-3 questions
-8. IMPORTANT: Make questions specific enough that they can be answered with the content above
+3. Questions MUST ask about SPECIFIC FACTS that appear EXPLICITLY and CLEARLY in the content above
+4. Each question must be DIRECTLY ANSWERABLE by quoting or paraphrasing MULTIPLE sentences from the content
+5. Focus on PROMINENT details that appear in MULTIPLE places or are explained in detail:
+   - Main characters, locations, or objects that are described extensively
+   - Key events or actions that are explained with context
+   - Important facts that are repeated or emphasized
+6. DO NOT ask about:
+   - Minor details mentioned only once in passing
+   - Background information not clearly stated
+   - Themes, interpretations, or analysis
+   - Information that requires inference
+7. Before finalizing each question, verify:
+   ✓ Can I find CLEAR and EXPLICIT answer in the content above?
+   ✓ Is this fact explained with enough context?
+   ✓ Would I be confident answering this question based on the content?
+8. Return ONLY 2-3 questions, one per line, no numbering or bullets
 
-**Good Examples** (specific and answerable):
-- 故事的主角叫什麼名字？
-- 愛麗絲在花園裡遇到了哪些角色？
-- 瘋帽匠的茶會上發生了什麼事？
+**Good Examples** (specific, prominent, clearly answerable):
+- 故事的主角叫什麼名字？（如果文中多次提到並描述主角）
+- 愛麗絲在花園裡遇到了哪些角色？（如果文中詳細列出角色）
+- 愛麗絲喝了什麼之後變小了？（如果文中明確描述這個事件）
 
-**Bad Examples** (too vague or not answerable from content):
-- 這個故事想表達什麼？
-- 作者為什麼這樣寫？
-- 這本書的主題是什麼？
+**Bad Examples** (vague, obscure, or requires inference):
+- 控訴書連面寫的是誰偷了餡餅？（可能只是一句話提到，缺乏上下文）
+- 這個故事想表達什麼？（需要解讀和分析）
+- 作者為什麼這樣寫？（文中沒有明確說明）
 
-**Your Suggested Questions** (must be specific and directly answerable from the content above):"""
+**Your Suggested Questions** (must be confidently answerable from the content above):"""
 
         try:
             response = self._generate_with_retry(prompt, session_id)
@@ -725,12 +735,13 @@ class RAGEngine:
             if is_cannot_answer:
                 logger.info(f"[{session_id}] Generating suggestions for unanswered query...")
                 # 嘗試用較低閾值獲取一些文檔內容來生成建議
+                sample_chunks = []
                 try:
                     sample_results = self.vector_store.search_similar(
                         collection_name=collection_name,
                         query_vector=query_embedding.vector,
-                        limit=3,
-                        score_threshold=0.1  # 非常低的閾值，只是為了獲取文檔樣本
+                        limit=5,
+                        score_threshold=0.05  # 非常低的閾值，只是為了獲取文檔樣本
                     )
                     sample_chunks = [
                         RetrievedChunk(
@@ -742,17 +753,40 @@ class RAGEngine:
                             chunk_index=r['payload'].get('chunk_index', 0)
                         ) for r in sample_results
                     ]
-                    logger.debug(f"[{session_id}] Found {len(sample_chunks)} sample chunks for suggestion generation")
+                    logger.debug(f"[{session_id}] Found {len(sample_chunks)} sample chunks via search")
+                except Exception as e:
+                    logger.warning(f"[{session_id}] Search failed for suggestions: {e}")
+                
+                # 如果search找不到，使用scroll獲取任意文檔內容
+                if not sample_chunks:
+                    try:
+                        points, _ = self.vector_store.client.scroll(
+                            collection_name=collection_name,
+                            limit=5,
+                            with_payload=True,
+                            with_vectors=False
+                        )
+                        sample_chunks = [
+                            RetrievedChunk(
+                                chunk_id=str(point.id),
+                                text=point.payload.get('text', ''),
+                                similarity_score=1.0,
+                                document_id=point.payload.get('document_id', ''),
+                                source_reference=point.payload.get('source_reference', ''),
+                                chunk_index=point.payload.get('chunk_index', 0)
+                            ) for point in points
+                        ]
+                        logger.debug(f"[{session_id}] Found {len(sample_chunks)} sample chunks via scroll")
+                    except Exception as e:
+                        logger.warning(f"[{session_id}] Scroll failed for suggestions: {e}")
+                
+                # 生成建議問題
+                try:
                     suggestions = self._generate_suggestions(session_id, user_query, sample_chunks, language)
                     logger.info(f"[{session_id}] Generated {len(suggestions) if suggestions else 0} suggestions")
                 except Exception as e:
-                    logger.warning(f"[{session_id}] Failed to get sample chunks for suggestions: {e}")
-                    try:
-                        suggestions = self._generate_suggestions(session_id, user_query, [], language)
-                        logger.info(f"[{session_id}] Generated {len(suggestions) if suggestions else 0} fallback suggestions")
-                    except Exception as e2:
-                        logger.error(f"[{session_id}] Failed to generate fallback suggestions: {e2}")
-                        suggestions = None
+                    logger.error(f"[{session_id}] Failed to generate suggestions: {e}")
+                    suggestions = None
             
             # 更新記憶體和 metrics
             self._update_memory(session_id, user_query, response_type, token_total)

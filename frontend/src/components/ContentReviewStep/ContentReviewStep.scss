@@ -96,8 +96,8 @@ $prof-blue: $card-active-bg; // #2b6cb0
   box-shadow: $shadow-sm;
 
   &.active-card-border {
-    border: 3px solid $prof-blue;
-    box-shadow: 0 0 0 4px rgba($prof-blue, 0.15), $shadow-lg;
+    border: 2px solid $card-active-bg !important;
+    box-shadow: 0 0 0 4px rgba($card-active-bg, 0.15), $shadow-lg !important;
     background: linear-gradient(180deg, #ffffff 0%, #f0f7ff 100%);
   }
 

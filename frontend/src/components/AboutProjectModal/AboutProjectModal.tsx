@@ -126,13 +126,12 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
                       <i className="bi bi-cpu"></i>
                     </div>
                     <div className="card-content">
-                      <h5 className="card-title">
-                        LLM 語言模型是RAG的執行核心
-                      </h5>
+                      <h5 className="card-title">RAG 技術實際應用場景</h5>
 
                       <div className="card-highlight">
                         <span className="highlight-text">
-                          它將不再天馬行空，只限於向量資料庫的內容來檢索到的資料，呈現給使用者
+                          非常適合嚴謹的場合,
+                          如企業內部知識庫問答、法律文件檢索、醫療資訊查詢等。對外像客服助理、研究助手也很合適。不會平白亂說話。
                         </span>
                       </div>
                     </div>
@@ -147,76 +146,13 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
                     <i className="bi bi-exclamation-triangle"></i>
                   </div>
                   <div className="card-content">
-                    <h5 className="card-title">還有進步空間</h5>
-                    <p className="card-subtitle">此專案與商業實用之間距離</p>
-                    <div className="card-description">
-                      <p className="mb-2">
-                        <strong>缺少企業級功能：</strong>
-                        未實現用戶權限管理、多租戶隔離、審計日誌等企業必需功能。
-                      </p>
-                      <p className="mb-2">
-                        <strong>可擴展性不足：</strong>
-                        單機部署架構，未考慮分散式向量庫、負載均衡、容錯機制。
-                      </p>
-                      <p className="mb-2">
-                        <strong>成本控制缺失：</strong>無 Token
-                        用量監控、配額管理、成本分析等營運必備工具。
-                      </p>
-                      <p className="mb-0">
-                        <strong>測試覆蓋有限：</strong>
-                        缺少完整的單元測試、集成測試、性能測試與 A/B 測試框架。
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                    <h4 className="card-title">RAG 並非萬能，還有進步空間</h4>
 
-                <div className="feature-card success-card">
-                  <div className="card-icon success-icon">
-                    <i className="bi bi-check-circle"></i>
-                  </div>
-                  <div className="card-content">
-                    <h5 className="card-title">RAG 帶來的好處</h5>
-                    <p className="card-subtitle">為何選擇 RAG 架構</p>
-                    <div className="card-description">
-                      <p className="mb-2">
-                        <strong>減少幻覺，提升準確性：</strong>
-                        RAG 透過檢索真實文件確保回答有明確來源，大幅降低 LLM
-                        憑空想像的幻覺問題。
-                      </p>
-                      <p className="mb-2">
-                        <strong>即時知識更新：</strong>
-                        只需更新向量資料庫文件即可反映最新資訊，無需重新訓練模型。
-                      </p>
-                      <p className="mb-0">
-                        <strong>可追溯性與安全性：</strong>
-                        明確標示答案來源，便於驗證。企業資料存於自建資料庫，符合隱私法規。
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="feature-card danger-card">
-                  <div className="card-icon danger-icon">
-                    <i className="bi bi-x-circle"></i>
-                  </div>
-                  <div className="card-content">
-                    <h5 className="card-title">RAG 並非萬能</h5>
-                    <p className="card-subtitle">需要注意的局限性</p>
-                    <div className="card-description">
-                      <p className="mb-2">
-                        <strong>檢索品質決定一切：</strong>
-                        向量搜尋若錯過關鍵資訊或檢索不當，會導致錯誤答案。閾值設定、模型選擇、切塊策略都影響結果。
-                      </p>
-                      <p className="mb-2">
-                        <strong>延遲與成本：</strong>
-                        需先檢索再生成，增加延遲。大規模部署時資料庫與 LLM
-                        並發壓力高。
-                      </p>
-                      <p className="mb-0">
-                        <strong>複雜推理限制：</strong>
-                        擅長查找回答，但不擅長多步驟推理或跨文件整合的複雜分析。
-                      </p>
-                    </div>
+                    <p className="mb-2">
+                      {
+                        "如果你也測試了本專案的效果，你可能會發現 AI 好像變笨了？ 因為 RAG 限制了 LLM 的自由發揮空間，無法充分利用其強大的推理和創造能力。完全依賴檢索到的文件來生成回答。所以提供的知識庫完整性很重要，若知識庫不完整或缺乏關鍵資訊，仍可能導致錯誤或不完整的回答。"
+                      }
+                    </p>
                   </div>
                 </div>
 
@@ -225,28 +161,14 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
                     <i className="bi bi-stars"></i>
                   </div>
                   <div className="card-content">
-                    <h5 className="card-title">可以更智能! Agentic RAG</h5>
-                    <p className="card-subtitle">從被動檢索到主動推理</p>
-                    <div className="card-description">
-                      <p className="mb-2">
-                        <strong>多輪自主檢索：</strong>
-                        評估結果充分性，自動調整策略直到找到滿意答案。
-                      </p>
-                      <p className="mb-2">
-                        <strong>工具呼叫整合：</strong>
-                        可執行代碼、查詢
-                        API、訪問資料庫，實現複雜計算與即時查詢。
-                      </p>
-                      <p className="mb-2">
-                        <strong>任務分解：</strong>
-                        將複雜問題拆解成子任務獨立執行，最終整合結果。
-                      </p>
-                      <div className="card-highlight">
-                        <span className="highlight-text">
-                          應用案例：客服代理、研究助手、程式碼助手
-                        </span>
-                      </div>
-                    </div>
+                    <h4 className="card-title">
+                      迭代更新不間斷，Agentic RAG 等技術正在發展
+                    </h4>
+                    <p className="mb-2">
+                      {
+                        "Agentic RAG 是一種結合代理人（Agent）的技術。 除了內部提供的資料庫，還能動態地從外部資源（如網頁、API 等）檢索資訊，更可結合其它程式碼以及現有系統。它會合理地重新編排內容並進行驗證。當然不只Agentic RAG， 相信更多智能的AI 創新會不斷湧現。"
+                      }
+                    </p>
                   </div>
                 </div>
               </div>

@@ -69,6 +69,25 @@
   color: #742a2a;
 }
 
+/* 設定建議提示 */
+.settings-hint {
+  margin-top: $spacing-3;
+  padding: $spacing-3;
+  background: rgba(13, 110, 253, 0.05);
+  border-left: 3px solid rgba(13, 110, 253, 0.3);
+  border-radius: $border-radius;
+  max-width: 600px;
+
+  i {
+    color: rgba(13, 110, 253, 0.7);
+  }
+
+  small {
+    font-size: $font-size-sm;
+    line-height: 1.4;
+  }
+}
+
 /* 建議氣泡標籤樣式 */
 .suggestion-bubbles {
   margin-top: $spacing-3;

@@ -46,6 +46,19 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
         {message.content}
       </div>
 
+      {/* 無法回答時的設定建議提示 */}
+      {cannotAnswer && (
+        <div className="settings-hint">
+          <i className="bi bi-info-circle me-1"></i>
+          <small className="text-muted">
+            {t(
+              "chat.message.settingsHint",
+              "提示：如果經常無法找到答案，可嘗試調整「相似度閾值」(降低至 0.5-0.6) 或「分塊大小」(增加至 800-1000) 來改善檢索效果。"
+            )}
+          </small>
+        </div>
+      )}
+
       {/* 建議氣泡標籤 */}
       {suggestions && suggestions.length > 0 && (
         <div className="suggestion-bubbles">
