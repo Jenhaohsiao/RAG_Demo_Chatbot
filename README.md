@@ -17,13 +17,13 @@
 | **📄 Document Upload** | ✅ Complete | PDF, Text files, URL content extraction |
 | **🛡️ Content Moderation** | ✅ Complete | Gemini Safety API integration, automated filtering |
 | **🤖 RAG Query Engine** | ✅ Complete | Vector search (≥0.7 similarity), strict context-based responses |
-| **🌍 Multilingual UI** | ✅ Complete | 7 languages: English, 中文(繁/簡), 한국어, Español, 日本語, العربية, Français |
+| **🌍 Multilingual UI** | ✅ Complete | 4 languages: English, Français, 繁體中文, 简体中文 |
 | **📊 Metrics Dashboard** | ✅ Complete | Real-time token usage, query statistics, performance tracking |
 | **♿ Accessibility** | ✅ Complete | WCAG AA compliance (6.8:1 contrast ratio), responsive design |
 
 ### 🚀 Enhancement Features (Phases 6-7)
 
-- Real-time language switching with RTL support (Arabic)
+- Real-time language switching
 - Advanced metrics display with visual indicators
 - Session control buttons (Leave/Restart) with confirmations
 - Responsive design (Mobile/Tablet/Desktop)
@@ -129,19 +129,15 @@ Open browser to: **http://localhost:5173**
 4. **Ask Questions** → Vector search retrieves relevant chunks
 5. **Get Answers** → LLM generates context-based responses
 6. **Track Metrics** → Real-time token usage & performance stats
-7. **Switch Language** → 7-language UI with instant translation
+7. **Switch Language** → 4-language UI with instant translation
 8. **Close Session** → Auto-cleanup after 30 minutes or manual leave
 
 ### Language Support
 
 - 🇬🇧 **English** (en)
+- 🇫🇷 **French** (fr)
 - 🇹🇼 **Traditional Chinese** (zh-TW)
 - 🇨🇳 **Simplified Chinese** (zh-CN)
-- 🇰🇷 **Korean** (ko)
-- 🇪🇸 **Spanish** (es)
-- 🇯🇵 **Japanese** (ja)
-- 🇸🇦 **Arabic** (ar) - RTL layout supported
-- 🇫🇷 **French** (fr)
 
 ---
 

@@ -49,7 +49,7 @@ async def create_session(request: Request, language: str = "en", similarity_thre
     Create a new session with unique ID and Qdrant collection
     
     Args:
-        language: Initial UI language (default: en, supported: en, zh-TW, ko, es, ja, ar, fr, zh-CN)
+        language: Initial UI language (default: en, supported: en, fr, zh-TW, zh-CN)
         similarity_threshold: RAG similarity threshold (0.0-1.0, default: 0.5)
         custom_prompt: Custom prompt template (optional)
         

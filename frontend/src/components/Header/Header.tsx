@@ -24,11 +24,8 @@ interface HeaderProps {
 
 const SUPPORTED_LANGUAGES: { code: SupportedLanguage; name: string }[] = [
   { code: "en", name: "English" },
-  { code: "zh-TW", name: "繁體中文" },
-  { code: "ja", name: "日本語" },
-  { code: "es", name: "Español" },
-  { code: "ko", name: "한국어" },
   { code: "fr", name: "Français" },
+  { code: "zh-TW", name: "繁體中文" },
   { code: "zh-CN", name: "简体中文" },
 ];
 

@@ -1,6 +1,6 @@
 /**
  * i18n (internationalization) configuration
- * 支援 7 種語言: en, zh-TW, ko, es, ja, fr, zh-CN
+ * 支援 4 種語言: en, fr, zh-TW, zh-CN
  */
 
 import i18n from 'i18next';
@@ -9,21 +9,15 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 
 // Import translation files
 import en from './locales/en.json';
-import zhTW from './locales/zh-TW.json';
-import ko from './locales/ko.json';
-import es from './locales/es.json';
-import ja from './locales/ja.json';
 import fr from './locales/fr.json';
+import zhTW from './locales/zh-TW.json';
 import zhCN from './locales/zh-CN.json';
 
 // 支援的語言配置
 export const supportedLanguages = {
   en: { nativeName: 'English', dir: 'ltr' },
-  'zh-TW': { nativeName: '繁體中文', dir: 'ltr' },
-  ko: { nativeName: '한국어', dir: 'ltr' },
-  es: { nativeName: 'Español', dir: 'ltr' },
-  ja: { nativeName: '日本語', dir: 'ltr' },
   fr: { nativeName: 'Français', dir: 'ltr' },
+  'zh-TW': { nativeName: '繁體中文', dir: 'ltr' },
   'zh-CN': { nativeName: '简体中文', dir: 'ltr' },
 };
 
@@ -34,11 +28,8 @@ i18n
   .init({
     resources: {
       en: { translation: en },
-      'zh-TW': { translation: zhTW },
-      ko: { translation: ko },
-      es: { translation: es },
-      ja: { translation: ja },
       fr: { translation: fr },
+      'zh-TW': { translation: zhTW },
       'zh-CN': { translation: zhCN },
     },
     fallbackLng: 'en', // 如果找不到翻譯則回退到英文

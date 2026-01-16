@@ -1,9 +1,9 @@
 /**
  * LanguageSelector Component
- * Cycling animation through 7 languages, click to select
+ * Cycling animation through 4 languages, click to select
  *
  * Features:
- * - Auto-cycle button text through 7 language names every 1 second
+ * - Auto-cycle button text through 4 language names every 1 second
  * - Click button to toggle dropdown menu
  * - Language text animates with smooth transition
  * - Shows checkmark for currently selected language
@@ -15,23 +15,12 @@ import "./LanguageSelector.scss";
 
 const LANGUAGE_LABELS: Record<SupportedLanguage, string> = {
   en: "English",
-  "zh-TW": "繁體中文",
-  ko: "한국어",
-  es: "Español",
-  ja: "日本語",
   fr: "Français",
+  "zh-TW": "繁體中文",
   "zh-CN": "简体中文",
 };
 
-const LANGUAGE_ORDER: SupportedLanguage[] = [
-  "en",
-  "zh-TW",
-  "ko",
-  "es",
-  "ja",
-  "fr",
-  "zh-CN",
-];
+const LANGUAGE_ORDER: SupportedLanguage[] = ["en", "fr", "zh-TW", "zh-CN"];
 
 // Cycle interval: 1 second
 const CYCLE_INTERVAL = 1000;
@@ -44,7 +33,7 @@ interface LanguageSelectorProps {
  * Language selector with cycling animation
  *
  * Features:
- * - Auto-cycle button text through 7 languages every 1 second (when dropdown closed)
+ * - Auto-cycle button text through 4 languages every 1 second (when dropdown closed)
  * - Click button to toggle dropdown menu
  * - Click to select language from dropdown
  * - Shows checkmark for currently selected language

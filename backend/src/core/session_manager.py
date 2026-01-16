@@ -30,7 +30,7 @@ class SessionManager:
         Create a new session with unique ID and Qdrant collection
         
         Args:
-            language: Initial UI language (default: en, supported: en, zh-TW, ko, es, ja, ar, fr, zh-CN)
+            language: Initial UI language (default: en, supported: en, fr, zh-TW, zh-CN)
             similarity_threshold: RAG similarity threshold (default: 0.5)
             custom_prompt: Custom prompt template (default: None)
             
