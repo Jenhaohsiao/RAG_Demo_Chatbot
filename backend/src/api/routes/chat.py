@@ -1,10 +1,10 @@
 """
 Chat API Routes
-處理 RAG 查詢與聊天歷史
+Handles RAG queries and chat history
 
 Constitutional Compliance:
-- Principle V (Strict RAG): 僅基於檢索內容回答，相似度 ≥0.7
-- Principle VIII (API Contract Stability): 遵循 contracts/chat.openapi.yaml
+- Principle V (Strict RAG): Answer based on retrieved content only, similarity ≥0.7
+- Principle VIII (API Contract Stability): Follows contracts/chat.openapi.yaml
 
 T089: Enhanced error handling with appropriate HTTP status codes
 """

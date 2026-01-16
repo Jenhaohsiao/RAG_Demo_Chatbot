@@ -1,35 +1,35 @@
 /**
  * Upload Service
- * 文件上傳 API 呼叫封裝
+ * File upload API call wrapper
  * 
  * Constitutional Compliance:
- * - Principle II (Testability): 獨立服務模組
- * - Principle VIII (API Contract Stability): 遵循 contracts/upload.openapi.yaml
+ * - Principle II (Testability): Independent service module
+ * - Principle VIII (API Contract Stability): Follows contracts/upload.openapi.yaml
  */
 
 import api from './api';
 import { SourceType, ExtractionStatus, ModerationStatus } from '../types/document';
 
 /**
- * 規範化 URL - 自動添加協議前綴
+ * Normalize URL - automatically add protocol prefix
  * 
- * @param url - 用戶輸入的 URL
- * @returns 包含協議的完整 URL
+ * @param url - User input URL
+ * @returns Full URL with protocol
  */
 export const normalizeUrl = (url: string): string => {
   const trimmed = url.trim();
   
-  // 如果已經有協議，直接返回
+  // Return directly if protocol exists
   if (/^https?:\/\//i.test(trimmed)) {
     return trimmed;
   }
   
-  // 自動添加 https:// 前綴
+  // Automatically add https:// prefix
   return `https://${trimmed}`;
 };
 
 /**
- * 上傳回應（202 Accepted）
+ * Upload response (202 Accepted)
  */
 export interface UploadResponse {
   document_id: string;
@@ -47,7 +47,7 @@ export interface UploadResponse {
 }
 
 /**
- * 爬蟲抓取的單個頁面
+ * Single crawled page
  */
 export interface CrawledPage {
   url: string;
@@ -57,7 +57,7 @@ export interface CrawledPage {
 }
 
 /**
- * 上傳狀態查詢回應
+ * Upload status query response
  */
 export interface UploadStatusResponse {
   document_id: string;
@@ -82,19 +82,19 @@ export interface UploadStatusResponse {
 }
 
 /**
- * URL 上傳請求
+ * URL upload request
  */
 export interface UrlUploadRequest {
   url: string;
 }
 
 /**
- * 網站爬蟲上傳請求
+ * Website crawler upload request
  */
 export interface WebsiteUploadRequest {
   url: string;
-  max_tokens?: number;  // 默認 100K
-  max_pages?: number;   // 默認 100
+  max_tokens?: number;  // Default 100K
+  max_pages?: number;   // Default 100
 }
 
 /**

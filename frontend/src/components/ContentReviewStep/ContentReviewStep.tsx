@@ -312,7 +312,8 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
     ) {
       startReviewProcess();
     }
-  }, [shouldStartReview]); // 只依賴外部觸發信號，避免因內部狀態變化導致重複執行
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldStartReview, sessionId]); // 只依賴外部觸發信號和 sessionId
 
   // 轉換props數據為組件需要的格式
   const documents = React.useMemo(() => {

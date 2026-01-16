@@ -41,13 +41,13 @@ import type { ChatResponse } from "./types/chat";
  * T093: Wrapped with Error Boundary for error handling
  *
  * Flow:
- * 1. Upload Screen - 初始畫面
- * 2. Processing Modal - 上傳/處理進度
- * 3. Chat Screen - 完成後的對話界面
+ * 1. Upload Screen - Initial screen
+ * 2. Processing Modal - Upload/processing progress
+ * 3. Chat Screen - Chat interface after completion
  */
 const App: React.FC = () => {
   const { t } = useTranslation();
-  const [currentStep, setCurrentStep] = useState(1); // 新增當前步驟狀態
+  const [currentStep, setCurrentStep] = useState(1); // Current step state
   const { toasts, showToast, dismissToast } = useToast();
 
   const {
@@ -62,7 +62,7 @@ const App: React.FC = () => {
     updateLanguage,
     setOnSessionExpired,
     resetSessionExpired,
-  } = useSession(); // 先初始化session，稍後設置callback
+  } = useSession(); // Initialize session first, set callback later
 
   const {
     uploadResponse,
@@ -79,13 +79,13 @@ const App: React.FC = () => {
    */
   const handleSessionExpiration = useCallback(() => {
     // Modal will be shown via isSessionExpired state
-    // 重置所有狀態到第一步
+    // Reset all states to first step
     setCurrentStep(1);
     setChatPhase(false);
     resetUpload();
   }, [resetUpload]);
 
-  // 設置session過期回調
+  // Set session expired callback
   React.useEffect(() => {
     setOnSessionExpired(handleSessionExpiration);
   }, [handleSessionExpiration, setOnSessionExpired]);
@@ -114,9 +114,9 @@ const App: React.FC = () => {
     type: "error" | "warning" | "info" | "success";
     message: string;
   } | null>(null);
-  const [isBlocked, setIsBlocked] = useState(false); // 阻止用户操作直到确认消息
+  const [isBlocked, setIsBlocked] = useState(false); // Block user actions until message confirmed
   const lastErrorRef = React.useRef<string | null>(null);
-  const [workflowReset, setWorkflowReset] = useState(false); // 工作流程重置信號
+  const [workflowReset, setWorkflowReset] = useState(false); // Workflow reset signal
 
   // T074: Setup language direction (simplified - no RTL languages)
   React.useEffect(() => {
@@ -138,18 +138,18 @@ const App: React.FC = () => {
     };
   }, []);
 
-  // 當 threshold 改變時重新創建 session（僅在沒有上傳文件時）
+  // Recreate session when threshold changes (only when no files uploaded)
   const handleThresholdChange = async (newThreshold: number) => {
     setSimilarityThreshold(newThreshold);
 
-    // 只在沒有上傳文件時才重新創建 session
+    // Only recreate session when no files uploaded
     if (sessionId && !uploadResponse) {
       await closeSession();
       await createSession(newThreshold);
     }
   };
 
-  // 處理來自 PromptVisualization 的參數變更
+  // Handle parameter changes from PromptVisualization
   const handleParameterChange = (parameter: string, value: any) => {
     switch (parameter) {
       case "similarity_threshold":
@@ -227,7 +227,7 @@ const App: React.FC = () => {
     }
 
     if (currentError && lastErrorRef.current !== currentError) {
-      // 新錯誤，設置系統消息
+      // New error, set system message
       lastErrorRef.current = currentError;
       setSystemMessage({
         type: "error",
@@ -239,7 +239,7 @@ const App: React.FC = () => {
       lastErrorRef.current &&
       systemMessage?.type === "error"
     ) {
-      // 錯誤已清除，清理狀態
+      // Error cleared, cleanup state
       lastErrorRef.current = null;
       setSystemMessage(null);
       setIsBlocked(false);
@@ -248,30 +248,30 @@ const App: React.FC = () => {
     error,
     isFailed,
     statusResponse?.error_message,
-    // 移除 systemMessage 依賴，避免循環觸發
+    // Remove systemMessage dependency to avoid circular triggers
   ]);
 
-  // 上傳檔案時顯示 modal
+  // Show modal when uploading file
   const wrappedFileUpload = async (file: File) => {
     setShowModal(true);
     await handleFileUpload(file);
   };
 
-  // 上傳 URL 時顯示 modal
+  // Show modal when uploading URL
   const wrappedUrlUpload = async (url: string) => {
     setShowModal(true);
     await handleUrlUpload(url);
   };
 
-  // Modal 確認按鈕
+  // Modal confirm button
   const handleModalConfirm = async () => {
     if (isFailed) {
-      // 失敗時回到上傳畫面
+      // Return to upload screen on failure
       setShowModal(false);
       resetUpload();
     } else if (isCompleted) {
-      // 直接進入聊天畫面，不需要等待狀態更新
-      // 因為文件處理完成後，後端已經將狀態設置為 READY_FOR_CHAT
+      // Go directly to chat screen without waiting for state update
+      // Because backend already set state to READY_FOR_CHAT after file processing completes
       setShowModal(false);
       setChatPhase(true);
     } else {
@@ -286,13 +286,13 @@ const App: React.FC = () => {
       // Error is already handled in useSession.updateLanguage
     }
   };
-  // 处理系统消息确认
+  // Handle system message confirmation
   const handleDismissMessage = () => {
     setSystemMessage(null);
     setIsBlocked(false);
   };
 
-  // 处理session错误时的重启
+  // Handle session restart on error
   const handleRestartSession = async () => {
     try {
       setSystemMessage(null);
@@ -301,13 +301,13 @@ const App: React.FC = () => {
       resetUpload();
       setChatPhase(false);
 
-      // 显示成功提示
+      // Show success message
       setSystemMessage({
         type: "success",
         message: "Session 更新成功！",
       });
     } catch (err) {
-      // 显示错误提示
+      // Show error message
       setSystemMessage({
         type: "error",
         message: "Session 更新失敗，請稍後再試。",
@@ -342,11 +342,11 @@ const App: React.FC = () => {
       setChatPhase(false);
       setShowRestartConfirm(false);
 
-      // 觸發工作流程重置
+      // Trigger workflow reset
       setWorkflowReset(true);
-      setTimeout(() => setWorkflowReset(false), 100); // 重置信號
+      setTimeout(() => setWorkflowReset(false), 100); // Reset signal
 
-      // 显示成功提示
+      // Show success message
       setSystemMessage({
         type: "success",
         message: "Session 重新啟動成功！系統已重置為初始狀態。",
@@ -426,7 +426,7 @@ const App: React.FC = () => {
           isBlocked ? "position-relative" : ""
         }`}
       >
-        {/* 阻止遮罩层 */}
+        {/* Blocking overlay */}
         {isBlocked && (
           <div className="position-fixed main-blocking-overlay"></div>
         )}
@@ -464,7 +464,7 @@ const App: React.FC = () => {
           isCompleted={isCompleted}
           summary={statusResponse.summary}
           chunkCount={statusResponse.chunk_count}
-          // T089+ 傳遞 token 和頁面信息
+          // T089+ Pass token and page info
           tokensUsed={statusResponse.tokens_used}
           pagesCrawled={statusResponse.pages_crawled}
           onConfirm={handleModalConfirm}

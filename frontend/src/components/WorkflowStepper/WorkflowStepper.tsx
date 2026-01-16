@@ -1044,11 +1044,14 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
               setShouldStartReview(false);
             }}
             onReviewStatusChange={(passed) => {
-              setReviewPassed(passed);
-              if (passed) {
-                // 審核通過後重置shouldStartReview為false
-                setShouldStartReview(false);
-              }
+              // 使用 setTimeout 將狀態更新推遲到下一個事件循環，避免在渲染期間更新狀態
+              setTimeout(() => {
+                setReviewPassed(passed);
+                if (passed) {
+                  // 審核通過後重置shouldStartReview為false
+                  setShouldStartReview(false);
+                }
+              }, 0);
             }}
             onLoadingChange={(isLoading, message) => {
               setIsGlobalLoading(isLoading);
@@ -1077,7 +1080,12 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
               setTextProcessingCompleted(true);
               setStepCompletion((prev) => ({ ...prev, 5: true }));
             }}
-            onProcessingStatusChange={setTextProcessingCompleted}
+            onProcessingStatusChange={(isCompleted) => {
+              // 使用 setTimeout 將狀態更新推遲到下一個事件循環
+              setTimeout(() => {
+                setTextProcessingCompleted(isCompleted);
+              }, 0);
+            }}
             onLoadingChange={(isLoading, message) => {
               setIsGlobalLoading(isLoading);
               if (message) {

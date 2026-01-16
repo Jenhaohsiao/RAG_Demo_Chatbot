@@ -1,6 +1,6 @@
 /**
  * i18n (internationalization) configuration
- * 支援 4 種語言: en, fr, zh-TW, zh-CN
+ * Supports 4 languages: en, fr, zh-TW, zh-CN
  */
 
 import i18n from 'i18next';
@@ -13,7 +13,7 @@ import fr from './locales/fr.json';
 import zhTW from './locales/zh-TW.json';
 import zhCN from './locales/zh-CN.json';
 
-// 支援的語言配置
+// Supported language configuration
 export const supportedLanguages = {
   en: { nativeName: 'English', dir: 'ltr' },
   fr: { nativeName: 'Français', dir: 'ltr' },
@@ -23,8 +23,8 @@ export const supportedLanguages = {
 
 // i18next initialization
 i18n
-  .use(LanguageDetector) // 從瀏覽器偵測使用者語言
-  .use(initReactI18next) // 將 i18n 實例傳遞給 react-i18next
+  .use(LanguageDetector) // Detect user language from browser
+  .use(initReactI18next) // Pass i18n instance to react-i18next
   .init({
     resources: {
       en: { translation: en },
@@ -32,11 +32,11 @@ i18n
       'zh-TW': { translation: zhTW },
       'zh-CN': { translation: zhCN },
     },
-    fallbackLng: 'en', // 如果找不到翻譯則回退到英文
+    fallbackLng: 'en', // Fallback to English if translation not found
     supportedLngs: Object.keys(supportedLanguages),
-    debug: import.meta.env.DEV, // 在開發模式啟用偵錯
+    debug: false, // Disable debug mode to suppress console warnings
     interpolation: {
-      escapeValue: false, // React 已經會逸出值
+      escapeValue: false, // React already escapes values
     },
     detection: {
       // Order of language detection methods

@@ -106,7 +106,8 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
     ) {
       startProcessing();
     }
-  }, [shouldStartProcessing]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldStartProcessing, jobs.length]); // 依賴觸發信號和作業數量
 
   // 計算整體進度並在完成時保存結果
   useEffect(() => {
