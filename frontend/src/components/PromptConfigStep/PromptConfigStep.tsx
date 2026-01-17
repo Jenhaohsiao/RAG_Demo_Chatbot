@@ -45,7 +45,7 @@ export interface PromptConfigStepProps {
 const ANSWER_LANGUAGE_OPTIONS = [
   { value: "zh-TW", label: "繁體中文", labelKey: "step2.system.lang.zhTW" },
   { value: "auto", label: "自動偵測", labelKey: "step2.system.lang.auto" },
-  { value: "zh-CN", label: "简体中文", labelKey: "step2.system.lang.zhCN" },
+  { value: "zh-CN", label: "Simplified Chinese", labelKey: "step2.system.lang.zhCN" },
   { value: "en", label: "English", labelKey: "step2.system.lang.en" },
   { value: "fr", label: "Français", labelKey: "step2.system.lang.fr" },
 ];
