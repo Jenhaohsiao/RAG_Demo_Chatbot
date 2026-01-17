@@ -61,23 +61,13 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  // 如果有保存的結果，使用保存的結果初始化
-  const [jobs, setJobs] = useState<ProcessingJob[]>(() => {
-    if (savedProcessingResults && savedProcessingResults.jobs.length > 0) {
-      return savedProcessingResults.jobs;
-    }
-    return [];
-  });
-
-  const [overallProgress, setOverallProgress] = useState(() => {
-    if (savedProcessingResults) {
-      return savedProcessingResults.overallProgress;
-    }
-    return 0;
-  });
-
+  const [jobs, setJobs] = useState<ProcessingJob[]>(
+    savedProcessingResults?.jobs || []
+  );
+  const [overallProgress, setOverallProgress] = useState<number>(
+    savedProcessingResults?.overallProgress || 0
+  );
   const [isProcessing, setIsProcessing] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
 
   // 追蹤是否已經初始化過（用於判斷是否需要載入新作業）
   const [hasInitialized, setHasInitialized] = useState(() => {
@@ -185,7 +175,10 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
 
     // 通知父組件開始 loading
     if (onLoadingChange) {
-      onLoadingChange(true, "正在進行文本處理...");
+      onLoadingChange(
+        true,
+        t("textProcessingStep.loading", "Processing documents into vectors...")
+      );
     }
 
     // 模擬處理過程
@@ -271,11 +264,11 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
       error: "bg-danger",
     };
     const labels = {
-      pending: "等待中",
-      chunking: "切塊中",
-      embedding: "嵌入中",
-      completed: "已完成",
-      error: "錯誤",
+      pending: t("textProcessingStep.status.pending", "Pending"),
+      chunking: t("textProcessingStep.status.chunking", "Chunking"),
+      embedding: t("textProcessingStep.status.embedding", "Embedding"),
+      completed: t("textProcessingStep.status.completed", "Completed"),
+      error: t("textProcessingStep.status.error", "Error"),
     };
     return (
       <span className={`badge ${variants[status as keyof typeof variants]}`}>
@@ -288,7 +281,9 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
     const start = new Date(startTime);
     const end = endTime ? new Date(endTime) : new Date();
     const duration = Math.floor((end.getTime() - start.getTime()) / 1000);
-    return `${duration}秒`;
+    return t("textProcessingStep.durationSeconds", "{{seconds}}s", {
+      seconds: duration,
+    });
   };
 
   // Determine if processing has started or completed
@@ -296,9 +291,6 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
     shouldStartProcessing ||
     isProcessing ||
     (jobs.length > 0 && jobs.some((j) => j.status !== "pending"));
-
-  const vectorTotal = jobs.reduce((sum, j) => sum + j.chunks, 0);
-  const progressLabel = Math.round(overallProgress);
 
   return (
     <div className="text-processing-step">
@@ -311,7 +303,9 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
               <div className="d-flex align-items-center">
                 <i className="bi bi-database-fill text-primary fs-4 me-3"></i>
                 <div>
-                  <small className="text-muted d-block">Collection</small>
+                  <small className="text-muted d-block">
+                    {t("textProcessingStep.collection", "Collection")}
+                  </small>
                   <span className="fw-bold">
                     session_{sessionId?.substring(0, 8) || "xxxx"}
                   </span>
@@ -324,8 +318,14 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
               <div className="d-flex align-items-center">
                 <i className="bi bi-file-earmark-text text-info fs-4 me-3"></i>
                 <div>
-                  <small className="text-muted d-block">來源文件</small>
-                  <span className="fw-bold">{jobs.length} 個</span>
+                  <small className="text-muted d-block">
+                    {t("textProcessingStep.sources", "Source files")}
+                  </small>
+                  <span className="fw-bold">
+                    {t("textProcessingStep.sourcesCount", "{{count}}", {
+                      count: jobs.length,
+                    })}
+                  </span>
                 </div>
               </div>
             </div>
@@ -335,13 +335,21 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
               <div className="d-flex align-items-center">
                 <i className="bi bi-cpu text-success fs-4 me-3"></i>
                 <div>
-                  <small className="text-muted d-block">Vector DB</small>
+                  <small className="text-muted d-block">
+                    {t("textProcessingStep.vectorDb", "Vector DB")}
+                  </small>
                   <span
                     className={`fw-bold ${!hasStarted ? "text-muted" : "text-success"}`}
                   >
                     {!hasStarted
-                      ? "等待執行"
-                      : `${jobs.reduce((sum, j) => sum + j.chunks, 0)} 個向量`}
+                      ? t("textProcessingStep.vectorPending", "Waiting")
+                      : t(
+                          "textProcessingStep.vectorsCount",
+                          "{{count}} vectors",
+                          {
+                            count: jobs.reduce((sum, j) => sum + j.chunks, 0),
+                          }
+                        )}
                   </span>
                 </div>
               </div>
@@ -352,21 +360,27 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
           <div className="mt-3 pt-3 border-top">
             <div className="d-flex flex-wrap gap-3 small text-muted">
               <span>
-                <i className="bi bi-gear me-1"></i>Embedding Model:{" "}
-                <strong className="text-dark">text-embedding-004</strong>
+                <i className="bi bi-gear me-1"></i>
+                {t(
+                  "textProcessingStep.embeddingModel",
+                  "Embedding Model"
+                )}: <strong className="text-dark">text-embedding-004</strong>
               </span>
               <span>
-                <i className="bi bi-scissors me-1"></i>Chunk Size:{" "}
+                <i className="bi bi-scissors me-1"></i>
+                {t("textProcessingStep.chunkSize", "Chunk Size")}:{" "}
                 <strong className="text-dark">{parameters.chunk_size}</strong>
               </span>
               <span>
-                <i className="bi bi-shuffle me-1"></i>Overlap:{" "}
+                <i className="bi bi-shuffle me-1"></i>
+                {t("textProcessingStep.overlap", "Overlap")}:{" "}
                 <strong className="text-dark">
                   {parameters.chunk_overlap}
                 </strong>
               </span>
               <span>
-                <i className="bi bi-search me-1"></i>Vector DB:{" "}
+                <i className="bi bi-search me-1"></i>
+                {t("textProcessingStep.vectorDbLabel", "Vector DB")}:{" "}
                 <strong className="text-dark">Qdrant</strong>
               </span>
             </div>
@@ -391,11 +405,14 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
             disabled={jobs.length === 0}
           >
             <i className="bi bi-play-circle-fill me-2 fs-4"></i>
-            開始文本處理
+            {t("textProcessingStep.startButton", "Start text processing")}
           </button>
           <div className="mt-2 text-muted small">
             <i className="bi bi-info-circle me-1"></i>
-            將文件分塊並轉換為向量，儲存至 Vector DB
+            {t(
+              "textProcessingStep.startHint",
+              "Chunk documents and convert to vectors, then store in the Vector DB"
+            )}
           </div>
         </div>
       )}
@@ -409,10 +426,21 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
           >
             <i className="bi bi-check-circle-fill me-3 fs-3"></i>
             <div className="text-start">
-              <div className="fw-bold fs-5">✅ 文本處理完成！</div>
+              <div className="fw-bold fs-5">
+                {t(
+                  "textProcessingStep.successTitle",
+                  "Text processing completed!"
+                )}
+              </div>
               <div className="small text-muted mt-1">
-                共處理 {jobs.length} 個文件，生成{" "}
-                {jobs.reduce((sum, j) => sum + j.chunks, 0)} 個文本塊
+                {t(
+                  "textProcessingStep.successSubtext",
+                  "Processed {{files}} file(s); generated {{chunks}} text chunks",
+                  {
+                    files: jobs.length,
+                    chunks: jobs.reduce((sum, j) => sum + j.chunks, 0),
+                  }
+                )}
               </div>
             </div>
           </div>

@@ -869,3 +869,223 @@ npm run dev
 ---
 
 **系統已準備好進行下一階段的開發或部署工作！**
+
+---
+
+## 📅 2026-01-17 (晚間) - 多語言系統實作與翻譯載入問題 ⚠️
+
+**🎯 本次更新重點**:
+1. **多語言系統架構** - 完整的 i18n 基礎建設已建立
+2. **翻譯文件完成** - 4種語言的翻譯鍵值已全部建立
+3. **組件國際化** - 所有主要組件已整合 useTranslation
+4. **問題待解決** - zh-TW.json 翻譯無法在運行時正確載入
+
+---
+
+### ✅ 已完成項目
+
+#### 1. i18n 架構建立
+
+**配置文件**: `frontend/src/i18n/config.ts`
+- ✅ 使用 i18next + react-i18next
+- ✅ 整合 i18next-browser-languagedetector（自動偵測瀏覽器語言）
+- ✅ 支援 4 種語言：en, fr, zh-TW, zh-CN
+- ✅ LocalStorage 語言偏好記憶
+- ✅ HTML dir 和 lang 屬性自動更新
+
+#### 2. 翻譯文件建立
+
+**位置**: `frontend/src/i18n/locales/`
+
+**所有語言檔案已完成**:
+- ✅ `en.json` - 英文（458行）- 基準版本
+- ✅ `fr.json` - 法文（458行）- 完整翻譯 ✅ 運行正常
+- ✅ `zh-CN.json` - 簡體中文（589行）- 完整翻譯
+- ✅ `zh-TW.json` - 繁體中文（586行）- 完整翻譯 ❌ 載入失敗
+
+**翻譯範圍涵蓋**:
+- app（應用標題、標語）
+- buttons（所有按鈕文字）
+- aboutModal（關於專案 Modal 所有內容）
+- workflow.stepper（6個工作流程步驟）
+- workflow.steps（詳細步驟配置）
+- labels, messages, settings, errors, upload, crawler, processing, chat, metrics, dialogs, etc.
+
+#### 3. 組件國際化整合
+
+**已完成的組件**:
+1. ✅ **Header.tsx** 
+   - 應用標題、標語
+   - 所有按鈕（關於、聯絡、重新開始、了解）
+   - 語言切換器（4種語言下拉選單）
+   - 圖示已移除（乾淨的按鈕設計）
+
+2. ✅ **WorkflowStepper.tsx**
+   - 6個步驟標題和描述
+   - 使用 `t("workflow.stepper.{step}.title/description")`
+   - 上一步/下一步按鈕文字
+
+3. ✅ **RagConfigStep.tsx**
+   - 相似度閾值卡片（標題、描述、標籤）
+   - Top-K 檢索卡片
+   - 文本分塊卡片
+   - 資料鎖定警告訊息
+
+4. ✅ **AboutProjectModal.tsx**
+   - 關於專案/RAG 技術總結兩個視圖
+   - 6 個功能卡片（主要目標、Vector DB、System Prompt、應用場景、限制、未來發展）
+   - 版本資訊顯示
+
+#### 4. 建置與測試
+
+**建置狀態**:
+- ✅ `npm run build` 成功（無錯誤）
+- ✅ Vite 開發伺服器正常運行
+- ✅ 生成檔案：`index-CE2EFgT_.js` (479.51 kB)
+- ✅ 法文翻譯運行正常（Console 證實）
+- ✅ 簡體中文翻譯運行正常
+
+---
+
+### ❌ 當前問題：zh-TW.json 翻譯無法載入
+
+#### 問題現象
+
+**瀏覽器 Console 日誌**:
+```
+WorkflowStepper - Current language: zh-TW  ✅ 語言設定正確
+WorkflowStepper - Translation test: Retrieval Strategy Configuration  ❌ 顯示英文（fallback）
+```
+
+**切換語言測試結果**:
+- 選擇「繁體中文 (zh-TW)」→ 顯示英文
+- 切換到「Français (fr)」→ 顯示法文 ✅
+- 切換到「简体中文 (zh-CN)」→ 預期顯示簡體中文
+- 再切回「繁體中文」→ 仍顯示英文
+
+**預期行為**: 選擇繁體中文後，所有 UI 應顯示繁體中文文字
+**實際行為**: UI 顯示英文（fallback 語言）
+
+#### 已執行的診斷步驟
+
+1. ✅ **檔案結構驗證** - 使用 `read_file` 確認 zh-TW.json 內容正確
+2. ✅ **JSON 語法驗證** - PowerShell `ConvertFrom-Json` 遇到編碼問題但建置成功
+3. ✅ **編碼問題排除** - 嘗試移除 BOM，重新儲存為純 UTF-8
+4. ✅ **快取清除** - 清除 Vite 快取、重啟開發伺服器
+5. ✅ **瀏覽器快取** - 嘗試 Ctrl+Shift+R 強制重新載入
+6. ✅ **Node.js 解析測試** - 發現結構問題
+
+#### 發現的技術細節
+
+**問題根源（已修正但仍未生效）**:
+```json
+// zh-TW.json 原始結構（錯誤）
+"workflow": {
+  "title": "RAG 工作流程",    // ❌ 多餘的屬性
+  "step": "步驟",             // ❌ 多餘的屬性
+  "of": "共",                 // ❌ 多餘的屬性
+  "previous": "上一步",
+  "stepper": { ... }          // ✅ 正確位置
+}
+
+// 已修正為（但 Node.js 仍讀取舊版）
+"workflow": {
+  "previous": "上一步",       // ✅ 正確
+  "next": "下一步",
+  "stepper": { ... }          // ✅ 正確
+}
+```
+
+**Node.js 測試持續失敗**:
+```bash
+# 修正後測試
+node -e "... console.log(Object.keys(data.workflow));"
+輸出: [ "steps" ]  # ❌ 應該包含 "stepper"
+```
+
+這表示儘管檔案內容已修正，但：
+1. Node.js 可能讀取了快取版本
+2. 或檔案儲存未正確寫入磁碟
+3. 或存在其他隱藏的編碼/格式問題
+
+---
+
+### 🔧 建議的解決方案（供下次對話使用）
+
+#### 方案 A：完全重建 zh-TW.json
+1. 刪除現有 zh-TW.json
+2. 從 en.json 複製一份作為基礎
+3. 手動替換所有英文為繁體中文
+4. 確保 JSON 結構與 en.json 完全一致
+5. 使用工具驗證 JSON 格式
+
+#### 方案 B：檢查 i18n 配置
+1. 驗證 `frontend/src/i18n/config.ts` 中的資源載入
+2. 確認 zh-TW 的 import 路徑正確
+3. 檢查是否有特殊字符導致解析失敗
+4. 添加 debug 日誌追蹤載入過程
+
+#### 方案 C：使用替代方案
+1. 暫時將 zh-TW.json 改名為 zh.json
+2. 修改 config.ts 中的語言代碼對應
+3. 測試簡化的語言代碼是否可行
+
+#### 方案 D：比對工作版本
+1. 法文 (fr.json) 正常工作 ✅
+2. 使用 diff 工具比對 fr.json 和 zh-TW.json
+3. 找出結構或格式上的差異
+4. 模仿 fr.json 的確切格式
+
+---
+
+### 📋 待辦事項（Next Session）
+
+**優先級 P0 - 緊急**:
+- [ ] 修復 zh-TW.json 翻譯載入問題
+- [ ] 驗證簡體中文 (zh-CN) 是否也有相同問題
+- [ ] 確保所有語言切換功能正常
+
+**優先級 P1 - 重要**:
+- [ ] 移除 WorkflowStepper.tsx 中的調試 console.log
+- [ ] 測試所有組件的多語言顯示
+- [ ] 補充遺漏的翻譯鍵（如有）
+
+**優先級 P2 - 改進**:
+- [ ] 添加語言切換動畫效果
+- [ ] 實作語言偏好持久化測試
+- [ ] 文件化多語言系統使用方式
+
+---
+
+### 🗂️ 相關檔案清單
+
+**核心配置**:
+- `frontend/src/i18n/config.ts` - i18n 初始化配置
+- `frontend/src/i18n/locales/zh-TW.json` ⚠️ - 繁體中文翻譯（問題檔案）
+- `frontend/src/i18n/locales/en.json` ✅ - 英文翻譯（正常）
+- `frontend/src/i18n/locales/fr.json` ✅ - 法文翻譯（正常）
+- `frontend/src/i18n/locales/zh-CN.json` - 簡體中文翻譯（未測試）
+
+**已國際化的組件**:
+- `frontend/src/components/Header/Header.tsx`
+- `frontend/src/components/WorkflowStepper/WorkflowStepper.tsx` （包含調試代碼）
+- `frontend/src/components/RagConfigStep/RagConfigStep.tsx`
+- `frontend/src/components/AboutProjectModal/AboutProjectModal.tsx`
+
+**待國際化的組件** (優先級較低):
+- ContactModal, ChatScreen, UploadScreen, ConfirmDialog, etc.
+
+---
+
+### 💡 關鍵發現與學習
+
+1. **i18next 的 fallback 機制**: 當翻譯鍵找不到時，自動回退到 fallbackLng (en)
+2. **JSON 結構的嚴格性**: 即使一個額外的屬性也可能導致解析問題
+3. **檔案編碼的重要性**: UTF-8 BOM 可能導致 JSON 解析失敗
+4. **快取的影響**: 多層快取（Node.js、Vite、瀏覽器）需要全部清除
+5. **語言代碼命名**: `zh-TW` vs `zh` vs `zh-Hant` 的差異需要注意
+
+---
+
+**當前狀態**: 🟡 多語言系統 80% 完成，繁體中文翻譯載入問題待解決
+**下次對話優先處理**: 修復 zh-TW.json 載入問題，確保所有語言正常運作

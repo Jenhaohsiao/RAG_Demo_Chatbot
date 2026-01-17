@@ -2,13 +2,39 @@
   "app": {
     "title": "RAG 演示聊天机器人",
     "subtitle": "AI 工程师作品集项目",
-    "description": "上传文件或网络内容，然后使用 AI 驱动的语义搜索提出问题。",
+    "tagline": "可视化 RAG 原理与流程",
+    "description": "上传文件或网页内容，使用 AI 进行语义搜索并提问。",
     "features": {
-      "pdfSupport": "📄 PDF & 文本支持",
+      "pdfSupport": "📄 PDF 与文字支持",
       "urlExtraction": "🔗 URL 提取",
       "aiQa": "🤖 AI 问答",
       "multilingual": "🌐 多语言"
     }
+  },
+  "textProcessingStep": {
+    "loading": "正在进行文本处理...",
+    "status": {
+      "pending": "等待中",
+      "chunking": "切块中",
+      "embedding": "嵌入中",
+      "completed": "已完成",
+      "error": "错误"
+    },
+    "durationSeconds": "{{seconds}} 秒",
+    "collection": "Collection",
+    "sources": "来源文件",
+    "sourcesCount": "{{count}} 个",
+    "vectorDb": "Vector DB",
+    "vectorPending": "等待执行",
+    "vectorsCount": "{{count}} 个向量",
+    "embeddingModel": "Embedding 模型",
+    "chunkSize": "分块大小",
+    "overlap": "重叠",
+    "vectorDbLabel": "Vector DB",
+    "startButton": "开始文本处理",
+    "startHint": "将文件分块并转换为向量，存入 Vector DB",
+    "successTitle": "文本处理完成！",
+    "successSubtext": "共处理 {{files}} 个文件，生成 {{chunks}} 个文本块"
   },
   "buttons": {
     "uploadPdf": "上传 PDF",
@@ -20,7 +46,55 @@
     "close": "关闭",
     "cancel": "取消",
     "confirm": "确认",
-    "settings": "设置"
+    "settings": "设置",
+    "about": "关于本项目",
+    "contact": "与我联系",
+    "understand": "了解"
+  },
+  "step2": {
+    "system": {
+      "lang": {
+        "zhTW": "繁体中文",
+        "zhCN": "简体中文",
+        "en": "英文",
+        "fr": "法文",
+        "auto": "自动检测"
+      }
+    }
+  },
+  "aboutModal": {
+    "about": "关于本项目",
+    "ragSummary": "RAG 技术总结",
+    "version": "版本",
+    "updateDate": "更新日",
+    "mainTitle": "使用RAG让 AI 减少幻觉，回答专注",
+    "subtitle": "您好，这是一个 AI 工程展示项目，说明 RAG 检索增强生成技术如何优化大型语言模型输出。",
+    "cards": {
+      "mainGoal": {
+        "title": "RAG主要目的是强制规范AI的做事逻辑",
+        "description": "让AI在回答前先搜寻数据库，确保相关内容才回答，而非健谈"
+      },
+      "vectorDb": {
+        "title": "把数据切片，向量化，存入向量数据库（Vector DB）",
+        "description": "让 AI 能快速搜寻、比对和验证知识来源。每句回答都有根据"
+      },
+      "systemPrompt": {
+        "title": "System Prompt 行为规则",
+        "description": "不同于一般的Prompt，它定义AI如何做事，以及用什么角色语气来回应"
+      },
+      "applications": {
+        "title": "RAG 技术实际应用场景",
+        "description": "非常适合严谨场合，如企业知识库问答、法律文件检索、医疗资讯查询、客服助理等"
+      },
+      "limitations": {
+        "title": "RAG 并非万能，还有进步空间",
+        "description": "如果你也测试了本项目的效果，你可能会发现 AI 好像变笨了？因为 RAG 限制了 LLM 的自由发挥空间，无法充分利用其强大的推理和创造能力。完全依赖检索到的文件来生成回答。所以提供的知识库完整性很重要，若知识库不完整或缺乏关键资讯，仍可能导致错误或不完整的回答。"
+      },
+      "evolution": {
+        "title": "迭代更新不间断，Agentic RAG 等技术正在发展",
+        "description": "Agentic RAG 是一种结合代理人（Agent）的技术。除了内部提供的数据库，还能动态地从外部资源（如网页、API 等）检索资讯，更可结合其它程序码以及现有系统。它会合理地重新编排内容并进行验证。当然不只Agentic RAG，相信更多智能的AI 创新会不断涌现。"
+      }
+    }
   },
   "labels": {
     "session": "会话",
@@ -39,6 +113,9 @@
     "processing": "处理中...",
     "uploadStatus": "上传状态",
     "sessionExpiresIn": "会话将在 ~30 分钟后过期"
+  },
+  "parameters": {
+    "title": "参数设置"
   },
   "messages": {
     "sessionCreated": "会话创建成功",
@@ -95,6 +172,11 @@
   "upload": {
     "title": "上传文件",
     "subtitle": "上传 PDF、文本文件或提供 URL 来开始",
+    "tab": {
+      "file": "文件上传",
+      "url": "单一URL",
+      "crawler": "网站爬虫"
+    },
     "mode": {
       "file": "文件上传",
       "url": "网址"
@@ -118,6 +200,117 @@
       "invalidUrl": "无效的网址格式。必须是 http:// 或 https://"
     }
   },
+  "uploadWizard": {
+    "tabs": {
+      "file": "文件上传",
+      "crawler": "网站爬虫",
+      "fileDesc": "快速设置文件限制并上传，确保格式与大小符合规范。",
+      "crawlerDesc": "设定爬虫安全范围与抓取上限，输入网址即可开始提取内容。"
+    },
+    "dialog": {
+      "uploadFailed": "文件上传失败",
+      "invalidFormat": "文件格式不支持",
+      "confirm": "确定"
+    },
+    "errors": {
+      "sampleFileLoad": "无法加载示例文件，请手动上传。",
+      "unsupportedFormats": "仅支持 {{formats}} 文件。\n\n请选择其他文件或点击下方“使用示例文件”按钮。",
+      "fileTooLarge": "文件太大：{{fileSize}}（超过限制 {{maxSize}}）\n\n请选择其他文件或点击下方“使用示例文件”按钮。",
+      "fileEmpty": "文件为空，无法上传。\n\n请选择其他文件或点击下方“使用示例文件”按钮。",
+      "crawlerInsufficient": "爬取的网页内容过少（仅 {{tokens}} tokens），无法形成有效数据。请提供内容更丰富的网页，或点击下方“使用示例网站”按钮。",
+      "crawlerBlocked": "此网站无法被爬取（可能存在反爬机制）。\n\n请尝试其他网站或点击下方“使用示例网站”按钮。",
+      "crawlerFailed": "爬取失败：{{reason}}\n\n请尝试其他网站或点击下方“使用示例网站”按钮。"
+    },
+    "supportedFormats": "支持格式：{{formats}}（最大 {{maxSize}}）",
+    "acceptFormatsOnly": "仅支持 {{formats}} 格式文件",
+    "steps": {
+      "eyebrow": "步骤 3 · 配置",
+      "basicParameters": "{{tab}} 基本参数",
+      "stepIndicator": "步骤 1 / 2",
+      "file": {
+        "maxFileSize": "单个文件大小限制",
+        "supportedTypes": "支持文件类型"
+      },
+      "crawler": {
+        "maxTokens": "最大 Token 数",
+        "maxPages": "最大页面数",
+        "pageUnit": "页"
+      },
+      "next": {
+        "file": "下一步：选择文件",
+        "crawler": "下一步：输入网址"
+      },
+      "upload": {
+        "titleFile": "步骤 2/2：上传文件",
+        "titleCrawler": "步骤 2/2：开始爬取",
+        "crawlerCompleted": "爬取完成"
+      },
+      "crawlerSuccess": {
+        "title": "网站爬取成功！",
+        "description": "已成功爬取 {{pages}} 个页面，共 {{tokens}}K tokens。资料已上传，请点击下方“下一步”按钮继续。",
+        "detailsTitle": "爬取结果详情"
+      },
+      "stats": {
+        "pages": "站点页面",
+        "tokens": "总 TOKEN 数",
+        "status": "状态",
+        "statusComplete": "完成",
+        "statusTokenLimit": "达到 Token 限制",
+        "statusPageLimit": "达到页面限制"
+      },
+      "info": {
+        "autoNext": "资料已自动上传，系统将进入下一步「内容审核」流程。"
+      },
+      "sampleFileButton": "使用示例文件（Alice in Wonderland）",
+      "back": "返回设定"
+    },
+    "summary": {
+      "title": "上传完成",
+      "uploadedFiles": "已上传文件 ({{count}})",
+      "uploadedSites": "已爬取网站 ({{count}})",
+      "unnamed": "未命名文件",
+      "fileType": {
+        "url": "URL",
+        "file": "文件"
+      },
+      "sizeLabel": "大小 {{size}}",
+      "completed": "已完成",
+      "siteMeta": "{{size}} • {{pages}} 页 • {{time}}",
+      "fileMeta": "{{type}} • {{size}} • {{time}}"
+    },
+    "loading": {
+      "crawling": "正在爬取网站内容，请稍候..."
+    }
+  },
+  "crawler": {
+    "title": "网站爬虫",
+    "loading": "正在爬取网站内容，请稍候...",
+    "description": "输入网站 URL 以自动爬取和提取内容",
+    "url": "网站 URL",
+    "maxTokens": "最大 Token 数",
+    "maxPages": "最大页面数",
+    "advancedOptions": "进阶选项",
+    "start": "开始爬虫",
+    "crawling": "爬虫中...",
+    "results": "爬虫结果",
+    "pagesFound": "找到页面",
+    "totalTokens": "总 Token 数",
+    "urlList": "爬虫的 URL",
+    "urlNote": "已爬虫 {{count}} 个 URL，准备处理",
+    "useSample": "使用示例网站（Project Gutenberg）",
+    "status": {
+      "completed": "✓ 完成",
+      "tokenLimit": "⚠ 达到 Token 限制",
+      "pageLimit": "⚠ 达到页面限制",
+      "crawling": "⏳ 爬取中..."
+    },
+    "untitled": "无标题",
+    "tokenCount": "{{count}} tokens",
+    "error": {
+      "emptyUrl": "请输入网站 URL",
+      "invalidUrl": "请输入有效的 URL"
+    }
+  },
   "processing": {
     "title": "处理文件中",
     "sourceType": {
@@ -132,7 +325,7 @@
       "embedding": "嵌入与存储中...",
       "complete": "处理完成",
       "failed": "处理失败",
-      "blocked": "内容被阻止"
+      "label": "角色设定"
     },
     "pleaseWait": "请稍候，这可能需要一些时间...",
     "complete": {
@@ -167,6 +360,7 @@
     },
     "input": {
       "placeholder": "提出关于文件的问题...",
+      "placeholder_new": "欢迎讨论与已上传数据相关的主题",
       "submit": "发送",
       "hint": "按 Enter 发送，Shift+Enter 换行",
       "maxLength": "{{count}} / 2000"
@@ -215,17 +409,40 @@
   },
   "step2": {
     "title": "AI 行为与回答规则设定",
+    "subtitle": "设置 AI 的行为、回答策略与运行限制",
     "disabledNotice": "数据已上传处理，配置已锁定，无法修改。",
+    "badge": {
+      "sessionFixed": "会话固定",
+      "chatAdjustable": "对话中可调整",
+      "partialFixed": "部分固定",
+      "readonly": "只读"
+    },
     "system": {
-      "title": "系统行为",
+      "title": "系统规则",
+      "answerLanguage": "回答语言",
+      "lang": {
+        "zhTW": "繁体中文",
+        "en": "English",
+        "auto": "自动检测"
+      },
+      "strictRagMode": "严格 RAG 模式",
+      "strictRagOn": "开启：当数据不足时 AI 将拒绝回答",
+      "strictRagOff": "关闭：AI 可能使用一般知识补充",
       "allowInference": "允许推论",
       "inferenceOn": "开启：可在上传数据范围内合理推论",
-      "inferenceOff": "关闭：仅回答文件中明确记载的内容"
+      "inferenceOff": "关闭：仅回答文件中明确记载的内容",
+      "allowUserOverride": "允许调整 System Prompt",
+      "externalKnowledge": "外部知识存取",
+      "alwaysOff": "永远关闭",
+      "noDataPolicy": "无数据回应策略",
+      "noDataPolicyDesc": "当检索不到相关数据时，AI 会明确告知使用者，并提供可能的替代问题建议。"
     },
     "policy": {
       "title": "回答政策",
       "style": {
         "label": "回答风格",
+        "brief": "简要",
+        "kidFriendly": "浅显易懂",
         "concise": "简洁扼要",
         "standard": "标准详细",
         "detailed": "深入完整",
@@ -233,29 +450,63 @@
       },
       "tone": {
         "label": "回答语气",
-        "formal": "正式专业",
         "friendly": "亲切友善",
+        "rigorous": "严谨",
+        "urgent": "紧急直接",
+        "formal": "正式专业",
         "casual": "轻松活泼",
         "academic": "严谨学术"
       },
       "persona": {
-        "label": "角色设定 (Persona)"
+        "label": "角色设定"
+      },
+      "citation": {
+        "label": "引用方式",
+        "inline": "行内引用",
+        "document": "文件引用",
+        "none": "不显示"
       }
     },
     "persona": {
-      "professor": "大学教授",
-      "expert": "职场专家",
-      "educator": "儿童教育者",
-      "neighbor": "市场大妈大叔"
+      "elementaryTeacher": "小学老师",
+      "showHost": "节目主持人",
+      "workplaceVeteran": "职场老手"
+    },
+    "summary": {
+      "style": {
+        "brief": "快速给重点",
+        "kidFriendly": "用浅显比喻让孩子懂"
+      },
+      "tone": {
+        "friendly": "温暖易亲近",
+        "rigorous": "精确、逻辑清晰",
+        "urgent": "简短直入重点，快速输出"
+      },
+      "persona": {
+        "elementaryTeacher": "用简单例子慢慢教",
+        "showHost": "生动活泼，带节奏与互动",
+        "workplaceVeteran": "实战经验丰富，给务实建议"
+      },
+      "citation": {
+        "inline": "在文字旁标注来源 [文件1]",
+        "document": "在结尾列出所有来源",
+        "none": "不显示引用来源"
+      }
+    },
+    "response": {
+      "title": "回应策略"
     },
     "runtime": {
-      "title": "执行限制",
+      "title": "运行限制",
       "maxTokens": "最大回应 Token",
-      "short": "简短",
-      "detailed": "详细",
-      "tokenHint": "数值越大，回答越长越详细",
+      "retrievalTopK": "Retrieval Top-K",
+      "similarityThreshold": "相似度阈值",
+      "maxContextTokens": "最大 Context Token",
       "contextWarning": "Context 使用预警",
-      "contextHint": "达到此比例时提醒您 Token 使用量"
+      "precise": "精确",
+      "broad": "广泛",
+      "loose": "宽松",
+      "strict": "严格"
     },
     "info": {
       "title": "系统状态",
@@ -274,5 +525,140 @@
   },
   "common": {
     "processing": "处理中..."
+  },
+  "workflow": {
+    "previous": "上一步",
+    "next": "下一步",
+    "complete": "完成",
+    "summary": "总结",
+    "warning": "警告",
+    "success": "成功",
+    "loading": {
+      "default": "处理中，请稍候...",
+      "uploadingFile": "正在上传文件：{{name}}...",
+      "processingUrl": "正在处理网址：{{url}}...",
+      "processingSite": "正在处理网站：{{url}}...",
+      "processingShort": "处理中..."
+    },
+    "errors": {
+      "uploadFailedTitle": "错误",
+      "uploadFailed": "文件上传失败：{{error}}",
+      "urlFailedTitle": "错误",
+      "urlFailed": "URL 处理失败：{{error}}",
+      "crawlerFailedTitle": "错误",
+      "crawlerFailed": "网站爬取失败：{{error}}",
+      "unknown": "未知错误"
+    },
+    "warnings": {
+      "uploadFirst": "请先上传档案或设定网站爬虫后才能进入下一步骤。",
+      "reviewFirst": "请先完成内容审核并通过检查后才能进入下一步骤。",
+      "processFirst": "请先完成数据处理并写入 Vector DB 后才能进入下一步骤。"
+    },
+    "crawlerSuccess": "网站 {{url}} 爬取成功，共爬取 {{pages}} 个页面",
+    "stepper": {
+      "ragConfig": {
+        "title": "检索策略设定",
+        "infoTitle": "什么是检索策略（Retrieval Strategy）？",
+        "description": "微调相似度与 Top-K，让查询更精准更涵盖全面，并可以设定切块大小与安全范围。",
+        "detailMessage": "检索策略用来设定 AI 在回答问题前，要如何从 Vector DB 中找出最相关的数据内容。\n\n透过调整相似度门槛与检索数量，可以控制：\n\nAI 回答时「只使用高度相关的数据」\n\n或在必要时扩大搜寻范围，避免漏掉重要信息\n\n此步骤只影响 数据检索（Retrieval），不涉及 AI 的回答方式或语言生成。"
+      },
+      "promptConfig": {
+        "title": "System Prompt",
+        "infoTitle": "何为 System Prompt ?",
+        "description": "定义模型行为、回答范畴、能做与不能做及安全规则",
+        "detailMessage": "系统提示词(System Prompt ) 跟一般使用者在对话框使用的 Prompt不一样。一般 prompt 让模型「尽量用自己记忆/理解去回事情最好」。在 RAG中使用 system prompt 通常会被设定来强制引导 LLM 必须根据上下文件来回答，这可以大幅降低幻觉（hallucination）并提升事实准确度以及可信度。"
+      },
+      "dataUpload": {
+        "title": "数据上传",
+        "infoTitle": "上传使用或指定的数据",
+        "description": "上传档案或爬取网站数据。",
+        "detailMessage": "这个步作是让自己上传文字档案或使用网站爬虫来抓取网络内容。系统将接收并解析文本内容，这些数据将成为AI助理的核心知识库，而AI 将只会针对此内容来做进一步交流。"
+      },
+      "contentReview": {
+        "title": "内容审核",
+        "infoTitle": "内容审核",
+        "description": "安全性检查与内容审查",
+        "detailMessage": "此步骤检测上传内容是否包含危险信息或敏感内容、仇恨信息。确保您的知识库符合安全标准，保护用户隐私及企业信息安全。"
+      },
+      "textProcessing": {
+        "title": "数据处理与 写入 Vector DB",
+        "infoTitle": "数据处理与 写入 Vector DB",
+        "description": "将档案切块、转换为向量，并写入 Vector DB 以供后续检索",
+        "detailMessage": "简单来说这个步作是把文字转成一串数字当密码，让电脑能去比对找到更多相关。\n而「Vector DB（向量数据库）」是一种特殊数据库，专门存这些向量密码，可以帮你找出和你问题「最相关」的内容。\n\n传统数据库例如 MySQL、PostgreSQL、MongoDB 擅长「精准完全符合比对」的东西；但Vector DB 专门做「向量比对、视觉比对」类的东西，因为人类的问题和回答常常不是完全模一样的关键字，而是在「相似的意思」去表达，所以需要这种寻找相似度的超能力。"
+      },
+      "aiChat": {
+        "title": "AI 对话",
+        "infoTitle": "AI 对话",
+        "description": "启用智能助理对话",
+        "detailMessage": "基于向量数据库开始回答问话。AI会根据问题检索相关内容并给出准确回答，并会提供原始来源以确保答案的可信度及可追溯性。"
+      }
+    },
+    "steps": {
+      "ragConfig": {
+        "title": "步骤 1：RAG 配置",
+        "description": "配置 RAG 系统参数",
+        "complete": "已完成",
+        "dataLocked": "数据已上传，参数已锁定",
+        "similarityThreshold": {
+          "title": "相似度阈值 (Similarity Threshold)",
+          "description": "控制引用内容的信心门槛，越高越严谨",
+          "lenient": "宽松",
+          "strict": "严格"
+        },
+        "topK": {
+          "title": "检索数量 (Top-K Retrieval Count)",
+          "description": "控制每次拉取的段落数，平衡信息量与精准度",
+          "minimal": "最少",
+          "comprehensive": "完整"
+        },
+        "textChunking": {
+          "title": "自动文本分块处理",
+          "optimized": "已优化",
+          "maxChunk": "最大分块",
+          "minChunk": "最小分块",
+          "overlap": "重叠区域",
+          "characters": "字符"
+        }
+      }
+    }
+  },
+  "contentReview": {
+    "header": {
+      "title": "内容审核",
+      "subtitle": "阻挡不安全内容"
+    },
+    "loading": "正在分析内容...",
+    "retrying": "正在重试...",
+    "items": {
+      "formatShort": "格式检查",
+      "format": "检查文件能否打开、是否为受保护文件或受支持的类型",
+      "malwareShort": "恶意软件扫描",
+      "malware": "检查文件或内容是否包含恶意软件或可疑代码",
+      "harmShort": "有害内容检查",
+      "harm": "检查内容是否包含有害或敏感信息",
+      "structureShort": "结构校验",
+      "structure": "检查内容结构是否清晰，例如标题、段落、列表",
+      "qualityShort": "内容质量分析",
+      "quality": "检查文本质量是否足够，无重大错别字或缺失",
+      "copyrightShort": "版权检查",
+      "copyright": "检查内容是否可能存在版权或授权限制"
+    },
+    "harmfulDetected": "检测到可能有害的内容：骚扰、仇恨言论、性相关内容或危险内容",
+    "harmfulFailureDetail": "检测到有害内容（{{sources}}）：{{categories}}",
+    "serviceUnavailable": "审核服务暂时不可用，已跳过此检查",
+    "startButton": "开始内容审核",
+    "uploadFirst": "请先在“数据上传”步骤上传文件",
+    "infoHint": "检查文件安全与合规性",
+    "successTitle": "审核完成",
+    "successSubtext": "内容符合政策，可进入下一步",
+    "failureTitle": "审核未通过",
+    "failureSubtext": "检测到不适当内容。请点击“上一步”重新上传。",
+    "genericError": "审核时发生错误",
+    "defaults": {
+      "documentName": "未命名文件 {{index}}",
+      "documentPreview": "预览内容不可用或为空",
+      "siteName": "未命名网站 {{index}}",
+      "sitePreview": "预览内容不可用或为空"
+    }
   }
 }

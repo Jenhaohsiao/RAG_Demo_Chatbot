@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import "./AboutProjectModal.scss";
 
 interface AboutProjectModalProps {
@@ -14,6 +15,7 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
   onClose,
   initialView = "about", // 預設為 "about"
 }) => {
+  const { t } = useTranslation();
   const [viewMode, setViewMode] = useState<ViewMode>(initialView);
 
   // 當 initialView 改變時，更新 viewMode
@@ -40,7 +42,9 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
             <div className="header-content">
               <div>
                 <h6 className="modal-title mb-0 fw-bold">
-                  {viewMode === "about" ? "關於本專案" : "RAG 技術總結"}
+                  {viewMode === "about"
+                    ? t("aboutModal.about")
+                    : t("aboutModal.ragSummary")}
                 </h6>
               </div>
             </div>
@@ -57,11 +61,10 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
               <>
                 <div className="intro-section mb-2">
                   <h5 className="header-subtitle mb-2 fw-bold">
-                    使用RAG讓 AI 減少幻覺，回答專注
+                    {t("aboutModal.mainTitle")}
                   </h5>
                   <p className="small text-muted mb-0">
-                    您好，這是一個 AI 工程展示專案，說明 RAG
-                    檢索增強生成技術如何優化大型語言模型輸出。
+                    {t("aboutModal.subtitle")}
                   </p>
                 </div>
 
@@ -73,10 +76,10 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
                           <i className="bi bi-search text-primary me-2 fs-5"></i>
                           <div>
                             <h6 className="card-title mb-1 fw-bold">
-                              RAG主要目的是強制規範AI的做事邏輯
+                              {t("aboutModal.cards.mainGoal.title")}
                             </h6>
                             <p className="small text-muted mb-0">
-                              讓AI在回答前先搜尋資料庫，確保相關內容才回答，而非健談
+                              {t("aboutModal.cards.mainGoal.description")}
                             </p>
                           </div>
                         </div>
@@ -91,11 +94,10 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
                           <i className="bi bi-database text-info me-2 fs-5"></i>
                           <div>
                             <h6 className="card-title mb-1 fw-bold">
-                              把資料切片，向量化，存入向量資料庫（Vector DB）
+                              {t("aboutModal.cards.vectorDb.title")}
                             </h6>
                             <p className="small text-muted mb-0">
-                              讓 AI
-                              能快速搜尋、比對和驗證知識來源。每句回答都有根據
+                              {t("aboutModal.cards.vectorDb.description")}
                             </p>
                           </div>
                         </div>
@@ -110,10 +112,10 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
                           <i className="bi bi-gear text-success me-2 fs-5"></i>
                           <div>
                             <h6 className="card-title mb-1 fw-bold">
-                              System Prompt 行為規則
+                              {t("aboutModal.cards.systemPrompt.title")}
                             </h6>
                             <p className="small text-muted mb-0">
-                              不同於一般的Prompt，它定義AI如何做事，以及用什麼角色語氣來回應
+                              {t("aboutModal.cards.systemPrompt.description")}
                             </p>
                           </div>
                         </div>
@@ -128,10 +130,10 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
                           <i className="bi bi-cpu text-warning me-2 fs-5"></i>
                           <div>
                             <h6 className="card-title mb-1 fw-bold">
-                              RAG 技術實際應用場景
+                              {t("aboutModal.cards.applications.title")}
                             </h6>
                             <p className="small text-muted mb-0">
-                              非常適合嚴謹場合，如企業知識庫問答、法律文件檢索、醫療資訊查詢、客服助理等
+                              {t("aboutModal.cards.applications.description")}
                             </p>
                           </div>
                         </div>
@@ -150,12 +152,10 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
                         <i className="bi bi-exclamation-triangle text-warning me-2 fs-5"></i>
                         <div>
                           <h6 className="card-title mb-1 fw-bold">
-                            RAG 並非萬能，還有進步空間
+                            {t("aboutModal.cards.limitations.title")}
                           </h6>
                           <p className="small text-muted mb-0">
-                            如果你也測試了本專案的效果，你可能會發現 AI
-                            好像變笨了？因為 RAG 限制了 LLM
-                            的自由發揮空間，無法充分利用其強大的推理和創造能力。完全依賴檢索到的文件來生成回答。所以提供的知識庫完整性很重要，若知識庫不完整或缺乏關鍵資訊，仍可能導致錯誤或不完整的回答。
+                            {t("aboutModal.cards.limitations.description")}
                           </p>
                         </div>
                       </div>
@@ -170,13 +170,10 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
                         <i className="bi bi-stars text-info me-2 fs-5"></i>
                         <div>
                           <h6 className="card-title mb-1 fw-bold">
-                            迭代更新不間斷，Agentic RAG 等技術正在發展
+                            {t("aboutModal.cards.evolution.title")}
                           </h6>
                           <p className="small text-muted mb-0">
-                            Agentic RAG
-                            是一種結合代理人（Agent）的技術。除了內部提供的資料庫，還能動態地從外部資源（如網頁、API
-                            等）檢索資訊，更可結合其它程式碼以及現有系統。它會合理地重新編排內容並進行驗證。當然不只Agentic
-                            RAG，相信更多智能的AI 創新會不斷湧現。
+                            {t("aboutModal.cards.evolution.description")}
                           </p>
                         </div>
                       </div>
@@ -195,7 +192,7 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
                   onClick={() => setViewMode("summary")}
                 >
                   <i className="bi bi-journal-text me-1"></i>
-                  RAG 技術總結
+                  {t("aboutModal.ragSummary")}
                 </button>
               ) : (
                 <button
@@ -204,21 +201,22 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
                   onClick={() => setViewMode("about")}
                 >
                   <i className="bi bi-info-circle me-1"></i>
-                  關於本專案
+                  {t("aboutModal.about")}
                 </button>
               )}
             </div>
             <div className="footer-right">
               <div className="version-info small">
                 <i className="bi bi-tag me-1"></i>
-                版本: 1.0 · 更新日: 2026-01-11
+                {t("aboutModal.version")}: 1.0 · {t("aboutModal.updateDate")}:
+                2026-01-11
               </div>
               <button
                 type="button"
                 className="btn btn-sm btn-primary"
                 onClick={onClose}
               >
-                了解
+                {t("buttons.understand")}
               </button>
             </div>
           </div>

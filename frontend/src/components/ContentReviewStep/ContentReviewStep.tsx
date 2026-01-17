@@ -53,6 +53,69 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
   const [retryCount, setRetryCount] = useState(0);
   const [showRetryOption, setShowRetryOption] = useState(false);
 
+  const defaultDocPreview = t(
+    "contentReview.defaults.documentPreview",
+    "Document preview..."
+  );
+  const defaultSitePreview = t(
+    "contentReview.defaults.sitePreview",
+    "Website summary..."
+  );
+  const defaultDocName = (index: number) =>
+    t("contentReview.defaults.documentName", "Document {{index}}", {
+      index,
+    });
+  const defaultSiteName = (index: number) =>
+    t("contentReview.defaults.siteName", "Website {{index}}", { index });
+
+  const reviewChecklist = React.useMemo(
+    () => [
+      {
+        key: "format",
+        label: t("contentReview.items.format", "Check file format integrity"),
+        short: t("contentReview.items.formatShort", "Format check"),
+      },
+      {
+        key: "malware",
+        label: t("contentReview.items.malware", "Scan for malware"),
+        short: t("contentReview.items.malwareShort", "Malware scan"),
+      },
+      {
+        key: "harm",
+        label: t(
+          "contentReview.items.harm",
+          "Detect harmful content (blocks harassment, hate speech, sexual content, dangerous content)"
+        ),
+        short: t("contentReview.items.harmShort", "Harmful content check"),
+      },
+      {
+        key: "structure",
+        label: t(
+          "contentReview.items.structure",
+          "Validate document structure"
+        ),
+        short: t("contentReview.items.structureShort", "Structure validation"),
+      },
+      {
+        key: "quality",
+        label: t("contentReview.items.quality", "Analyze content quality"),
+        short: t(
+          "contentReview.items.qualityShort",
+          "Content quality analysis"
+        ),
+      },
+      {
+        key: "copyright",
+        label: t(
+          "contentReview.items.copyright",
+          "Check copyright restrictions"
+        ),
+        short: t("contentReview.items.copyrightShort", "Copyright check"),
+      },
+    ],
+    [t]
+  );
+
   // 添加審核進度狀態 - 如果有保存的結果，使用保存的結果初始化
   const [reviewProgress, setReviewProgress] = useState(() => {
     if (
@@ -93,7 +156,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
 
     showToast({
       type: "info",
-      message: "正在重新審核...",
+      message: t("contentReview.retrying", "Re-running content review..."),
       duration: 3000,
     });
 
@@ -118,7 +181,10 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
 
     // 通知父組件開始 loading
     if (onLoadingChange) {
-      onLoadingChange(true, "正在進行內容審核...");
+      onLoadingChange(
+        true,
+        t("contentReview.loading", "Running content review...")
+      );
     }
 
     setHasStartedReview(true);
@@ -130,20 +196,14 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
       isRunning: true,
     });
 
-    const reviewItems = [
-      "檢查文件格式完整性",
-      "掃描惡意軟體",
-      "檢測有害內容 (僅阻擋騷擾、仇恨言論、性相關內容、危險內容)",
-      "驗證文檔結構",
-      "分析內容品質",
-      "檢查版權限制",
-    ];
+    // Use stable keys so progress persists across language switches
+    const reviewItems = reviewChecklist.map((item) => item.key);
 
     try {
       // 準備審核內容
       const contentToModerate = documents.map((doc, index) => ({
         content:
-          doc.preview && doc.preview !== "文檔內容預覽..."
+          doc.preview && doc.preview !== defaultDocPreview
             ? doc.preview
             : doc.filename,
         source_reference: doc.filename || `Document ${index + 1}`,
@@ -192,14 +252,21 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                     blockedContent.flatMap((item) => item.blocked_categories)
                   ),
                 ];
-                failureReason = `檢測到有害內容 (${blockedSources}): ${blockedCategories.join(
-                  ", "
-                )}`;
+                failureReason = t(
+                  "contentReview.harmfulFailureDetail",
+                  "Detected harmful content ({{sources}}): {{categories}}",
+                  {
+                    sources: blockedSources,
+                    categories: blockedCategories.join(", "),
+                  }
+                );
                 // 顯示明確的有害內容警告
                 showToast({
                   type: "error",
-                  message:
-                    "檢測到有害內容：騷擾、仇恨言論、性相關內容或危險內容",
+                  message: t(
+                    "contentReview.harmfulDetected",
+                    "Harmful content detected: harassment, hate speech, sexual content, or dangerous content"
+                  ),
                   duration: 5000,
                 });
               } else {
@@ -213,7 +280,10 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
               // 顯示警告但不阻止繼續
               showToast({
                 type: "warning",
-                message: "內容審核服務暫時無法使用，已跳過此檢查",
+                message: t(
+                  "contentReview.serviceUnavailable",
+                  "Content review service is temporarily unavailable, this check was skipped"
+                ),
                 duration: 3000,
               });
             }
@@ -224,16 +294,14 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
         }
         // 更新進度狀態
         setReviewProgress((prev) => {
+          const failureEntry = failureReason
+            ? `${item}: ${failureReason}`
+            : item;
           const newState = {
             ...prev,
             currentItem: "", // 清空當前項目
             completed: passed ? [...prev.completed, item] : prev.completed,
-            failed: !passed
-              ? [
-                  ...prev.failed,
-                  failureReason ? `${item}: ${failureReason}` : item,
-                ]
-              : prev.failed,
+            failed: !passed ? [...prev.failed, failureEntry] : prev.failed,
           };
           return newState;
         });
@@ -248,6 +316,9 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
       }
 
       // 完成審核
+      let finalCompleted: string[] = [];
+      let finalFailed: string[] = [];
+
       setReviewProgress((prev) => {
         const finalState = {
           ...prev,
@@ -255,28 +326,39 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
           isCompleted: true,
           isRunning: false,
         };
-        // 保存審核結果到父組件
-        onSaveReviewResults?.({
-          completed: finalState.completed,
-          failed: finalState.failed,
-        });
 
-        // 通知父組件審核完成
-        // 🚨 安全準則：如果有任何審核失敗項目，必須阻止用戶繼續
-        const canProceed = prev.failed.length === 0;
-        // 通知父組件結束 loading
-        if (onLoadingChange) {
-          onLoadingChange(false);
-        }
-
-        onReviewStatusChange?.(canProceed);
-        if (canProceed) {
-          onReviewComplete?.();
-          // 不再重置 hasStartedReview，保持為 true 以便返回時顯示結果
-        }
+        // Capture the final state for callbacks outside setState
+        finalCompleted = [...finalState.completed];
+        finalFailed = [...finalState.failed];
 
         return finalState;
       });
+
+      // 將通知與儲存邏輯移到 setState 之外，避免在渲染階段觸發父層更新
+      const completedToSave = finalCompleted.length
+        ? finalCompleted
+        : reviewProgress.completed;
+      const failedToSave = finalFailed.length
+        ? finalFailed
+        : reviewProgress.failed;
+
+      onSaveReviewResults?.({
+        completed: completedToSave,
+        failed: failedToSave,
+      });
+
+      const canProceed = failedToSave.length === 0;
+
+      // 通知父組件結束 loading
+      if (onLoadingChange) {
+        onLoadingChange(false);
+      }
+
+      onReviewStatusChange?.(canProceed);
+      if (canProceed) {
+        onReviewComplete?.();
+        // 不再重置 hasStartedReview，保持為 true 以便返回時顯示結果
+      }
     } catch (error) {
       // 通知父組件結束 loading（錯誤情況）
       if (onLoadingChange) {
@@ -288,7 +370,13 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
         isCompleted: true,
         isRunning: false,
         currentItem: "",
-        failed: [...prev.failed, "審核過程發生錯誤"],
+        failed: [
+          ...prev.failed,
+          `generic:${t(
+            "contentReview.genericError",
+            "An error occurred during review"
+          )}`,
+        ],
       }));
       setHasStartedReview(false); // 重置審核狀態
       onReviewStatusChange?.(false);
@@ -327,12 +415,12 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
       propDocuments.forEach((doc: any, index: number) => {
         const documentInfo = {
           id: `file-${index}`,
-          filename: doc.filename || doc.name || `文檔 ${index + 1}`,
+          filename: doc.filename || doc.name || defaultDocName(index + 1),
           type: "file" as const,
           size: doc.size || 1024000,
           uploadTime: doc.uploadTime || new Date().toISOString(),
           status: "approved" as const,
-          preview: doc.content || doc.preview || "文檔內容預覽...",
+          preview: doc.content || doc.preview || defaultDocPreview,
           chunks: doc.chunks || 5,
         };
         result.push(documentInfo);
@@ -344,12 +432,12 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
       crawledUrls.forEach((url: any, index: number) => {
         result.push({
           id: `url-${index}`,
-          filename: url.url || `網站 ${index + 1}`,
+          filename: url.url || defaultSiteName(index + 1),
           type: "crawler",
           size: url.content_size || 500000,
           uploadTime: url.crawl_time || new Date().toISOString(),
           status: "approved",
-          preview: url.summary || "網站內容摘要...",
+          preview: url.summary || defaultSitePreview,
           chunks: url.chunks || 3,
         });
       });
@@ -358,7 +446,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
     return result;
   }, [propDocuments, crawledUrls]);
 
-  const totalChecklistItems = 6;
+  const totalChecklistItems = reviewChecklist.length;
   const completedCount =
     reviewProgress.completed.length + reviewProgress.failed.length;
   const progressPercent = Math.round(
@@ -374,8 +462,12 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
           <div className="d-flex align-items-center mb-3 pb-2 border-bottom">
             <i className="bi bi-shield-check text-primary fs-4 me-2"></i>
             <div>
-              <span className="fw-bold me-2">Gemini Safety API</span>
-              <small className="text-muted">阻擋不當內容</small>
+              <span className="fw-bold me-2">
+                {t("contentReview.header.title", "Gemini Safety API")}
+              </span>
+              <small className="text-muted">
+                {t("contentReview.header.subtitle", "Blocks unsafe content")}
+              </small>
             </div>
           </div>
 
@@ -384,30 +476,12 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
             reviewProgress.isRunning ||
             reviewProgress.isCompleted) && (
             <div className="row g-2 mb-3">
-              {[
-                "格式檢查",
-                "惡意軟體掃描",
-                "有害內容檢測",
-                "文檔結構驗證",
-                "內容品質分析",
-                "版權檢查",
-              ].map((item, index) => {
-                const fullItem = [
-                  "檢查文件格式完整性",
-                  "掃描惡意軟體",
-                  "檢測有害內容 (僅阻擋騷擾、仇恨言論、性相關內容、危險內容)",
-                  "驗證文檔結構",
-                  "分析內容品質",
-                  "檢查版權限制",
-                ][index];
-
-                const isCompleted = reviewProgress.completed.includes(fullItem);
-                const isFailed = reviewProgress.failed.some(
-                  (failedItem) =>
-                    failedItem.includes(fullItem) ||
-                    failedItem.startsWith(fullItem)
+              {reviewChecklist.map(({ key, label, short }) => {
+                const isCompleted = reviewProgress.completed.includes(key);
+                const isFailed = reviewProgress.failed.some((failedItem) =>
+                  failedItem.startsWith(key)
                 );
-                const isCurrent = reviewProgress.currentItem === fullItem;
+                const isCurrent = reviewProgress.currentItem === label;
 
                 let iconClass = "bi-circle text-muted";
                 if (isCompleted)
@@ -417,7 +491,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                   iconClass = "spinner-border spinner-border-sm text-primary";
 
                 return (
-                  <div key={`item-${index}`} className="col-md-4 col-6">
+                  <div key={key} className="col-md-4 col-6">
                     <div className="d-flex align-items-center small">
                       {isCurrent ? (
                         <div
@@ -428,7 +502,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                       ) : (
                         <i className={`bi ${iconClass} me-2`}></i>
                       )}
-                      <span className={isCurrent ? "ms-2" : ""}>{item}</span>
+                      <span className={isCurrent ? "ms-2" : ""}>{short}</span>
                     </div>
                   </div>
                 );
@@ -476,17 +550,23 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                     }
                   >
                     <i className="bi bi-shield-check me-2 fs-4"></i>
-                    開始內容審核
+                    {t("contentReview.startButton", "Start content review")}
                   </button>
                   {documents.length === 0 && crawledUrls.length === 0 ? (
                     <div className="text-muted mt-2 small">
                       <i className="bi bi-exclamation-circle me-1"></i>
-                      請先在「資料上傳」步驟上傳文件
+                      {t(
+                        "contentReview.uploadFirst",
+                        'Please upload files in the "Data Upload" step first'
+                      )}
                     </div>
                   ) : (
                     <div className="text-muted mt-2 small">
                       <i className="bi bi-info-circle me-1"></i>
-                      檢查文件安全性與內容合規性
+                      {t(
+                        "contentReview.infoHint",
+                        "Checks file safety and content compliance"
+                      )}
                     </div>
                   )}
                 </>
@@ -498,9 +578,14 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                 <div className="alert alert-success d-inline-flex align-items-center mb-0 shadow-sm">
                   <i className="bi bi-check-circle-fill me-2 fs-3"></i>
                   <div className="text-start">
-                    <div className="fw-bold fs-5">✅ 審核完成</div>
+                    <div className="fw-bold fs-5">
+                      {t("contentReview.successTitle", "Review completed")}
+                    </div>
                     <div className="small text-muted mt-1">
-                      內容符合規範，可以繼續下一步
+                      {t(
+                        "contentReview.successSubtext",
+                        "Content meets policy; you may continue to the next step"
+                      )}
                     </div>
                   </div>
                 </div>
@@ -511,17 +596,37 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
               <div className="alert alert-danger mb-0 border-0 shadow-sm">
                 <div className="d-flex align-items-center mb-2">
                   <i className="bi bi-x-circle-fill me-2 fs-4"></i>
-                  <strong>審核失敗</strong>
+                  <strong>
+                    {t("contentReview.failureTitle", "Review failed")}
+                  </strong>
                 </div>
                 <p className="mb-2 small">
-                  檢測到不當內容。請點擊「上一步」返回重新上傳。
+                  {t(
+                    "contentReview.failureSubtext",
+                    'Inappropriate content detected. Click "Previous" to re-upload.'
+                  )}
                 </p>
                 <div className="bg-white rounded p-2 border border-danger-subtle">
-                  {reviewProgress.failed.map((failure, index) => (
-                    <div key={index} className="mb-1 text-danger small">
-                      • {failure}
-                    </div>
-                  ))}
+                  {reviewProgress.failed.map((failure, index) => {
+                    const separatorIndex = failure.indexOf(":");
+                    const failureKey =
+                      separatorIndex >= 0
+                        ? failure.slice(0, separatorIndex)
+                        : failure;
+                    const failureDetail =
+                      separatorIndex >= 0
+                        ? failure.slice(separatorIndex + 1).trim()
+                        : "";
+                    const checklistLabel =
+                      reviewChecklist.find((item) => item.key === failureKey)
+                        ?.label || failureKey;
+                    return (
+                      <div key={index} className="mb-1 text-danger small">
+                        • {checklistLabel}
+                        {failureDetail ? `: ${failureDetail}` : ""}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}

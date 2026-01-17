@@ -58,7 +58,7 @@ interface PromptParameters {
   rag_chunk_size: number;
   rag_chunk_overlap: number;
   rag_min_chunk_length: number;
-  response_style: "concise" | "standard" | "detailed";
+  response_style: "brief" | "kid_friendly";
   professional_level: "casual" | "professional" | "academic";
   creativity_level: "conservative" | "balanced" | "creative";
   enabled_principles: string[];
@@ -98,7 +98,7 @@ const PromptVisualization: React.FC<PromptVisualizationProps> = ({
     rag_chunk_size: 2000,
     rag_chunk_overlap: 500,
     rag_min_chunk_length: 100,
-    response_style: "standard",
+    response_style: "brief",
     professional_level: "professional",
     creativity_level: "balanced",
     enabled_principles: [],

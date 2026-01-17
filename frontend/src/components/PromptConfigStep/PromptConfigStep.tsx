@@ -12,14 +12,14 @@ export interface PromptConfigStepProps {
   parameters: {
     // A. 系統規則 (System Rules) - Session 固定
     allow_inference: boolean; // 允許推論
-    answer_language: "zh-TW" | "en" | "auto"; // 回答語言
+    answer_language: "zh-TW" | "zh-CN" | "en" | "fr" | "auto"; // 回答語言
     strict_rag_mode: boolean; // 嚴格 RAG 模式
     // external_knowledge: false;       // 外部知識（永遠關閉，唯讀）
 
     // B. 回答政策 (Response Policy) - 對話中可調整
-    response_style: "concise" | "standard" | "detailed" | "step_by_step";
-    response_tone: "formal" | "friendly" | "casual" | "academic";
-    persona: "professor" | "expert" | "educator" | "neighbor";
+    response_style: "brief" | "kid_friendly";
+    response_tone: "friendly" | "rigorous" | "urgent";
+    persona: "elementary_teacher" | "show_host" | "workplace_veteran";
     citation_style: "inline" | "document" | "none"; // 引用方式
 
     // C. 執行限制 (Runtime Constraints) - 部分固定
@@ -44,79 +44,77 @@ export interface PromptConfigStepProps {
 // 回答語言選項
 const ANSWER_LANGUAGE_OPTIONS = [
   { value: "zh-TW", label: "繁體中文", labelKey: "step2.system.lang.zhTW" },
-  { value: "en", label: "English", labelKey: "step2.system.lang.en" },
   { value: "auto", label: "自動偵測", labelKey: "step2.system.lang.auto" },
+  { value: "zh-CN", label: "简体中文", labelKey: "step2.system.lang.zhCN" },
+  { value: "en", label: "English", labelKey: "step2.system.lang.en" },
+  { value: "fr", label: "Français", labelKey: "step2.system.lang.fr" },
 ];
 
 // 回答風格選項
 const RESPONSE_STYLE_OPTIONS = [
   {
-    value: "concise",
-    label: "簡潔扼要",
-    labelKey: "step2.policy.style.concise",
-    description: "精簡重點，快速理解",
+    value: "brief",
+    label: "簡要",
+    labelKey: "step2.policy.style.brief",
+    descriptionKey: "step2.summary.style.brief",
+    description: "快速給重點",
   },
   {
-    value: "standard",
-    label: "標準詳細",
-    labelKey: "step2.policy.style.standard",
-    description: "平衡說明，適中詳細度",
-  },
-  {
-    value: "detailed",
-    label: "深入完整",
-    labelKey: "step2.policy.style.detailed",
-    description: "詳盡解釋，全面說明",
-  },
-  {
-    value: "step_by_step",
-    label: "步驟教學",
-    labelKey: "step2.policy.style.stepByStep",
-    description: "手把手引導，分步說明",
+    value: "kid_friendly",
+    label: "試著讓小孩也能懂",
+    labelKey: "step2.policy.style.kidFriendly",
+    descriptionKey: "step2.summary.style.kidFriendly",
+    description: "用淺顯比喻讓孩子懂",
   },
 ];
 
 // 回答語氣選項
 const RESPONSE_TONE_OPTIONS = [
   {
-    value: "formal",
-    label: "專業簡潔",
-    labelKey: "step2.policy.tone.formal",
-    description: "專業術語，簡明扼要",
+    value: "friendly",
+    label: "親切",
+    labelKey: "step2.policy.tone.friendly",
+    descriptionKey: "step2.summary.tone.friendly",
+    description: "溫暖易親近",
   },
   {
-    value: "casual",
-    label: "友善活潑",
-    labelKey: "step2.policy.tone.casual",
-    description: "口語化，輕鬆有趣",
+    value: "rigorous",
+    label: "嚴謹",
+    labelKey: "step2.policy.tone.rigorous",
+    descriptionKey: "step2.summary.tone.rigorous",
+    description: "精確、邏輯清晰",
   },
   {
-    value: "hesitant",
-    label: "猶豫不決",
-    labelKey: "step2.policy.tone.hesitant",
-    description: "反覆斟酌，多角度思考",
+    value: "urgent",
+    label: "急促",
+    labelKey: "step2.policy.tone.urgent",
+    descriptionKey: "step2.summary.tone.urgent",
+    description: "簡短直入重點，快速輸出",
   },
 ];
 
 // Persona 選項
 const PERSONA_OPTIONS = [
   {
-    value: "host",
+    value: "elementary_teacher",
+    label: "小學老師",
+    labelKey: "step2.persona.elementaryTeacher",
+    descriptionKey: "step2.summary.persona.elementaryTeacher",
+    description: "用簡單例子慢慢教",
+  },
+  {
+    value: "show_host",
     label: "節目主持人",
-    labelKey: "step2.persona.host",
-    description: "生動有趣、互動性強",
+    labelKey: "step2.persona.showHost",
+    descriptionKey: "step2.summary.persona.showHost",
+    description: "生動活潑，帶節奏與互動",
   },
   {
-    value: "receptionist",
-    label: "酒店櫃檯",
-    labelKey: "step2.persona.receptionist",
-    description: "服務親切、細心周到",
-  },
-  {
-    value: "teacher",
-    label: "高中老師",
-    labelKey: "step2.persona.teacher",
-    description: "循序漸進、耐心解說",
+    value: "workplace_veteran",
+    label: "職場老手",
+    labelKey: "step2.persona.workplaceVeteran",
+    descriptionKey: "step2.summary.persona.workplaceVeteran",
+    description: "實戰經驗豐富，給務實建議",
   },
 ];
 
@@ -126,18 +124,21 @@ const CITATION_STYLE_OPTIONS = [
     value: "inline",
     label: "行內引用",
     labelKey: "step2.policy.citation.inline",
+    descriptionKey: "step2.summary.citation.inline",
     description: "在文字旁標註來源 [文件1]",
   },
   {
     value: "document",
     label: "文件引用",
     labelKey: "step2.policy.citation.document",
+    descriptionKey: "step2.summary.citation.document",
     description: "在結尾列出所有來源",
   },
   {
     value: "none",
     label: "不顯示",
     labelKey: "step2.policy.citation.none",
+    descriptionKey: "step2.summary.citation.none",
     description: "不顯示引用來源",
   },
 ];
@@ -152,16 +153,16 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
 
   const styleOption =
     RESPONSE_STYLE_OPTIONS.find(
-      (opt) => opt.value === (parameters.response_style || "standard")
-    ) || RESPONSE_STYLE_OPTIONS[1];
+      (opt) => opt.value === (parameters.response_style || "brief")
+    ) || RESPONSE_STYLE_OPTIONS[0];
   const toneOption =
     RESPONSE_TONE_OPTIONS.find(
-      (opt) => opt.value === (parameters.response_tone || "formal")
+      (opt) => opt.value === (parameters.response_tone || "friendly")
     ) || RESPONSE_TONE_OPTIONS[0];
   const personaOption =
     PERSONA_OPTIONS.find(
-      (opt) => opt.value === (parameters.persona || "expert")
-    ) || PERSONA_OPTIONS[1];
+      (opt) => opt.value === (parameters.persona || "workplace_veteran")
+    ) || PERSONA_OPTIONS[2];
   const citationOption =
     CITATION_STYLE_OPTIONS.find(
       (opt) => opt.value === (parameters.citation_style || "inline")
@@ -194,7 +195,7 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
       {disabled && (
         <div className="alert alert-info mb-2 py-2">
           <i className="bi bi-info-circle me-2"></i>
-          資料已上傳，配置已鎖定
+          {t("step2.disabledNotice", "資料已上傳，配置已鎖定，無法修改。")}
         </div>
       )}
 
@@ -207,7 +208,9 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
             <div className="value">
               {t(styleOption.labelKey, styleOption.label)}
             </div>
-            <div className="meta">{styleOption.description}</div>
+            <div className="meta">
+              {t(styleOption.descriptionKey, styleOption.description)}
+            </div>
           </div>
         </div>
         <div className="col-md-3 col-sm-6">
@@ -218,7 +221,9 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
             <div className="value">
               {t(toneOption.labelKey, toneOption.label)}
             </div>
-            <div className="meta">{toneOption.description}</div>
+            <div className="meta">
+              {t(toneOption.descriptionKey, toneOption.description)}
+            </div>
           </div>
         </div>
         <div className="col-md-3 col-sm-6">
@@ -229,7 +234,9 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
             <div className="value">
               {t(personaOption.labelKey, personaOption.label)}
             </div>
-            <div className="meta">{personaOption.description}</div>
+            <div className="meta">
+              {t(personaOption.descriptionKey, personaOption.description)}
+            </div>
           </div>
         </div>
         <div className="col-md-3 col-sm-6">
@@ -240,7 +247,9 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
             <div className="value">
               {t(citationOption.labelKey, citationOption.label)}
             </div>
-            <div className="meta">{citationOption.description}</div>
+            <div className="meta">
+              {t(citationOption.descriptionKey, citationOption.description)}
+            </div>
           </div>
         </div>
       </div>
@@ -393,7 +402,7 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                 </label>
                 <select
                   className="form-select modern-select"
-                  value={parameters.response_style || "standard"}
+                  value={parameters.response_style || "brief"}
                   disabled={disabled}
                   onChange={(e) =>
                     onParameterChange("response_style", e.target.value)
@@ -414,7 +423,7 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                 </label>
                 <select
                   className="form-select form-select-sm"
-                  value={parameters.response_tone || "formal"}
+                  value={parameters.response_tone || "friendly"}
                   disabled={disabled}
                   onChange={(e) =>
                     onParameterChange("response_tone", e.target.value)
@@ -435,7 +444,7 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                 </label>
                 <select
                   className="form-select form-select-sm"
-                  value={parameters.persona || "expert"}
+                  value={parameters.persona || "workplace_veteran"}
                   disabled={disabled}
                   onChange={(e) => onParameterChange("persona", e.target.value)}
                 >

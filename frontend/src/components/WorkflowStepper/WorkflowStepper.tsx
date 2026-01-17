@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import "./WorkflowStepper.scss";
 import RagConfigStep from "../RagConfigStep/RagConfigStep";
 import PromptConfigStep from "../PromptConfigStep/PromptConfigStep";
@@ -46,6 +47,8 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   onShowMessage,
   onShowRagSummary,
 }) => {
+  const { t, i18n } = useTranslation();
+
   const [showToast, setShowToast] = useState(false);
   const [toastContent, setToastContent] = useState({ title: "", message: "" });
   const [showErrorDialog, setShowErrorDialog] = useState(false);
@@ -58,8 +61,16 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   const [successDialogMessage, setSuccessDialogMessage] = useState<string>("");
 
   // 全局 Loading 狀態
+  const processingLabel = t(
+    "workflow.loading.processingShort",
+    "Processing..."
+  );
+  const defaultLoadingMessage = t(
+    "workflow.loading.default",
+    "Processing, please wait..."
+  );
   const [isGlobalLoading, setIsGlobalLoading] = useState(false);
-  const [loadingMessage, setLoadingMessage] = useState("處理中，請稍候..");
+  const [loadingMessage, setLoadingMessage] = useState(defaultLoadingMessage);
 
   // RAG 總結對話框 - 移除本地狀態，改用父組件的 AboutProjectModal
   // const [showRagSummaryDialog, setShowRagSummaryDialog] = useState(false);
@@ -92,7 +103,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             const updatedDoc = {
               ...docItem,
               chunks: status.chunk_count,
-              preview: status.summary || "處理中",
+              preview: status.summary || processingLabel,
               status: "processing",
             };
 
@@ -420,66 +431,59 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     {
       id: 1,
       key: "rag-config",
-      title: "檢索策略設定",
-      infoTitle: "什麼是檢索策略（Retrieval Strategy）？",
+      title: t("workflow.stepper.ragConfig.title"),
+      infoTitle: t("workflow.stepper.ragConfig.infoTitle"),
       icon: "bi-gear",
-      description:
-        "微調相似度與 Top-K，讓查詢更精準更涵蓋全面，並可以設定切塊大小與安全範圍。",
+      description: t("workflow.stepper.ragConfig.description"),
       color: "primary",
-      detailMessage:
-        "檢索策略用來設定 AI 在回答問題前，要如何從 Vector DB 中找出最相關的資料內容。\n\n透過調整相似度門檻與檢索數量，可以控制：\n\nAI 回答時「只使用高度相關的資料」\n\n或在必要時擴大搜尋範圍，避免漏掉重要資訊\n\n此步驟只影響 資料檢索（Retrieval），不涉及 AI 的回答方式或語言生成。",
+      detailMessage: t("workflow.stepper.ragConfig.detailMessage"),
     },
     {
       id: 2,
       key: "prompt-config",
-      title: "System Prompt",
-      infoTitle: "何為 System Prompt ?",
+      title: t("workflow.stepper.promptConfig.title"),
+      infoTitle: t("workflow.stepper.promptConfig.infoTitle"),
       icon: "bi-chat-dots",
-      description: "定義模型行為、回答範疇、能做與不能做及安全規則",
+      description: t("workflow.stepper.promptConfig.description"),
       color: "info",
-      detailMessage:
-        "系統提示詞(System Prompt ) 跟一般使用者在對話框使用的 Prompt不一樣。一般 prompt 讓模型「盡量用自己記憶/理解去回事情最好」。在 RAG中使用 system prompt 通常會被設定來強制引導 LLM 必須根據上下文件來回答，這可以大幅降低幻覺（hallucination）並提升事實準確度以及可信度。",
+      detailMessage: t("workflow.stepper.promptConfig.detailMessage"),
     },
     {
       id: 3,
       key: "data-upload",
-      title: "資料上傳",
-      infoTitle: "上傳使用或指定的資料",
+      title: t("workflow.stepper.dataUpload.title"),
+      infoTitle: t("workflow.stepper.dataUpload.infoTitle"),
       icon: "bi-cloud-upload",
-      description: "上傳檔案或爬取網站資料。",
+      description: t("workflow.stepper.dataUpload.description"),
       color: "orange",
-      detailMessage:
-        "這個步作是讓自己上傳文字檔案或使用網站爬蟲來抓取網路內容。系統將接收並解析文本內容，這些資料將成為AI助理的核心知識庫，而AI 將只會針對此內容來做進一步交流。",
+      detailMessage: t("workflow.stepper.dataUpload.detailMessage"),
     },
     {
       id: 4,
       key: "content-review",
-      title: "內容審核",
+      title: t("workflow.stepper.contentReview.title"),
       icon: "bi-shield-check",
-      description: "安全性檢查與內容審查",
+      description: t("workflow.stepper.contentReview.description"),
       color: "warning",
-      detailMessage:
-        "此步驟檢測上傳內容是否包含危險資訊或敏感內容、仇恨資訊。確保您的知識庫符合安全標準，保護用戶隱私及企業資訊安全。",
+      detailMessage: t("workflow.stepper.contentReview.detailMessage"),
     },
     {
       id: 5,
       key: "text-processing",
-      title: "資料處理與 寫入 Vector DB",
+      title: t("workflow.stepper.textProcessing.title"),
       icon: "bi-diagram-3",
-      description: "將檔案切塊、轉換為向量，並寫入 Vector DB 以供後續檢索",
+      description: t("workflow.stepper.textProcessing.description"),
       color: "purple",
-      detailMessage:
-        "簡單來說這個步作是把文字轉成一串數字當密碼，讓電腦能去比對找到更多相關。\n而「Vector DB（向量資料庫）」是一種特殊資料庫，專門存這些向量密碼，可以幫你找出和你問題「最相關」的內容。\n\n傳統資料庫例如 MySQL、PostgreSQL、MongoDB 擅長「精準完全符合比對」的東西；但Vector DB 專門做「向量比對、視覺比對」類的東西，因為人類的問題和回答常常不是完全模一樣的關鍵字，而是在「相似的意思」去表達，所以需要這種尋找相似度的超能力。",
+      detailMessage: t("workflow.stepper.textProcessing.detailMessage"),
     },
     {
       id: 6,
       key: "ai-chat",
-      title: "AI 對話",
+      title: t("workflow.stepper.aiChat.title"),
       icon: "bi-robot",
-      description: "啟用智能助理對話",
+      description: t("workflow.stepper.aiChat.description"),
       color: "indigo",
-      detailMessage:
-        "基於向量資料庫開始回答問話。AI會根據問題檢索相關內容並給出準確回答，並會提供原始來源以確保答案的可信度及可追溯性。",
+      detailMessage: t("workflow.stepper.aiChat.detailMessage"),
     },
   ];
 
@@ -648,8 +652,11 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     // 檢查步驟3是否可以進入下一步
     if (currentStep === 3 && !canProceedToNextStep()) {
       setToastContent({
-        title: "警告",
-        message: "請先上傳檔案或設定網站爬蟲後才能進入下一步驟。",
+        title: t("workflow.warning", "警告"),
+        message: t(
+          "workflow.warnings.uploadFirst",
+          "請先上傳檔案或設定網站爬蟲後才能進入下一步驟。"
+        ),
       });
       setShowToast(true);
       return;
@@ -659,9 +666,11 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     if (currentStep === 4 && !canProceedToNextStep()) {
       if (!reviewPassed) {
         setToastContent({
-          title: "警告",
-          message:
-            "Please finish content review and pass checks before proceeding.",
+          title: t("workflow.warning", "警告"),
+          message: t(
+            "workflow.warnings.reviewFirst",
+            "請先完成內容審核並通過檢查後才能進入下一步驟。"
+          ),
         });
         setShowToast(true);
       }
@@ -671,9 +680,11 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     // 檢查步驟5是否可以進入下一步
     if (currentStep === 5 && !canProceedToNextStep()) {
       setToastContent({
-        title: "警告",
-        message:
-          "Please upload files or configure crawler input before continuing.",
+        title: t("workflow.warning", "警告"),
+        message: t(
+          "workflow.warnings.processFirst",
+          "請先完成資料處理並寫入 Vector DB 後才能進入下一步驟。"
+        ),
       });
       setShowToast(true);
       return;
@@ -723,28 +734,22 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
     // Persona 對照
     const personaMap: Record<string, string> = {
-      professor:
-        "大學教授 - 使用學術嚴謹語言，適合討論理論來源與專業術語解釋概念。",
-      expert: "現場專家 - 務實導向論點，確實使用專業術語，直達問題核心。",
-      educator: "兒童教育員 - 使用淺顯易懂語言，搭配生活範例，一步步講解概念。",
-      neighbor:
-        "市場大媽大伯 - 用口語化且生活化的方式說話，就像跟鄰居聊天，輕鬆自然，多用比喻。",
+      elementary_teacher: "小學老師 - 用簡單例子循序漸進，耐心讓孩子理解。",
+      show_host: "節目主持人 - 生動活潑、帶節奏，讓內容更有趣也容易跟上。",
+      workplace_veteran: "職場老手 - 實戰經驗豐富，提供務實可落地的建議。",
     };
 
     // 回應風格對照
     const styleMap: Record<string, string> = {
-      concise: "簡潔扼要，只提供關鍵資訊，不要過多說明。",
-      standard: "標準詳細程度，提供適度的背景及說明。",
-      detailed: "深入完整，提供詳盡解釋及相關例子。",
-      step_by_step: "分步驟說明，編號列表引導使用者完成任務。",
+      brief: "簡要回答，直接給出重點與結論。",
+      kid_friendly: "用淺顯比喻與例子，讓小孩也能聽懂。",
     };
 
     // 回應語氣對照
     const toneMap: Record<string, string> = {
-      formal: "使用正式專業語調，精確客觀。",
-      friendly: "使用親切友善語調，溫暖且容易親近。",
-      casual: "使用輕鬆活潑的口語化語氣，讓人感到輕鬆易於理解。",
-      academic: "使用嚴謹學術語調，精確使用術語。",
+      friendly: "親切溫和的語氣，保持陪伴感。",
+      rigorous: "嚴謹精確的語氣，條理清晰。",
+      urgent: "急促直接，快速給出答案。",
     };
 
     // 引用樣式對照
@@ -757,7 +762,9 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     // 語言對照
     const languageMap: Record<string, string> = {
       "zh-TW": "Traditional Chinese (繁體中文)",
+      "zh-CN": "Simplified Chinese (简体中文)",
       en: "English",
+      fr: "Français",
       auto: "{{language}}", // 使用變數，由後端決定
     };
 
@@ -773,9 +780,10 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
         : "若文件內容不足，可以適度使用一般知識補充，但需標示哪些來自文件及哪些是補充。";
 
     // 組裝提示
-    const personaInstruction = personaMap[persona] || personaMap["expert"];
-    const styleInstruction = styleMap[response_style] || styleMap["standard"];
-    const toneInstruction = toneMap[response_tone] || toneMap["formal"];
+    const personaInstruction =
+      personaMap[persona] || personaMap["workplace_veteran"];
+    const styleInstruction = styleMap[response_style] || styleMap["brief"];
+    const toneInstruction = toneMap[response_tone] || toneMap["friendly"];
     const citationInstruction =
       citationMap[citation_style] || citationMap["inline"];
     const responseLanguage = languageMap[answer_language] || "{{language}}";
@@ -783,7 +791,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     // 組合完整的custom_prompt
     return `你是一個RAG (Retrieval-Augmented Generation) 助理。
 
-**角色設定 (PERSONA)**: ${personaInstruction}
+**角色設定**: ${personaInstruction}
 
 **回答風格 (RESPONSE STYLE)**: ${styleInstruction}
 
@@ -868,7 +876,13 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
               try {
                 // 顯示全局 Loading
                 setIsGlobalLoading(true);
-                setLoadingMessage(`正在上傳檔案: ${file.name}...`);
+                setLoadingMessage(
+                  t(
+                    "workflow.loading.uploadingFile",
+                    "Uploading file: {{name}}...",
+                    { name: file.name }
+                  )
+                );
 
                 const response = await uploadFile(sessionId!, file);
 
@@ -879,7 +893,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                   uploadTime: new Date().toISOString(),
                   type: "file",
                   chunks: 0, // 初始化0，等待輪詢更新
-                  preview: response.preview || "處理中..",
+                  preview: response.preview || processingLabel,
                   status: "processing",
                 };
                 onDocumentsUpdate?.([...documents, newDoc]);
@@ -897,10 +911,17 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
               } catch (error) {
                 setIsGlobalLoading(false);
                 setToastContent({
-                  title: "錯誤",
-                  message: `檔案上傳失敗: ${
-                    error instanceof Error ? error.message : "未知錯誤"
-                  }`,
+                  title: t("workflow.errors.uploadFailedTitle", "Error"),
+                  message: t(
+                    "workflow.errors.uploadFailed",
+                    "File upload failed: {{error}}",
+                    {
+                      error:
+                        error instanceof Error
+                          ? error.message
+                          : t("workflow.errors.unknown", "Unknown error"),
+                    }
+                  ),
                 });
                 setShowToast(true);
               }
@@ -909,7 +930,13 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
               try {
                 // 顯示全局 Loading
                 setIsGlobalLoading(true);
-                setLoadingMessage(`正在處理URL: ${url}...`);
+                setLoadingMessage(
+                  t(
+                    "workflow.loading.processingUrl",
+                    "Processing URL: {{url}}...",
+                    { url }
+                  )
+                );
 
                 const response = await uploadUrl(sessionId!, url);
                 // 建立新的文件項目
@@ -919,7 +946,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                   uploadTime: new Date().toISOString(),
                   type: "url",
                   chunks: 0, // 初始為0，等待輪詢更新
-                  preview: response.preview || "處理中..",
+                  preview: response.preview || processingLabel,
                   status: "processing",
                 };
                 onDocumentsUpdate?.([...documents, newDoc]);
@@ -946,8 +973,12 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
                 if (!isContentBlockedError) {
                   setToastContent({
-                    title: "錯誤",
-                    message: `URL處理失敗: ${errorMessage}`,
+                    title: t("workflow.errors.urlFailedTitle", "Error"),
+                    message: t(
+                      "workflow.errors.urlFailed",
+                      "URL processing failed: {{error}}",
+                      { error: errorMessage }
+                    ),
                   });
                   setShowToast(true);
                 } else {
@@ -959,7 +990,13 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
               try {
                 // 顯示全局 Loading
                 setIsGlobalLoading(true);
-                setLoadingMessage(`正在處理網站: ${url}...`);
+                setLoadingMessage(
+                  t(
+                    "workflow.loading.processingSite",
+                    "Processing website: {{url}}...",
+                    { url }
+                  )
+                );
 
                 const response = await uploadWebsite(
                   sessionId!,
@@ -973,7 +1010,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                   content_size: response.content_size || 0,
                   crawl_time: new Date().toISOString(),
                   chunks: response.chunk_count || 0,
-                  summary: response.summary || "網站內容處理...",
+                  summary: response.summary || processingLabel,
                   pages_found: response.pages_found || 1,
                 };
                 onCrawledUrlsUpdate?.([...crawledUrls, newUrl]);
@@ -985,9 +1022,13 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                 setIsGlobalLoading(false);
 
                 // 使用中文對話框顯示成功訊息
-                setSuccessDialogTitle("成功");
+                setSuccessDialogTitle(t("workflow.success", "成功"));
                 setSuccessDialogMessage(
-                  `網站 ${url} 爬取成功，共爬取 ${response.pages_found} 個頁面`
+                  t(
+                    "workflow.crawlerSuccess",
+                    `網站 ${url} 爬取成功，共爬取 ${response.pages_found} 個頁面`,
+                    { url, pages: response.pages_found }
+                  )
                 );
                 setShowSuccessDialog(true);
               } catch (error) {
@@ -998,8 +1039,12 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                   error instanceof Error ? error.message : String(error);
 
                 setToastContent({
-                  title: "錯誤",
-                  message: `網站爬取失敗: ${errorMessage}`,
+                  title: t("workflow.errors.crawlerFailedTitle", "Error"),
+                  message: t(
+                    "workflow.errors.crawlerFailed",
+                    "Website crawl failed: {{error}}",
+                    { error: errorMessage }
+                  ),
                 });
                 setShowToast(true);
               }
@@ -1025,9 +1070,13 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
               resetDownstreamSteps();
 
               // 使用中文對話框顯示成功訊息
-              setSuccessDialogTitle("成功");
+              setSuccessDialogTitle(t("workflow.success", "成功"));
               setSuccessDialogMessage(
-                `網站 ${url} 爬取成功，共爬取 ${result.pages_found} 個頁面`
+                t(
+                  "workflow.crawlerSuccess",
+                  `網站 ${url} 爬取成功，共爬取 ${result.pages_found} 個頁面`,
+                  { url, pages: result.pages_found }
+                )
               );
               setShowSuccessDialog(true);
             }}
@@ -1180,7 +1229,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                   className="btn btn-success"
                   onClick={() => setShowSuccessDialog(false)}
                 >
-                  確定
+                  {t("buttons.confirm", "Confirm")}
                 </button>
               </div>
             </div>
@@ -1248,7 +1297,9 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
               {currentStep === 5 &&
                 shouldStartProcessing &&
                 !textProcessingCompleted && (
-                  <span className="badge bg-info text-dark">Processing</span>
+                  <span className="badge bg-info text-dark">
+                    {t("workflow.loading.processingShort", "Processing...")}
+                  </span>
                 )}
             </h5>
             <div className="text-muted ">
@@ -1264,7 +1315,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                 disabled={currentStep === 1}
               >
                 <i className="bi bi-chevron-left me-1"></i>
-                上一步
+                {t("workflow.previous")}
               </button>
             )}
 
@@ -1279,7 +1330,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                 onClick={() => onShowRagSummary?.()}
                 disabled={isGlobalLoading}
               >
-                總結
+                {t("workflow.summary")}
               </button>
             )}
 
@@ -1296,12 +1347,12 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
               >
                 {[3, 4, 5].includes(currentStep) && !canProceedToNextStep() ? (
                   <>
-                    下一步
+                    {t("workflow.next")}
                     <i className="bi bi-question-circle ms-1"></i>
                   </>
                 ) : (
                   <>
-                    下一步
+                    {t("workflow.next")}
                     <i className="bi bi-chevron-right ms-1"></i>
                   </>
                 )}
@@ -1347,7 +1398,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                   className="btn btn-primary"
                   onClick={() => setShowToast(false)}
                 >
-                  了解
+                  {t("buttons.understand", "Got it")}
                 </button>
               </div>
             </div>
@@ -1527,7 +1578,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                   className="btn btn-primary"
                   onClick={() => {}}
                 >
-                  了解
+                  {t("buttons.understand", "Got it")}
                 </button>
               </div>
             </div>

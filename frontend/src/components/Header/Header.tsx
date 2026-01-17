@@ -102,7 +102,7 @@ export const Header: React.FC<HeaderProps> = ({
             <h3 className="mb-0 fw-bold app-title">{t("app.title")}</h3>
             <div className="small app-subtitle-container">
               <h6 className="mb-0 mt-1 text-white">
-                <b>用視覺說明RAG運行的原理跟流程</b>
+                <b>{t("app.tagline")}</b>
               </h6>
             </div>
           </a>
@@ -115,9 +115,9 @@ export const Header: React.FC<HeaderProps> = ({
                 className="btn btn-sm btn-outline-light border "
                 type="button"
                 onClick={onAboutClick}
-                title="關於本專案"
+                title={t("buttons.about")}
               >
-                <span className="d-none d-sm-inline">關於本專案</span>
+                <span className="d-none d-sm-inline">{t("buttons.about")}</span>
               </button>
             )}
 
@@ -127,10 +127,11 @@ export const Header: React.FC<HeaderProps> = ({
                 className="btn btn-sm btn-outline-light border"
                 type="button"
                 onClick={onContactClick}
-                title="與我聯絡"
+                title={t("buttons.contact")}
               >
-                <i className="bi bi-envelope me-1"></i>
-                <span className="d-none d-sm-inline">與我聯絡</span>
+                <span className="d-none d-sm-inline">
+                  {t("buttons.contact")}
+                </span>
               </button>
             )}
 
@@ -142,7 +143,6 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={onRestart}
                 title={t("buttons.restart")}
               >
-                <i className="bi bi-arrow-clockwise me-1"></i>
                 <span className="d-none d-sm-inline">
                   {t("buttons.restart")}
                 </span>
@@ -159,7 +159,6 @@ export const Header: React.FC<HeaderProps> = ({
                 aria-expanded={dropdownOpen}
                 title={t("labels.selectLanguage")}
               >
-                <i className="bi bi-globe me-2"></i>
                 <span className="d-none d-sm-inline text-truncate language-selector-text">
                   {currentLangName}
                 </span>

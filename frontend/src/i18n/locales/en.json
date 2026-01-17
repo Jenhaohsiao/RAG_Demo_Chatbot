@@ -2,6 +2,7 @@
   "app": {
     "title": "RAG Demo Chatbot",
     "subtitle": "AI Engineer Portfolio Project",
+    "tagline": "Visualizing RAG principles and workflow",
     "description": "Upload documents or web content, then ask questions about them using AI-powered semantic search.",
     "features": {
       "pdfSupport": "📄 PDF & Text Support",
@@ -20,9 +21,139 @@
     "close": "Close",
     "cancel": "Cancel",
     "confirm": "Confirm",
-    "settings": "Settings"
+    "settings": "Settings",
+    "about": "About Project",
+    "contact": "Contact Me",
+    "understand": "Understood"
+  },
+  "step2": {
+    "system": {
+      "lang": {
+        "zhTW": "Traditional Chinese",
+        "zhCN": "Simplified Chinese",
+        "en": "English",
+        "fr": "French",
+        "auto": "Auto detect"
+      }
+    }
+  },
+  "aboutModal": {
+    "about": "About this project",
+    "ragSummary": "RAG Summary",
+    "version": "Version",
+    "updateDate": "Updated",
+    "mainTitle": "Use RAG to reduce hallucination and keep answers focused",
+    "subtitle": "This AI engineering demo shows how RAG improves LLM outputs.",
+    "cards": {
+      "mainGoal": {
+        "title": "RAG enforces how AI works",
+        "description": "Search the vector DB before answering so replies stay relevant."
+      },
+      "vectorDb": {
+        "title": "Chunk, vectorize, store in Vector DB",
+        "description": "Helps the AI search, compare, and verify sources—every answer has a basis."
+      },
+      "systemPrompt": {
+        "title": "System Prompt rules",
+        "description": "Defines how the AI should act and what role/tone to use."
+      },
+      "applications": {
+        "title": "Where RAG shines",
+        "description": "Great for enterprise KB Q&A, legal search, medical info, customer support, and more."
+      },
+      "limitations": {
+        "title": "RAG isn’t magic",
+        "description": "If the knowledge base is incomplete, answers can still be wrong or partial."
+      },
+      "evolution": {
+        "title": "Iterating with Agentic RAG and beyond",
+        "description": "Agents can pull external data (web, APIs) and verify it—more AI innovations are coming."
+      }
+    }
   },
   "labels": {
+    "uploadWizard": {
+      "tabs": {
+        "file": "File Upload",
+        "crawler": "Website Crawler",
+        "fileDesc": "Quickly set file limits and upload documents to ensure format and size are compliant.",
+        "crawlerDesc": "Set crawl bounds and limits, then enter a URL to extract content."
+      },
+      "dialog": {
+        "uploadFailed": "File Upload Failed",
+        "invalidFormat": "Unsupported File Format",
+        "confirm": "OK"
+      },
+      "errors": {
+        "sampleFileLoad": "Unable to load the sample file. Please upload manually.",
+        "unsupportedFormats": "Only {{formats}} files are supported.\n\nPlease choose another file or click the \"Use sample file\" button below.",
+        "fileTooLarge": "File is too large: {{fileSize}} (exceeds limit {{maxSize}})\n\nPlease choose another file or click the \"Use sample file\" button below.",
+        "fileEmpty": "The file is empty and cannot be uploaded.\n\nPlease choose another file or click the \"Use sample file\" button below.",
+        "crawlerInsufficient": "The crawled page has too little content (only {{tokens}} tokens). Please provide a richer page or click the \"Use sample website\" button below.",
+        "crawlerBlocked": "This website cannot be crawled (it may block crawlers).\n\nPlease try another site or click the \"Use sample website\" button below.",
+        "crawlerFailed": "Crawl failed: {{reason}}\n\nPlease try another site or click the \"Use sample website\" button below."
+      },
+      "supportedFormats": "Supported formats: {{formats}} (max {{maxSize}})",
+      "acceptFormatsOnly": "Only {{formats}} files are supported",
+      "steps": {
+        "eyebrow": "Step 3 · Configure",
+        "basicParameters": "{{tab}} basic parameters",
+        "stepIndicator": "Step 1 / 2",
+        "file": {
+          "maxFileSize": "Max file size",
+          "supportedTypes": "Supported file types"
+        },
+        "crawler": {
+          "maxTokens": "Max tokens",
+          "maxPages": "Max pages",
+          "pageUnit": "pages"
+        },
+        "next": {
+          "file": "Next: Choose file",
+          "crawler": "Next: Enter URL"
+        },
+        "upload": {
+          "titleFile": "Step 2/2: Upload file",
+          "titleCrawler": "Step 2/2: Start crawl",
+          "crawlerCompleted": "Crawl completed"
+        },
+        "crawlerSuccess": {
+          "title": "Website crawl succeeded!",
+          "description": "Crawled {{pages}} pages, total {{tokens}}K tokens. Data uploaded; click Next to continue.",
+          "detailsTitle": "Crawl details"
+        },
+        "stats": {
+          "pages": "Pages",
+          "tokens": "Total tokens",
+          "status": "Status",
+          "statusComplete": "Completed",
+          "statusTokenLimit": "Token limit reached",
+          "statusPageLimit": "Page limit reached"
+        },
+        "info": {
+          "autoNext": "Data uploaded automatically; the system will proceed to content review."
+        },
+        "sampleFileButton": "Use sample file (Alice in Wonderland)",
+        "back": "Back to settings"
+      },
+      "summary": {
+        "title": "Upload complete",
+        "uploadedFiles": "Uploaded files ({{count}})",
+        "uploadedSites": "Crawled websites ({{count}})",
+        "unnamed": "Untitled file",
+        "fileType": {
+          "url": "URL",
+          "file": "File"
+        },
+        "sizeLabel": "Size {{size}}",
+        "completed": "Completed",
+        "siteMeta": "{{size}} • {{pages}} pages • {{time}}",
+        "fileMeta": "{{type}} • {{size}} • {{time}}"
+      },
+      "loading": {
+        "crawling": "Crawling website content, please wait..."
+      }
+    },
     "session": "Session",
     "sessionId": "Session ID",
     "language": "Language",
@@ -37,8 +168,20 @@
     "chatHistory": "Chat History",
     "typeMessage": "Type your question...",
     "processing": "Processing...",
+    "useSample": "Use sample website (Project Gutenberg)",
+    "status": {
+      "completed": "✓ Completed",
+      "tokenLimit": "⚠ Token Limit",
+      "pageLimit": "⚠ Page Limit",
+      "crawling": "⏳ Crawling..."
+    },
+    "untitled": "Untitled",
+    "tokenCount": "{{count}} tokens",
     "uploadStatus": "Upload Status",
     "sessionExpiresIn": "Session expires in ~30 minutes"
+  },
+  "parameters": {
+    "title": "Parameter Settings"
   },
   "messages": {
     "sessionCreated": "Session created successfully",
@@ -123,8 +266,91 @@
       "invalidUrl": "Invalid URL format. Must be http:// or https://"
     }
   },
+  "uploadWizard": {
+    "tabs": {
+      "file": "File Upload",
+      "crawler": "Website Crawler",
+      "fileDesc": "Quickly set file limits and upload documents to ensure format and size are compliant.",
+      "crawlerDesc": "Set crawl bounds and limits, then enter a URL to extract content."
+    },
+    "dialog": {
+      "uploadFailed": "File Upload Failed",
+      "invalidFormat": "Unsupported File Format",
+      "confirm": "OK"
+    },
+    "errors": {
+      "sampleFileLoad": "Unable to load the sample file. Please upload manually.",
+      "unsupportedFormats": "Only {{formats}} files are supported.\n\nPlease choose another file or click the \"Use sample file\" button below.",
+      "fileTooLarge": "File is too large: {{fileSize}} (exceeds limit {{maxSize}})\n\nPlease choose another file or click the \"Use sample file\" button below.",
+      "fileEmpty": "The file is empty and cannot be uploaded.\n\nPlease choose another file or click the \"Use sample file\" button below.",
+      "crawlerInsufficient": "The crawled page has too little content (only {{tokens}} tokens). Please provide a richer page or click the \"Use sample website\" button below.",
+      "crawlerBlocked": "This website cannot be crawled (it may block crawlers).\n\nPlease try another site or click the \"Use sample website\" button below.",
+      "crawlerFailed": "Crawl failed: {{reason}}\n\nPlease try another site or click the \"Use sample website\" button below."
+    },
+    "supportedFormats": "Supported formats: {{formats}} (max {{maxSize}})",
+    "acceptFormatsOnly": "Only {{formats}} files are supported",
+    "steps": {
+      "eyebrow": "Step 3 · Configure",
+      "basicParameters": "{{tab}} basic parameters",
+      "stepIndicator": "Step 1 / 2",
+      "file": {
+        "maxFileSize": "Max file size",
+        "supportedTypes": "Supported file types"
+      },
+      "crawler": {
+        "maxTokens": "Max tokens",
+        "maxPages": "Max pages",
+        "pageUnit": "pages"
+      },
+      "next": {
+        "file": "Next: Choose file",
+        "crawler": "Next: Enter URL"
+      },
+      "upload": {
+        "titleFile": "Step 2/2: Upload file",
+        "titleCrawler": "Step 2/2: Start crawl",
+        "crawlerCompleted": "Crawl completed"
+      },
+      "crawlerSuccess": {
+        "title": "Website crawl succeeded!",
+        "description": "Crawled {{pages}} pages, total {{tokens}}K tokens. Data uploaded; click Next to continue.",
+        "detailsTitle": "Crawl details"
+      },
+      "stats": {
+        "pages": "Pages",
+        "tokens": "Total tokens",
+        "status": "Status",
+        "statusComplete": "Completed",
+        "statusTokenLimit": "Token limit reached",
+        "statusPageLimit": "Page limit reached"
+      },
+      "info": {
+        "autoNext": "Data uploaded automatically; the system will proceed to content review."
+      },
+      "sampleFileButton": "Use sample file (Alice in Wonderland)",
+      "back": "Back to settings"
+    },
+    "summary": {
+      "title": "Upload complete",
+      "uploadedFiles": "Uploaded files ({{count}})",
+      "uploadedSites": "Crawled websites ({{count}})",
+      "unnamed": "Untitled file",
+      "fileType": {
+        "url": "URL",
+        "file": "File"
+      },
+      "sizeLabel": "Size {{size}}",
+      "completed": "Completed",
+      "siteMeta": "{{size}} • {{pages}} pages • {{time}}",
+      "fileMeta": "{{type}} • {{size}} • {{time}}"
+    },
+    "loading": {
+      "crawling": "Crawling website content, please wait..."
+    }
+  },
   "crawler": {
     "title": "Website Crawler",
+    "loading": "Crawling site content, please wait...",
     "description": "Enter a website URL to automatically crawl and extract content",
     "url": "Website URL",
     "maxTokens": "Max Tokens",
@@ -267,6 +493,7 @@
       "allowInference": "Allow Inference",
       "inferenceOn": "ON: May make reasonable inferences within document scope",
       "inferenceOff": "OFF: Only answers explicitly stated in documents",
+      "allowUserOverride": "Allow adjusting System Prompt",
       "externalKnowledge": "External Knowledge Access",
       "alwaysOff": "Always Off",
       "noDataPolicy": "No-data Response Policy",
@@ -276,6 +503,8 @@
       "title": "Response Policy",
       "style": {
         "label": "Response Style",
+        "brief": "Brief",
+        "kidFriendly": "Kid-friendly",
         "concise": "Concise",
         "standard": "Standard",
         "detailed": "Detailed",
@@ -283,8 +512,10 @@
       },
       "tone": {
         "label": "Response Tone",
-        "formal": "Formal Professional",
         "friendly": "Friendly Approachable",
+        "rigorous": "Rigorous",
+        "urgent": "Urgent Direct",
+        "formal": "Formal Professional",
         "casual": "Casual Relaxed",
         "academic": "Academic Rigorous"
       },
@@ -299,10 +530,48 @@
       }
     },
     "persona": {
+      "elementaryTeacher": "Elementary teacher",
+      "showHost": "Show host",
+      "workplaceVeteran": "Workplace veteran",
       "professor": "University Professor",
       "expert": "Workplace Expert",
       "educator": "Children's Educator",
       "neighbor": "Friendly Neighbor"
+    },
+    "summary": {
+      "style": {
+        "brief": "Get to the point quickly",
+        "kidFriendly": "Use simple metaphors so kids understand",
+        "concise": "Focus on key points for quick understanding",
+        "standard": "Balanced explanation with moderate detail",
+        "detailed": "Thorough explanation with supporting details",
+        "stepByStep": "Guided instructions with numbered steps"
+      },
+      "tone": {
+        "friendly": "Warm and approachable, human-centered",
+        "rigorous": "Precise and structured, logic-driven",
+        "urgent": "Direct and quick, minimal fluff",
+        "formal": "Professional terms with concise delivery",
+        "casual": "Conversational and easygoing",
+        "academic": "Precise academic phrasing, structured logically"
+      },
+      "persona": {
+        "elementaryTeacher": "Teaches slowly with simple examples",
+        "showHost": "Energetic and engaging, keeps the pace",
+        "workplaceVeteran": "Pragmatic advice from hands-on experience",
+        "professor": "Academic rigor; explains with theory and terms",
+        "expert": "Pragmatic and direct with actionable advice",
+        "educator": "Simple, gradual explanations with life examples",
+        "neighbor": "Chatty and relatable, uses everyday metaphors"
+      },
+      "citation": {
+        "inline": "Cite sources inline, e.g., [Doc1]",
+        "document": "List all sources at the end",
+        "none": "Do not show citation sources"
+      }
+    },
+    "response": {
+      "title": "Response Policy"
     },
     "runtime": {
       "title": "Runtime Constraints",
@@ -337,5 +606,165 @@
     "reloadMessage": "The page was reloaded. Your session has been reset.",
     "restartMessage": "You clicked 'Start Over'. Your session has been reset.",
     "startNewSession": "OK"
+  },
+  "workflow": {
+    "previous": "Previous",
+    "next": "Next Step",
+    "complete": "Complete",
+    "summary": "Summary",
+    "warning": "Warning",
+    "success": "Success",
+    "loading": {
+      "default": "Processing, please wait...",
+      "uploadingFile": "Uploading file: {{name}}...",
+      "processingUrl": "Processing URL: {{url}}...",
+      "processingSite": "Processing website: {{url}}...",
+      "processingShort": "Processing..."
+    },
+    "errors": {
+      "uploadFailedTitle": "Error",
+      "uploadFailed": "File upload failed: {{error}}",
+      "urlFailedTitle": "Error",
+      "urlFailed": "URL processing failed: {{error}}",
+      "crawlerFailedTitle": "Error",
+      "crawlerFailed": "Website crawl failed: {{error}}",
+      "unknown": "Unknown error"
+    },
+    "warnings": {
+      "uploadFirst": "Please upload files or configure website crawler before proceeding to next step.",
+      "reviewFirst": "Please complete content review and pass the check before proceeding to next step.",
+      "processFirst": "Please complete data processing and write to Vector DB before proceeding to next step."
+    },
+    "crawlerSuccess": "Website {{url}} crawled successfully, {{pages}} pages in total",
+    "stepper": {
+      "ragConfig": {
+        "title": "Retrieval Strategy Configuration",
+        "infoTitle": "What is Retrieval Strategy?",
+        "description": "Fine-tune similarity and Top-K for more precise and comprehensive queries, with adjustable chunk size and safety thresholds.",
+        "detailMessage": "Retrieval strategy configures how AI finds the most relevant data from Vector DB before answering questions.\n\nBy adjusting similarity threshold and retrieval count, you can control:\n\nWhether AI uses 'only highly relevant data'\n\nOr expands search scope when necessary to avoid missing important information\n\nThis step only affects data Retrieval, not AI's response style or language generation."
+      },
+      "promptConfig": {
+        "title": "System Prompt",
+        "infoTitle": "What is System Prompt?",
+        "description": "Define model behavior, answer scope, capabilities and safety rules",
+        "detailMessage": "System Prompt is different from regular user prompts in chat. Regular prompts let the model 'use its own memory/understanding to answer as best as possible'. In RAG, system prompts are usually set to force guide the LLM to answer based on context documents, which can significantly reduce hallucinations and improve factual accuracy and credibility."
+      },
+      "dataUpload": {
+        "title": "Data Upload",
+        "infoTitle": "Upload or specify data",
+        "description": "Upload files or crawl website data.",
+        "detailMessage": "This step allows you to upload text files or use website crawler to extract web content. The system will receive and parse text content, which will become the core knowledge base of the AI assistant, and the AI will only communicate based on this content."
+      },
+      "contentReview": {
+        "title": "Content Review",
+        "infoTitle": "Content Review",
+        "description": "Security checks and content moderation",
+        "detailMessage": "This step detects whether uploaded content contains dangerous information, sensitive content, or hate speech. Ensure your knowledge base meets safety standards and protects user privacy and corporate information security."
+      },
+      "textProcessing": {
+        "title": "Data Processing & Vector DB Storage",
+        "infoTitle": "Data Processing & Vector DB Storage",
+        "description": "Chunk files, convert to vectors, and store in Vector DB for subsequent retrieval",
+        "detailMessage": "Simply put, this step converts text into a series of numbers as passwords, allowing computers to compare and find more relevant content.\nAnd 'Vector DB (Vector Database)' is a special database that specifically stores these vector passwords and can help you find content that is 'most relevant' to your question.\n\nTraditional databases like MySQL, PostgreSQL, MongoDB are good at 'precise exact matching'; but Vector DB specializes in 'vector comparison, visual comparison' because human questions and answers are often not exactly the same keywords, but express 'similar meanings', so this similarity-finding superpower is needed."
+      },
+      "aiChat": {
+        "title": "AI Chat",
+        "infoTitle": "AI Chat",
+        "description": "Enable intelligent assistant conversation",
+        "detailMessage": "Start answering questions based on the vector database. AI will retrieve relevant content based on questions and provide accurate answers, and will provide original sources to ensure answer credibility and traceability."
+      }
+    },
+    "steps": {
+      "ragConfig": {
+        "title": "Step 1: RAG Configuration",
+        "description": "Configure RAG system parameters",
+        "complete": "Completed",
+        "dataLocked": "Data uploaded, parameters locked",
+        "similarityThreshold": {
+          "title": "Similarity Threshold",
+          "description": "Controls the confidence threshold for citations, higher values are stricter",
+          "lenient": "Lenient",
+          "strict": "Strict"
+        },
+        "topK": {
+          "title": "Top-K Retrieval Count",
+          "description": "Controls the number of chunks retrieved per query, balances information quantity and precision",
+          "minimal": "Minimal",
+          "comprehensive": "Comprehensive"
+        },
+        "textChunking": {
+          "title": "Automatic Text Chunking",
+          "optimized": "Optimized",
+          "maxChunk": "Max Chunk",
+          "minChunk": "Min Chunk",
+          "overlap": "Overlap",
+          "characters": "characters"
+        }
+      }
+    }
+  },
+  "contentReview": {
+    "header": {
+      "title": "Gemini Safety API",
+      "subtitle": "Blocks unsafe content"
+    },
+    "loading": "Running content review...",
+    "retrying": "Re-running content review...",
+    "items": {
+      "formatShort": "Format check",
+      "format": "Check file format integrity",
+      "malwareShort": "Malware scan",
+      "malware": "Scan for malware",
+      "harmShort": "Harmful content check",
+      "harm": "Detect harmful content (blocks harassment, hate speech, sexual content, dangerous content)",
+      "structureShort": "Structure validation",
+      "structure": "Validate document structure",
+      "qualityShort": "Content quality analysis",
+      "quality": "Analyze content quality",
+      "copyrightShort": "Copyright check",
+      "copyright": "Check copyright restrictions"
+    },
+    "harmfulDetected": "Harmful content detected: harassment, hate speech, sexual content, or dangerous content",
+    "harmfulFailureDetail": "Detected harmful content ({{sources}}): {{categories}}",
+    "serviceUnavailable": "Content review service is temporarily unavailable, this check was skipped",
+    "startButton": "Start content review",
+    "uploadFirst": "Please upload files in the \"Data Upload\" step first",
+    "infoHint": "Checks file safety and content compliance",
+    "successTitle": "Review completed",
+    "successSubtext": "Content meets policy; you may continue to the next step",
+    "failureTitle": "Review failed",
+    "failureSubtext": "Inappropriate content detected. Click \"Previous\" to re-upload.",
+    "genericError": "An error occurred during review",
+    "defaults": {
+      "documentName": "Document {{index}}",
+      "documentPreview": "Document preview...",
+      "siteName": "Website {{index}}",
+      "sitePreview": "Website summary..."
+    }
+  },
+  "textProcessingStep": {
+    "loading": "Processing documents into vectors...",
+    "status": {
+      "pending": "Pending",
+      "chunking": "Chunking",
+      "embedding": "Embedding",
+      "completed": "Completed",
+      "error": "Error"
+    },
+    "durationSeconds": "{{seconds}}s",
+    "collection": "Collection",
+    "sources": "Source files",
+    "sourcesCount": "{{count}}",
+    "vectorDb": "Vector DB",
+    "vectorPending": "Waiting",
+    "vectorsCount": "{{count}} vectors",
+    "embeddingModel": "Embedding Model",
+    "chunkSize": "Chunk Size",
+    "overlap": "Overlap",
+    "vectorDbLabel": "Vector DB",
+    "startButton": "Start text processing",
+    "startHint": "Chunk documents and convert to vectors, then store in the Vector DB",
+    "successTitle": "Text processing completed!",
+    "successSubtext": "Processed {{files}} file(s); generated {{chunks}} text chunks"
   }
 }

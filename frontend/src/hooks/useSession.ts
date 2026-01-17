@@ -25,7 +25,7 @@ interface UseSessionReturn {
   createSession: (similarityThreshold?: number, customPrompt?: string) => Promise<void>;
   closeSession: () => Promise<void>;
   restartSession: () => Promise<void>;
-  updateLanguage: (newLanguage: 'en' | 'zh-TW' | 'zh-CN' | 'ko' | 'es' | 'ja' | 'fr', passedSessionId?: string | null) => Promise<void>;
+  updateLanguage: (newLanguage: 'en' | 'zh-TW' | 'zh-CN' | 'fr', passedSessionId?: string | null) => Promise<void>;
   setOnSessionExpired: (callback: (() => void) | undefined) => void;
   resetSessionExpired: () => void;
 }
@@ -84,12 +84,12 @@ export const useSession = (): UseSessionReturn => {
     setIsSessionExpired(true);
     stopHeartbeat();
     
-    // ?ç½®?€?‰session?€??
+    // ?ï¿½ç½®?ï¿½?ï¿½session?ï¿½??
     setSessionId(null);
     setSessionState(null);
     setExpiresAt(null);
     
-    // è§¸ç™¼?žèª¿
+    // è§¸ç™¼?ï¿½èª¿
     if (onSessionExpiredRef.current) {
       onSessionExpiredRef.current();
     }
@@ -172,7 +172,7 @@ export const useSession = (): UseSessionReturn => {
     }
   }, [sessionId, error, handleSessionExpiration, startExpirationCheck]);
   
-  // ??½?¨æˆ¶æ´»å?ä¸¦è§¸?¼heartbeat
+  // ??ï¿½ï¿½?ï¿½æˆ¶æ´»ï¿½?ä¸¦è§¸?ï¿½heartbeat
   useUserActivity({
     onActivity: triggerHeartbeat,
     throttleTime: ACTIVITY_THROTTLE
@@ -181,19 +181,19 @@ export const useSession = (): UseSessionReturn => {
   /**
    * Start heartbeat timer
    * 
-   * ? ï? å·²ç??¨è‡ª?•å??‚å™¨ - ?ªé€šé??¨æˆ¶æ´»å?è§¸ç™¼ heartbeat
-   * ?Ÿå?ï¼šå??œç”¨?¶æ??‰æ?ä½œï??ƒè©±?‰è©²??0?†é?å¾Œè‡ª?¶é???
-   * å¦‚é??¢å¾©?ªå? heartbeatï¼Œå?æ¶ˆä??¹ä»£ç¢¼ç?è¨»é?
+   * ?ï¿½ï¿½? å·²ï¿½??ï¿½è‡ª?ï¿½ï¿½??ï¿½å™¨ - ?ï¿½é€šï¿½??ï¿½æˆ¶æ´»ï¿½?è§¸ç™¼ heartbeat
+   * ?ï¿½ï¿½?ï¼šï¿½??ï¿½ç”¨?ï¿½ï¿½??ï¿½ï¿½?ä½œï¿½??ï¿½è©±?ï¿½è©²??0?ï¿½ï¿½?å¾Œè‡ª?ï¿½ï¿½???
+   * å¦‚ï¿½??ï¿½å¾©?ï¿½ï¿½? heartbeatï¼Œï¿½?æ¶ˆï¿½??ï¿½ä»£ç¢¼ï¿½?è¨»ï¿½?
    */
   const startHeartbeat = useCallback((currentSessionId: string) => {
-    // æ¸…é™¤?Šç?å®šæ??¨ï?å¦‚æ?å­˜åœ¨ï¼?
+    // æ¸…é™¤?ï¿½ï¿½?å®šï¿½??ï¿½ï¿½?å¦‚ï¿½?å­˜åœ¨ï¿½?
     if (heartbeatTimerRef.current) {
       clearInterval(heartbeatTimerRef.current);
       heartbeatTimerRef.current = null;
     }
 
-    // ??ç¦ç”¨?ªå?å®šæ???- ?¨æˆ¶?¡æ?ä½œæ??‰è??ƒè©±?ªç„¶?Žæ?
-    // å¦‚é??¢å¾©ï¼Œå?æ¶ˆä??¹ä»£ç¢¼ç?è¨»é?ï¼?
+    // ??ç¦ç”¨?ï¿½ï¿½?å®šï¿½???- ?ï¿½æˆ¶?ï¿½ï¿½?ä½œï¿½??ï¿½ï¿½??ï¿½è©±?ï¿½ç„¶?ï¿½ï¿½?
+    // å¦‚ï¿½??ï¿½å¾©ï¼Œï¿½?æ¶ˆï¿½??ï¿½ä»£ç¢¼ï¿½?è¨»ï¿½?ï¿½?
     /*
     heartbeatTimerRef.current = setInterval(async () => {
       try {
@@ -211,7 +211,7 @@ export const useSession = (): UseSessionReturn => {
           if (err instanceof Error && (err.message.includes('404') || err.message.includes('410'))) {
             handleSessionExpiration();
           } else {
-            const errorMsg = '?¡æ?ç¶­æ??ƒè©±???ï¼Œè?æª¢æŸ¥ç¶²è·¯???';
+            const errorMsg = '?ï¿½ï¿½?ç¶­ï¿½??ï¿½è©±???ï¼Œï¿½?æª¢æŸ¥ç¶²è·¯???';
             setError(errorMsg);
             errorSetRef.current = true;
           }
@@ -307,7 +307,7 @@ export const useSession = (): UseSessionReturn => {
   /**
    * Update session language
    */
-  const updateLanguage = useCallback(async (newLanguage: 'en' | 'zh-TW' | 'zh-CN' | 'ko' | 'es' | 'ja' | 'fr', passedSessionId?: string | null) => {
+  const updateLanguage = useCallback(async (newLanguage: 'en' | 'zh-TW' | 'zh-CN' | 'fr', passedSessionId?: string | null) => {
     const targetSessionId = passedSessionId !== undefined ? passedSessionId : sessionId;
 
     if (!targetSessionId) {

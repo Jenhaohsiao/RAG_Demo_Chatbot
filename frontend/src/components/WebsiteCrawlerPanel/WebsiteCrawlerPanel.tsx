@@ -162,7 +162,7 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
             disabled={isLoading || disabled}
           >
             <i className="bi bi-globe me-2"></i>
-            使用範例網站（Project Gutenberg）
+            {t("crawler.useSample", "Use sample website (Project Gutenberg)")}
           </button>
         </div>
       </div>
@@ -191,12 +191,14 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
                 <span
                   className={`stat-status status-${crawlResults.crawl_status}`}
                 >
-                  {crawlResults.crawl_status === "completed" && "✓ Completed"}
+                  {crawlResults.crawl_status === "completed" &&
+                    t("crawler.status.completed", "✓ Completed")}
                   {crawlResults.crawl_status === "token_limit_reached" &&
-                    "⚠ Token Limit"}
+                    t("crawler.status.tokenLimit", "⚠ Token Limit")}
                   {crawlResults.crawl_status === "page_limit_reached" &&
-                    "⚠ Page Limit"}
-                  {crawlResults.crawl_status === "crawling" && "⏳ Crawling..."}
+                    t("crawler.status.pageLimit", "⚠ Page Limit")}
+                  {crawlResults.crawl_status === "crawling" &&
+                    t("crawler.status.crawling", "⏳ Crawling...")}
                 </span>
               </div>
             </div>
@@ -215,10 +217,12 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
                       rel="noopener noreferrer"
                       className="url-link"
                     >
-                      {page.title || "Untitled"}
+                      {page.title || t("crawler.untitled", "Untitled")}
                     </a>
                     <span className="url-tokens">
-                      {formatTokens(page.tokens)} tokens
+                      {t("crawler.tokenCount", "{{count}} tokens", {
+                        count: page.tokens ?? 0,
+                      })}
                     </span>
                   </div>
                   <div className="url-content-preview">{page.content}</div>

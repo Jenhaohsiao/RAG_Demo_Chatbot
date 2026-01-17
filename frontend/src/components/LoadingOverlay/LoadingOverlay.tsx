@@ -13,7 +13,7 @@ export interface LoadingOverlayProps {
 
 const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
   isVisible,
-  message = "處理中，請稍候...",
+  message = "Processing, please wait...",
 }) => {
   if (!isVisible) return null;
 

@@ -1,4 +1,5 @@
 ﻿import React from "react";
+import { useTranslation } from "react-i18next";
 import "./RagConfigStep.scss";
 interface RagConfigStepProps {
   parameters: {
@@ -23,6 +24,7 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
   onComplete,
   disabled = false,
 }) => {
+  const { t } = useTranslation();
   const statusLabel = disabled ? "已鎖定" : "即時可調";
   const statusTone = disabled
     ? "資料上傳後鎖定，確保檢索一致性"
@@ -47,7 +49,7 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
       {disabled && (
         <div className="alert alert-info mb-2 py-2">
           <i className="bi bi-info-circle me-2"></i>
-          資料已上傳，參數已鎖定
+          {t("workflow.steps.ragConfig.dataLocked")}
         </div>
       )}
       <div className="row g-2">
@@ -61,14 +63,14 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
             <div className="card-body p-3">
               <div className="d-flex align-items-center justify-content-between mb-2">
                 <h5 className="card-title mb-0 fw-bold">
-                  相似度閾值 (Similarity Threshold)
+                  {t("workflow.steps.ragConfig.similarityThreshold.title")}
                 </h5>
                 <div className="value-badge">
                   {parameters.similarity_threshold.toFixed(1)}
                 </div>
               </div>
               <p className="small text-muted mb-2">
-                控制引用內容的信心門檻，越高越嚴謹
+                {t("workflow.steps.ragConfig.similarityThreshold.description")}
               </p>
               <input
                 type="range"
@@ -86,8 +88,14 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
                 }
               />
               <div className="d-flex justify-content-between small text-muted">
-                <span>0.1 (寬鬆)</span>
-                <span>0.9 (嚴格)</span>
+                <span>
+                  0.1 (
+                  {t("workflow.steps.ragConfig.similarityThreshold.lenient")})
+                </span>
+                <span>
+                  0.9 (
+                  {t("workflow.steps.ragConfig.similarityThreshold.strict")})
+                </span>
               </div>
             </div>
           </div>
@@ -103,12 +111,12 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
             <div className="card-body p-3">
               <div className="d-flex align-items-center justify-content-between mb-2">
                 <h5 className="card-title mb-0 fw-bold">
-                  檢索數量 (Top-K Retrieval Count)
+                  {t("workflow.steps.ragConfig.topK.title")}
                 </h5>
                 <div className="value-badge">{parameters.rag_top_k}</div>
               </div>
               <p className="small text-muted mb-2">
-                控制每次拉取的段落數，平衡資訊量與精準度
+                {t("workflow.steps.ragConfig.topK.description")}
               </p>
               <input
                 type="range"
@@ -123,8 +131,10 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
                 }
               />
               <div className="d-flex justify-content-between small text-muted">
-                <span>1 (精簡)</span>
-                <span>20 (詳盡)</span>
+                <span>1 ({t("workflow.steps.ragConfig.topK.minimal")})</span>
+                <span>
+                  20 ({t("workflow.steps.ragConfig.topK.comprehensive")})
+                </span>
               </div>
             </div>
           </div>
@@ -136,38 +146,54 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
           <div className="card border-secondary bg-light">
             <div className="card-body p-3">
               <div className="d-flex align-items-center mb-2">
-                <span className="badge bg-warning text-dark me-2">已優化</span>
-                <h6 className="mb-0 fw-bold">自動文本分塊處理</h6>
+                <span className="badge bg-warning text-dark me-2">
+                  {t("workflow.steps.ragConfig.textChunking.optimized")}
+                </span>
+                <h6 className="mb-0 fw-bold">
+                  {t("workflow.steps.ragConfig.textChunking.title")}
+                </h6>
               </div>
 
               <div className="row g-2">
                 <div className="col-md-4">
                   <div className="text-center p-2 bg-white rounded">
-                    <div className="small text-muted">最大分塊</div>
+                    <div className="small text-muted">
+                      {t("workflow.steps.ragConfig.textChunking.maxChunk")}
+                    </div>
                     <div className="fw-bold text-dark">
                       {parameters.chunk_max_size || 2000}
                     </div>
-                    <div className="small text-muted">字元</div>
+                    <div className="small text-muted">
+                      {t("workflow.steps.ragConfig.textChunking.characters")}
+                    </div>
                   </div>
                 </div>
 
                 <div className="col-md-4">
                   <div className="text-center p-2 bg-white rounded">
-                    <div className="small text-muted">最小分塊</div>
+                    <div className="small text-muted">
+                      {t("workflow.steps.ragConfig.textChunking.minChunk")}
+                    </div>
                     <div className="fw-bold text-dark">
                       {parameters.chunk_min_size || 500}
                     </div>
-                    <div className="small text-muted">字元</div>
+                    <div className="small text-muted">
+                      {t("workflow.steps.ragConfig.textChunking.characters")}
+                    </div>
                   </div>
                 </div>
 
                 <div className="col-md-4">
                   <div className="text-center p-2 bg-white rounded">
-                    <div className="small text-muted">重疊區域</div>
+                    <div className="small text-muted">
+                      {t("workflow.steps.ragConfig.textChunking.overlap")}
+                    </div>
                     <div className="fw-bold text-dark">
                       {parameters.chunk_overlap_size || 200}
                     </div>
-                    <div className="small text-muted">字元</div>
+                    <div className="small text-muted">
+                      {t("workflow.steps.ragConfig.textChunking.characters")}
+                    </div>
                   </div>
                 </div>
               </div>

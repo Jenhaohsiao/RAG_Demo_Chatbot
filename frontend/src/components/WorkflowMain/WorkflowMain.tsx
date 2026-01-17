@@ -55,16 +55,15 @@ const WorkflowMain: React.FC<WorkflowMainProps> = ({
     rag_chunk_overlap: 200,
     rag_min_chunk_length: 100,
     allow_inference: false,
-    answer_language: "auto" as "zh-TW" | "en" | "auto",
+    answer_language: "auto" as "zh-TW" | "zh-CN" | "en" | "fr" | "auto",
     strict_rag_mode: true,
 
-    response_style: "standard" as
-      | "concise"
-      | "standard"
-      | "detailed"
-      | "step_by_step",
-    response_tone: "formal" as "formal" | "friendly" | "casual" | "academic",
-    persona: "expert" as "professor" | "expert" | "educator" | "neighbor",
+    response_style: "brief" as "brief" | "kid_friendly",
+    response_tone: "friendly" as "friendly" | "rigorous" | "urgent",
+    persona: "workplace_veteran" as
+      | "elementary_teacher"
+      | "show_host"
+      | "workplace_veteran",
     citation_style: "inline" as "inline" | "document" | "none",
 
     max_response_tokens: 2048,
