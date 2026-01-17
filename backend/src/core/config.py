@@ -51,6 +51,13 @@ class Settings(BaseSettings):
     api_port: int = 8000
     api_prefix: str = "/api/v1"
     
+    # Email Configuration for Contact Form
+    contact_email_recipient: str = "jenhao.hsiao2@gmail.com"
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 587
+    smtp_username: str | None = None  # Gmail account
+    smtp_password: str | None = None  # Gmail app password
+    
     # T091: Logging Configuration
     log_level: str = "INFO"  # Can be DEBUG, INFO, WARNING, ERROR, CRITICAL
     

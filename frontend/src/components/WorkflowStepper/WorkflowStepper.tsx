@@ -685,9 +685,8 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
         // 使用流程2的邏輯生成custom_prompt
         const customPrompt = generateCustomPrompt(parameters);
         if (customPrompt) {
-          const { updateCustomPrompt } = await import(
-            "../../services/sessionService"
-          );
+          const { updateCustomPrompt } =
+            await import("../../services/sessionService");
           await updateCustomPrompt(sessionId, customPrompt);
         }
       } catch (error) {
@@ -1209,8 +1208,8 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                       isStepCompleted(step.id)
                         ? "step-completed"
                         : isStepActive(step.id)
-                        ? "step-active"
-                        : "step-inactive"
+                          ? "step-active"
+                          : "step-inactive"
                     } text-white`}
                   >
                     <span className="fw-bold">{step.id}</span>
@@ -1280,7 +1279,6 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
                 onClick={() => onShowRagSummary?.()}
                 disabled={isGlobalLoading}
               >
-                <i className="bi bi-journal-text me-2"></i>
                 總結
               </button>
             )}

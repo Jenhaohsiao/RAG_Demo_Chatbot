@@ -32,16 +32,16 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
       role="dialog"
     >
       <div
-        className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable"
+        className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"
         role="document"
       >
         <div className="modal-content">
-          <div className="modal-header">
+          <div className="modal-header py-2">
             <div className="header-content">
               <div>
-                <h5 className="modal-title mb-0">
+                <h6 className="modal-title mb-0 fw-bold">
                   {viewMode === "about" ? "關於本專案" : "RAG 技術總結"}
-                </h5>
+                </h6>
               </div>
             </div>
             <button
@@ -55,84 +55,86 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
             {viewMode === "about" ? (
               // 關於本專案內容
               <>
-                <div className="intro-section">
-                  <h1 className="header-subtitle mb-3">
+                <div className="intro-section mb-2">
+                  <h5 className="header-subtitle mb-2 fw-bold">
                     使用RAG讓 AI 減少幻覺，回答專注
-                  </h1>
-                  <h4 className="intro-text divider-text"></h4>
-                </div>
-
-                <div className="d-flex align-items-center">
-                  <hr className="flex-grow-1 section-divider" />
-                  <h5 className="mx-3 mb-4 divider-text">
-                    您好，這是一個 AI 工程展示專案。它將說明什麼是 RAG
-                    檢索增強生成 (Retrieval Augmentation
-                    Generation)。歡迎來體驗這個優化大型語言模型（LLM）輸出的技術。
                   </h5>
-                  <hr className="flex-grow-1 section-divider" />
+                  <p className="small text-muted mb-0">
+                    您好，這是一個 AI 工程展示專案，說明 RAG
+                    檢索增強生成技術如何優化大型語言模型輸出。
+                  </p>
                 </div>
 
-                <div className="cards-container">
-                  <div className="feature-card rag-card">
-                    <div className="card-icon">
-                      <i className="bi bi-search"></i>
-                    </div>
-                    <div className="card-content">
-                      <h5 className="card-title">
-                        RAG主要目的是強制規範AI的做事邏輯
-                      </h5>
-
-                      <div className="card-highlight">
-                        <span className="highlight-text">
-                          讓AI
-                          在回答前先搜尋資料庫，確保相關內容才回答，而非健談
-                        </span>
+                <div className="row g-2">
+                  <div className="col-md-6">
+                    <div className="card h-100 border-primary">
+                      <div className="card-body p-2">
+                        <div className="d-flex align-items-start">
+                          <i className="bi bi-search text-primary me-2 fs-5"></i>
+                          <div>
+                            <h6 className="card-title mb-1 fw-bold">
+                              RAG主要目的是強制規範AI的做事邏輯
+                            </h6>
+                            <p className="small text-muted mb-0">
+                              讓AI在回答前先搜尋資料庫，確保相關內容才回答，而非健談
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="feature-card vector-card">
-                    <div className="card-icon">
-                      <i className="bi bi-database"></i>
-                    </div>
-                    <div className="card-content">
-                      <h5 className="card-title">
-                        把資料切片，向量化，存入向量資料庫（Vector DB ）
-                      </h5>
-                      <div className="card-highlight">
-                        <span className="highlight-text">
-                          讓 AI 能快速搜尋、比對和驗證知識來源。每句回答都有根據
-                        </span>
+                  <div className="col-md-6">
+                    <div className="card h-100 border-info">
+                      <div className="card-body p-2">
+                        <div className="d-flex align-items-start">
+                          <i className="bi bi-database text-info me-2 fs-5"></i>
+                          <div>
+                            <h6 className="card-title mb-1 fw-bold">
+                              把資料切片，向量化，存入向量資料庫（Vector DB）
+                            </h6>
+                            <p className="small text-muted mb-0">
+                              讓 AI
+                              能快速搜尋、比對和驗證知識來源。每句回答都有根據
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="feature-card prompt-card">
-                    <div className="card-icon">
-                      <i className="bi bi-gear"></i>
-                    </div>
-                    <div className="card-content">
-                      <h5 className="card-title">System Prompt 行為規則</h5>
-                      <div className="card-highlight">
-                        <span className="highlight-text">
-                          不同於一般的Prompt，它更了AI定義如何做事，以及用什麼角色語氣來回應
-                        </span>
+                  <div className="col-md-6">
+                    <div className="card h-100 border-success">
+                      <div className="card-body p-2">
+                        <div className="d-flex align-items-start">
+                          <i className="bi bi-gear text-success me-2 fs-5"></i>
+                          <div>
+                            <h6 className="card-title mb-1 fw-bold">
+                              System Prompt 行為規則
+                            </h6>
+                            <p className="small text-muted mb-0">
+                              不同於一般的Prompt，它定義AI如何做事，以及用什麼角色語氣來回應
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="feature-card llm-card">
-                    <div className="card-icon">
-                      <i className="bi bi-cpu"></i>
-                    </div>
-                    <div className="card-content">
-                      <h5 className="card-title">RAG 技術實際應用場景</h5>
-
-                      <div className="card-highlight">
-                        <span className="highlight-text">
-                          非常適合嚴謹的場合,
-                          如企業內部知識庫問答、法律文件檢索、醫療資訊查詢等。對外像客服助理、研究助手也很合適。不會平白亂說話。
-                        </span>
+                  <div className="col-md-6">
+                    <div className="card h-100 border-warning">
+                      <div className="card-body p-2">
+                        <div className="d-flex align-items-start">
+                          <i className="bi bi-cpu text-warning me-2 fs-5"></i>
+                          <div>
+                            <h6 className="card-title mb-1 fw-bold">
+                              RAG 技術實際應用場景
+                            </h6>
+                            <p className="small text-muted mb-0">
+                              非常適合嚴謹場合，如企業知識庫問答、法律文件檢索、醫療資訊查詢、客服助理等
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -140,70 +142,80 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
               </>
             ) : (
               // RAG 技術總結內容
-              <div className="cards-container">
-                <div className="feature-card warning-card">
-                  <div className="card-icon warning-icon">
-                    <i className="bi bi-exclamation-triangle"></i>
-                  </div>
-                  <div className="card-content">
-                    <h4 className="card-title">RAG 並非萬能，還有進步空間</h4>
-
-                    <p className="mb-2">
-                      {
-                        "如果你也測試了本專案的效果，你可能會發現 AI 好像變笨了？ 因為 RAG 限制了 LLM 的自由發揮空間，無法充分利用其強大的推理和創造能力。完全依賴檢索到的文件來生成回答。所以提供的知識庫完整性很重要，若知識庫不完整或缺乏關鍵資訊，仍可能導致錯誤或不完整的回答。"
-                      }
-                    </p>
+              <div className="row g-2">
+                <div className="col-12">
+                  <div className="card border-warning">
+                    <div className="card-body p-2">
+                      <div className="d-flex align-items-start">
+                        <i className="bi bi-exclamation-triangle text-warning me-2 fs-5"></i>
+                        <div>
+                          <h6 className="card-title mb-1 fw-bold">
+                            RAG 並非萬能，還有進步空間
+                          </h6>
+                          <p className="small text-muted mb-0">
+                            如果你也測試了本專案的效果，你可能會發現 AI
+                            好像變笨了？因為 RAG 限制了 LLM
+                            的自由發揮空間，無法充分利用其強大的推理和創造能力。完全依賴檢索到的文件來生成回答。所以提供的知識庫完整性很重要，若知識庫不完整或缺乏關鍵資訊，仍可能導致錯誤或不完整的回答。
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="feature-card info-card">
-                  <div className="card-icon info-icon">
-                    <i className="bi bi-stars"></i>
-                  </div>
-                  <div className="card-content">
-                    <h4 className="card-title">
-                      迭代更新不間斷，Agentic RAG 等技術正在發展
-                    </h4>
-                    <p className="mb-2">
-                      {
-                        "Agentic RAG 是一種結合代理人（Agent）的技術。 除了內部提供的資料庫，還能動態地從外部資源（如網頁、API 等）檢索資訊，更可結合其它程式碼以及現有系統。它會合理地重新編排內容並進行驗證。當然不只Agentic RAG， 相信更多智能的AI 創新會不斷湧現。"
-                      }
-                    </p>
+                <div className="col-12">
+                  <div className="card border-info">
+                    <div className="card-body p-2">
+                      <div className="d-flex align-items-start">
+                        <i className="bi bi-stars text-info me-2 fs-5"></i>
+                        <div>
+                          <h6 className="card-title mb-1 fw-bold">
+                            迭代更新不間斷，Agentic RAG 等技術正在發展
+                          </h6>
+                          <p className="small text-muted mb-0">
+                            Agentic RAG
+                            是一種結合代理人（Agent）的技術。除了內部提供的資料庫，還能動態地從外部資源（如網頁、API
+                            等）檢索資訊，更可結合其它程式碼以及現有系統。它會合理地重新編排內容並進行驗證。當然不只Agentic
+                            RAG，相信更多智能的AI 創新會不斷湧現。
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             )}
           </div>
-          <div className="modal-footer">
+          <div className="modal-footer py-2">
             <div className="footer-left">
               {viewMode === "about" ? (
                 <button
                   type="button"
-                  className="btn btn-outline-primary"
+                  className="btn btn-sm btn-outline-primary"
                   onClick={() => setViewMode("summary")}
                 >
-                  <i className="bi bi-journal-text me-2"></i>
+                  <i className="bi bi-journal-text me-1"></i>
                   RAG 技術總結
                 </button>
               ) : (
                 <button
                   type="button"
-                  className="btn btn-outline-primary"
+                  className="btn btn-sm btn-outline-primary"
                   onClick={() => setViewMode("about")}
                 >
-                  <i className="bi bi-info-circle me-2"></i>
+                  <i className="bi bi-info-circle me-1"></i>
                   關於本專案
                 </button>
               )}
             </div>
             <div className="footer-right">
-              <div className="version-info">
+              <div className="version-info small">
                 <i className="bi bi-tag me-1"></i>
                 版本: 1.0 · 更新日: 2026-01-11
               </div>
               <button
                 type="button"
-                className="btn btn-primary cta-button"
+                className="btn btn-sm btn-primary"
                 onClick={onClose}
               >
                 了解

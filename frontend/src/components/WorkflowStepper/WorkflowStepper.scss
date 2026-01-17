@@ -95,14 +95,13 @@
 }
 
 .btn-summary-pro {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, #b39646 0%, #4a5c2c 100%);
+  color: #ffffff !important;
   border: none;
   padding: 10px 24px;
   font-weight: 600;
   font-size: 0.95rem;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   letter-spacing: 0.3px;
   display: inline-flex;
@@ -448,7 +447,9 @@
 
 /* RAG設置卡片樣式 */
 .rag-config-step .card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   border-width: 2px;
 }
 
@@ -543,7 +544,9 @@
 
 /* Prompt設置卡片樣式 */
 .prompt-config-step .card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   border-width: 2px;
 }
 

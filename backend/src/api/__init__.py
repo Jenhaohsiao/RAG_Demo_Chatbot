@@ -5,7 +5,7 @@ Combines all API route modules
 from fastapi import APIRouter
 
 # Import route modules
-from src.api.routes import session, upload, chat, prompt
+from src.api.routes import session, upload, chat, prompt, contact
 
 # Create main API router
 router = APIRouter()
@@ -15,6 +15,7 @@ router.include_router(session.router, prefix="/session", tags=["Session"])
 router.include_router(upload.router, prefix="/upload", tags=["Upload"])
 router.include_router(chat.router, prefix="/chat", tags=["Chat"])
 router.include_router(prompt.router, prefix="/prompt", tags=["Prompt"])
+router.include_router(contact.router, prefix="/contact", tags=["Contact"])
 
 # Placeholder endpoint
 @router.get("/status")

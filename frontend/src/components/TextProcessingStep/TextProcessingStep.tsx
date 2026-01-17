@@ -91,8 +91,11 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
       (documents.length > 0 || crawledUrls.length > 0) &&
       !hasInitialized
     ) {
-      loadProcessingJobs();
-      setHasInitialized(true);
+      // 使用 setTimeout 避免在渲染期間執行狀態更新
+      setTimeout(() => {
+        loadProcessingJobs();
+        setHasInitialized(true);
+      }, 0);
     }
   }, [sessionId, documents, crawledUrls, hasInitialized]);
 
@@ -104,7 +107,10 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
       jobs.length > 0 &&
       jobs.some((j) => j.status === "pending")
     ) {
-      startProcessing();
+      // 使用 setTimeout 延遲執行，避免在渲染期間更新父組件狀態
+      setTimeout(() => {
+        startProcessing();
+      }, 0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldStartProcessing, jobs.length]); // 依賴觸發信號和作業數量
@@ -119,20 +125,27 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
       const allCompleted = jobs.every((job) => job.status === "completed");
       const anyError = jobs.some((job) => job.status === "error");
 
-      // 通知父組件狀態變化
-      onProcessingStatusChange?.(allCompleted && !anyError && jobs.length > 0);
+      // 使用 setTimeout 延遲執行，避免在渲染期間更新父組件狀態
+      setTimeout(() => {
+        // 通知父組件狀態變化
+        onProcessingStatusChange?.(
+          allCompleted && !anyError && jobs.length > 0
+        );
 
-      if (allCompleted && !anyError) {
-        // 保存處理結果到父組件
-        onSaveProcessingResults?.({
-          jobs: jobs,
-          overallProgress: avgProgress,
-        });
-        onProcessingComplete?.();
-      }
+        if (allCompleted && !anyError) {
+          // 保存處理結果到父組件
+          onSaveProcessingResults?.({
+            jobs: jobs,
+            overallProgress: avgProgress,
+          });
+          onProcessingComplete?.();
+        }
+      }, 0);
     } else {
       // 沒有作業時設置為未完成
-      onProcessingStatusChange?.(false);
+      setTimeout(() => {
+        onProcessingStatusChange?.(false);
+      }, 0);
     }
   }, [
     jobs,
@@ -289,209 +302,120 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
 
   return (
     <div className="text-processing-step">
-      <div className="row g-3 mb-4 processing-panels">
-        {/* 整合狀態面板 - 更緊湊的設計 */}
-        <div className="col-12">
-          <div className="card surface-card border-0">
-            <div
-              className="card-header bg-gradient py-3"
-              style={{
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              }}
-            >
-              <h4 className="card-title mb-0">Vector DB 狀態總覽</h4>
+      {/* 簡化版狀態卡片 - 只顯示關鍵資訊 */}
+      <div className="card surface-card border-0 mb-4">
+        <div className="card-body p-4">
+          <div className="row g-3 align-items-center">
+            {/* Collection 資訊 */}
+            <div className="col-md-4">
+              <div className="d-flex align-items-center">
+                <i className="bi bi-database-fill text-primary fs-4 me-3"></i>
+                <div>
+                  <small className="text-muted d-block">Collection</small>
+                  <span className="fw-bold">
+                    session_{sessionId?.substring(0, 8) || "xxxx"}
+                  </span>
+                </div>
+              </div>
             </div>
-            <div className="card-body p-4">
-              {/* 上半部：關鍵指標 */}
-              <div className="row g-3 mb-4">
-                <div className="col-md-3 col-6">
-                  <div className="p-3 bg-light rounded border">
-                    <div className="d-flex align-items-center mb-1">
-                      <i className="bi bi-collection text-primary me-2"></i>
-                      <small className="text-muted">Collection</small>
-                    </div>
-                    <div className="fw-bold text-dark small">
-                      session_{sessionId?.substring(0, 8) || "xxxx"}
-                    </div>
-                  </div>
-                </div>
-                <div className="col-md-3 col-6">
-                  <div className="p-3 bg-light rounded border">
-                    <div className="d-flex align-items-center mb-1">
-                      <i className="bi bi-file-earmark-text text-info me-2"></i>
-                      <small className="text-muted">來源文件</small>
-                    </div>
-                    <div className="fw-bold text-dark">{jobs.length} 個</div>
-                  </div>
-                </div>
-                <div className="col-md-3 col-6">
-                  <div className="p-3 bg-light rounded border">
-                    <div className="d-flex align-items-center mb-1">
-                      <i className="bi bi-vector-pen text-success me-2"></i>
-                      <small className="text-muted">向量總數</small>
-                    </div>
-                    <div
-                      className={`fw-bold ${
-                        !hasStarted ? "text-muted" : "text-primary"
-                      }`}
-                    >
-                      {!hasStarted
-                        ? "未執行"
-                        : jobs.reduce((sum, j) => sum + j.chunks, 0)}
-                    </div>
-                  </div>
-                </div>
-                <div className="col-md-3 col-6">
-                  <div className="p-3 bg-light rounded border">
-                    <div className="d-flex align-items-center mb-1">
-                      <i className="bi bi-check-circle text-success me-2"></i>
-                      <small className="text-muted">狀態</small>
-                    </div>
-                    <div
-                      className={`fw-bold ${
-                        !hasStarted
-                          ? "text-muted"
-                          : jobs.length > 0 &&
-                            jobs.every((j) => j.status === "completed")
-                          ? "text-success"
-                          : "text-warning"
-                      }`}
-                    >
-                      {!hasStarted
-                        ? "未執行"
-                        : jobs.length > 0 &&
-                          jobs.every((j) => j.status === "completed")
-                        ? "✅ 已就緒"
-                        : "⏳ 處理中"}
-                    </div>
-                  </div>
-                </div>
-              </div>
 
-              {/* 中間部：配置詳情 */}
-              <div className="row g-3 mb-3">
-                <div className="col-md-6">
-                  <div className="border-start border-primary border-3 ps-3">
-                    <h6 className="text-primary mb-2">
-                      <i className="bi bi-gear-fill me-2"></i>向量化設定
-                    </h6>
-                    <div className="small">
-                      <div className="d-flex justify-content-between mb-1">
-                        <span className="text-muted">Embedding Model:</span>
-                        <strong>text-embedding-004</strong>
-                      </div>
-                      <div className="d-flex justify-content-between mb-1">
-                        <span className="text-muted">Chunk Size:</span>
-                        <strong>{parameters.chunk_size}</strong>
-                      </div>
-                      <div className="d-flex justify-content-between mb-1">
-                        <span className="text-muted">Chunk Overlap:</span>
-                        <strong>{parameters.chunk_overlap}</strong>
-                      </div>
-                      <div className="d-flex justify-content-between">
-                        <span className="text-muted">語言:</span>
-                        <strong>
-                          {parameters.answer_language === "en"
-                            ? "English"
-                            : parameters.answer_language === "zh-TW"
-                            ? "繁體中文"
-                            : "Auto"}
-                        </strong>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-md-6">
-                  <div className="border-start border-info border-3 ps-3">
-                    <h6 className="text-info mb-2">
-                      <i className="bi bi-search me-2"></i>檢索配置
-                    </h6>
-                    <div className="small">
-                      <div className="d-flex justify-content-between mb-1">
-                        <span className="text-muted">Vector DB:</span>
-                        <strong>Qdrant</strong>
-                      </div>
-                      <div className="d-flex justify-content-between mb-1">
-                        <span className="text-muted">距離度量:</span>
-                        <strong>Cosine</strong>
-                      </div>
-                      <div className="d-flex justify-content-between mb-1">
-                        <span className="text-muted">向量維度:</span>
-                        <strong>768</strong>
-                      </div>
-                      <div className="d-flex justify-content-between">
-                        <span className="text-muted">索引類型:</span>
-                        <strong>HNSW</strong>
-                      </div>
-                    </div>
-                  </div>
+            {/* 來源文件數 */}
+            <div className="col-md-4">
+              <div className="d-flex align-items-center">
+                <i className="bi bi-file-earmark-text text-info fs-4 me-3"></i>
+                <div>
+                  <small className="text-muted d-block">來源文件</small>
+                  <span className="fw-bold">{jobs.length} 個</span>
                 </div>
               </div>
+            </div>
 
-              {/* 下半部：提示信息 */}
-              <div className="alert alert-info mb-0 d-flex align-items-start">
-                <i className="bi bi-lightbulb-fill me-2 mt-1"></i>
-                <div className="small">
-                  <strong>重要提示：</strong>
-                  <ul className="mb-0 ps-3 mt-1">
-                    <li>AI 將從 Vector DB 檢索記憶，而非憑空捏造答案</li>
-                    <li>適當的分塊與重疊能確保上下文連貫性</li>
-                    <li>嚴格模式下，若相似度低於門檻將拒絕回答</li>
-                  </ul>
+            {/* 向量總數 */}
+            <div className="col-md-4">
+              <div className="d-flex align-items-center">
+                <i className="bi bi-cpu text-success fs-4 me-3"></i>
+                <div>
+                  <small className="text-muted d-block">Vector DB</small>
+                  <span
+                    className={`fw-bold ${!hasStarted ? "text-muted" : "text-success"}`}
+                  >
+                    {!hasStarted
+                      ? "等待執行"
+                      : `${jobs.reduce((sum, j) => sum + j.chunks, 0)} 個向量`}
+                  </span>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* 配置摘要 - 收合在一行 */}
+          <div className="mt-3 pt-3 border-top">
+            <div className="d-flex flex-wrap gap-3 small text-muted">
+              <span>
+                <i className="bi bi-gear me-1"></i>Embedding Model:{" "}
+                <strong className="text-dark">text-embedding-004</strong>
+              </span>
+              <span>
+                <i className="bi bi-scissors me-1"></i>Chunk Size:{" "}
+                <strong className="text-dark">{parameters.chunk_size}</strong>
+              </span>
+              <span>
+                <i className="bi bi-shuffle me-1"></i>Overlap:{" "}
+                <strong className="text-dark">
+                  {parameters.chunk_overlap}
+                </strong>
+              </span>
+              <span>
+                <i className="bi bi-search me-1"></i>Vector DB:{" "}
+                <strong className="text-dark">Qdrant</strong>
+              </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Action Area (Moved to bottom) */}
+      {/* 執行按鈕區域 - 置頂且醒目 */}
       {!jobs.some((j) => j.status === "completed") && !isProcessing && (
-        <div className="action-area text-center mt-4 mb-4">
+        <div className="text-center mb-4">
           <button
-            className="btn btn-start-processing"
+            className="btn btn-primary btn-lg px-5 py-3 shadow-lg"
+            style={{
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              border: "none",
+              fontSize: "1.1rem",
+              fontWeight: "600",
+            }}
             onClick={() => {
-              if (onProcessingStatusChange) {
-                // Trigger via prop if wrapper handles logic,
-                // but local startProcessing is also available if simulated.
-                // Assuming shouldStartProcessing triggers useEffect, but let's call local start if wrapper logic is removed.
-                // Or better, set state to trigger effect or call method directly.
-                // The useEffect depends on `shouldStartProcessing`.
-                // Let's assume we need to notify parent OR handle local.
-                // Given previous logic relied on external trigger, let's look at Step 4 implementation. Step 4 had local click -> setShouldStartReview(true).
-                // But here `shouldStartProcessing` is a prop.
-                // However, the previous `WorkflowStepper` had logic to set internal state `shouldStartProcessing`.
-                // If we move button here, `TextProcessingStep` needs to be able to start it.
-                // The current component has `useEffect` on `shouldStartProcessing`.
-                // Let's modify the component to allow internal triggering or rely on parent.
-                // Actually `Step 4`'s internal button set an internal state `shouldStartReview` but here `shouldStartProcessing` is prop.
-                // Wait, Step 4 had `shouldStartReview` as prop AND internal.
-                // Let's check `TextProcessingStep` again. It has `shouldStartProcessing` prop.
-                // And `useEffect` on it.
-                // We should probably invoke `startProcessing()` directly from button click if it's cleaner.
-                startProcessing();
-              }
+              startProcessing();
             }}
             disabled={jobs.length === 0}
           >
-            <i className="bi bi-play-circle-fill me-2"></i>
-            {t("workflow.common.startProcessing", "開始文本處理")}
+            <i className="bi bi-play-circle-fill me-2 fs-4"></i>
+            開始文本處理
           </button>
+          <div className="mt-2 text-muted small">
+            <i className="bi bi-info-circle me-1"></i>
+            將文件分塊並轉換為向量，儲存至 Vector DB
+          </div>
         </div>
       )}
 
-      {/* 處理完成摘要 - 簡化版 */}
+      {/* 處理完成狀態 */}
       {jobs.length > 0 && jobs.every((j) => j.status === "completed") && (
-        <div className="text-center mt-4 mb-4">
-          <div className="d-inline-flex align-items-center px-4 py-3 rounded-pill bg-success-subtle text-success border border-success-subtle shadow-sm">
-            <i className="bi bi-check-circle-fill me-2 fs-4"></i>
-            <span className="fw-bold fs-5">文本處理完成！</span>
-            <span className="ms-2 small text-muted border-start border-success mx-2 ps-2">
-              共處理 {jobs.length} 個文件，生成{" "}
-              {jobs.reduce((sum, j) => sum + j.chunks, 0)} 個文本塊
-            </span>
+        <div className="text-center mb-4">
+          <div
+            className="alert alert-success d-inline-flex align-items-center shadow-sm"
+            style={{ maxWidth: "600px" }}
+          >
+            <i className="bi bi-check-circle-fill me-3 fs-3"></i>
+            <div className="text-start">
+              <div className="fw-bold fs-5">✅ 文本處理完成！</div>
+              <div className="small text-muted mt-1">
+                共處理 {jobs.length} 個文件，生成{" "}
+                {jobs.reduce((sum, j) => sum + j.chunks, 0)} 個文本塊
+              </div>
+            </div>
           </div>
-          {/* 已刪除冗餘的提示文字 */}
         </div>
       )}
     </div>

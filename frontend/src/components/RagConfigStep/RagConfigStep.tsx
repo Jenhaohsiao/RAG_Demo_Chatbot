@@ -45,12 +45,12 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
     <div className={`rag-config-step ${disabled ? "disabled-step" : ""}`}>
       {/* 禁用狀態提示 */}
       {disabled && (
-        <div className="alert alert-info mb-3">
+        <div className="alert alert-info mb-2 py-2">
           <i className="bi bi-info-circle me-2"></i>
-          資料已上傳處理，RAG 參數配置已鎖定，無法修改。
+          資料已上傳，參數已鎖定
         </div>
       )}
-      <div className="row g-3">
+      <div className="row g-2">
         {/* 相似度閾值卡片 */}
         <div className="col-lg-6">
           <div
@@ -58,19 +58,17 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
               disabled ? "border-secondary" : "active-card-border"
             }`}
           >
-            <div className="card-body">
-              <div className="d-flex align-items-start justify-content-between mb-3">
-                <div className="flex-grow-1">
-                  <h4 className="card-title mb-1">
-                    相似度閾值 (Similarity Threshold)
-                  </h4>
-                </div>
+            <div className="card-body p-3">
+              <div className="d-flex align-items-center justify-content-between mb-2">
+                <h5 className="card-title mb-0 fw-bold">
+                  相似度閾值 (Similarity Threshold)
+                </h5>
                 <div className="value-badge">
                   {parameters.similarity_threshold.toFixed(1)}
                 </div>
               </div>
-              <p className="small mb-3">
-                搜索嚴謹度，控制模型引用內容的信心門檻。越高越嚴謹，越低越包容。
+              <p className="small text-muted mb-2">
+                控制引用內容的信心門檻，越高越嚴謹
               </p>
               <input
                 type="range"
@@ -102,18 +100,15 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
               disabled ? "border-secondary" : "active-card-border"
             }`}
           >
-            <div className="card-body">
-              <div className="d-flex align-items-start justify-content-between mb-3">
-                <div className="flex-grow-1">
-                  　
-                  <h4 className="card-title mb-1">
-                    檢索數量 (Top-K Retrieval Count)
-                  </h4>
-                </div>
+            <div className="card-body p-3">
+              <div className="d-flex align-items-center justify-content-between mb-2">
+                <h5 className="card-title mb-0 fw-bold">
+                  檢索數量 (Top-K Retrieval Count)
+                </h5>
                 <div className="value-badge">{parameters.rag_top_k}</div>
               </div>
-              <p className="small mb-3">
-                檢索覆蓋度，控制每次回應拉取的段落數，平衡「資訊量」與「精準度」。
+              <p className="small text-muted mb-2">
+                控制每次拉取的段落數，平衡資訊量與精準度
               </p>
               <input
                 type="range"
@@ -136,72 +131,43 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
         </div>
       </div>
 
-      <div className="section-heading d-flex align-items-center justify-content-between mt-4 mb-3">
-        <div>
-          <h4 className="eyebrow text-uppercase m-0">文本分塊策略</h4>
-        </div>
-      </div>
-
-      <div className="row g-3">
+      <div className="row g-2 mt-2">
         <div className="col-12">
           <div className="card border-secondary bg-light">
-            <div className="card-body">
-              <div className="row align-items-center mb-3">
-                <div className="col-auto">
-                  <span className="pill pill-warning">
-                    目前調整至最佳，不開放修改
-                  </span>
-                </div>
-                <div className="col">
-                  <h6 className="mb-1 fw-bold">自動文本分塊處理</h6>
-                  <p className="text-muted small mb-0">
-                    系統會將上傳的文檔自動切分為適當大小的片段並存入向量資料庫，確保檢索的準確性與效率
-                  </p>
-                </div>
+            <div className="card-body p-3">
+              <div className="d-flex align-items-center mb-2">
+                <span className="badge bg-warning text-dark me-2">已優化</span>
+                <h6 className="mb-0 fw-bold">自動文本分塊處理</h6>
               </div>
 
-              <hr className="my-3" />
-
-              <div className="row g-4">
+              <div className="row g-2">
                 <div className="col-md-4">
-                  <div className="d-flex align-items-start">
-                    <div className="flex-grow-1">
-                      <div className="small text-muted mb-1">最大分塊大小</div>
-                      <div className="fs-5 fw-bold  text-muted ">
-                        {parameters.chunk_max_size || 2000}
-                      </div>
-                      <div className="small text-muted">
-                        字元 (約 500 個中文字)
-                      </div>
+                  <div className="text-center p-2 bg-white rounded">
+                    <div className="small text-muted">最大分塊</div>
+                    <div className="fw-bold text-dark">
+                      {parameters.chunk_max_size || 2000}
                     </div>
+                    <div className="small text-muted">字元</div>
                   </div>
                 </div>
 
                 <div className="col-md-4">
-                  <div className="d-flex align-items-start">
-                    <div className="flex-grow-1">
-                      <div className="small text-muted mb-1">最小分塊大小</div>
-                      <div className="fs-5 fw-bold   text-muted">
-                        {parameters.chunk_min_size || 500}
-                      </div>
-                      <div className="small text-muted">
-                        字元 (約 125 個中文字)
-                      </div>
+                  <div className="text-center p-2 bg-white rounded">
+                    <div className="small text-muted">最小分塊</div>
+                    <div className="fw-bold text-dark">
+                      {parameters.chunk_min_size || 500}
                     </div>
+                    <div className="small text-muted">字元</div>
                   </div>
                 </div>
 
                 <div className="col-md-4">
-                  <div className="d-flex align-items-start">
-                    <div className="flex-grow-1">
-                      <div className="small text-muted mb-1">重疊區域大小</div>
-                      <div className="fs-5 fw-bold text-muted">
-                        {parameters.chunk_overlap_size || 200}
-                      </div>
-                      <div className="small text-muted">
-                        字元 (約 50 個中文字)
-                      </div>
+                  <div className="text-center p-2 bg-white rounded">
+                    <div className="small text-muted">重疊區域</div>
+                    <div className="fw-bold text-dark">
+                      {parameters.chunk_overlap_size || 200}
                     </div>
+                    <div className="small text-muted">字元</div>
                   </div>
                 </div>
               </div>

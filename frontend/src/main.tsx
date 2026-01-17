@@ -25,6 +25,7 @@ import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary"; // T093: I
 import PromptVisualization from "./components/PromptVisualization/PromptVisualization";
 import FixedRagFlow from "./components/FixedRagFlow/FixedRagFlow";
 import AboutProjectModal from "./components/AboutProjectModal/AboutProjectModal";
+import ContactModal from "./components/ContactModal/ContactModal";
 import WorkflowMain from "./components/WorkflowMain/WorkflowMain"; // New workflow integration
 import SessionExpiredModal from "./components/SessionExpiredModal/SessionExpiredModal";
 import ToastMessage from "./components/ToastMessage/ToastMessage";
@@ -110,6 +111,7 @@ const App: React.FC = () => {
   const [aboutModalInitialView, setAboutModalInitialView] = useState<
     "about" | "summary"
   >("about");
+  const [showContactModal, setShowContactModal] = useState(false);
   const [systemMessage, setSystemMessage] = useState<{
     type: "error" | "warning" | "info" | "success";
     message: string;
@@ -415,6 +417,7 @@ const App: React.FC = () => {
           setAboutModalInitialView("about");
           setShowAboutModal(true);
         }}
+        onContactClick={() => setShowContactModal(true)}
         systemMessage={systemMessage}
         onDismissMessage={handleDismissMessage}
         onRestartSession={handleRestartSession}
@@ -522,6 +525,12 @@ const App: React.FC = () => {
         isOpen={showAboutModal}
         onClose={() => setShowAboutModal(false)}
         initialView={aboutModalInitialView}
+      />
+
+      {/* Contact Modal */}
+      <ContactModal
+        isOpen={showContactModal}
+        onClose={() => setShowContactModal(false)}
       />
 
       {/* Toast Messages */}

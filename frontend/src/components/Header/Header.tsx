@@ -14,6 +14,7 @@ interface HeaderProps {
   onLeave?: () => void;
   onRestart?: () => void;
   onAboutClick?: () => void;
+  onContactClick?: () => void;
   systemMessage?: {
     type: "error" | "warning" | "info" | "success";
     message: string;
@@ -43,6 +44,7 @@ export const Header: React.FC<HeaderProps> = ({
   onLeave,
   onRestart,
   onAboutClick,
+  onContactClick,
   systemMessage,
   onDismissMessage,
   onRestartSession,
@@ -116,6 +118,19 @@ export const Header: React.FC<HeaderProps> = ({
                 title="關於本專案"
               >
                 <span className="d-none d-sm-inline">關於本專案</span>
+              </button>
+            )}
+
+            {/* Contact Button */}
+            {onContactClick && (
+              <button
+                className="btn btn-sm btn-outline-light border"
+                type="button"
+                onClick={onContactClick}
+                title="與我聯絡"
+              >
+                <i className="bi bi-envelope me-1"></i>
+                <span className="d-none d-sm-inline">與我聯絡</span>
               </button>
             )}
 

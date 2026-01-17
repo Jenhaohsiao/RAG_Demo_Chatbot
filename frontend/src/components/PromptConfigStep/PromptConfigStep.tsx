@@ -192,13 +192,13 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
     <div className={`prompt-config-step ${disabled ? "disabled-step" : ""}`}>
       {/* 禁用狀態提示 */}
       {disabled && (
-        <div className="alert alert-info mb-3">
+        <div className="alert alert-info mb-2 py-2">
           <i className="bi bi-info-circle me-2"></i>
-          {t("step2.disabledNotice", "資料已上傳處理，配置已鎖定，無法修改。")}
+          資料已上傳，配置已鎖定
         </div>
       )}
 
-      <div className="row g-3 prompt-summary">
+      <div className="row g-2 prompt-summary mb-2">
         <div className="col-md-3 col-sm-6">
           <div className="summary-tile">
             <div className="label">
@@ -246,7 +246,7 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
       </div>
 
       {/* 2x2 Grid 卡片佈局 */}
-      <div className="row g-3">
+      <div className="row g-2">
         {/* A. 系統規則 (System Rules) - 左上 */}
         <div className="col-lg-6">
           <div
@@ -254,18 +254,18 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
               disabled ? "border-secondary" : "active-card-border"
             }`}
           >
-            <div className="card-body">
-              <h4 className="card-title mb-3">
+            <div className="card-body p-3">
+              <h5 className="card-title mb-2 fw-bold">
                 {t("step2.system.title", "系統規則")}
-              </h4>
+              </h5>
 
               {/* 回答語言 */}
-              <div className="mb-3">
-                <label className="form-label fw-bold">
+              <div className="mb-2">
+                <label className="form-label small mb-1">
                   {t("step2.system.answerLanguage", "回答語言")}
                 </label>
                 <select
-                  className="form-select modern-select"
+                  className="form-select form-select-sm"
                   value={parameters.answer_language || "auto"}
                   disabled={disabled}
                   onChange={(e) =>
@@ -281,7 +281,7 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
               </div>
 
               {/* 嚴格 RAG 模式 Toggle */}
-              <div className="mb-3">
+              <div className="mb-2">
                 <div className="form-check form-switch">
                   <input
                     className="form-check-input"
@@ -293,26 +293,17 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                       onParameterChange("strict_rag_mode", e.target.checked)
                     }
                   />
-                  <label className="form-check-label" htmlFor="strictRagMode">
+                  <label
+                    className="form-check-label small"
+                    htmlFor="strictRagMode"
+                  >
                     {t("step2.system.strictRagMode", "嚴格 RAG 模式")}
                   </label>
-                </div>
-                <div className="form-text text-muted">
-                  <i className="bi bi-info-circle me-1"></i>
-                  {parameters.strict_rag_mode !== false
-                    ? t(
-                        "step2.system.strictRagOn",
-                        "開啟：當資料不足時 AI 將拒絕回答"
-                      )
-                    : t(
-                        "step2.system.strictRagOff",
-                        "關閉：AI 可能使用一般知識補充"
-                      )}
                 </div>
               </div>
 
               {/* 允許推論 Toggle */}
-              <div className="mb-3">
+              <div className="mb-2">
                 <div className="form-check form-switch">
                   <input
                     className="form-check-input"
@@ -324,26 +315,17 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                       onParameterChange("allow_inference", e.target.checked)
                     }
                   />
-                  <label className="form-check-label" htmlFor="allowInference">
+                  <label
+                    className="form-check-label small"
+                    htmlFor="allowInference"
+                  >
                     {t("step2.system.allowInference", "允許推論")}
                   </label>
-                </div>
-                <div className="form-text text-muted">
-                  <i className="bi bi-info-circle me-1"></i>
-                  {parameters.allow_inference
-                    ? t(
-                        "step2.system.inferenceOn",
-                        "開啟：可在上傳資料範圍內合理推論"
-                      )
-                    : t(
-                        "step2.system.inferenceOff",
-                        "關閉：僅回答文件中明確記載的內容"
-                      )}
                 </div>
               </div>
 
               {/* 允許使用者的 Prompt 來調整 System Prompt (永遠關閉) */}
-              <div className="mb-3">
+              <div className="mb-2">
                 <div className="form-check form-switch">
                   <input
                     className="form-check-input"
@@ -353,22 +335,22 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                     disabled={true}
                   />
                   <label
-                    className="form-check-label text-muted"
+                    className="form-check-label text-muted small"
                     htmlFor="allowUserOverride"
                   >
                     {t(
                       "step2.system.allowUserOverride",
-                      "允許使用者的 Prompt 來調整 System Prompt"
+                      "允許調整 System Prompt"
                     )}
-                    <span className="badge bg-secondary ms-2 small">
-                      {t("step2.system.alwaysOff", "永遠關閉")}
+                    <span className="badge bg-secondary ms-1 small">
+                      {t("step2.system.alwaysOff", "關")}
                     </span>
                   </label>
                 </div>
               </div>
 
               {/* 外部知識（永遠關閉，唯讀） */}
-              <div className="mb-3">
+              <div className="mb-0">
                 <div className="form-check form-switch">
                   <input
                     className="form-check-input"
@@ -378,45 +360,31 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                     disabled={true}
                   />
                   <label
-                    className="form-check-label text-muted"
+                    className="form-check-label text-muted small"
                     htmlFor="externalKnowledge"
                   >
                     {t("step2.system.externalKnowledge", "外部知識存取")}
-                    <span className="badge bg-secondary ms-2 small">
-                      {t("step2.system.alwaysOff", "永遠關閉")}
+                    <span className="badge bg-secondary ms-1 small">
+                      {t("step2.system.alwaysOff", "關")}
                     </span>
                   </label>
-                </div>
-              </div>
-
-              {/* 無資料回應政策（僅顯示） */}
-              <div className="mb-0 p-2 bg-light rounded">
-                <div className="small fw-bold text-muted mb-1">
-                  <i className="bi bi-exclamation-triangle me-1"></i>
-                  {t("step2.system.noDataPolicy", "無資料回應政策")}
-                </div>
-                <div className="small text-secondary">
-                  {t(
-                    "step2.system.noDataPolicyDesc",
-                    "當檢索不到相關資料時，AI 會明確告知使用者，並提供可能的替代問題建議。"
-                  )}
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* B. 回答政策 (Response Policy) - 右上 */}
+        {/* B. 回應策略 (Response Policy) - 右上 */}
         <div className="col-lg-6">
           <div
             className={`card h-100 prompt-card ${
               disabled ? "border-secondary" : "active-card-border"
             }`}
           >
-            <div className="card-body">
-              <h4 className="card-title mb-3">
-                {t("step2.policy.title", "回答政策")}
-              </h4>
+            <div className="card-body p-3">
+              <h5 className="card-title mb-2 fw-bold">
+                {t("step2.response.title", "回應策略")}
+              </h5>
 
               {/* 回答風格 */}
               <div className="mb-3">
@@ -437,18 +405,15 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                     </option>
                   ))}
                 </select>
-                <div className="form-text text-muted">
-                  {getStyleDescription(parameters.response_style || "standard")}
-                </div>
               </div>
 
               {/* 回答語氣 */}
-              <div className="mb-3">
-                <label className="form-label fw-bold">
+              <div className="mb-2">
+                <label className="form-label small mb-1">
                   {t("step2.policy.tone.label", "回答語氣")}
                 </label>
                 <select
-                  className="form-select modern-select"
+                  className="form-select form-select-sm"
                   value={parameters.response_tone || "formal"}
                   disabled={disabled}
                   onChange={(e) =>
@@ -461,18 +426,15 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                     </option>
                   ))}
                 </select>
-                <div className="form-text text-muted">
-                  {getToneDescription(parameters.response_tone || "formal")}
-                </div>
               </div>
 
               {/* Persona */}
-              <div className="mb-3">
-                <label className="form-label fw-bold">
-                  {t("step2.policy.persona.label", "角色設定 (Persona)")}
+              <div className="mb-2">
+                <label className="form-label small mb-1">
+                  {t("step2.policy.persona.label", "角色設定")}
                 </label>
                 <select
-                  className="form-select modern-select"
+                  className="form-select form-select-sm"
                   value={parameters.persona || "expert"}
                   disabled={disabled}
                   onChange={(e) => onParameterChange("persona", e.target.value)}
@@ -483,18 +445,15 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                     </option>
                   ))}
                 </select>
-                <div className="form-text text-muted">
-                  {getPersonaDescription(parameters.persona || "expert")}
-                </div>
               </div>
 
               {/* 引用方式 */}
               <div className="mb-0">
-                <label className="form-label fw-bold">
+                <label className="form-label small mb-1">
                   {t("step2.policy.citation.label", "引用方式")}
                 </label>
                 <select
-                  className="form-select modern-select"
+                  className="form-select form-select-sm"
                   value={parameters.citation_style || "inline"}
                   disabled={disabled}
                   onChange={(e) =>
@@ -507,11 +466,6 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                     </option>
                   ))}
                 </select>
-                <div className="form-text text-muted">
-                  {getCitationDescription(
-                    parameters.citation_style || "inline"
-                  )}
-                </div>
               </div>
             </div>
           </div>
