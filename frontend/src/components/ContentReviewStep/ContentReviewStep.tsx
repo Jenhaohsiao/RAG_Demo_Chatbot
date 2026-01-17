@@ -368,7 +368,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
   return (
     <div className="content-review-step">
       {/* 簡化版審核資訊卡片 */}
-      <div className="card mb-3 shadow-sm border-0 surface-card">
+      <div className="card mb-3 shadow-sm active-card-border surface-card">
         <div className="card-body p-3">
           {/* 審核工具說明 - 更簡潔 */}
           <div className="d-flex align-items-center mb-3 pb-2 border-bottom">

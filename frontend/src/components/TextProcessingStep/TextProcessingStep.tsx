@@ -303,7 +303,7 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
   return (
     <div className="text-processing-step">
       {/* 簡化版狀態卡片 - 只顯示關鍵資訊 */}
-      <div className="card surface-card border-0 mb-4">
+      <div className="card surface-card active-card-border mb-4">
         <div className="card-body p-4">
           <div className="row g-3 align-items-center">
             {/* Collection 資訊 */}

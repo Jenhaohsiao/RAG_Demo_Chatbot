@@ -1,5 +1,14 @@
 @import "../../styles/variables";
 
+.active-card-bg {
+  background-color: $card-active-bg !important;
+}
+
+.active-card-border {
+  border: 3px solid $card-active-bg !important;
+  box-shadow: 0 0 0 4px rgba($card-active-bg, 0.15) !important;
+}
+
 /* UploadScreen specific styles */
 .upload-screen-hidden-input {
   display: none;

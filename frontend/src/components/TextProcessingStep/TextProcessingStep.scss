@@ -2,6 +2,15 @@
 
 $prof-blue: $card-active-bg; // #2b6cb0
 
+.active-card-bg {
+  background-color: $card-active-bg !important;
+}
+
+.active-card-border {
+  border: 3px solid $card-active-bg !important;
+  box-shadow: 0 0 0 4px rgba($card-active-bg, 0.15) !important;
+}
+
 .processing-hero {
   background: linear-gradient(135deg, #22376b 0%, #4e6dc6 60%, #7c91e0 100%);
   color: $color-white;
@@ -89,6 +98,11 @@ $prof-blue: $card-active-bg; // #2b6cb0
   border-radius: $border-radius-lg;
   padding: $spacing-3;
   box-shadow: $shadow-sm;
+
+  &.active-card-border {
+    border: 3px solid $card-active-bg !important;
+    box-shadow: 0 0 0 4px rgba($card-active-bg, 0.15) !important;
+  }
 
   .card-header {
     background: transparent;

@@ -9,6 +9,7 @@ RAG Demo Chatbot 現在包含一個聯絡表單功能，允許訪客直接通過
 - ✅ **信箱地址隱藏**：接收信箱地址存儲在後端環境變量中，前端代碼無法訪問
 - ✅ **API保護**：所有表單提交通過後端API處理，前端只能調用API端點
 - ✅ **數據驗證**：後端對所有輸入進行嚴格驗證，防止惡意輸入
+- ✅ **憑證隔離**：SMTP 憑證存儲在 `.env.local`（不追蹤到 Git）
 
 ## 配置步驟
 
@@ -25,19 +26,26 @@ RAG Demo Chatbot 現在包含一個聯絡表單功能，允許訪客直接通過
 
 ### 2. 配置環境變量
 
-在 `backend/.env` 文件中添加以下配置：
+⚠️ **重要安全提示**: 
+- **絕對不要**將 SMTP 憑證寫在 `backend/.env` 中（該檔案可能被提交）
+- **必須**將憑證寫在 `backend/.env.local` 中（已在 .gitignore 中，不會被提交）
+
+在 `backend/.env.local` 文件中添加以下配置：
 
 ```bash
-# 接收留言的信箱（已在config.py中設定為 jenhao.hsiao2@gmail.com）
-CONTACT_EMAIL_RECIPIENT=jenhao.hsiao2@gmail.com
-
-# SMTP服務器設置（Gmail）
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-
-# 您的Gmail帳戶和應用密碼
+# SMTP Configuration for Contact Form
+# ------------------------------------
 SMTP_USERNAME=your_email@gmail.com
 SMTP_PASSWORD=your_16_digit_app_password_here
+```
+
+`backend/.env` 文件應該只包含非敏感的預設值：
+
+```bash
+# Email Configuration for Contact Form
+# -------------------------------------
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
 ```
 
 ### 3. 使用其他郵件服務商
