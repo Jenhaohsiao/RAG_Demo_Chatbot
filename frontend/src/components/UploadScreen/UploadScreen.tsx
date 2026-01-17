@@ -512,16 +512,16 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                 <p style={{ whiteSpace: "pre-line" }}>{errorDialogMessage}</p>
               </div>
               <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={handleCloseErrorDialog}
-                  >
-                    {t(
-                      "uploadWizard.dialog.confirm",
-                      t("buttons.confirm", "Confirm")
-                    )}
-                  </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleCloseErrorDialog}
+                >
+                  {t(
+                    "uploadWizard.dialog.confirm",
+                    t("buttons.confirm", "Confirm")
+                  )}
+                </button>
               </div>
             </div>
           </div>
