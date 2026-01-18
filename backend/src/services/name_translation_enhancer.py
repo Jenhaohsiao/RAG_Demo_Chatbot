@@ -1,6 +1,6 @@
 """
 Name Translation Enhancement Service
-自動為專有名詞添加中英對照，改善跨語言檢索效果
+Automatically adds bilingual annotations to proper nouns to improve cross-language retrieval
 
 Example:
     Input:  "Alice felt curious"
@@ -26,7 +26,7 @@ class NameTranslationEnhancer:
         """Initialize with common name mappings"""
         # English -> Chinese mappings
         self.en_to_zh = {
-            # ===== Characters (人物) =====
+            # ===== Characters =====
             "Alice": "愛麗絲",
             "White Rabbit": "白兔",
             "Queen of Hearts": "紅心皇后",
@@ -45,7 +45,7 @@ class NameTranslationEnhancer:
             "Bill the Lizard": "蜥蜴比爾",
             "Knave of Hearts": "紅心傑克",
             
-            # ===== Places (地名) =====
+            # ===== Places =====
             "Wonderland": "仙境",
             "Looking-Glass World": "鏡中世界",
             "Tea Party": "茶會",
@@ -53,7 +53,7 @@ class NameTranslationEnhancer:
             "Rabbit Hole": "兔子洞",
             "Court of Justice": "法庭",
             
-            # ===== Organizations/Groups (組織/團體) =====
+            # ===== Organizations/Groups =====
             "The Royal Court": "王室法庭",
             "Card Soldiers": "撲克牌士兵",
             "Hearts": "紅心",
@@ -61,7 +61,7 @@ class NameTranslationEnhancer:
             "Diamonds": "方塊",
             "Clubs": "梅花",
             
-            # ===== Objects/Items (物品) =====
+            # ===== Objects/Items =====
             "Playing Cards": "撲克牌",
             "Magic Mushroom": "魔法蘑菇",
             "Pocket Watch": "懷錶",
@@ -212,9 +212,14 @@ class NameTranslationEnhancer:
         en_matches = len(self.en_pattern.findall(original))
         zh_matches = len(self.zh_pattern.findall(original))
         
+        size_increase = len(enhanced) - len(original)
+        size_increase_percent = (size_increase / len(original) * 100) if len(original) > 0 else 0
+        
         return {
             "original_length": len(original),
             "enhanced_length": len(enhanced),
+            "size_increase": size_increase,
+            "size_increase_percent": size_increase_percent,
             "en_names_found": en_matches,
             "zh_names_found": zh_matches,
             "total_enhancements": en_matches + zh_matches

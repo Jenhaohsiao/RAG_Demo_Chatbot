@@ -34,6 +34,7 @@ from ...services.vector_store import VectorStore
 from ...services.web_crawler import WebCrawler
 from ...services.vector_store import VectorStore
 from ...services.rag_engine import RAGEngine
+from ...services.name_translation_enhancer import NameTranslationEnhancer
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +47,7 @@ chunker = TextChunker()
 embedder = Embedder()
 vector_store = VectorStore()
 rag_engine = RAGEngine()
+name_enhancer = NameTranslationEnhancer()
 
 
 class UrlUploadRequest(BaseModel):
@@ -116,7 +118,7 @@ class WebsiteUploadResponse(UploadResponse):
 
 
 class UploadStatusResponse(BaseModel):
-    """上傳狀態查詢回應"""
+    """Upload status query response"""
     document_id: UUID
     source_type: SourceType
     source_reference: str
@@ -128,11 +130,11 @@ class UploadStatusResponse(BaseModel):
     error_code: str | None = None
     error_message: str | None = None
     moderation_categories: list[str] = []
-    # T089+ 新增 token 追蹤和頁面計數
-    tokens_used: int = 0  # 本文件/爬蟲使用的 tokens
-    pages_crawled: int = 0  # 爬蟲頁面數
-    # 爬蟲詳細信息
-    crawled_pages: list[CrawledPage] | None = None  # 爬蟲詳細頁面信息
+    # T089+ Token tracking and page count
+    tokens_used: int = 0  # Tokens used by this document/crawler
+    pages_crawled: int = 0  # Number of pages crawled
+    # Crawler detailed information
+    crawled_pages: list[CrawledPage] | None = None  # Detailed crawled page information
     crawl_status: str | None = None  # pending, crawling, completed, token_limit_reached, page_limit_reached
     avg_tokens_per_page: int = 0  # Average tokens per page
     crawl_duration_seconds: float | None = None  # Crawler duration in seconds
@@ -162,36 +164,56 @@ def process_document(document: Document):
     processing_start_time = time.time()
     
     try:
-        # Step 1: Extract text content
-        logger.info(f"[{document.document_id}] Starting extraction ({document.source_type})")
-        document.extraction_status = ExtractionStatus.EXTRACTING
+        # Step 1: Extract text content (or use pre-extracted content from crawler)
+        if document.raw_content and document.extraction_status == ExtractionStatus.EXTRACTED:
+            # Content already extracted (e.g., by web crawler)
+            logger.info(f"[{document.document_id}] Using pre-extracted content from crawler")
+            extracted_text = document.raw_content
+        else:
+            # Normal extraction flow
+            logger.info(f"[{document.document_id}] Starting extraction ({document.source_type})")
+            document.extraction_status = ExtractionStatus.EXTRACTING
+            
+            # Read or fetch content
+            if document.source_type == SourceType.URL:
+                # URL: Use URL string directly
+                content = document.source_reference
+            elif document.source_type == SourceType.PDF:
+                # PDF: Read binary content from file path
+                with open(document.source_reference, 'rb') as f:
+                    content = f.read()
+            else:  # TEXT
+                # TEXT: Read text content from file path
+                with open(document.source_reference, 'r', encoding='utf-8') as f:
+                    content = f.read()
+            
+            # Use unified extract_content function
+            extracted_text = extract_content(
+                content=content,
+                source_type=document.source_type.value,
+                source_reference=document.source_reference
+            )
         
-        # Read or fetch content
-        if document.source_type == SourceType.URL:
-            # URL: Use URL string directly
-            content = document.source_reference
-        elif document.source_type == SourceType.PDF:
-            # PDF: Read binary content from file path
-            with open(document.source_reference, 'rb') as f:
-                content = f.read()
-        else:  # TEXT
-            # TEXT: Read text content from file path
-            with open(document.source_reference, 'r', encoding='utf-8') as f:
-                content = f.read()
-        
-        # 使用統一的 extract_content 函數
-        extracted_text = extract_content(
-            content=content,
-            source_type=document.source_type.value,
-            source_reference=document.source_reference
-        )
-        
-        document.raw_content = extracted_text
+        # Step 1.5: Enhance text with bilingual name annotations
+        logger.info(f"[{document.document_id}] Enhancing text with bilingual annotations")
+        try:
+            enhanced_text = name_enhancer.enhance_text(extracted_text)
+            enhancement_stats = name_enhancer.get_statistics(extracted_text, enhanced_text)
+            logger.info(
+                f"[{document.document_id}] Enhancement complete: "
+                f"{enhancement_stats['total_enhancements']} names enhanced, "
+                f"size: {enhancement_stats['original_length']} → {enhancement_stats['enhanced_length']} chars "
+                f"(+{enhancement_stats['size_increase_percent']:.1f}%)"
+            )
+            document.raw_content = enhanced_text
+        except Exception as e:
+            logger.error(f"[{document.document_id}] Enhancement failed: {e}, using original text")
+            document.raw_content = extracted_text
         document.extraction_status = ExtractionStatus.EXTRACTED
         # T089+ Calculate document tokens (1 token ≈ 3 characters)
-        document.tokens_used = max(1, len(extracted_text) // 3)
-        logger.info(f"[{document.document_id}] Extraction complete: {len(extracted_text)} chars")
-        logger.info(f"[{document.document_id}] TOKENS_USED CALCULATION: {len(extracted_text)} chars // 3 = {document.tokens_used} tokens")
+        document.tokens_used = max(1, len(enhanced_text) // 3)
+        logger.info(f"[{document.document_id}] Extraction complete: {len(enhanced_text)} chars")
+        logger.info(f"[{document.document_id}] TOKENS_USED CALCULATION: {len(enhanced_text)} chars // 3 = {document.tokens_used} tokens")
         
         # Step 2: Moderate content review
         # Based on user requirements, Flow 3 no longer performs content moderation, deferred to Flow 4

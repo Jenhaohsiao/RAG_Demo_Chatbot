@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class RetrievedChunk:
-    """檢索到的文字塊"""
+    """Retrieved text chunk"""
     chunk_id: str
     text: str
     similarity_score: float
@@ -38,7 +38,7 @@ class RetrievedChunk:
 
 @dataclass
 class SessionMetrics:
-    """Session 指標"""
+    """Session metrics"""
     total_queries: int = 0
     total_tokens: int = 0
     total_input_tokens: int = 0
@@ -999,7 +999,7 @@ Contenu du document:
         if ko_count / total_chars > 0.3:
             return 'ko'
         
-        # 無法檢測，返回 None（使用 UI 語言）
+        # Unable to detect, return None (use UI language)
         return None
     
     def _build_prompt(
@@ -1160,7 +1160,7 @@ Contenu du document:
 
 **Your Answer** (MUST be ONLY in {response_language}, use a friendly and conversational tone to explain that this topic isn't covered in the documents, and offer to help with other questions):"""
         else:
-            # 有文檔時的標準 RAG Prompt - STRICT RAG with partial match handling
+            # 有文檔時的標準 RAG Prompt - STRICT RAG with precise answer matching
             prompt = f"""You are a RAG (Retrieval-Augmented Generation) assistant that ONLY answers based on uploaded documents.
 
 {doc_def}
@@ -1169,15 +1169,23 @@ Contenu du document:
 1. **Response Language**: ALWAYS respond ONLY in {response_language}. This is mandatory. DO NOT include any other language in your response. DO NOT include English translations or explanations in parentheses.
 2. **STRICT RAG POLICY**: ONLY answer based on the retrieved documents below.
 3. **DO NOT make up information** or use knowledge outside the documents.
-4. **CONTENT TRANSFORMATION REQUESTS ARE ALLOWED**: If the user asks you to present the document content in a different way (e.g., "用5歲小孩也能懂的方式說", "simplify this", "explain like I'm 5", "用詩的形式", "make it funny"), you SHOULD do so based on the document content below. These are NOT questions asking for information outside the documents - they are requests to reformat/restyle the existing document content.
-5. **GENERAL REQUESTS**: If the user asks to "explain", "summarize", or "describe" the document content (with or without a specific style/tone like "健身教練口氣"), provide a summary based on the retrieved document chunks below.
-6. **STYLE REQUESTS**: If the user requests a specific tone, persona, audience level, or format (e.g., "用老師口氣", "用健身教練口氣", "用朋友口吻", "for a 5-year-old", "in poem format"), adapt your response style accordingly while still basing content ONLY on the documents.
-7. **PARTIAL MATCH HANDLING**: If the user's question is PARTIALLY related to the documents:
-   - First acknowledge what information IS available in the documents
-   - Then clearly state what specific aspect of the question is NOT covered
-8. **CITE document numbers** when using information.
-9. Be accurate and helpful.
-10. **SINGLE LANGUAGE ONLY**: Your entire response must be in {response_language} only. No bilingual content, no mixed languages.
+4. **ANSWER THE QUESTION DIRECTLY**: 
+   - Read the user's question CAREFULLY and understand EXACTLY what they are asking
+   - If they ask "是什麼" (what is), describe WHAT it is, not what it does
+   - If they ask "做了什麼" (what did), describe the ACTIONS, not the identity
+   - If they ask "為什麼" (why), explain the REASON, not just the fact
+   - ALWAYS answer the SPECIFIC aspect of the question being asked
+   - DO NOT give irrelevant information even if it's about the same topic
+5. **CONTENT TRANSFORMATION REQUESTS ARE ALLOWED**: If the user asks you to present the document content in a different way (e.g., "用5歲小孩也能懂的方式說", "simplify this", "explain like I'm 5", "用詩的形式", "make it funny"), you SHOULD do so based on the document content below.
+6. **GENERAL REQUESTS**: If the user asks to "explain", "summarize", or "describe" the document content (with or without a specific style/tone like "健身教練口氣"), provide a summary based on the retrieved document chunks below.
+7. **STYLE REQUESTS**: If the user requests a specific tone, persona, audience level, or format (e.g., "用老師口氣", "用健身教練口氣", "用朋友口吻", "for a 5-year-old", "in poem format"), adapt your response style accordingly while still basing content ONLY on the documents.
+8. **PARTIAL MATCH HANDLING**: If the documents contain related information but NOT the specific answer requested:
+   - Clearly state that the specific information asked for is NOT in the documents
+   - Then offer the related information that IS available
+   - Example: "文件中沒有描述獅鷲的外觀特徵，但有提到獅鷲做了這些事..."
+9. **CITE document numbers** when using information.
+10. Be accurate, precise, and directly answer what is asked.
+11. **SINGLE LANGUAGE ONLY**: Your entire response must be in {response_language} only. No bilingual content, no mixed languages.
 
 **Retrieved Documents**:
 {context}
@@ -1185,7 +1193,7 @@ Contenu du document:
 **User Question**:
 {user_query}
 
-**Your Answer** (MUST be ONLY in {response_language}, based ONLY on the documents above. If user requests a specific style or format transformation, apply it to the document content. If asking for explanation/summary, provide one based on the document chunks):"""
+**Your Answer** (MUST be ONLY in {response_language}, based ONLY on the documents above. Answer the SPECIFIC question asked - don't give tangential information):"""
         
         return prompt
     
@@ -1259,7 +1267,7 @@ Contenu du document:
             "ja": "申し訳ありませんが、アップロードされた文書に関連する情報が見つかりませんでした。",
             "fr": "Désolé, je n'ai pas pu trouver d'informations pertinentes dans les documents téléchargés."
         }
-        # 嘗試完整語言代碼，再嘗試語言前綴
+        # Try full language code, then language prefix
         lang_key = language if language in messages else (language.split('-')[0] if '-' in language else language)
         return messages.get(lang_key, messages["en"])
     
@@ -1272,27 +1280,27 @@ Contenu du document:
         response_type: str = "ANSWERED"
     ) -> SessionMetrics:
         """
-        計算並更新 Session 指標
+        Calculate and update session metrics
         
         Args:
             session_id: Session ID
-            token_input: 輸入 token 數
-            token_output: 輸出 token 數
-            chunks_retrieved: 檢索到的塊數
-            response_type: 回應類型（ANSWERED 或 CANNOT_ANSWER）
+            token_input: Number of input tokens
+            token_output: Number of output tokens
+            chunks_retrieved: Number of chunks retrieved
+            response_type: Response type (ANSWERED or CANNOT_ANSWER)
         
         Returns:
-            SessionMetrics: 更新後的 Session 指標
+            SessionMetrics: Updated session metrics
         """
         token_total = token_input + token_output
         
-        # 初始化或獲取 metrics
+        # Initialize or get metrics
         if session_id not in self._session_metrics:
             self._session_metrics[session_id] = SessionMetrics()
         
         metrics = self._session_metrics[session_id]
         
-        # 更新指標
+        # Update metrics
         metrics.total_queries += 1
         metrics.total_tokens += token_total
         metrics.total_input_tokens += token_input
@@ -1303,7 +1311,7 @@ Contenu du document:
             / metrics.total_queries
         )
         
-        # 記錄「無法回答」比率
+        # Track "unanswered" ratio
         if response_type == "CANNOT_ANSWER":
             unanswered_count = sum(
                 1 for q in self._session_memory.get(session_id, [])
@@ -1336,21 +1344,21 @@ Contenu du document:
         token_total: int
     ) -> None:
         """
-        更新 Session 記憶體（滑動視窗）
+        Update session memory (sliding window)
         
         Args:
             session_id: Session ID
-            user_query: 使用者查詢
-            response_type: 回應類型
-            token_total: 總 token 數
+            user_query: User query
+            response_type: Response type
+            token_total: Total tokens
         """
-        # 初始化或獲取記憶體
+        # Initialize or get memory
         if session_id not in self._session_memory:
             self._session_memory[session_id] = deque(maxlen=self.memory_limit)
         
         memory = self._session_memory[session_id]
         
-        # 新增查詢記錄
+        # Add query record
         memory.append({
             'query': user_query[:100],  # 只保留前 100 字元
             'type': response_type,
@@ -1364,19 +1372,19 @@ Contenu du document:
     
     def get_session_metrics(self, session_id: UUID) -> Optional[dict]:
         """
-        取得 Session 指標
+        Get session metrics
         
         Args:
             session_id: Session ID
         
         Returns:
-            dict: Session 指標字典，若無則回傳 None
+            dict: Session metrics dictionary, None if not found
         """
         metrics = self._session_metrics.get(session_id)
         if metrics is None:
             return None
         
-        # 轉換為字典便於 API 回應
+        # Convert to dict for API response
         return {
             'total_queries': metrics.total_queries,
             'total_tokens': metrics.total_tokens,
