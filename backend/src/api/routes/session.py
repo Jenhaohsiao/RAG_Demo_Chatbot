@@ -332,9 +332,11 @@ async def update_custom_prompt(session_id: UUID, custom_prompt: str | None = Non
 @router.get("/{session_id}/api-key/status", response_model=ApiKeyStatusResponse)
 async def get_api_key_status(session_id: UUID):
     """
-    檢查目前 Session 的 Gemini API Key 狀態。
-    如果存在使用者提供的 key，直接返回已驗證狀態；
-    否則回傳預設 key 的狀態。
+    檢查系統 API Key 狀態（不檢查用戶提供的 Key）
+    用戶提供的 Key 不會被存儲，僅在請求時通過 Header 傳遞
+    
+    Returns:
+        ApiKeyStatusResponse: 系統 API Key 狀態資訊
     """
     session = session_manager.get_session(session_id)
     if not session:
@@ -343,15 +345,7 @@ async def get_api_key_status(session_id: UUID):
             detail=f"Session {session_id} not found"
         )
 
-    # 優先使用使用者提供的 key 狀態
-    if session.gemini_api_key and session.has_valid_api_key:
-        return ApiKeyStatusResponse(
-            status="valid",
-            source="user",
-            has_valid_api_key=True
-        )
-
-    # 退回到預設 key 狀態
+    # 僅檢查系統預設 API Key 狀態
     if get_default_api_key_status():
         return ApiKeyStatusResponse(
             status="valid",
@@ -366,34 +360,10 @@ async def get_api_key_status(session_id: UUID):
     )
 
 
-@router.post("/{session_id}/api-key", response_model=ApiKeyStatusResponse)
-async def set_api_key(session_id: UUID, request: ApiKeyRequest):
-    """
-    讓使用者在 Session 層級提供 Gemini API Key。
-    會先做輕量驗證，成功後僅儲存在記憶體，不回傳給前端。
-    """
-    session = session_manager.get_session(session_id)
-    if not session:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Session {session_id} not found"
-        )
-
-    # 驗證 key
-    is_valid = validate_gemini_api_key(request.api_key)
-    if not is_valid:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=ErrorCode.API_KEY_INVALID.value
-        )
-
-    session_manager.set_api_key(session_id, request.api_key)
-
-    return ApiKeyStatusResponse(
-        status="valid",
-        source="user",
-        has_valid_api_key=True
-    )
+# Removed: POST /{session_id}/api-key endpoint
+# API keys are no longer stored in session state
+# User-provided keys are validated per-request via X-User-API-Key header
+# Use POST /api-key/validate for stateless validation before use
 
 
 @router.get("/api-key/status", response_model=ApiKeyStatusResponse)

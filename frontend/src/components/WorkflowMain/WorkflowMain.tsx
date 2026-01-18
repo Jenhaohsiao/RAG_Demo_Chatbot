@@ -47,7 +47,7 @@ const WorkflowMain: React.FC<WorkflowMainProps> = ({
     rag_chunk_size: 1000,
     rag_chunk_overlap: 200,
     rag_min_chunk_length: 100,
-    allow_inference: false,
+    allow_inference: true,
     answer_language: "auto" as "zh-TW" | "zh-CN" | "en" | "fr" | "auto",
     strict_rag_mode: true,
 
@@ -57,7 +57,7 @@ const WorkflowMain: React.FC<WorkflowMainProps> = ({
       | "elementary_teacher"
       | "show_host"
       | "workplace_veteran",
-    citation_style: "inline" as "inline" | "document" | "none",
+    citation_style: "none" as "inline" | "document" | "none",
 
     max_response_tokens: 2048,
     context_warning_threshold: 80,

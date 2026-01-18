@@ -128,13 +128,14 @@ class RAGEngine:
             f"rate_limiting={self.max_retries} retries with exponential backoff"
         )
     
-    def _generate_with_retry(self, prompt: str, session_id: UUID) -> str:
+    def _generate_with_retry(self, prompt: str, session_id: UUID, api_key: Optional[str] = None) -> str:
         """
         使用指數退避重試邏輯調用 Gemini API (T099 Rate Limiting)
         
         Args:
             prompt: 要發送給 LLM 的 prompt
             session_id: 會話 ID (用於日誌)
+            api_key: Optional user-provided API key (overrides system key)
             
         Returns:
             LLM 生成的回應文本
@@ -145,17 +146,33 @@ class RAGEngine:
         retry_count = 0
         current_delay = self.retry_delay
         
+        # Use user-provided API key if available, otherwise use system key
+        effective_api_key = api_key or settings.gemini_api_key
+        if api_key:
+            # Temporarily configure with user's API key
+            model = genai.GenerativeModel(settings.gemini_model)
+        else:
+            model = self.model
+        
         while retry_count < self.max_retries:
             try:
                 logger.debug(f"[{session_id}] Generating LLM response (attempt {retry_count + 1}/{self.max_retries})")
                 
-                response = self.model.generate_content(
+                # Configure API key if user-provided
+                if api_key:
+                    genai.configure(api_key=api_key)
+                
+                response = model.generate_content(
                     prompt,
                     generation_config=genai.GenerationConfig(
                         temperature=self.temperature,
                         max_output_tokens=2048,
                     )
                 )
+                
+                # Restore system API key if we used user's key
+                if api_key:
+                    genai.configure(api_key=settings.gemini_api_key)
                 
                 logger.info(f"[{session_id}] LLM response generated successfully")
                 return response
@@ -546,7 +563,8 @@ class RAGEngine:
         user_query: str,
         similarity_threshold: Optional[float] = None,
         language: str = "en",
-        custom_prompt: Optional[str] = None
+        custom_prompt: Optional[str] = None,
+        api_key: Optional[str] = None
     ) -> RAGResponse:
         """
         執行 RAG 查詢
@@ -557,6 +575,7 @@ class RAGEngine:
             similarity_threshold: Session specific similarity threshold (overrides default)
             language: UI language code
             custom_prompt: Custom prompt template (overrides default)
+            api_key: Optional user-provided API key (for per-request authentication)
         
         Returns:
             RAGResponse: RAG 回應結果
@@ -688,7 +707,7 @@ class RAGEngine:
             
             # Step 4: LLM 生成 (with T099 rate limiting & retry logic)
             logger.debug(f"[{session_id}] Generating LLM response...")
-            response = self._generate_with_retry(prompt, session_id)
+            response = self._generate_with_retry(prompt, session_id, api_key)
             
             # 修復 Unicode 編碼問題：使用 candidates API 而非 response.text
             # response.text 可能有 UTF-16 代理對錯誤導致 emoji 替換中文字
@@ -971,6 +990,54 @@ Contenu du document:
             logger.error(f"[{session_id}] Summary generation failed: {str(e)}", exc_info=True)
             raise
     
+    def _detect_query_language(self, user_query: str) -> Optional[str]:
+        """
+        檢測用戶提問的語言
+        
+        Args:
+            user_query: 用戶查詢文本
+            
+        Returns:
+            Optional[str]: 檢測到的語言代碼 (zh-TW, zh-CN, en, ko, ja, fr, es) 或 None
+        """
+        # 統計各語言字符數
+        zh_count = len([c for c in user_query if '\u4e00' <= c <= '\u9fff'])  # 中文字符
+        ja_count = len([c for c in user_query if '\u3040' <= c <= '\u309f' or '\u30a0' <= c <= '\u30ff'])  # 日文平假名/片假名
+        ko_count = len([c for c in user_query if '\uac00' <= c <= '\ud7af'])  # 韓文
+        
+        total_chars = len(user_query.replace(' ', ''))  # 移除空格後的總字符數
+        
+        if total_chars == 0:
+            return None
+        
+        # 如果中文字符超過30%，判定為中文
+        if zh_count / total_chars > 0.3:
+            # 檢測繁體/簡體：如果包含繁體特有字符，判定為繁體
+            traditional_chars = ['為', '麼', '條', '説', '國', '學', '們', '個', '處', '這', '那', '與', '習', '無', '會', '來']
+            simplified_chars = ['为', '么', '条', '说', '国', '学', '们', '个', '处', '这', '那', '与', '习', '无', '会', '来']
+            
+            has_traditional = any(c in user_query for c in traditional_chars)
+            has_simplified = any(c in user_query for c in simplified_chars)
+            
+            if has_traditional and not has_simplified:
+                return 'zh-TW'
+            elif has_simplified and not has_traditional:
+                return 'zh-CN'
+            else:
+                # 默認繁體（或無法區分時）
+                return 'zh-TW'
+        
+        # 日文
+        if ja_count / total_chars > 0.2:
+            return 'ja'
+        
+        # 韓文
+        if ko_count / total_chars > 0.3:
+            return 'ko'
+        
+        # 無法檢測，返回 None（使用 UI 語言）
+        return None
+    
     def _build_prompt(
         self,
         user_query: str,
@@ -993,6 +1060,12 @@ Contenu du document:
         Returns:
             str: 完整 Prompt
         """
+        # 自動檢測用戶提問的語言（優先於UI語言設置）
+        detected_lang = self._detect_query_language(user_query)
+        if detected_lang:
+            logger.info(f"Detected user query language: {detected_lang}, overriding UI language: {language}")
+            language = detected_lang
+        
         # If custom prompt is provided, use it directly with variable substitution
         if custom_prompt:
             logger.info(f"Using custom_prompt (length={len(custom_prompt)}, preview={custom_prompt[:200]}...)")

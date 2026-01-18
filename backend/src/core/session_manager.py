@@ -173,33 +173,9 @@ class SessionManager:
         logger.debug(f"Session {session_id} vector_count: {count}")
         return True
 
-    def set_api_key(self, session_id: UUID, api_key: str) -> bool:
-        """
-        Store a user-provided Gemini API key for this session.
-
-        Args:
-            session_id: UUID of the session
-            api_key: validated Gemini API key
-
-        Returns:
-            bool: True if stored, False if session not found
-        """
-        session = self.get_session(session_id)
-        if not session:
-            return False
-
-        session.gemini_api_key = api_key
-        session.has_valid_api_key = True
-        session.api_key_source = "user"
-        logger.info(f"Session {session_id} stored user API key (masked)")
-        return True
-
-    def get_effective_api_key(self, session_id: UUID) -> str | None:
-        """Return user-provided key if present, otherwise default env key."""
-        session = self.get_session(session_id)
-        if session and session.gemini_api_key:
-            return session.gemini_api_key
-        return settings.gemini_api_key
+    # Removed: API keys are no longer stored in session state
+    # User-provided keys are passed via X-User-API-Key header per-request
+    # This ensures compliance with "no storage" security principle
     
     def close_session(self, session_id: UUID) -> bool:
         """

@@ -751,6 +751,22 @@
     "title": "资料分析摘要",
     "ready": "✓ 文件已处理，向量资料已储存至 Vector DB。可以开始问答。"
   },
+  "quota": {
+    "exceeded": {
+      "title": "API 配额已用完",
+      "heading": "每日 API 限额已达上限",
+      "description": "系统的 Gemini API 每日配额已用尽。",
+      "retryInfo": "系统配额将在约 {{hours}} 小时后重置。",
+      "solution": {
+        "title": "继续使用 - 提供您自己的 API Key",
+        "description": "您可以提供自己的 Gemini API key 继续使用聊天机器人。您的 key 仅用于当前会话，不会被储存。"
+      },
+      "apiKeyHelp": "您的 API key 仅用于本次会话，不会被保存。",
+      "securityNote": "🔒 您的 API key 仅用于本次请求，绝不会被留存。我们不会将其存入数据库、Session 储存或任何持久化储存中。",
+      "needKey": "还没有 API key？",
+      "getKeyLink": "取得免费 Gemini API Key"
+    }
+  },
   "crawledUrls": {
     "title": "🌐 爬虫 URL 列表",
     "pagesCount": "个页面",
@@ -764,5 +780,54 @@
     "pageTitle": "页面标题:",
     "tokens": "Token:",
     "contentPreview": "内容预览:"
+  },
+  "promptTemplate": {
+    "fullPrompt": "您是一个基于提供的文件来回答问题的 AI 助手。\n\n{{personaInstruction}}\n\n{{styleInstruction}}\n\n{{toneInstruction}}\n\n{{citationInstruction}}\n\n{{inferencePolicy}}\n\n{{strictRagPolicy}}\n\n技术参数：\n- 最大回应长度：{{maxResponseTokens}} tokens\n- 检索的文件片段数：{{retrievalTopK}}\n- 相似度阈值：{{similarityThreshold}}\n\n**检索到的文件**：\n{{context}}\n\n**用户问题**：\n{{query}}\n\n您的回答（请使用 {{responseLanguage}} 回应，仅基于上述文件内容）：",
+    "persona": {
+      "default": "角色：标准 AI 助手 - 提供平衡、中立的回应。",
+      "expert": "角色：领域专家 - 提供深入、技术性的解释，使用专业术语。",
+      "teacher": "角色：耐心教师 - 逐步解释概念，使用类比，确保理解。",
+      "friend": "角色：友善伙伴 - 使用对话语气，同理心，让信息易于理解。",
+      "elementary_teacher": "角色：小学老师 - 用简单例子慢慢教。",
+      "show_host": "角色：节目主持人 - 生动活泼，带节奏与互动。",
+      "workplace_veteran": "角色：职场老手 - 实战经验丰富，给务实建议。"
+    },
+    "responseStyle": {
+      "detailed": "风格：详细 - 提供全面的解释，包含范例和背景。",
+      "concise": "风格：简洁 - 提供简短、直接的答案，专注于重点。",
+      "bullet": "风格：条列式 - 以清晰、易扫描的项目符号组织信息。",
+      "narrative": "风格：叙述式 - 以流畅的故事或解释呈现信息。",
+      "brief": "风格：简要 - 快速给重点。",
+      "kid_friendly": "风格：浅显易懂 - 用浅显比喻让孩子懂。"
+    },
+    "responseTone": {
+      "professional": "语气：专业 - 保持正式、适合商业的语言。",
+      "casual": "语气：轻松 - 使用放松、对话式的语言。",
+      "enthusiastic": "语气：热情 - 对主题表达活力和兴奋。",
+      "empathetic": "语气：同理心 - 展现理解和情感意识。",
+      "friendly": "语气：友善 - 温暖易亲近。",
+      "rigorous": "语气：严谨 - 精确、逻辑清晰。",
+      "urgent": "语气：紧急直接 - 简短直入重点，快速输出。"
+    },
+    "citation": {
+      "none": "引用：不包含来源引用。",
+      "inline": "引用：包含内嵌参考，如 [Doc 1, p.5]。",
+      "endnotes": "引用：在回应末尾列出所有来源。",
+      "footnotes": "引用：使用脚注式编号标记来源。"
+    },
+    "inference": {
+      "allowed": "推论：在有帮助的情况下，您可以进行合理的推论，超越文档的确切内容。",
+      "notAllowed": "推论：仅使用文档中明确陈述的信息。不要推论或外推。"
+    },
+    "strictRag": {
+      "enabled": "RAG 模式：严格 - 仅在文档中找到相关信息时回答。若未找到，清楚说明信息不可用。",
+      "disabled": "RAG 模式：灵活 - 优先基于文档回答，但在需要时可使用一般知识。"
+    },
+    "languages": {
+      "en": "英文",
+      "zhTW": "繁体中文（台湾）",
+      "zhCN": "简体中文",
+      "fr": "法文"
+    }
   }
 }

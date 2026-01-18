@@ -708,19 +708,19 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   const generateCustomPrompt = (params: any): string | null => {
     const {
       // A. System Rules
-      allow_inference,
-      answer_language,
-      strict_rag_mode,
+      allow_inference = true,
+      answer_language = "auto",
+      strict_rag_mode = true,
       // B. Response Style
-      response_style,
-      response_tone,
-      persona,
-      citation_style,
+      response_style = "detailed",
+      response_tone = "professional",
+      persona = "default",
+      citation_style = "none",
       // C. Technical Control
-      max_response_tokens,
-      retrieval_top_k,
-      similarity_threshold,
-    } = params;
+      max_response_tokens = 2048,
+      retrieval_top_k = 5,
+      similarity_threshold = 0.7,
+    } = params || {};
 
     // Determine prompt language based on answer_language
     const promptLang =
@@ -774,9 +774,9 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       citationInstruction,
       inferencePolicy,
       strictRagPolicy,
-      maxResponseTokens: max_response_tokens || 2048,
-      retrievalTopK: retrieval_top_k || 5,
-      similarityThreshold: similarity_threshold || 0.7,
+      maxResponseTokens: max_response_tokens,
+      retrievalTopK: retrieval_top_k,
+      similarityThreshold: similarity_threshold,
       responseLanguage,
     });
   };
@@ -1072,7 +1072,6 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
         return (
           <TextProcessingStep
             parameters={parameters}
-            onParameterChange={onParameterChange!}
             sessionId={sessionId}
             documents={documents}
             crawledUrls={crawledUrls}

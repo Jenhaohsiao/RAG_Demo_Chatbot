@@ -64,8 +64,8 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
       const result = await validateUserApiKey(apiKey);
 
       if (result.valid) {
-        // Validation successful, save to session storage (security consideration)
-        sessionStorage.setItem("user_gemini_api_key", apiKey);
+        // Validation successful - pass API key to parent component
+        // API key is kept in React state (in-memory only) and never stored
         onApiKeyValidated?.(apiKey);
       } else {
         setError(result.message || t("apiKey.error.invalid"));

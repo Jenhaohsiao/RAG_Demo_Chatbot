@@ -150,10 +150,9 @@ async def query(
     try:
         # 執行 RAG 查詢（使用 session 特定的 similarity_threshold 和 custom_prompt）
         # 如果用戶提供 API Key，傳遞給 RAG 引擎使用
-        logger.info(
-            f"[{session_id}] Processing query: {user_query[:100]} "
-            f"(threshold={session.similarity_threshold}, language={request.language}, "
-            f"custom_prompt={bool(session.custom_prompt)}, user_api_key={'provided' if x_user_api_key else 'not_provided'})"
+        logger.debug(
+            f"[{session_id}] Processing query (threshold={session.similarity_threshold}, "
+            f"language={request.language}, custom_prompt={bool(session.custom_prompt)})"
         )
         
         rag_response = rag_engine.query(

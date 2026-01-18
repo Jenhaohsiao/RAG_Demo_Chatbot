@@ -904,7 +904,7 @@
         "description": "您可以提供自己的 Gemini API key 繼續使用聊天機器人。您的 key 僅用於當前會話，不會被儲存。"
       },
       "apiKeyHelp": "您的 API key 僅用於本次會話，不會被保存。",
-      "securityNote": "🔒 您的 API key 僅用於本次會話，不會儲存到我們的資料庫。",
+      "securityNote": "🔒 您的 API key 僅用於本次請求，絕不會被留存。我們不會將其存入資料庫、Session 儲存或任何持久化儲存中。",
       "needKey": "還沒有 API key？",
       "getKeyLink": "取得免費 Gemini API Key"
     }
@@ -916,6 +916,55 @@
       "empty": "API key 不能為空",
       "invalid": "API key 格式無效",
       "validationFailed": "API key 驗證失敗"
+    }
+  },
+  "promptTemplate": {
+    "fullPrompt": "您是一個基於提供的文件來回答問題的 AI 助手。\n\n{{personaInstruction}}\n\n{{styleInstruction}}\n\n{{toneInstruction}}\n\n{{citationInstruction}}\n\n{{inferencePolicy}}\n\n{{strictRagPolicy}}\n\n技術參數：\n- 最大回應長度：{{maxResponseTokens}} tokens\n- 檢索的文件片段數：{{retrievalTopK}}\n- 相似度閾值：{{similarityThreshold}}\n\n**檢索到的文件**：\n{{context}}\n\n**使用者問題**：\n{{query}}\n\n您的回答（請使用 {{responseLanguage}} 回應，僅基於上述文件內容）：",
+    "persona": {
+      "default": "角色：標準 AI 助手 - 提供平衡、中立的回應。",
+      "expert": "角色：領域專家 - 提供深入、技術性的解釋，使用專業術語。",
+      "teacher": "角色：耐心教師 - 逐步解釋概念，使用類比，確保理解。",
+      "friend": "角色：友善夥伴 - 使用對話語氣，同理心，讓資訊易於理解。",
+      "elementary_teacher": "角色：小學老師 - 用簡單例子慢慢教。",
+      "show_host": "角色：節目主持人 - 生動活潑，帶節奏與互動。",
+      "workplace_veteran": "角色：職場老手 - 實戰經驗豐富，給務實建議。"
+    },
+    "responseStyle": {
+      "detailed": "風格：詳細 - 提供全面的解釋，包含範例和背景。",
+      "concise": "風格：簡潔 - 提供簡短、直接的答案，專注於重點。",
+      "bullet": "風格：條列式 - 以清晰、易掃描的項目符號組織資訊。",
+      "narrative": "風格：敘述式 - 以流暢的故事或解釋呈現資訊。",
+      "brief": "風格：簡要 - 快速給重點。",
+      "kid_friendly": "風格：淺顯易懂 - 用淺顯比喻讓孩子懂。"
+    },
+    "responseTone": {
+      "professional": "語氣：專業 - 保持正式、適合商業的語言。",
+      "casual": "語氣：輕鬆 - 使用放鬆、對話式的語言。",
+      "enthusiastic": "語氣：熱情 - 對主題表達活力和興奮。",
+      "empathetic": "語氣：同理心 - 展現理解和情感意識。",
+      "friendly": "語氣：友善 - 溫暖易親近。",
+      "rigorous": "語氣：嚴謹 - 精確、邏輯清晰。",
+      "urgent": "語氣：緊急直接 - 簡短直入重點，快速輸出。"
+    },
+    "citation": {
+      "none": "引用：不包含來源引用。",
+      "inline": "引用：包含內嵌參考，如 [Doc 1, p.5]。",
+      "endnotes": "引用：在回應末尾列出所有來源。",
+      "footnotes": "引用：使用腳註式編號標記來源。"
+    },
+    "inference": {
+      "allowed": "推論：在有幫助的情況下，您可以進行合理的推論，超越文件的確切內容。",
+      "notAllowed": "推論：僅使用文件中明確陳述的資訊。不要推論或外推。"
+    },
+    "strictRag": {
+      "enabled": "RAG 模式：嚴格 - 僅在文件中找到相關資訊時回答。若未找到，清楚說明資訊不可用。",
+      "disabled": "RAG 模式：靈活 - 優先基於文件回答，但在需要時可使用一般知識。"
+    },
+    "languages": {
+      "en": "英文",
+      "zhTW": "繁體中文（台灣）",
+      "zhCN": "簡體中文",
+      "fr": "法文"
     }
   }
 }

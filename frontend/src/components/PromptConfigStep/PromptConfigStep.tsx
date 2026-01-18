@@ -161,8 +161,8 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
     ) || PERSONA_OPTIONS[2];
   const citationOption =
     CITATION_STYLE_OPTIONS.find(
-      (opt) => opt.value === (parameters.citation_style || "inline")
-    ) || CITATION_STYLE_OPTIONS[0];
+      (opt) => opt.value === (parameters.citation_style || "none")
+    ) || CITATION_STYLE_OPTIONS[2];
 
   return (
     <div className={`prompt-config-step ${disabled ? "disabled-step" : ""}`}>
@@ -269,7 +269,7 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                     className="form-check-input"
                     type="checkbox"
                     id="allowInference"
-                    checked={parameters.allow_inference || false}
+                    checked={parameters.allow_inference ?? true}
                     disabled={disabled}
                     onChange={(e) =>
                       onParameterChange("allow_inference", e.target.checked)
@@ -411,7 +411,7 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                 </label>
                 <select
                   className="form-select form-select-sm"
-                  value={parameters.citation_style || "inline"}
+                  value={parameters.citation_style || "none"}
                   disabled={disabled}
                   onChange={(e) =>
                     onParameterChange("citation_style", e.target.value)

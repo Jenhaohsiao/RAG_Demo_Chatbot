@@ -722,6 +722,22 @@
     "title": "Résumé d'analyse du document",
     "ready": "✓ Document traité, données vectorielles enregistrées dans Vector DB. Prêt pour Q&R."
   },
+  "quota": {
+    "exceeded": {
+      "title": "Quota API épuisé",
+      "heading": "Limite quotidienne de l'API atteinte",
+      "description": "Le quota quotidien de l'API Gemini du système est épuisé.",
+      "retryInfo": "Le quota du système sera réinitialisé dans environ {{hours}} heures.",
+      "solution": {
+        "title": "Continuer - Fournissez votre propre clé API",
+        "description": "Vous pouvez fournir votre propre clé API Gemini pour continuer à utiliser le chatbot. Votre clé n'est utilisée que pour la session en cours et ne sera pas stockée."
+      },
+      "apiKeyHelp": "Votre clé API ne sera utilisée que pour cette session et ne sera pas enregistrée.",
+      "securityNote": "🔒 Votre clé API est utilisée uniquement pour la requête actuelle et NE sera PAS stockée. Elle n'est pas enregistrée dans notre base de données, le stockage de session ou tout stockage persistant.",
+      "needKey": "Vous n'avez pas encore de clé API ?",
+      "getKeyLink": "Obtenir une clé API Gemini gratuite"
+    }
+  },
   "crawledUrls": {
     "title": "🌐 URLs explorées",
     "pagesCount": "pages",
@@ -735,5 +751,54 @@
     "pageTitle": "Titre de la page:",
     "tokens": "Tokens:",
     "contentPreview": "Aperçu du contenu:"
+  },
+  "promptTemplate": {
+    "fullPrompt": "Vous êtes un assistant IA conçu pour répondre aux questions basées sur les documents fournis.\n\n{{personaInstruction}}\n\n{{styleInstruction}}\n\n{{toneInstruction}}\n\n{{citationInstruction}}\n\n{{inferencePolicy}}\n\n{{strictRagPolicy}}\n\nParamètres techniques:\n- Longueur maximale de réponse: {{maxResponseTokens}} tokens\n- Nombre de fragments de documents récupérés: {{retrievalTopK}}\n- Seuil de similarité: {{similarityThreshold}}\n\n**Documents récupérés**:\n{{context}}\n\n**Question de l'utilisateur**:\n{{query}}\n\nVotre réponse (répondez en {{responseLanguage}} en vous basant sur les documents ci-dessus):",
+    "persona": {
+      "default": "Rôle: Assistant IA Standard - Fournir des réponses équilibrées et neutres.",
+      "expert": "Rôle: Expert du Domaine - Fournir des explications approfondies et techniques avec une terminologie professionnelle.",
+      "teacher": "Rôle: Enseignant Patient - Expliquer les concepts étape par étape, utiliser des analogies et assurer la compréhension.",
+      "friend": "Rôle: Compagnon Amical - Utiliser un ton conversationnel, faire preuve d'empathie et rendre l'information accessible.",
+      "elementary_teacher": "Rôle: Enseignant du Primaire - Expliquer avec des exemples simples et une guidance patiente.",
+      "show_host": "Rôle: Animateur - Engager avec énergie, rythme et style interactif.",
+      "workplace_veteran": "Rôle: Vétéran du Milieu de Travail - Fournir des conseils pratiques basés sur l'expérience."
+    },
+    "responseStyle": {
+      "detailed": "Style: Détaillé - Fournir des explications complètes avec des exemples et du contexte.",
+      "concise": "Style: Concis - Donner des réponses brèves et directes en se concentrant sur les points clés.",
+      "bullet": "Style: Points à puces - Organiser les informations en listes claires et faciles à scanner.",
+      "narrative": "Style: Narratif - Présenter les informations sous forme d'histoire ou d'explication fluide.",
+      "brief": "Style: Bref - Fournir uniquement les points essentiels rapidement.",
+      "kid_friendly": "Style: Adapté aux Enfants - Utiliser un langage simple et des analogies accessibles."
+    },
+    "responseTone": {
+      "professional": "Ton: Professionnel - Maintenir un langage formel et approprié pour les affaires.",
+      "casual": "Ton: Décontracté - Utiliser un langage détendu et conversationnel.",
+      "enthusiastic": "Ton: Enthousiaste - Exprimer de l'énergie et de l'excitation à propos du sujet.",
+      "empathetic": "Ton: Empathique - Montrer de la compréhension et une conscience émotionnelle.",
+      "friendly": "Ton: Amical - Communication chaleureuse et accessible.",
+      "rigorous": "Ton: Rigoureux - Précis et logiquement clair.",
+      "urgent": "Ton: Urgent - Bref et direct, se concentrant sur les besoins immédiats."
+    },
+    "citation": {
+      "none": "Citations: Ne pas inclure de citations de sources.",
+      "inline": "Citations: Inclure des références en ligne comme [Doc 1, p.5].",
+      "endnotes": "Citations: Lister toutes les sources à la fin de votre réponse.",
+      "footnotes": "Citations: Utiliser une numérotation de style note de bas de page pour les sources."
+    },
+    "inference": {
+      "allowed": "Inférence: Vous pouvez faire des inférences raisonnables au-delà du contenu exact du document lorsque cela est utile.",
+      "notAllowed": "Inférence: Utilisez uniquement les informations explicitement énoncées dans les documents. Ne pas inférer ou extrapoler."
+    },
+    "strictRag": {
+      "enabled": "Mode RAG: Strict - Répondre uniquement si des informations pertinentes sont trouvées dans les documents. Si non trouvé, indiquer clairement que l'information n'est pas disponible.",
+      "disabled": "Mode RAG: Flexible - Répondre en fonction des documents lorsque disponible, mais utiliser les connaissances générales si nécessaire."
+    },
+    "languages": {
+      "en": "Anglais",
+      "zhTW": "Chinois traditionnel (Taïwan)",
+      "zhCN": "Chinois simplifié",
+      "fr": "Français"
+    }
   }
 }
