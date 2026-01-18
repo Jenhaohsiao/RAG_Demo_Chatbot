@@ -8,19 +8,29 @@ import type { ChatResponse, ChatHistoryResponse } from '../types/chat';
 
 /**
  * Submit query
+ * 支援用戶自帶 API Key（當系統配額用完時）
  */
 export async function submitQuery(
   sessionId: string,
   userQuery: string,
-  language?: string
+  language?: string,
+  userApiKey?: string // 可選的用戶 API Key
 ): Promise<ChatResponse> {
   const lang = language || 'en';
+  
+  // 構建 headers
+  const headers: Record<string, string> = {};
+  if (userApiKey) {
+    headers['X-User-API-Key'] = userApiKey;
+  }
+  
   const response = await api.post<ChatResponse>(
     `/chat/${sessionId}/query`,
     { 
       user_query: userQuery,
       language: lang
-    }
+    },
+    { headers }
   );
   return response.data;
 }

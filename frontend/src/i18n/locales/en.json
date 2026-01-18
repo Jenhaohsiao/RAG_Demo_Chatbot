@@ -28,7 +28,9 @@
     "submit": "Submit Message",
     "submitting": "Submitting...",
     "updateSession": "Update Session",
-    "ok": "OK"
+    "ok": "OK",
+    "validating": "Validating...",
+    "useMyKey": "Use My API Key"
   },
   "contactModal": {
     "title": "Contact Me",
@@ -889,5 +891,30 @@
     "pageTitle": "Page Title:",
     "tokens": "Tokens:",
     "contentPreview": "Content Preview:"
+  },
+  "quota": {
+    "exceeded": {
+      "title": "API Quota Exceeded",
+      "heading": "Daily API Limit Reached",
+      "description": "The system's Gemini API daily quota has been exhausted.",
+      "retryInfo": "System quota will reset in approximately {{hours}} hours.",
+      "solution": {
+        "title": "Continue Using - Provide Your Own API Key",
+        "description": "You can continue using the chatbot by providing your own Gemini API key. Your key will only be used for the current session and will not be stored."
+      },
+      "apiKeyHelp": "Your API key will be used only for this session and will not be saved.",
+      "securityNote": "🔒 Your API key is only used for this session and will not be stored in our database.",
+      "needKey": "Don't have an API key?",
+      "getKeyLink": "Get Free Gemini API Key"
+    }
+  },
+  "apiKey": {
+    "label": "Gemini API Key",
+    "placeholder": "Enter your Gemini API key (AIza...)",
+    "errors": {
+      "empty": "API key cannot be empty",
+      "invalid": "API key format is invalid",
+      "validationFailed": "API key validation failed"
+    }
   }
 }

@@ -28,7 +28,9 @@
     "submit": "送出留言",
     "submitting": "送出中...",
     "updateSession": "更新 Session",
-    "ok": "確定"
+    "ok": "確定",
+    "validating": "驗證中...",
+    "useMyKey": "使用我的 API Key"
   },
   "contactModal": {
     "title": "與我聯絡",
@@ -890,5 +892,30 @@
     "pageTitle": "頁面標題:",
     "tokens": "Token:",
     "contentPreview": "內容預覽:"
+  },
+  "quota": {
+    "exceeded": {
+      "title": "API 配額已用完",
+      "heading": "每日 API 限額已達上限",
+      "description": "系統的 Gemini API 每日配額已用盡。",
+      "retryInfo": "系統配額將在約 {{hours}} 小時後重置。",
+      "solution": {
+        "title": "繼續使用 - 提供您自己的 API Key",
+        "description": "您可以提供自己的 Gemini API key 繼續使用聊天機器人。您的 key 僅用於當前會話，不會被儲存。"
+      },
+      "apiKeyHelp": "您的 API key 僅用於本次會話，不會被保存。",
+      "securityNote": "🔒 您的 API key 僅用於本次會話，不會儲存到我們的資料庫。",
+      "needKey": "還沒有 API key？",
+      "getKeyLink": "取得免費 Gemini API Key"
+    }
+  },
+  "apiKey": {
+    "label": "Gemini API Key",
+    "placeholder": "請輸入您的 Gemini API key (AIza...)",
+    "errors": {
+      "empty": "API key 不能為空",
+      "invalid": "API key 格式無效",
+      "validationFailed": "API key 驗證失敗"
+    }
   }
 }

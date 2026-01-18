@@ -15,6 +15,7 @@ from dataclasses import dataclass
 import google.generativeai as genai
 
 from ..core.config import settings
+from ..models.quota_errors import QuotaExceededError, InvalidApiKeyError, ApiKeyMissingError
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -139,6 +140,22 @@ class Embedder:
             )
         
         except Exception as e:
+            error_str = str(e).lower()
+            
+            # 檢測配額超限錯誤 (HTTP 429 或包含 quota 關鍵字)
+            if "429" in error_str or "quota" in error_str or "rate limit" in error_str or "resource exhausted" in error_str:
+                logger.warning(f"Gemini API quota exceeded: {str(e)}")
+                raise QuotaExceededError(
+                    message="Gemini API daily quota has been exceeded. Please provide your own API key to continue.",
+                    retry_after=86400  # 24 小時後重試
+                )
+            
+            # 檢測無效 API Key 錯誤
+            if "invalid" in error_str and ("api" in error_str or "key" in error_str):
+                logger.warning(f"Invalid API key provided: {str(e)}")
+                raise InvalidApiKeyError("The provided API key is invalid or has been revoked.")
+            
+            # 其他錯誤
             error_msg = f"Failed to embed text{source_info}: {str(e)}"
             logger.error(error_msg, exc_info=True)
             raise EmbeddingError(error_msg) from e

@@ -78,7 +78,9 @@
     "submit": "送出留言",
     "submitting": "送出中...",
     "updateSession": "更新 Session",
-    "ok": "确定"
+    "ok": "确定",
+    "validating": "验证中...",
+    "useMyKey": "使用我的 API Key"
   },
   "step2": {
     "system": {

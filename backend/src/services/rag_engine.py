@@ -20,6 +20,7 @@ from google.api_core import exceptions as google_exceptions
 from ..core.config import settings
 from ..services.vector_store import VectorStore
 from ..services.embedder import Embedder
+from ..models.quota_errors import QuotaExceededError, InvalidApiKeyError
 
 logger = logging.getLogger(__name__)
 
@@ -160,7 +161,17 @@ class RAGEngine:
                 return response
                 
             except google_exceptions.ResourceExhausted as e:
-                # Rate limit 錯誤
+                # Rate limit 錯誤 - 檢查是否為配額超限
+                error_str = str(e).lower()
+                
+                if "quota" in error_str or "daily" in error_str or "limit" in error_str:
+                    logger.error(f"[{session_id}] Gemini API quota exceeded: {str(e)}")
+                    raise QuotaExceededError(
+                        message="Gemini API daily quota has been exceeded. Please provide your own API key to continue.",
+                        retry_after=86400
+                    )
+                
+                # 一般的 rate limit，嘗試重試
                 logger.warning(
                     f"[{session_id}] Rate limit hit (attempt {retry_count + 1}/{self.max_retries}). "
                     f"Retrying in {current_delay}s..."

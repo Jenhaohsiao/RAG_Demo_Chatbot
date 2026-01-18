@@ -12,12 +12,13 @@ T089: Enhanced error handling with appropriate HTTP status codes
 import logging
 from uuid import UUID
 from typing import List, Optional
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Header
 from pydantic import BaseModel, Field
 
 from ...models.chat import ChatMessage, ChatRole
 from ...models.session import SessionState
 from ...models.errors import ErrorCode, get_error_response, get_http_status_code
+from ...models.quota_errors import QuotaExceededError, InvalidApiKeyError, ApiKeyMissingError
 from ...core.session_manager import session_manager
 from ...services.rag_engine import get_rag_engine, RAGError
 
@@ -89,7 +90,8 @@ _chat_history: dict[UUID, List[ChatMessage]] = {}
 @router.post("/{session_id}/query", response_model=ChatResponse)
 async def query(
     session_id: UUID,
-    request: QueryRequest
+    request: QueryRequest,
+    x_user_api_key: Optional[str] = Header(None, description="用戶提供的 API Key (optional)")
 ):
     """
     執行 RAG 查詢
@@ -100,10 +102,16 @@ async def query(
     3. 儲存聊天歷史
     4. 回傳回應
     
+    支援用戶自帶 API Key：
+    - 當系統 API Key 配額用完時，用戶可在 Header 中提供自己的 Key
+    - Header: X-User-API-Key: your_api_key_here
+    - 用戶的 Key 僅用於當前請求，不會被存儲
+    
     T089: Enhanced error handling:
     - 404 if session not found
     - 400 if query empty
     - 409 if session in invalid state
+    - 429 if quota exceeded (需要用戶提供 API Key)
     - 500 if RAG processing fails
     """
     # 延遲導入以避免循環導入
@@ -141,9 +149,11 @@ async def query(
     
     try:
         # 執行 RAG 查詢（使用 session 特定的 similarity_threshold 和 custom_prompt）
+        # 如果用戶提供 API Key，傳遞給 RAG 引擎使用
         logger.info(
             f"[{session_id}] Processing query: {user_query[:100]} "
-            f"(threshold={session.similarity_threshold}, language={request.language}, custom_prompt={bool(session.custom_prompt)})"
+            f"(threshold={session.similarity_threshold}, language={request.language}, "
+            f"custom_prompt={bool(session.custom_prompt)}, user_api_key={'provided' if x_user_api_key else 'not_provided'})"
         )
         
         rag_response = rag_engine.query(
@@ -151,7 +161,8 @@ async def query(
             user_query=user_query,
             similarity_threshold=session.similarity_threshold,
             language=request.language,
-            custom_prompt=session.custom_prompt
+            custom_prompt=session.custom_prompt,
+            api_key=x_user_api_key  # 傳遞用戶的 API Key（如有）
         )
         
         # 建立使用者訊息
@@ -215,6 +226,30 @@ async def query(
             token_total=rag_response.token_total,
             timestamp=assistant_message.timestamp.isoformat() + "Z",
             suggestions=rag_response.suggestions
+        )
+    
+    except QuotaExceededError as e:
+        # 配額超限錯誤 - 返回 429 讓前端顯示 API Key 輸入對話框
+        logger.warning(f"[{session_id}] API quota exceeded: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail={
+                "error_code": "QUOTA_EXCEEDED",
+                "message": e.message,
+                "retry_after": e.retry_after,
+                "requires_user_api_key": True
+            }
+        )
+    
+    except InvalidApiKeyError as e:
+        # 用戶提供的 API Key 無效
+        logger.warning(f"[{session_id}] Invalid API key provided: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={
+                "error_code": "INVALID_API_KEY",
+                "message": e.message
+            }
         )
     
     except RAGError as e:

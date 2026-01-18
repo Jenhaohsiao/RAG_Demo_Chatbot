@@ -53,7 +53,9 @@
     "submit": "Soumettre le message",
     "submitting": "Envoi en cours...",
     "updateSession": "Mettre à jour la session",
-    "ok": "OK"
+    "ok": "OK",
+    "validating": "Validation en cours...",
+    "useMyKey": "Utiliser ma clé API"
   },
   "step2": {
     "system": {
