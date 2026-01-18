@@ -101,53 +101,41 @@ const RESPONSE_TONE_OPTIONS = [
   },
 ];
 
-// Persona 選項
+// Persona options
 const PERSONA_OPTIONS = [
   {
     value: "elementary_teacher",
-    label: "小學老師",
     labelKey: "step2.persona.elementaryTeacher",
     descriptionKey: "step2.summary.persona.elementaryTeacher",
-    description: "用簡單例子慢慢教",
   },
   {
     value: "show_host",
-    label: "節目主持人",
     labelKey: "step2.persona.showHost",
     descriptionKey: "step2.summary.persona.showHost",
-    description: "生動活潑，帶節奏與互動",
   },
   {
     value: "workplace_veteran",
-    label: "職場老手",
     labelKey: "step2.persona.workplaceVeteran",
     descriptionKey: "step2.summary.persona.workplaceVeteran",
-    description: "實戰經驗豐富，給務實建議",
   },
 ];
 
-// 引用方式選項
+// Citation style options
 const CITATION_STYLE_OPTIONS = [
   {
     value: "inline",
-    label: "行內引用",
     labelKey: "step2.policy.citation.inline",
     descriptionKey: "step2.summary.citation.inline",
-    description: "在文字旁標註來源 [文件1]",
   },
   {
     value: "document",
-    label: "文件引用",
     labelKey: "step2.policy.citation.document",
     descriptionKey: "step2.summary.citation.document",
-    description: "在結尾列出所有來源",
   },
   {
     value: "none",
-    label: "不顯示",
     labelKey: "step2.policy.citation.none",
     descriptionKey: "step2.summary.citation.none",
-    description: "不顯示引用來源",
   },
 ];
 
@@ -176,95 +164,50 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
       (opt) => opt.value === (parameters.citation_style || "inline")
     ) || CITATION_STYLE_OPTIONS[0];
 
-  // 獲取選項描述
-  const getStyleDescription = (value: string) => {
-    const option = RESPONSE_STYLE_OPTIONS.find((opt) => opt.value === value);
-    return option?.description || "";
-  };
-
-  const getToneDescription = (value: string) => {
-    const option = RESPONSE_TONE_OPTIONS.find((opt) => opt.value === value);
-    return option?.description || "";
-  };
-
-  const getPersonaDescription = (value: string) => {
-    const option = PERSONA_OPTIONS.find((opt) => opt.value === value);
-    return option?.description || "";
-  };
-
-  const getCitationDescription = (value: string) => {
-    const option = CITATION_STYLE_OPTIONS.find((opt) => opt.value === value);
-    return option?.description || "";
-  };
-
   return (
     <div className={`prompt-config-step ${disabled ? "disabled-step" : ""}`}>
-      {/* 禁用狀態提示 */}
+      {/* Disabled status notice */}
       {disabled && (
         <div className="alert alert-info mb-2 py-2">
           <i className="bi bi-info-circle me-2"></i>
-          {t("step2.disabledNotice", "資料已上傳，配置已鎖定，無法修改。")}
+          {t("step2.disabledNotice")}
         </div>
       )}
 
       <div className="row g-2 prompt-summary mb-2">
         <div className="col-md-3 col-sm-6">
           <div className="summary-tile">
-            <div className="label">
-              {t("step2.policy.style.label", "回答風格")}
-            </div>
-            <div className="value">
-              {t(styleOption.labelKey, styleOption.label)}
-            </div>
-            <div className="meta">
-              {t(styleOption.descriptionKey, styleOption.description)}
-            </div>
+            <div className="label">{t("step2.policy.style.label")}</div>
+            <div className="value">{t(styleOption.labelKey)}</div>
+            <div className="meta">{t(styleOption.descriptionKey)}</div>
           </div>
         </div>
         <div className="col-md-3 col-sm-6">
           <div className="summary-tile">
-            <div className="label">
-              {t("step2.policy.tone.label", "回答語氣")}
-            </div>
-            <div className="value">
-              {t(toneOption.labelKey, toneOption.label)}
-            </div>
-            <div className="meta">
-              {t(toneOption.descriptionKey, toneOption.description)}
-            </div>
+            <div className="label">{t("step2.policy.tone.label")}</div>
+            <div className="value">{t(toneOption.labelKey)}</div>
+            <div className="meta">{t(toneOption.descriptionKey)}</div>
           </div>
         </div>
         <div className="col-md-3 col-sm-6">
           <div className="summary-tile">
-            <div className="label">
-              {t("step2.policy.persona.label", "角色設定")}
-            </div>
-            <div className="value">
-              {t(personaOption.labelKey, personaOption.label)}
-            </div>
-            <div className="meta">
-              {t(personaOption.descriptionKey, personaOption.description)}
-            </div>
+            <div className="label">{t("step2.policy.persona.label")}</div>
+            <div className="value">{t(personaOption.labelKey)}</div>
+            <div className="meta">{t(personaOption.descriptionKey)}</div>
           </div>
         </div>
         <div className="col-md-3 col-sm-6">
           <div className="summary-tile">
-            <div className="label">
-              {t("step2.policy.citation.label", "引用方式")}
-            </div>
-            <div className="value">
-              {t(citationOption.labelKey, citationOption.label)}
-            </div>
-            <div className="meta">
-              {t(citationOption.descriptionKey, citationOption.description)}
-            </div>
+            <div className="label">{t("step2.policy.citation.label")}</div>
+            <div className="value">{t(citationOption.labelKey)}</div>
+            <div className="meta">{t(citationOption.descriptionKey)}</div>
           </div>
         </div>
       </div>
 
-      {/* 2x2 Grid 卡片佈局 */}
+      {/* 2x2 Grid card layout */}
       <div className="row g-2">
-        {/* A. 系統規則 (System Rules) - 左上 */}
+        {/* A. System Rules - top left */}
         <div className="col-lg-6">
           <div
             className={`card h-100 prompt-card ${
@@ -273,13 +216,13 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
           >
             <div className="card-body p-3">
               <h5 className="card-title mb-2 fw-bold">
-                {t("step2.system.title", "系統規則")}
+                {t("step2.system.title")}
               </h5>
 
-              {/* 回答語言 */}
+              {/* Answer language */}
               <div className="mb-2">
                 <label className="form-label small mb-1">
-                  {t("step2.system.answerLanguage", "回答語言")}
+                  {t("step2.system.answerLanguage")}
                 </label>
                 <select
                   className="form-select form-select-sm"
@@ -291,13 +234,13 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                 >
                   {ANSWER_LANGUAGE_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
-                      {t(option.labelKey, option.label)}
+                      {t(option.labelKey)}
                     </option>
                   ))}
                 </select>
               </div>
 
-              {/* 嚴格 RAG 模式 Toggle */}
+              {/* Strict RAG mode Toggle */}
               <div className="mb-2">
                 <div className="form-check form-switch">
                   <input
@@ -314,12 +257,12 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                     className="form-check-label small"
                     htmlFor="strictRagMode"
                   >
-                    {t("step2.system.strictRagMode", "嚴格 RAG 模式")}
+                    {t("step2.system.strictRagMode")}
                   </label>
                 </div>
               </div>
 
-              {/* 允許推論 Toggle */}
+              {/* Allow inference Toggle */}
               <div className="mb-2">
                 <div className="form-check form-switch">
                   <input
@@ -336,12 +279,12 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                     className="form-check-label small"
                     htmlFor="allowInference"
                   >
-                    {t("step2.system.allowInference", "允許推論")}
+                    {t("step2.system.allowInference")}
                   </label>
                 </div>
               </div>
 
-              {/* 允許使用者的 Prompt 來調整 System Prompt (永遠關閉) */}
+              {/* Allow user prompt to adjust System Prompt (always off) */}
               <div className="mb-2">
                 <div className="form-check form-switch">
                   <input
@@ -355,18 +298,15 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                     className="form-check-label text-muted small"
                     htmlFor="allowUserOverride"
                   >
-                    {t(
-                      "step2.system.allowUserOverride",
-                      "允許調整 System Prompt"
-                    )}
+                    {t("step2.system.allowUserOverride")}
                     <span className="badge bg-secondary ms-1 small">
-                      {t("step2.system.alwaysOff", "關")}
+                      {t("step2.system.alwaysOff")}
                     </span>
                   </label>
                 </div>
               </div>
 
-              {/* 外部知識（永遠關閉，唯讀） */}
+              {/* External knowledge (always off, read-only) */}
               <div className="mb-0">
                 <div className="form-check form-switch">
                   <input
@@ -380,9 +320,9 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                     className="form-check-label text-muted small"
                     htmlFor="externalKnowledge"
                   >
-                    {t("step2.system.externalKnowledge", "外部知識存取")}
+                    {t("step2.system.externalKnowledge")}
                     <span className="badge bg-secondary ms-1 small">
-                      {t("step2.system.alwaysOff", "關")}
+                      {t("step2.system.alwaysOff")}
                     </span>
                   </label>
                 </div>
@@ -391,7 +331,7 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
           </div>
         </div>
 
-        {/* B. 回應策略 (Response Policy) - 右上 */}
+        {/* B. Response Policy - top right */}
         <div className="col-lg-6">
           <div
             className={`card h-100 prompt-card ${
@@ -400,13 +340,13 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
           >
             <div className="card-body p-3">
               <h5 className="card-title mb-2 fw-bold">
-                {t("step2.response.title", "回應策略")}
+                {t("step2.response.title")}
               </h5>
 
-              {/* 回答風格 */}
+              {/* Response style */}
               <div className="mb-3">
                 <label className="form-label fw-bold">
-                  {t("step2.policy.style.label", "回答風格")}
+                  {t("step2.policy.style.label")}
                 </label>
                 <select
                   className="form-select modern-select"
@@ -418,16 +358,16 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                 >
                   {RESPONSE_STYLE_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
-                      {t(option.labelKey, option.label)}
+                      {t(option.labelKey)}
                     </option>
                   ))}
                 </select>
               </div>
 
-              {/* 回答語氣 */}
+              {/* Response tone */}
               <div className="mb-2">
                 <label className="form-label small mb-1">
-                  {t("step2.policy.tone.label", "回答語氣")}
+                  {t("step2.policy.tone.label")}
                 </label>
                 <select
                   className="form-select form-select-sm"
@@ -439,7 +379,7 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                 >
                   {RESPONSE_TONE_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
-                      {t(option.labelKey, option.label)}
+                      {t(option.labelKey)}
                     </option>
                   ))}
                 </select>
@@ -448,7 +388,7 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
               {/* Persona */}
               <div className="mb-2">
                 <label className="form-label small mb-1">
-                  {t("step2.policy.persona.label", "角色設定")}
+                  {t("step2.policy.persona.label")}
                 </label>
                 <select
                   className="form-select form-select-sm"
@@ -458,16 +398,16 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                 >
                   {PERSONA_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
-                      {t(option.labelKey, option.label)}
+                      {t(option.labelKey)}
                     </option>
                   ))}
                 </select>
               </div>
 
-              {/* 引用方式 */}
+              {/* Citation style */}
               <div className="mb-0">
                 <label className="form-label small mb-1">
-                  {t("step2.policy.citation.label", "引用方式")}
+                  {t("step2.policy.citation.label")}
                 </label>
                 <select
                   className="form-select form-select-sm"
@@ -479,7 +419,7 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                 >
                   {CITATION_STYLE_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
-                      {t(option.labelKey, option.label)}
+                      {t(option.labelKey)}
                     </option>
                   ))}
                 </select>

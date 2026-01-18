@@ -131,7 +131,7 @@
   flex: 1;
 }
 
-/* RTL 支持 */
+/* RTL support */
 .rtl-layout .resource-consumption-panel {
   border-left: none;
   border-right: 4px solid #3b82f6;
@@ -151,7 +151,6 @@
   direction: rtl;
 }
 
-/* 響應式 */
 @media (max-width: 768px) {
   .resource-consumption-panel {
     padding: 12px;

@@ -113,7 +113,7 @@ const ProcessingScreen: React.FC<ProcessingScreenProps> = ({
   };
 
   /**
-   * 取得來源類型圖示
+   * Get source type icon
    */
   const getSourceIcon = (): string => {
     switch (sourceType) {
@@ -129,7 +129,7 @@ const ProcessingScreen: React.FC<ProcessingScreenProps> = ({
   };
 
   /**
-   * 格式化來源引用
+   * Format source reference
    */
   const formatSourceReference = (): string => {
     if (!sourceReference) {
@@ -140,7 +140,7 @@ const ProcessingScreen: React.FC<ProcessingScreenProps> = ({
       return sourceReference;
     }
 
-    // 僅顯示檔名
+    // Only show filename
     const parts = sourceReference.split(/[/\\]/);
     return parts[parts.length - 1] || sourceReference;
   };
@@ -151,7 +151,7 @@ const ProcessingScreen: React.FC<ProcessingScreenProps> = ({
         <h2>{t("processing.title", "Processing Document")}</h2>
       </div>
 
-      {/* 來源資訊 */}
+      {/* Source information */}
       <div className="processing-source">
         <span className="source-icon">{getSourceIcon()}</span>
         <div className="source-details">
@@ -162,7 +162,7 @@ const ProcessingScreen: React.FC<ProcessingScreenProps> = ({
         </div>
       </div>
 
-      {/* 錯誤訊息 */}
+      {/* Error message */}
       {(extractionStatus === ExtractionStatus.FAILED ||
         moderationStatus === ModerationStatus.BLOCKED) && (
         <div className="processing-error">
@@ -202,7 +202,7 @@ const ProcessingScreen: React.FC<ProcessingScreenProps> = ({
         </div>
       )}
 
-      {/* 處理進度 */}
+      {/* Processing progress */}
       {extractionStatus !== ExtractionStatus.FAILED &&
         moderationStatus !== ModerationStatus.BLOCKED && (
           <div className="processing-progress">
@@ -214,7 +214,7 @@ const ProcessingScreen: React.FC<ProcessingScreenProps> = ({
               />
             )}
 
-            {/* 進度條 */}
+            {/* Progress bar */}
             <div className="progress-bar-container">
               <div
                 className="progress-bar"
@@ -225,13 +225,13 @@ const ProcessingScreen: React.FC<ProcessingScreenProps> = ({
               />
             </div>
 
-            {/* 進度文字 */}
+            {/* Progress text */}
             <div className="progress-info">
               <p className="progress-stage">{getProcessingStageText()}</p>
               <p className="progress-percentage">{processingProgress}%</p>
             </div>
 
-            {/* Spinner（處理中） */}
+            {/* Spinner (processing) */}
             {processingProgress < 100 && (
               <div className="processing-spinner">
                 <div className="spinner-icon">⏳</div>
@@ -244,7 +244,7 @@ const ProcessingScreen: React.FC<ProcessingScreenProps> = ({
               </div>
             )}
 
-            {/* 完成資訊 */}
+            {/* Completion information */}
             {processingProgress === 100 && (
               <div className="processing-complete">
                 <div className="complete-icon">✅</div>
@@ -265,7 +265,7 @@ const ProcessingScreen: React.FC<ProcessingScreenProps> = ({
                     )}
                   </p>
                 )}
-                {/* T089+ 顯示 Token 和頁面信息 */}
+                {/* T089+ Display Token and page information */}
                 <div className="processing-stats">
                   {tokensUsed > 0 && (
                     <p className="stat-item">
@@ -300,7 +300,7 @@ const ProcessingScreen: React.FC<ProcessingScreenProps> = ({
           </div>
         )}
 
-      {/* 處理步驟指示器 */}
+      {/* Processing step indicators */}
       <div className="processing-steps">
         <div
           className={`step ${

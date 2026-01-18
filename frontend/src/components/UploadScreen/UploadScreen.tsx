@@ -70,16 +70,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
     activeTab === "file"
       ? t("uploadWizard.tabs.file", "File Upload")
       : t("uploadWizard.tabs.crawler", "Website Crawler");
-  const tabDescription =
-    activeTab === "file"
-      ? t(
-          "uploadWizard.tabs.fileDesc",
-          "Quickly set file limits and upload documents, ensuring format and size compliance."
-        )
-      : t(
-          "uploadWizard.tabs.crawlerDesc",
-          "Set crawler safety scope and limits, enter URL to start capturing content."
-        );
+
   const cardWrapperClasses =
     "card shadow-sm mx-auto upload-card-wrapper active-card-border";
   const [isDragging, setIsDragging] = useState(false);
@@ -389,7 +380,8 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
         const debugInfo =
           failureReasons.length > 0 ? ` (${failureReasons.join(", ")})` : "";
         const errorMsg =
-          (response.error_message || "Cannot embed empty text list") +
+          (response.error_message ||
+            t("crawler.error.emptyTextList", "Cannot embed empty text list")) +
           debugInfo;
 
         setCrawlerResults(null);
@@ -408,7 +400,9 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
       setCrawlerResults(null);
 
       const errorMessage =
-        err instanceof Error ? err.message : "Failed to crawl website";
+        err instanceof Error
+          ? err.message
+          : t("crawler.error.failed", "Failed to crawl website");
 
       const isInsufficientDataError =
         errorMessage.startsWith("INSUFFICIENT_DATA:");

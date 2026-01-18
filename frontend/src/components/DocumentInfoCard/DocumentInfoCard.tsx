@@ -30,7 +30,7 @@ export const DocumentInfoCard: React.FC<DocumentInfoCardProps> = ({
   const [sessionInfo, setSessionInfo] = useState<SessionInfo | null>(null);
   const [isExpanded, setIsExpanded] = useState(true);
 
-  // Get session info (document_count, vector_count)
+  // Fetch session info (document_count, vector_count)
   useEffect(() => {
     const fetchSessionInfo = async () => {
       try {
@@ -44,24 +44,23 @@ export const DocumentInfoCard: React.FC<DocumentInfoCardProps> = ({
 
     fetchSessionInfo();
 
-    // Update every 5 seconds
+    // Refresh session info every 5 seconds
     const interval = setInterval(fetchSessionInfo, 5000);
     return () => clearInterval(interval);
   }, [sessionId]);
 
-  // Show card only if sessionInfo exists (even without summary)
+  // Only render card when sessionInfo is available
   if (!sessionInfo) {
     return null;
   }
 
-  // Debug: Check props
   return (
     <div className="card mb-3 border-primary">
       <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
         <div className="d-flex align-items-center">
           <h5 className="p-0">
             {" "}
-            <strong>{t("documentInfo.title", "資料分析摘要")}</strong>
+            <strong>{t("documentInfo.title")}</strong>
           </h5>
         </div>
         <button
@@ -82,12 +81,7 @@ export const DocumentInfoCard: React.FC<DocumentInfoCardProps> = ({
             <div className="mt-3">
               <div className="alert alert-success mb-0 py-2 d-flex align-items-center">
                 <i className="bi bi-check-circle-fill me-2"></i>
-                <small>
-                  {t(
-                    "documentInfo.ready",
-                    "✓ Document processed, vector data saved to Vector DB. Ready for Q&A."
-                  )}
-                </small>
+                <small>{t("documentInfo.ready")}</small>
               </div>
             </div>
           )}

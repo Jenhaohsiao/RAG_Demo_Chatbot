@@ -16,14 +16,10 @@ import { useTranslation } from "react-i18next";
 import i18n from "./i18n/config";
 
 import Header from "./components/Header/Header";
-import UploadScreen from "./components/UploadScreen/UploadScreen";
 import ProcessingModal from "./components/ProcessingModal/ProcessingModal";
-import ChatScreen from "./components/ChatScreen/ChatScreen";
 import SettingsModal from "./components/SettingsModal/SettingsModal";
 import ConfirmDialog from "./components/ConfirmDialog/ConfirmDialog";
 import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary"; // T093: Import Error Boundary
-import PromptVisualization from "./components/PromptVisualization/PromptVisualization";
-import FixedRagFlow from "./components/FixedRagFlow/FixedRagFlow";
 import AboutProjectModal from "./components/AboutProjectModal/AboutProjectModal";
 import ContactModal from "./components/ContactModal/ContactModal";
 import WorkflowMain from "./components/WorkflowMain/WorkflowMain"; // New workflow integration
@@ -32,9 +28,7 @@ import ToastMessage from "./components/ToastMessage/ToastMessage";
 import { useSession } from "./hooks/useSession";
 import { useUpload } from "./hooks/useUpload";
 import { useToast } from "./hooks/useToast";
-import { submitQuery } from "./services/chatService";
 import type { SupportedLanguage } from "./hooks/useLanguage";
-import type { ChatResponse } from "./types/chat";
 
 /**
  * Main App Component

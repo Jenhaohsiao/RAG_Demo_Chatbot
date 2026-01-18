@@ -7,6 +7,32 @@
 
 ---
 
+## 📅 2026-01-17 - 多語言與編譯錯誤修正 (Multilingual & Build Fixes) ✅
+
+**🎯 本次更新重點**:
+1. **多語言修復**: 補齊 `Session Expired` 與 `Server Error` 相關翻譯，確保中/英文介面顯示正確。
+2. **API 路徑修正**: 修復前端 Service 層多處 API URL 格式錯誤 (Template Literal 語法修復)。
+3. **Build 錯誤排除**: 修復大量 TypeScript/JSX 語法錯誤與 Sass 全域引入設定問題，成功通過 `npm run build`。
+
+**主要變更**:
+- **Services 修復**:
+  - `uploadService.ts` & `chatService.ts`: 修正路徑拼接語法（如 `/upload//file` → `/upload/${sessionId}/file`）。
+  - `api.ts`: 錯誤訊息全面改用 `i18n.t()`。
+- **Hooks 修復**:
+  - `useSession.ts`: 修復 `sendBeacon` URL 格式錯誤。
+- **UI Components 修復**:
+  - 修復 `ApiKeyInput`, `ResourceConsumptionPanel`, `SettingsModal`, `TextProcessingStep`, `ToastMessage`, `WebsiteCrawlerPanel` 中的 JSX 語法錯誤（如 `className` 亂碼、括號不匹配）。
+- **Locales 更新**:
+  - `en.json` & `zh-TW.json`: 新增 `error.*`, `session.*`, `system.*` 相關翻譯鍵值。
+- **Build Config**:
+  - `vite.config.ts`: 移除 Sass `additionalData` 中的全域 Bootstrap 引入，改為在 `main.scss` 顯式引入，解決樣式編譯錯誤。
+
+**驗證**:
+- ✅ `npm run build` 成功（無 Error，僅剩 Warning）。
+- ✅ 重啟開發伺服器後，網頁可正常運行。
+
+---
+
 ## 📅 2026-01-17 - 多語言修正與流程警告修復 ✅
 
 **🎯 本次更新重點**:

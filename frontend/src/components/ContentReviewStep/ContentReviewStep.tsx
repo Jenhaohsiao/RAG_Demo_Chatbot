@@ -200,7 +200,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
     const reviewItems = reviewChecklist.map((item) => item.key);
 
     try {
-      // 準備審核內容
+      // Prepare content for moderation
       const contentToModerate = documents.map((doc, index) => ({
         content:
           doc.preview && doc.preview !== defaultDocPreview
@@ -208,7 +208,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
             : doc.filename,
         source_reference: doc.filename || `Document ${index + 1}`,
       }));
-      // 逐項執行審核
+      // Execute review items one by one
       for (let i = 0; i < reviewItems.length; i++) {
         const item = reviewItems[i];
         setReviewProgress((prev) => ({
@@ -216,28 +216,28 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
           currentItem: item,
         }));
 
-        // 添加小延遲確保UI更新
+        // Add small delay to ensure UI updates
         await new Promise((resolve) => setTimeout(resolve, 100));
 
         let passed = true;
         let failureReason = "";
 
-        // 檢查每個審核項目
+        // Check each review item
         if (i === 0 || i === 1 || i === 3 || i === 4 || i === 5) {
-          // 檢查文件格式完整性、掃描惡意軟體、驗證文檔結構、分析內容品質、檢查版權限制 - 基本檢查總是通過
+          // Check file format integrity, scan for malware, validate document structure, analyze content quality, check copyright restrictions - basic checks always pass
           await new Promise((resolve) => setTimeout(resolve, 1500));
-          // ✅ 基本檢查總是通過，避免隨機失敗
+          // ✅ Basic checks always pass to avoid random failures
           passed = true;
         } else if (i === 2) {
-          // 檢測有害內容 - 只阻擋真正有害的內容
+          // Detect harmful content - only block truly harmful content
           if (contentToModerate.length > 0) {
             try {
               const moderationResults = await moderateMultipleContent(
                 sessionId,
                 contentToModerate,
-                false // 不使用學術模式，因為新的邏輯已經夠寬鬆
+                false // Don't use academic mode, as the new logic is already lenient enough
               );
-              // 檢查是否有任何內容被阻擋
+              // Check if any content was blocked
               const blockedContent = moderationResults.filter(
                 (result) => !result.is_approved
               );
@@ -260,7 +260,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                     categories: blockedCategories.join(", "),
                   }
                 );
-                // 顯示明確的有害內容警告
+                // Show clear harmful content warning
                 showToast({
                   type: "error",
                   message: t(
@@ -272,12 +272,12 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
               } else {
               }
             } catch (error) {
-              // ⚠️ API 調用失敗 - 將錯誤記錄但不阻擋用戶
-              // 這避免了因網絡問題或 API 錯誤而阻止合法內容
+              // ⚠️ API call failed - log the error but don't block the user
+              // This prevents legitimate content from being blocked due to network issues or API errors
               passed = true;
               const errorMsg =
                 error instanceof Error ? error.message : String(error);
-              // 顯示警告但不阻止繼續
+              // Show warning but don't block continuation
               showToast({
                 type: "warning",
                 message: t(
@@ -288,34 +288,34 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
               });
             }
           } else {
-            // 沒有內容需要審核，直接通過
+            // No content needs moderation, pass directly
             await new Promise((resolve) => setTimeout(resolve, 1500));
           }
         }
-        // 更新進度狀態
+        // Update progress state
         setReviewProgress((prev) => {
           const failureEntry = failureReason
             ? `${item}: ${failureReason}`
             : item;
           const newState = {
             ...prev,
-            currentItem: "", // 清空當前項目
+            currentItem: "", // Clear current item
             completed: passed ? [...prev.completed, item] : prev.completed,
             failed: !passed ? [...prev.failed, failureEntry] : prev.failed,
           };
           return newState;
         });
 
-        // 如果是有害內容檢測失敗，我們仍然繼續其他檢查，但會在最後標記為需要人工審核
+        // If harmful content detection fails, continue with other checks but mark for manual review at the end
         if (!passed && i === 2) {
-          // 不要 break，繼續執行其他檢查項目
+          // Don't break, continue with other check items
         }
 
-        // 添加項目間的小延遲讓用戶看到進度變化
+        // Add small delay between items to let users see progress changes
         await new Promise((resolve) => setTimeout(resolve, 300));
       }
 
-      // 完成審核
+      // Complete review
       let finalCompleted: string[] = [];
       let finalFailed: string[] = [];
 
@@ -334,7 +334,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
         return finalState;
       });
 
-      // 將通知與儲存邏輯移到 setState 之外，避免在渲染階段觸發父層更新
+      // Move notification and save logic outside setState to avoid triggering parent updates during render phase
       const completedToSave = finalCompleted.length
         ? finalCompleted
         : reviewProgress.completed;
@@ -349,7 +349,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
 
       const canProceed = failedToSave.length === 0;
 
-      // 通知父組件結束 loading
+      // Notify parent component to end loading
       if (onLoadingChange) {
         onLoadingChange(false);
       }
@@ -357,10 +357,10 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
       onReviewStatusChange?.(canProceed);
       if (canProceed) {
         onReviewComplete?.();
-        // 不再重置 hasStartedReview，保持為 true 以便返回時顯示結果
+        // No longer reset hasStartedReview, keep it as true to show results when returning
       }
     } catch (error) {
-      // 通知父組件結束 loading（錯誤情況）
+      // Notify parent component to end loading (error case)
       if (onLoadingChange) {
         onLoadingChange(false);
       }
@@ -378,39 +378,39 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
           )}`,
         ],
       }));
-      setHasStartedReview(false); // 重置審核狀態
+      setHasStartedReview(false); // Reset review state
       onReviewStatusChange?.(false);
     }
   };
 
-  // 從外部觸發審核過程（移除自動執行）
+  // Trigger review process externally (remove auto-execution)
   React.useEffect(() => {
-    // 移除自動執行邏輯，改由外部按鈕觸發
+    // Remove auto-execution logic, trigger via external button
   }, []);
 
-  // 監聽外部觸發信號
+  // Listen to external trigger signal
   React.useEffect(() => {
-    // 添加 sessionId 檢查，避免在沒有 sessionId 時執行
-    // 使用 ref 來追蹤是否已經開始審核，避免重複執行
+    // Add sessionId check to avoid execution without sessionId
+    // Use ref to track if review has started to avoid duplicate execution
     if (
       shouldStartReview &&
       !hasStartedReview &&
       !reviewProgress.isRunning &&
       sessionId
     ) {
-      // 使用 setTimeout 延遲執行，避免在渲染期間更新父組件狀態
+      // Use setTimeout to delay execution to avoid updating parent component state during render
       setTimeout(() => {
         startReviewProcess();
       }, 0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shouldStartReview, sessionId]); // 只依賴外部觸發信號和 sessionId
+  }, [shouldStartReview, sessionId]); // Only depend on external trigger signal and sessionId
 
-  // 轉換props數據為組件需要的格式
+  // Convert props data to component-required format
   const documents = React.useMemo(() => {
     const result: DocumentInfo[] = [];
 
-    // 處理propDocuments
+    // Process propDocuments
     if (propDocuments && propDocuments.length > 0) {
       propDocuments.forEach((doc: any, index: number) => {
         const documentInfo = {
@@ -427,7 +427,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
       });
     }
 
-    // 處理crawledUrls
+    // Process crawledUrls
     if (crawledUrls && crawledUrls.length > 0) {
       crawledUrls.forEach((url: any, index: number) => {
         result.push({
@@ -455,10 +455,10 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
 
   return (
     <div className="content-review-step">
-      {/* 簡化版審核資訊卡片 */}
+      {/* Simplified review info card */}
       <div className="card mb-3 shadow-sm active-card-border surface-card">
         <div className="card-body p-3">
-          {/* 審核工具說明 - 更簡潔 */}
+          {/* Review tool description - more concise */}
           <div className="d-flex align-items-center mb-3 pb-2 border-bottom">
             <i className="bi bi-shield-check text-primary fs-4 me-2"></i>
             <div>
@@ -471,7 +471,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
             </div>
           </div>
 
-          {/* 審核項目 - 精簡顯示 */}
+          {/* Review items - simplified display */}
           {(hasStartedReview ||
             reviewProgress.isRunning ||
             reviewProgress.isCompleted) && (
@@ -510,7 +510,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
             </div>
           )}
 
-          {/* 進度條 - 只在審核中顯示 */}
+          {/* Progress bar - only show during review */}
           {reviewProgress.isRunning && (
             <div className="mb-3">
               <div className="progress" style={{ height: "8px" }}>
@@ -529,7 +529,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
             </div>
           )}
 
-          {/* 執行按鈕 / 完成訊息 - 固定在同一位置 */}
+          {/* Execute button / Completion message - fixed at same position */}
           <div className="text-center mt-3">
             {!hasStartedReview &&
               !reviewProgress.isRunning &&
@@ -572,7 +572,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                 </>
               )}
 
-            {/* 完成訊息 - 與按鈕在同一位置 */}
+            {/* Completion message - at same position as button */}
             {reviewProgress.isCompleted &&
               reviewProgress.failed.length === 0 && (
                 <div className="alert alert-success d-inline-flex align-items-center mb-0 shadow-sm">
@@ -591,7 +591,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                 </div>
               )}
 
-            {/* 審核失敗提示 - 與按鈕在同一位置 */}
+            {/* Review failure message - at same position as button */}
             {reviewProgress.isCompleted && reviewProgress.failed.length > 0 && (
               <div className="alert alert-danger mb-0 border-0 shadow-sm">
                 <div className="d-flex align-items-center mb-2">

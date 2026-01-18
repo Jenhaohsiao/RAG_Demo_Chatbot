@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import "./ContactModal.scss";
 
 interface ContactModalProps {
@@ -18,6 +19,7 @@ interface FormErrors {
 }
 
 const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
@@ -34,19 +36,19 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
     const newErrors: FormErrors = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = "請輸入您的名字";
+      newErrors.name = t("contactModal.validation.nameRequired");
     } else if (formData.name.trim().length < 2) {
-      newErrors.name = "名字至少需要2個字元";
+      newErrors.name = t("contactModal.validation.nameMinLength");
     } else if (formData.name.trim().length > 100) {
-      newErrors.name = "名字不可超過100個字元";
+      newErrors.name = t("contactModal.validation.nameMaxLength");
     }
 
     if (!formData.message.trim()) {
-      newErrors.message = "請輸入留言內容";
+      newErrors.message = t("contactModal.validation.messageRequired");
     } else if (formData.message.trim().length < 10) {
-      newErrors.message = "留言至少需要10個字元";
+      newErrors.message = t("contactModal.validation.messageMinLength");
     } else if (formData.message.trim().length > 200) {
-      newErrors.message = "留言不可超過200個字元";
+      newErrors.message = t("contactModal.validation.messageMaxLength");
     }
 
     setErrors(newErrors);
@@ -75,7 +77,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
       if (response.ok) {
         setSubmitStatus({
           type: "success",
-          message: "留言已成功送出！感謝您的聯絡。",
+          message: t("contactModal.success"),
         });
         setFormData({ name: "", email: "", message: "" });
         setTimeout(() => {
@@ -91,7 +93,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
               ? typeof errorData.detail === "string"
                 ? errorData.detail
                 : JSON.stringify(errorData.detail)
-              : "送出失敗，請稍後再試。";
+              : t("contactModal.errorDefault");
 
         setSubmitStatus({
           type: "error",
@@ -102,7 +104,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
       console.error("Contact form error:", error);
       setSubmitStatus({
         type: "error",
-        message: "網路錯誤，請檢查您的連線。",
+        message: t("contactModal.errorNetwork"),
       });
     } finally {
       setIsSubmitting(false);
@@ -143,7 +145,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
           <div className="modal-header py-2">
             <h6 className="modal-title mb-0 fw-bold">
               <i className="bi bi-envelope me-2"></i>
-              與我聯絡
+              {t("contactModal.title")}
             </h6>
             <button
               type="button"
@@ -177,7 +179,10 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
               {/* Name Field */}
               <div className="mb-3">
                 <label htmlFor="name" className="form-label fw-bold">
-                  您的名字 <span className="text-danger">*</span>
+                  {t("contactModal.nameLabel")}{" "}
+                  <span className="text-danger">
+                    {t("contactModal.required")}
+                  </span>
                 </label>
                 <input
                   type="text"
@@ -186,7 +191,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="請輸入您的名字"
+                  placeholder={t("contactModal.namePlaceholder")}
                   disabled={isSubmitting}
                 />
                 {errors.name && (
@@ -197,7 +202,10 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
               {/* Email Field */}
               <div className="mb-3">
                 <label htmlFor="email" className="form-label fw-bold">
-                  電子信箱 <span className="text-muted small">(選填)</span>
+                  {t("contactModal.emailLabel")}{" "}
+                  <span className="text-muted small">
+                    {t("contactModal.emailOptional")}
+                  </span>
                 </label>
                 <input
                   type="email"
@@ -206,19 +214,20 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="your.email@example.com"
+                  placeholder={t("contactModal.emailPlaceholder")}
                   disabled={isSubmitting}
                 />
-                <div className="form-text">
-                  若希望收到回覆，請提供您的電子信箱
-                </div>
+                <div className="form-text">{t("contactModal.emailHint")}</div>
               </div>
 
               {/* Message Field */}
               <div className="mb-3">
                 <div className="d-flex justify-content-between align-items-center mb-1">
                   <label htmlFor="message" className="form-label fw-bold mb-0">
-                    留言內容 <span className="text-danger">*</span>
+                    {t("contactModal.messageLabel")}{" "}
+                    <span className="text-danger">
+                      {t("contactModal.required")}
+                    </span>
                   </label>
                   <small
                     className={`${
@@ -229,8 +238,10 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
                           : "text-muted"
                     }`}
                   >
-                    {formData.message.length}/200 字元
-                    {formData.message.length < 10 && " (至少10字元)"}
+                    {formData.message.length}/200{" "}
+                    {t("contactModal.characterCount")}
+                    {formData.message.length < 10 &&
+                      ` ${t("contactModal.minCharactersHint")}`}
                   </small>
                 </div>
                 <textarea
@@ -242,7 +253,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
                   rows={5}
                   value={formData.message}
                   onChange={handleChange}
-                  placeholder="請輸入您的留言或問題... (10-200字元)"
+                  placeholder={t("contactModal.messagePlaceholder")}
                   disabled={isSubmitting}
                   maxLength={200}
                 ></textarea>
@@ -265,12 +276,12 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
                         role="status"
                         aria-hidden="true"
                       ></span>
-                      送出中...
+                      {t("buttons.submitting")}
                     </>
                   ) : (
                     <>
                       <i className="bi bi-send me-2"></i>
-                      送出留言
+                      {t("buttons.submit")}
                     </>
                   )}
                 </button>
@@ -285,7 +296,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
               onClick={handleClose}
               disabled={isSubmitting}
             >
-              取消
+              {t("buttons.cancel")}
             </button>
           </div>
         </div>

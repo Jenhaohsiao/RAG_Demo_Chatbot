@@ -38,12 +38,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     return t("settings.threshold.lenient", "Lenient");
   };
 
-  const getThresholdColor = (value: number): string => {
-    if (value >= 0.7) return "danger";
-    if (value >= 0.5) return "warning";
-    return "success";
-  };
-
   return (
     <div className="modal show d-block settings-modal-backdrop">
       <div className="modal-dialog modal-dialog-centered">

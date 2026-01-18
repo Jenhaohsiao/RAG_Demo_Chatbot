@@ -63,9 +63,7 @@ export const MetricsPanel: React.FC<MetricsPanelProps> = ({
   if (isLoading && !metrics) {
     return (
       <div className="metrics-panel loading">
-        <div className="loading-placeholder">
-          {t("metrics.loading") || "Loading metrics..."}
-        </div>
+        <div className="loading-placeholder">{t("metrics.loading")}</div>
       </div>
     );
   }
@@ -79,9 +77,7 @@ export const MetricsPanel: React.FC<MetricsPanelProps> = ({
       <div className="metrics-grid-vertical">
         {/* Token Input */}
         <div className="metric-item-vertical">
-          <div className="metric-label">
-            {t("metrics.tokenInput", "Input Tokens")}
-          </div>
+          <div className="metric-label">{t("metrics.tokenInput")}</div>
           <div className="metric-value">
             {metrics.token_input.toLocaleString()}
           </div>
@@ -89,9 +85,7 @@ export const MetricsPanel: React.FC<MetricsPanelProps> = ({
 
         {/* Token Output */}
         <div className="metric-item-vertical">
-          <div className="metric-label">
-            {t("metrics.tokenOutput", "Output Tokens")}
-          </div>
+          <div className="metric-label">{t("metrics.tokenOutput")}</div>
           <div className="metric-value">
             {metrics.token_output.toLocaleString()}
           </div>
@@ -99,9 +93,7 @@ export const MetricsPanel: React.FC<MetricsPanelProps> = ({
 
         {/* Token Total */}
         <div className="metric-item-vertical">
-          <div className="metric-label">
-            {t("metrics.tokenTotal") || "Total Tokens"}
-          </div>
+          <div className="metric-label">{t("metrics.tokenTotal")}</div>
           <div className="metric-value">
             {metrics.token_total.toLocaleString()} /{" "}
             {(metrics.token_limit / 1000).toFixed(0)}K
@@ -110,9 +102,7 @@ export const MetricsPanel: React.FC<MetricsPanelProps> = ({
 
         {/* Token Percent with Progress Bar */}
         <div className="metric-item-vertical metric-item-progress">
-          <div className="metric-label">
-            {t("metrics.tokenPercent") || "Usage %"}
-          </div>
+          <div className="metric-label">{t("metrics.tokenPercent")}</div>
           <div className="metric-progress-vertical">
             <div className="progress-bar-container">
               <div
@@ -136,9 +126,7 @@ export const MetricsPanel: React.FC<MetricsPanelProps> = ({
 
         {/* Context Tokens */}
         <div className="metric-item-vertical">
-          <div className="metric-label">
-            {t("metrics.contextTokens") || "Context Tokens"}
-          </div>
+          <div className="metric-label">{t("metrics.contextTokens")}</div>
           <div className="metric-value">
             {metrics.context_tokens.toLocaleString()}
           </div>
@@ -146,9 +134,7 @@ export const MetricsPanel: React.FC<MetricsPanelProps> = ({
 
         {/* Context Percent with Progress Bar */}
         <div className="metric-item-vertical metric-item-progress">
-          <div className="metric-label">
-            {t("metrics.contextPercent") || "Context %"}
-          </div>
+          <div className="metric-label">{t("metrics.contextPercent")}</div>
           <div className="metric-progress-vertical">
             <div className="progress-bar-container">
               <div
@@ -172,9 +158,7 @@ export const MetricsPanel: React.FC<MetricsPanelProps> = ({
 
         {/* Vector Count */}
         <div className="metric-item-vertical">
-          <div className="metric-label">
-            {t("metrics.vectorCount") || "Vector Count"}
-          </div>
+          <div className="metric-label">{t("metrics.vectorCount")}</div>
           <div className="metric-value">
             {metrics.vector_count.toLocaleString()}
           </div>
@@ -185,10 +169,7 @@ export const MetricsPanel: React.FC<MetricsPanelProps> = ({
       {metrics.token_percent > 80 && (
         <div className="metrics-warning">
           <span className="warning-icon">⚠️</span>
-          <span className="warning-text">
-            {t("metrics.tokenWarning") ||
-              "Token使用率超過80%，建議開始新的會話。"}
-          </span>
+          <span className="warning-text">{t("metrics.tokenWarning")}</span>
         </div>
       )}
     </div>

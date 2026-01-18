@@ -18,14 +18,14 @@
 
 .toast.toast-animated {
   animation: slideInRight 0.3s ease-out forwards;
-  /* 確保動畫只執行一次 */
+  /* Ensure animation only runs once */
 }
 
-/* 新增：靜止狀態，防止動畫重複 */
+/* Added: Static state to prevent animation repeat */
 .toast.toast-static {
   transform: translateX(0);
   opacity: 1;
-  /* 直接設置最終狀態，不使用動畫 */
+  /* Directly set final state without animation */
 }
 
 @keyframes slideInRight {

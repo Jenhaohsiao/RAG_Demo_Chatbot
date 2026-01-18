@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useTranslation } from "react-i18next";
 import WorkflowStepper from "../WorkflowStepper/WorkflowStepper";
-import ChatScreen from "../ChatScreen/ChatScreen";
-import { ResponseType } from "../../types/chat";
-
 export interface WorkflowMainProps {
   sessionId?: string;
   onParameterChange?: (parameter: string, value: any) => void;
@@ -38,10 +34,7 @@ const WorkflowMain: React.FC<WorkflowMainProps> = ({
   ragFallbackMode = "flexible",
   onShowRagSummary,
 }) => {
-  const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
-  const [workflowComplete, setWorkflowComplete] = useState(false);
-
   const [documents, setDocuments] = useState<any[]>([]);
   const [crawledUrls, setCrawledUrls] = useState<any[]>([]);
 
@@ -115,7 +108,6 @@ const WorkflowMain: React.FC<WorkflowMainProps> = ({
   useEffect(() => {
     if (sessionId) {
       setCurrentStep(1);
-      setWorkflowComplete(false);
       setDocuments([]);
       setCrawledUrls([]);
     }
@@ -124,7 +116,6 @@ const WorkflowMain: React.FC<WorkflowMainProps> = ({
   useEffect(() => {
     if (onResetWorkflow) {
       setCurrentStep(1);
-      setWorkflowComplete(false);
       setDocuments([]);
       setCrawledUrls([]);
     }

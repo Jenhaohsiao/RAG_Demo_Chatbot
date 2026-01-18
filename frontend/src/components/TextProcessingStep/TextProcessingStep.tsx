@@ -28,7 +28,6 @@ export interface TextProcessingStepProps {
     strict_rag_mode?: boolean;
     answer_language?: string;
   };
-  onParameterChange: (parameter: string, value: any) => void;
   sessionId?: string;
   onProcessingComplete?: () => void;
   onProcessingStatusChange?: (isCompleted: boolean) => void;
@@ -38,17 +37,12 @@ export interface TextProcessingStepProps {
   shouldStartProcessing?: boolean; // Control start from external
   savedProcessingResults?: {
     jobs: ProcessingJob[];
-    overallProgress: number;
   } | null; // Saved processing results
-  onSaveProcessingResults?: (results: {
-    jobs: ProcessingJob[];
-    overallProgress: number;
-  }) => void; // Save processing results callback
+  onSaveProcessingResults?: (results: { jobs: ProcessingJob[] }) => void; // Save processing results callback
 }
 
 const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
   parameters,
-  onParameterChange,
   sessionId,
   onProcessingComplete,
   onProcessingStatusChange,
@@ -63,9 +57,6 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
 
   const [jobs, setJobs] = useState<ProcessingJob[]>(
     savedProcessingResults?.jobs || []
-  );
-  const [overallProgress, setOverallProgress] = useState<number>(
-    savedProcessingResults?.overallProgress || 0
   );
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -110,7 +101,6 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
     if (jobs.length > 0) {
       const avgProgress =
         jobs.reduce((sum, job) => sum + job.progress, 0) / jobs.length;
-      setOverallProgress(avgProgress);
 
       const allCompleted = jobs.every((job) => job.status === "completed");
       const anyError = jobs.some((job) => job.status === "error");
@@ -126,7 +116,6 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
           // Save processing results to parent
           onSaveProcessingResults?.({
             jobs: jobs,
-            overallProgress: avgProgress,
           });
           onProcessingComplete?.();
         }
@@ -242,48 +231,6 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
     if (onLoadingChange) {
       onLoadingChange(false);
     }
-  };
-
-  const getStatusIcon = (status: string) => {
-    const icons = {
-      pending: "bi-clock",
-      chunking: "bi-scissors",
-      embedding: "bi-cpu",
-      completed: "bi-check-circle",
-      error: "bi-x-circle",
-    };
-    return icons[status as keyof typeof icons] || "bi-clock";
-  };
-
-  const getStatusBadge = (status: string) => {
-    const variants = {
-      pending: "bg-secondary",
-      chunking: "bg-warning",
-      embedding: "bg-info",
-      completed: "bg-success",
-      error: "bg-danger",
-    };
-    const labels = {
-      pending: t("textProcessingStep.status.pending", "Pending"),
-      chunking: t("textProcessingStep.status.chunking", "Chunking"),
-      embedding: t("textProcessingStep.status.embedding", "Embedding"),
-      completed: t("textProcessingStep.status.completed", "Completed"),
-      error: t("textProcessingStep.status.error", "Error"),
-    };
-    return (
-      <span className={`badge ${variants[status as keyof typeof variants]}`}>
-        {labels[status as keyof typeof labels]}
-      </span>
-    );
-  };
-
-  const formatDuration = (startTime: string, endTime?: string) => {
-    const start = new Date(startTime);
-    const end = endTime ? new Date(endTime) : new Date();
-    const duration = Math.floor((end.getTime() - start.getTime()) / 1000);
-    return t("textProcessingStep.durationSeconds", "{{seconds}}s", {
-      seconds: duration,
-    });
   };
 
   // Determine if processing has started or completed

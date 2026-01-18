@@ -14,7 +14,7 @@ $prof-blue: $bg-card-green; // #2b6cb0
   background: transparent;
 }
 
-/* 爬蟲表單 */
+/* Crawler form */
 .crawler-form {
   display: flex;
   flex-direction: column;
@@ -37,7 +37,7 @@ $prof-blue: $bg-card-green; // #2b6cb0
   line-height: 1.5;
 }
 
-/* 表單組 */
+/* Form group */
 .form-group {
   display: flex;
   flex-direction: column;
@@ -66,7 +66,7 @@ $prof-blue: $bg-card-green; // #2b6cb0
   border-radius: 4px;
 }
 
-/* URL 輸入 */
+/* URL input */
 .url-input {
   padding: 10px 12px;
   border: 1px solid #e2e8f0;
@@ -93,7 +93,7 @@ $prof-blue: $bg-card-green; // #2b6cb0
   opacity: 0.6;
 }
 
-/* 錯誤訊息 */
+/* Error message */
 .error-message {
   font-size: 13px;
   color: #f56565;
@@ -103,7 +103,7 @@ $prof-blue: $bg-card-green; // #2b6cb0
   border-radius: 3px;
 }
 
-/* Token 滑塊 */
+/* Token slider */
 .token-slider,
 .page-slider {
   width: 100%;
@@ -161,7 +161,7 @@ $prof-blue: $bg-card-green; // #2b6cb0
   cursor: not-allowed;
 }
 
-/* Token 提示 */
+/* Token info */
 .token-info {
   font-size: 12px;
   color: #666;
@@ -186,7 +186,7 @@ $prof-blue: $bg-card-green; // #2b6cb0
   color: #2d3748;
 }
 
-/* 高級選項按鈕 */
+/* Advanced options button */
 .toggle-advanced {
   padding: 8px 12px;
   font-size: 13px;
@@ -213,7 +213,7 @@ $prof-blue: $bg-card-green; // #2b6cb0
   cursor: not-allowed;
 }
 
-/* 高級選項 */
+/* Advanced options */
 .advanced-options {
   padding: 12px;
   background: #f7fafc;
@@ -233,7 +233,7 @@ $prof-blue: $bg-card-green; // #2b6cb0
   }
 }
 
-/* 爬蟲按鈕 */
+/* Crawler button */
 .crawler-button {
   padding: 10px 16px;
   font-size: 14px;
@@ -285,7 +285,7 @@ $prof-blue: $bg-card-green; // #2b6cb0
   }
 }
 
-/* 爬蟲結果 */
+/* Crawler results */
 .crawler-results {
   display: flex;
   flex-direction: column;
@@ -380,7 +380,7 @@ $prof-blue: $bg-card-green; // #2b6cb0
   background: #bee3f8;
 }
 
-/* URL 列表 */
+/* URL list */
 .urls-list {
   display: flex;
   flex-direction: column;
@@ -470,7 +470,7 @@ $prof-blue: $bg-card-green; // #2b6cb0
   text-align: center;
 }
 
-/* 響應式設計 */
+/* Responsive design */
 @media (max-width: 768px) {
   .website-crawler-panel {
     padding: 16px;

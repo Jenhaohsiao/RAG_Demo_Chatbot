@@ -8,8 +8,6 @@ import ContentReviewStep from "../ContentReviewStep/ContentReviewStep";
 import TextProcessingStep from "../TextProcessingStep/TextProcessingStep";
 import AiChatStep from "../AiChatStep/AiChatStep";
 import LoadingOverlay from "../LoadingOverlay/LoadingOverlay";
-// import TestStep6 from "../TestStep6/TestStep6"; // Test component has been replaced with actual component
-import FixedRagFlow from "../FixedRagFlow/FixedRagFlow";
 import {
   uploadFile,
   uploadUrl,
@@ -260,7 +258,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
         errorMessage.toLowerCase().includes("moderation");
 
       if (!isContentBlockedError) {
-        // 檢查是否為爬蟲相關錯誤
+        // Check if it's a crawler-related error
         const isUrlError = docItem.type === "url";
         const isBlockedError =
           errorMessage.toLowerCase().includes("blocked") ||
@@ -520,13 +518,13 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   const getResponseStyleText = (style: string | undefined) => {
     switch (style) {
       case "concise":
-        return "簡潔";
+        return t("settings.responseStyle.concise", "Concise");
       case "standard":
-        return "標準";
+        return t("settings.responseStyle.standard", "Standard");
       case "detailed":
-        return "詳細";
+        return t("settings.responseStyle.detailed", "Detailed");
       default:
-        return "標準";
+        return t("settings.responseStyle.standard", "Standard");
     }
   };
 
@@ -534,13 +532,13 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   const getProfessionalLevelText = (level: string | undefined) => {
     switch (level) {
       case "casual":
-        return "輕鬆";
+        return t("settings.professionalLevel.casual", "Casual");
       case "professional":
-        return "專業";
+        return t("settings.professionalLevel.professional", "Professional");
       case "academic":
-        return "學術";
+        return t("settings.professionalLevel.academic", "Academic");
       default:
-        return "專業";
+        return t("settings.professionalLevel.professional", "Professional");
     }
   };
 
@@ -548,13 +546,13 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   const getCreativityLevelText = (level: string | undefined) => {
     switch (level) {
       case "conservative":
-        return "保守";
+        return t("settings.creativityLevel.conservative", "Conservative");
       case "balanced":
-        return "平衡";
+        return t("settings.creativityLevel.balanced", "Balanced");
       case "creative":
-        return "創新";
+        return t("settings.creativityLevel.creative", "Creative");
       default:
-        return "平衡";
+        return t("settings.creativityLevel.balanced", "Balanced");
     }
   };
 
@@ -652,11 +650,8 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     // Check if step 3 can proceed to next step
     if (currentStep === 3 && !canProceedToNextStep()) {
       setToastContent({
-        title: t("workflow.warning", "警告"),
-        message: t(
-          "workflow.warnings.uploadFirst",
-          "請先上傳檔案或設定網站爬蟲後才能進入下一步驟。"
-        ),
+        title: t("workflow.warning"),
+        message: t("workflow.warnings.uploadFirst"),
       });
       setShowToast(true);
       return;
@@ -666,11 +661,8 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     if (currentStep === 4 && !canProceedToNextStep()) {
       if (!reviewPassed) {
         setToastContent({
-          title: t("workflow.warning", "警告"),
-          message: t(
-            "workflow.warnings.reviewFirst",
-            "請先完成內容審核並通過檢查後才能進入下一步驟。"
-          ),
+          title: t("workflow.warning"),
+          message: t("workflow.warnings.reviewFirst"),
         });
         setShowToast(true);
       }
@@ -680,11 +672,8 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     // Check if step 5 can proceed to next step
     if (currentStep === 5 && !canProceedToNextStep()) {
       setToastContent({
-        title: t("workflow.warning", "警告"),
-        message: t(
-          "workflow.warnings.processFirst",
-          "請先完成資料處理並寫入 Vector DB 後才能進入下一步驟。"
-        ),
+        title: t("workflow.warning"),
+        message: t("workflow.warnings.processFirst"),
       });
       setShowToast(true);
       return;
@@ -714,7 +703,8 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     onStepChange(currentStep + 1);
   };
 
-  // Generate custom_prompt using parameters from flow 2 (added 4 blocks structure)
+  // Generate custom_prompt using parameters from flow 2
+  // Note: This function generates AI system prompts in the user's selected language
   const generateCustomPrompt = (params: any): string | null => {
     const {
       // A. System Rules
@@ -732,99 +722,63 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       similarity_threshold,
     } = params;
 
-    // Persona Mapping
-    const personaMap: Record<string, string> = {
-      elementary_teacher: "小學老師 - 用簡單例子循序漸進，耐心讓孩子理解。",
-      show_host: "節目主持人 - 生動活潑、帶節奏，讓內容更有趣也容易跟上。",
-      workplace_veteran: "職場老手 - 實戰經驗豐富，提供務實可落地的建議。",
-    };
+    // Determine prompt language based on answer_language
+    const promptLang =
+      answer_language === "auto" ? i18n.language : answer_language;
 
-    // Response Style Mapping
-    const styleMap: Record<string, string> = {
-      brief: "簡要回答，直接給出重點與結論。",
-      kid_friendly: "用淺顯比喻與例子，讓小孩也能聽懂。",
-    };
+    // Get persona instruction from i18n
+    const personaKey = `promptTemplate.persona.${persona}`;
+    const personaInstruction = t(personaKey, { lng: promptLang });
 
-    // Response Tone Mapping
-    const toneMap: Record<string, string> = {
-      friendly: "親切溫和的語氣，保持陪伴感。",
-      rigorous: "嚴謹精確的語氣，條理清晰。",
-      urgent: "急促直接，快速給出答案。",
-    };
+    // Get response style instruction from i18n
+    const styleKey = `promptTemplate.responseStyle.${response_style}`;
+    const styleInstruction = t(styleKey, { lng: promptLang });
 
-    // Citation Style Mapping
-    const citationMap: Record<string, string> = {
-      inline: "請勿在回答中插入 [文件ID] 或 [文件x] 等引用標記。直接回答即可。",
-      document: "在回答最尾統一列出參考文件來源。",
-      none: "不需要標註出處來源。",
-    };
+    // Get response tone instruction from i18n
+    const toneKey = `promptTemplate.responseTone.${response_tone}`;
+    const toneInstruction = t(toneKey, { lng: promptLang });
 
-    // Language Mapping
-    const languageMap: Record<string, string> = {
-      "zh-TW": "Traditional Chinese (繁體中文)",
-      "zh-CN": "Simplified Chinese (简体中文)",
-      en: "English",
-      fr: "Français",
-      auto: "{{language}}", // 使用變數，由後端決定
-    };
+    // Get citation instruction from i18n
+    const citationKey = `promptTemplate.citation.${citation_style}`;
+    const citationInstruction = t(citationKey, { lng: promptLang });
 
-    // Inference Policy
-    const inferencePolicy = allow_inference
-      ? "你可以基於文件內容做適當推論，但必須清楚標示哪些是直接引用。"
-      : "你只能回答文件中明確記載的內容，不可進行推論。";
+    // Get inference policy from i18n
+    const inferenceKey = allow_inference
+      ? "promptTemplate.inference.allowed"
+      : "promptTemplate.inference.notAllowed";
+    const inferencePolicy = t(inferenceKey, { lng: promptLang });
 
-    // Strict RAG Mode
-    const strictRagPolicy =
+    // Get strict RAG policy from i18n
+    const strictRagKey =
       strict_rag_mode !== false
-        ? "若檢索到的文件無法回答問題，必須明確拒絕回答，並告知使用者找不到相關資料。"
-        : "若文件內容不足，可以適度使用一般知識補充，但需標示哪些來自文件及哪些是補充。";
+        ? "promptTemplate.strictRag.enabled"
+        : "promptTemplate.strictRag.disabled";
+    const strictRagPolicy = t(strictRagKey, { lng: promptLang });
 
-    // Assemble Prompt
-    const personaInstruction =
-      personaMap[persona] || personaMap["workplace_veteran"];
-    const styleInstruction = styleMap[response_style] || styleMap["brief"];
-    const toneInstruction = toneMap[response_tone] || toneMap["friendly"];
-    const citationInstruction =
-      citationMap[citation_style] || citationMap["inline"];
+    // Get language name
+    const languageMap: Record<string, string> = {
+      "zh-TW": t("promptTemplate.languages.zhTW", { lng: promptLang }),
+      "zh-CN": t("promptTemplate.languages.zhCN", { lng: promptLang }),
+      en: t("promptTemplate.languages.en", { lng: promptLang }),
+      fr: t("promptTemplate.languages.fr", { lng: promptLang }),
+      auto: "{{language}}",
+    };
     const responseLanguage = languageMap[answer_language] || "{{language}}";
 
-    // Assemble complete custom_prompt
-    return `你是一個RAG (Retrieval-Augmented Generation) 助理。
-
-**角色設定**: ${personaInstruction}
-
-**回答風格 (RESPONSE STYLE)**: ${styleInstruction}
-
-**回答語氣 (RESPONSE TONE)**: ${toneInstruction}
-
-**引用規範 (CITATION)**: ${citationInstruction}
-
-**推論政策 (INFERENCE)**: ${inferencePolicy}
-
-**嚴格 RAG 模式**: ${strictRagPolicy}
-
-**回答長度限制**: 將回答控制在約${max_response_tokens || 2048} tokens 以內。
-
-**檢索設定**: Top-K=${retrieval_top_k || 5}, 相似度閾值=${
-      similarity_threshold || 0.7
-    }
-
-**關鍵規則**:
-1. **回答語言**: 一律使用${responseLanguage} 進行完整回答，不論使用何種語言。
-2. **嚴格 RAG**: 只能依靠下方檢索到的文件內容回答。
-3. **禁止虛構**: 不可編造資訊，使用文件以外知識。
-4. **部分回答策略**: 如果只有部分與文件相關：
-   - 先說明文件中有哪些相關內容
-   - 再明確表示問題的哪個部分找不到資料
-5. **完全未知處理**: 明確告知使用者並建議可能的替代問法。
-
-**檢索到的文件 (Retrieved Documents)**:
-{{context}}
-
-**使用者問題(User Question)**:
-{{query}}
-
-**你的回答** (請遵循上述角色、風格與語氣設定):`;
+    // Assemble complete custom_prompt using template from i18n
+    return t("promptTemplate.fullPrompt", {
+      lng: promptLang,
+      personaInstruction,
+      styleInstruction,
+      toneInstruction,
+      citationInstruction,
+      inferencePolicy,
+      strictRagPolicy,
+      maxResponseTokens: max_response_tokens || 2048,
+      retrievalTopK: retrieval_top_k || 5,
+      similarityThreshold: similarity_threshold || 0.7,
+      responseLanguage,
+    });
   };
 
   const handleStepComplete = (stepId: number) => {

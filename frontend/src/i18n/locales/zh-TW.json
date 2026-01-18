@@ -24,7 +24,36 @@
     "settings": "設定",
     "about": "關於本專案",
     "contact": "與我聯絡",
-    "understand": "了解"
+    "understand": "了解",
+    "submit": "送出留言",
+    "submitting": "送出中...",
+    "updateSession": "更新 Session",
+    "ok": "確定"
+  },
+  "contactModal": {
+    "title": "與我聯絡",
+    "nameLabel": "您的名字",
+    "namePlaceholder": "請輸入您的名字",
+    "emailLabel": "電子信箱",
+    "emailOptional": "(選填)",
+    "emailPlaceholder": "your.email@example.com",
+    "emailHint": "若希望收到回覆，請提供您的電子信箱",
+    "messageLabel": "留言內容",
+    "messagePlaceholder": "請輸入您的留言或問題... (10-200字元)",
+    "characterCount": "字元",
+    "minCharactersHint": "(至少10字元)",
+    "required": "*",
+    "validation": {
+      "nameRequired": "請輸入您的名字",
+      "nameMinLength": "名字至少需要2個字元",
+      "nameMaxLength": "名字不可超過100個字元",
+      "messageRequired": "請輸入留言內容",
+      "messageMinLength": "留言至少需要10個字元",
+      "messageMaxLength": "留言不可超過200個字元"
+    },
+    "success": "留言已成功送出！感謝您的聯絡。",
+    "errorDefault": "送出失敗，請稍後再試。",
+    "errorNetwork": "網路錯誤，請檢查您的連線。"
   },
   "step2": {
     "system": {
@@ -344,6 +373,8 @@
   "messages": {
     "sessionCreated": "會話建立成功",
     "sessionExpired": "會話已過期",
+    "sessionExpiredDetail": "Session已過期，請重新登入或刷新頁面",
+    "sessionMaintainError": "無法維持會話",
     "uploadSuccess": "文件上傳成功",
     "uploadFailed": "上傳失敗",
     "processingDocument": "文件處理中...",
@@ -377,6 +408,21 @@
       "rec_lenient": "適合探索性查詢，可能包含更多不相關內容",
       "rec_balanced": "建議設定，平衡精確性和包容性",
       "rec_strict": "僅回答高度相關的問題，可能經常無法回答"
+    },
+    "responseStyle": {
+      "concise": "簡潔",
+      "standard": "標準",
+      "detailed": "詳細"
+    },
+    "professionalLevel": {
+      "casual": "輕鬆",
+      "professional": "專業",
+      "academic": "學術"
+    },
+    "creativityLevel": {
+      "conservative": "保守",
+      "balanced": "平衡",
+      "creative": "創新"
     }
   },
   "states": {
@@ -523,7 +569,9 @@
     "urlNote": "已爬蟲 {{count}} 個 URL，準備處理",
     "error": {
       "emptyUrl": "請輸入網站 URL",
-      "invalidUrl": "請輸入有效的 URL"
+      "invalidUrl": "請輸入有效的 URL",
+      "emptyTextList": "無法嵌入空文字列表",
+      "failed": "網站爬取失敗"
     },
     "tokenHint": {
       "small": "適合小型網站",
@@ -580,12 +628,46 @@
       "title": "除錯資訊"
     }
   },
+  "resourceConsumption": {
+    "operation": {
+      "websiteCrawler": "網站爬取",
+      "pdfProcessing": "PDF 處理",
+      "textProcessing": "文字處理",
+      "documentProcessing": "文件處理"
+    },
+    "tokenConsumption": "Token 消耗",
+    "of": "的",
+    "textChunks": "文字塊",
+    "avgTokensPerChunk": "平均 {{tokens}} tokens/塊",
+    "none": "無",
+    "avgPerPage": "每頁平均",
+    "tokensPerPage": "tokens/頁",
+    "crawlTime": "爬取時間",
+    "processingTime": "處理時間",
+    "sec": "秒",
+    "highConsumptionWarning": "資源消耗過高。建議調整參數以供未來上傳使用。"
+  },
+  "toast": {
+    "error": "錯誤",
+    "warning": "警告",
+    "info": "資訊",
+    "success": "成功"
+  },
   "chat": {
     "title": "聊天",
     "subtitle": "提出關於您的文件的問題",
     "empty": {
       "message": "還沒有訊息",
       "hint": "開始輸入關於已上傳文件的問題"
+    },
+    "documentSummary": {
+      "title": "文件摘要",
+      "translationNote": "此摘要包含語言說明",
+      "collapse": "收起",
+      "expand": "展開"
+    },
+    "suggestions": {
+      "loading": "正在生成建議問題..."
     },
     "input": {
       "placeholder": "提出關於文件的問題...",
@@ -606,6 +688,10 @@
       "you": "您",
       "assistant": "助理"
     },
+    "message": {
+      "settingsHint": "提示：如果經常無法找到答案，可嘗試調整「相似度閾值」(降低至 0.5-0.6) 或「分塊大小」(增加至 800-1000) 來改善檢索效果。",
+      "maybeYouWantToAsk": "也許您想問："
+    },
     "retrieved": {
       "title": "檢索到的來源",
       "chunks": "找到 {{count}} 個相關段落",
@@ -615,16 +701,29 @@
   "metrics": {
     "title": "📊 實時指標",
     "loading": "載入指標中...",
-    "tokens": "Token 使用量",
-    "tokenInput": "輸入 Tokens",
-    "tokenOutput": "輸出 Tokens",
-    "tokenTotal": "總 Tokens",
-    "tokenPercent": "使用百分比",
-    "context": "上下文窗口",
-    "contextTokens": "上下文 Tokens",
-    "contextPercent": "上下文百分比",
-    "vectors": "向量資料庫",
-    "vectorCount": "儲存的向量",
+    "tokens": {
+      "title": "Token 使用量",
+      "warning": "高使用量",
+      "total": "總量",
+      "input": "輸入",
+      "output": "輸出",
+      "avgPerQuery": "平均/查詢"
+    },
+    "queries": {
+      "title": "查詢統計",
+      "total": "總查詢數",
+      "answered": "已回答",
+      "unanswered": "未回答",
+      "avgChunks": "平均分塊數"
+    },
+    "common": {
+      "queries": "次查詢",
+      "requests": "次請求",
+      "perQuery": "每次查詢"
+    },
+    "warnings": {
+      "highUnanswered": "未回答率偏高。建議上傳更多相關文件。"
+    },
     "tokenWarning": "⚠️ Token 使用量已超過 80%。建議開始新會話。"
   },
   "dialogs": {
@@ -773,5 +872,23 @@
     "reloadMessage": "頁面已重新載入，您的會話已重置。",
     "restartMessage": "您點擊了「重新開始」，會話已重置。",
     "startNewSession": "確定"
+  },
+  "documentInfo": {
+    "title": "資料分析摘要",
+    "ready": "✓ 文件已處理，向量資料已儲存至 Vector DB。可以開始問答。"
+  },
+  "crawledUrls": {
+    "title": "🌐 爬蟲 URL 列表",
+    "pagesCount": "個頁面",
+    "totalTokens": "總 Token",
+    "average": "平均",
+    "baseUrl": "基礎 URL",
+    "copyUrl": "複製 URL",
+    "copied": "✓ 已複製",
+    "fullUrl": "完整 URL:",
+    "copyButton": "📋 複製",
+    "pageTitle": "頁面標題:",
+    "tokens": "Token:",
+    "contentPreview": "內容預覽:"
   }
 }

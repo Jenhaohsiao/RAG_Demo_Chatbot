@@ -40,12 +40,10 @@ export const MetricsDashboard: React.FC<MetricsDashboardProps> = ({
       {/* Token Usage */}
       <div className="metrics-section token-section">
         <div className="section-header">
-          <span className="section-title">
-            🔋 {t("metrics.tokens.title", "Token Usage")}
-          </span>
+          <span className="section-title">🔋 {t("metrics.tokens.title")}</span>
           {metrics.is_token_warning && (
             <span className="warning-badge">
-              ⚠️ {t("metrics.tokens.warning", "High Usage")}
+              ⚠️ {t("metrics.tokens.warning")}
             </span>
           )}
         </div>
@@ -53,9 +51,7 @@ export const MetricsDashboard: React.FC<MetricsDashboardProps> = ({
         <div className="metrics-grid">
           {/* Total Tokens */}
           <div className="metric-item">
-            <span className="metric-label">
-              {t("metrics.tokens.total", "Total")}
-            </span>
+            <span className="metric-label">{t("metrics.tokens.total")}</span>
             <span
               className={`metric-value ${
                 metrics.is_token_warning ? "warning" : ""
@@ -70,9 +66,7 @@ export const MetricsDashboard: React.FC<MetricsDashboardProps> = ({
 
           {/* Input Tokens */}
           <div className="metric-item">
-            <span className="metric-label">
-              {t("metrics.tokens.input", "Input")}
-            </span>
+            <span className="metric-label">{t("metrics.tokens.input")}</span>
             <span className="metric-value">
               {formatTokenCount(metrics.total_input_tokens)}
             </span>
@@ -88,9 +82,7 @@ export const MetricsDashboard: React.FC<MetricsDashboardProps> = ({
 
           {/* Output Tokens */}
           <div className="metric-item">
-            <span className="metric-label">
-              {t("metrics.tokens.output", "Output")}
-            </span>
+            <span className="metric-label">{t("metrics.tokens.output")}</span>
             <span className="metric-value">
               {formatTokenCount(metrics.total_output_tokens)}
             </span>
@@ -107,13 +99,13 @@ export const MetricsDashboard: React.FC<MetricsDashboardProps> = ({
           {/* Avg per Query */}
           <div className="metric-item">
             <span className="metric-label">
-              {t("metrics.tokens.avgPerQuery", "Avg/Query")}
+              {t("metrics.tokens.avgPerQuery")}
             </span>
             <span className="metric-value">
               {formatTokenCount(Math.round(metrics.avg_tokens_per_query))}
             </span>
             <span className="metric-sublabel">
-              {metrics.total_queries} {t("metrics.common.queries", "queries")}
+              {metrics.total_queries} {t("metrics.common.queries")}
             </span>
           </div>
         </div>
@@ -132,30 +124,25 @@ export const MetricsDashboard: React.FC<MetricsDashboardProps> = ({
         </div>
       </div>
 
-      {/* 查詢統計 */}
       <div className="metrics-section query-section">
         <div className="section-header">
-          <span className="section-title">
-            📊 {t("metrics.queries.title", "Query Statistics")}
-          </span>
+          <span className="section-title">📊 {t("metrics.queries.title")}</span>
         </div>
 
         <div className="metrics-grid">
           {/* Total Queries */}
           <div className="metric-item">
-            <span className="metric-label">
-              {t("metrics.queries.total", "Total Queries")}
-            </span>
+            <span className="metric-label">{t("metrics.queries.total")}</span>
             <span className="metric-value">{metrics.total_queries}</span>
             <span className="metric-sublabel">
-              {t("metrics.common.requests", "requests")}
+              {t("metrics.common.requests")}
             </span>
           </div>
 
           {/* Answered Queries */}
           <div className="metric-item">
             <span className="metric-label">
-              {t("metrics.queries.answered", "Answered")}
+              {t("metrics.queries.answered")}
             </span>
             <span className="metric-value">
               {metrics.total_queries > 0
@@ -178,7 +165,7 @@ export const MetricsDashboard: React.FC<MetricsDashboardProps> = ({
             }`}
           >
             <span className="metric-label">
-              {t("metrics.queries.unanswered", "Unanswered")}
+              {t("metrics.queries.unanswered")}
             </span>
             <span
               className={`metric-value ${
@@ -198,13 +185,13 @@ export const MetricsDashboard: React.FC<MetricsDashboardProps> = ({
           {/* Avg Chunks Retrieved */}
           <div className="metric-item">
             <span className="metric-label">
-              {t("metrics.queries.avgChunks", "Avg Chunks")}
+              {t("metrics.queries.avgChunks")}
             </span>
             <span className="metric-value">
               {metrics.avg_chunks_retrieved.toFixed(1)}
             </span>
             <span className="metric-sublabel">
-              {t("metrics.common.perQuery", "per query")}
+              {t("metrics.common.perQuery")}
             </span>
           </div>
         </div>
@@ -214,10 +201,7 @@ export const MetricsDashboard: React.FC<MetricsDashboardProps> = ({
           <div className="warning-message">
             <span className="warning-icon">⚠️</span>
             <span className="warning-text">
-              {t(
-                "metrics.warnings.highUnanswered",
-                "High unanswered rate. Consider uploading more relevant documents."
-              )}
+              {t("metrics.warnings.highUnanswered")}
             </span>
           </div>
         )}

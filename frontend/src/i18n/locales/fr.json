@@ -11,6 +11,31 @@
       "multilingual": "🌐 Multilingue"
     }
   },
+  "contactModal": {
+    "title": "Contactez-moi",
+    "nameLabel": "Votre nom",
+    "namePlaceholder": "Veuillez entrer votre nom",
+    "emailLabel": "Adresse e-mail",
+    "emailOptional": "(Facultatif)",
+    "emailPlaceholder": "votre.email@exemple.com",
+    "emailHint": "Si vous souhaitez une réponse, veuillez fournir votre e-mail",
+    "messageLabel": "Message",
+    "messagePlaceholder": "Veuillez entrer votre message ou question... (10-200 caractères)",
+    "characterCount": "caractères",
+    "minCharactersHint": "(au moins 10 caractères)",
+    "required": "*",
+    "validation": {
+      "nameRequired": "Veuillez entrer votre nom",
+      "nameMinLength": "Le nom doit comporter au moins 2 caractères",
+      "nameMaxLength": "Le nom ne peut pas dépasser 100 caractères",
+      "messageRequired": "Veuillez entrer un message",
+      "messageMinLength": "Le message doit comporter au moins 10 caractères",
+      "messageMaxLength": "Le message ne peut pas dépasser 200 caractères"
+    },
+    "success": "Message envoyé avec succès ! Merci de nous avoir contactés.",
+    "errorDefault": "Échec de l'envoi. Veuillez réessayer plus tard.",
+    "errorNetwork": "Erreur réseau. Veuillez vérifier votre connexion."
+  },
   "buttons": {
     "uploadPdf": "Télécharger PDF",
     "uploadText": "Télécharger Texte",
@@ -24,7 +49,11 @@
     "settings": "Paramètres",
     "about": "À Propos du Projet",
     "contact": "Contactez-moi",
-    "understand": "Compris"
+    "understand": "Compris",
+    "submit": "Soumettre le message",
+    "submitting": "Envoi en cours...",
+    "updateSession": "Mettre à jour la session",
+    "ok": "OK"
   },
   "step2": {
     "system": {
@@ -92,6 +121,8 @@
   "messages": {
     "sessionCreated": "Session créée avec succès",
     "sessionExpired": "La session a expiré",
+    "sessionExpiredDetail": "La session a expiré, veuillez vous reconnecter ou actualiser la page",
+    "sessionMaintainError": "Impossible de maintenir la session",
     "uploadSuccess": "Document téléchargé avec succès",
     "uploadFailed": "Échec du téléchargement",
     "processingDocument": "Traitement du document...",
@@ -280,7 +311,9 @@
     "tokenCount": "{{count}} tokens",
     "error": {
       "emptyUrl": "Veuillez saisir une URL de site web",
-      "invalidUrl": "Veuillez saisir une URL valide"
+      "invalidUrl": "Veuillez saisir une URL valide",
+      "emptyTextList": "Impossible d'intégrer une liste de texte vide",
+      "failed": "Échec de l'exploration du site Web"
     }
   },
   "processing": {
@@ -323,12 +356,46 @@
       "title": "Informations de débogage"
     }
   },
+  "resourceConsumption": {
+    "operation": {
+      "websiteCrawler": "Crawl de site Web",
+      "pdfProcessing": "Traitement PDF",
+      "textProcessing": "Traitement de texte",
+      "documentProcessing": "Traitement de document"
+    },
+    "tokenConsumption": "Consommation de tokens",
+    "of": "de",
+    "textChunks": "Blocs de texte",
+    "avgTokensPerChunk": "Moy {{tokens}} tokens/bloc",
+    "none": "Aucun",
+    "avgPerPage": "Moyenne par page",
+    "tokensPerPage": "tokens/page",
+    "crawlTime": "Temps de crawl",
+    "processingTime": "Temps de traitement",
+    "sec": "sec",
+    "highConsumptionWarning": "Consommation élevée de ressources. Envisagez d'ajuster les paramètres pour les futurs téléchargements."
+  },
+  "toast": {
+    "error": "Erreur",
+    "warning": "Avertissement",
+    "info": "Info",
+    "success": "Succès"
+  },
   "chat": {
     "title": "Discuter",
     "subtitle": "Posez des questions sur vos documents",
     "empty": {
       "message": "Pas de messages pour l'instant",
       "hint": "Commencez par taper une question sur le document chargé"
+    },
+    "documentSummary": {
+      "title": "Résumé du document",
+      "translationNote": "Ce résumé contient des notes de langue",
+      "collapse": "Réduire",
+      "expand": "Développer"
+    },
+    "suggestions": {
+      "loading": "Génération de questions suggérées..."
     },
     "input": {
       "placeholder": "Posez une question sur le document...",
@@ -348,6 +415,10 @@
       "you": "Vous",
       "assistant": "Assistante"
     },
+    "message": {
+      "settingsHint": "Astuce : Si les réponses ne sont souvent pas trouvées, essayez d'ajuster le 'Seuil de similarité' (réduire à 0.5-0.6) ou la 'Taille des fragments' (augmenter à 800-1000) pour améliorer la récupération.",
+      "maybeYouWantToAsk": "Vous pourriez vouloir demander :"
+    },
     "retrieved": {
       "title": "Sources récupérées",
       "chunks": "{{count}} fragments pertinents trouvés",
@@ -357,16 +428,29 @@
   "metrics": {
     "title": "📊 Métriques en temps réel",
     "loading": "Chargement des métriques...",
-    "tokens": "Utilisation des tokens",
-    "tokenInput": "Tokens d'entrée",
-    "tokenOutput": "Tokens de sortie",
-    "tokenTotal": "Tokens totaux",
-    "tokenPercent": "Pourcentage d'utilisation",
-    "context": "Fenêtre de contexte",
-    "contextTokens": "Tokens de contexte utilisés",
-    "contextPercent": "Pourcentage de contexte",
-    "vectors": "Base de données vectorielle",
-    "vectorCount": "Vecteurs stockés",
+    "tokens": {
+      "title": "Utilisation des tokens",
+      "warning": "Utilisation élevée",
+      "total": "Total",
+      "input": "Entrée",
+      "output": "Sortie",
+      "avgPerQuery": "Moy/Requête"
+    },
+    "queries": {
+      "title": "Statistiques de requête",
+      "total": "Total des requêtes",
+      "answered": "Répondues",
+      "unanswered": "Non répondues",
+      "avgChunks": "Moy Segments"
+    },
+    "common": {
+      "queries": "requêtes",
+      "requests": "demandes",
+      "perQuery": "par requête"
+    },
+    "warnings": {
+      "highUnanswered": "Taux élevé de non-réponses. Envisagez de télécharger des documents plus pertinents."
+    },
     "tokenWarning": "⚠️ L'utilisation des tokens dépasse 80%. Il est recommandé de commencer une nouvelle session."
   },
   "dialogs": {
@@ -631,5 +715,23 @@
     "startHint": "Découper les documents, les vectoriser puis les stocker dans la base vectorielle",
     "successTitle": "Traitement des textes terminé !",
     "successSubtext": "{{files}} fichier(s) traités ; {{chunks}} segments générés"
+  },
+  "documentInfo": {
+    "title": "Résumé d'analyse du document",
+    "ready": "✓ Document traité, données vectorielles enregistrées dans Vector DB. Prêt pour Q&R."
+  },
+  "crawledUrls": {
+    "title": "🌐 URLs explorées",
+    "pagesCount": "pages",
+    "totalTokens": "Total Tokens",
+    "average": "Moyenne",
+    "baseUrl": "URL de base",
+    "copyUrl": "Copier l'URL",
+    "copied": "✓ Copié",
+    "fullUrl": "URL complète:",
+    "copyButton": "📋 Copier",
+    "pageTitle": "Titre de la page:",
+    "tokens": "Tokens:",
+    "contentPreview": "Aperçu du contenu:"
   }
 }

@@ -36,6 +36,31 @@
     "successTitle": "文本处理完成！",
     "successSubtext": "共处理 {{files}} 个文件，生成 {{chunks}} 个文本块"
   },
+  "contactModal": {
+    "title": "与我联络",
+    "nameLabel": "您的名字",
+    "namePlaceholder": "请输入您的名字",
+    "emailLabel": "电子邮箱",
+    "emailOptional": "(选填)",
+    "emailPlaceholder": "your.email@example.com",
+    "emailHint": "若希望收到回复，请提供您的电子邮箱",
+    "messageLabel": "留言内容",
+    "messagePlaceholder": "请输入您的留言或问题... (10-200字符)",
+    "characterCount": "字符",
+    "minCharactersHint": "(至少10字符)",
+    "required": "*",
+    "validation": {
+      "nameRequired": "请输入您的名字",
+      "nameMinLength": "名字至少需要2个字符",
+      "nameMaxLength": "名字不可超过100个字符",
+      "messageRequired": "请输入留言内容",
+      "messageMinLength": "留言至少需要10个字符",
+      "messageMaxLength": "留言不可超过200个字符"
+    },
+    "success": "留言已成功送出！感谢您的联络。",
+    "errorDefault": "送出失败，请稍后再试。",
+    "errorNetwork": "网络错误，请检查您的连线。"
+  },
   "buttons": {
     "uploadPdf": "上传 PDF",
     "uploadText": "上传文字",
@@ -49,7 +74,11 @@
     "settings": "设置",
     "about": "关于本项目",
     "contact": "与我联系",
-    "understand": "了解"
+    "understand": "了解",
+    "submit": "送出留言",
+    "submitting": "送出中...",
+    "updateSession": "更新 Session",
+    "ok": "确定"
   },
   "step2": {
     "system": {
@@ -120,6 +149,8 @@
   "messages": {
     "sessionCreated": "会话创建成功",
     "sessionExpired": "会话已过期",
+    "sessionExpiredDetail": "Session已过期，请重新登入或刷新页面",
+    "sessionMaintainError": "无法维持会话",
     "uploadSuccess": "文件上传成功",
     "uploadFailed": "上传失败",
     "processingDocument": "文件处理中...",
@@ -308,7 +339,9 @@
     "tokenCount": "{{count}} tokens",
     "error": {
       "emptyUrl": "请输入网站 URL",
-      "invalidUrl": "请输入有效的 URL"
+      "invalidUrl": "请输入有效的 URL",
+      "emptyTextList": "无法嵌入空文本列表",
+      "failed": "网站爬取失败"
     }
   },
   "processing": {
@@ -351,12 +384,46 @@
       "title": "调试信息"
     }
   },
+  "resourceConsumption": {
+    "operation": {
+      "websiteCrawler": "网站爬取",
+      "pdfProcessing": "PDF 处理",
+      "textProcessing": "文本处理",
+      "documentProcessing": "文档处理"
+    },
+    "tokenConsumption": "Token 消耗",
+    "of": "的",
+    "textChunks": "文本块",
+    "avgTokensPerChunk": "平均 {{tokens}} tokens/块",
+    "none": "无",
+    "avgPerPage": "每页平均",
+    "tokensPerPage": "tokens/页",
+    "crawlTime": "爬取时间",
+    "processingTime": "处理时间",
+    "sec": "秒",
+    "highConsumptionWarning": "资源消耗过高。建议调整参数以供未来上传使用。"
+  },
+  "toast": {
+    "error": "错误",
+    "warning": "警告",
+    "info": "信息",
+    "success": "成功"
+  },
   "chat": {
     "title": "聊天",
     "subtitle": "提出关于您的文件的问题",
     "empty": {
       "message": "还没有消息",
       "hint": "开始输入关于已上传文件的问题"
+    },
+    "documentSummary": {
+      "title": "文件摘要",
+      "translationNote": "此摘要包含语言说明",
+      "collapse": "收起",
+      "expand": "展开"
+    },
+    "suggestions": {
+      "loading": "正在生成建议问题..."
     },
     "input": {
       "placeholder": "提出关于文件的问题...",
@@ -376,6 +443,10 @@
       "you": "您",
       "assistant": "助理"
     },
+    "message": {
+      "settingsHint": "提示：如果经常无法找到答案，可尝试调整「相似度阈值」(降低至 0.5-0.6) 或「分块大小」(增加至 800-1000) 来改善检索效果。",
+      "maybeYouWantToAsk": "也许您想问："
+    },
     "retrieved": {
       "title": "检索到的来源",
       "chunks": "找到 {{count}} 个相关段落",
@@ -385,16 +456,29 @@
   "metrics": {
     "title": "📊 实时指标",
     "loading": "加载指标中...",
-    "tokens": "Token 使用量",
-    "tokenInput": "输入 Tokens",
-    "tokenOutput": "输出 Tokens",
-    "tokenTotal": "总 Tokens",
-    "tokenPercent": "使用百分比",
-    "context": "上下文窗口",
-    "contextTokens": "上下文 Tokens",
-    "contextPercent": "上下文百分比",
-    "vectors": "向量数据库",
-    "vectorCount": "存储的向量",
+    "tokens": {
+      "title": "Token 使用量",
+      "warning": "高使用量",
+      "total": "总量",
+      "input": "输入",
+      "output": "输出",
+      "avgPerQuery": "平均/查询"
+    },
+    "queries": {
+      "title": "查询统计",
+      "total": "总查询数",
+      "answered": "已回答",
+      "unanswered": "未回答",
+      "avgChunks": "平均分块数"
+    },
+    "common": {
+      "queries": "次查询",
+      "requests": "次请求",
+      "perQuery": "每次查询"
+    },
+    "warnings": {
+      "highUnanswered": "未回答率偏高。建议上传更多相关文件。"
+    },
     "tokenWarning": "⚠️ Token 使用量已超过 80%。建议开始新会话。"
   },
   "dialogs": {
@@ -660,5 +744,23 @@
       "siteName": "未命名网站 {{index}}",
       "sitePreview": "预览内容不可用或为空"
     }
+  },
+  "documentInfo": {
+    "title": "资料分析摘要",
+    "ready": "✓ 文件已处理，向量资料已储存至 Vector DB。可以开始问答。"
+  },
+  "crawledUrls": {
+    "title": "🌐 爬虫 URL 列表",
+    "pagesCount": "个页面",
+    "totalTokens": "总 Token",
+    "average": "平均",
+    "baseUrl": "基础 URL",
+    "copyUrl": "复制 URL",
+    "copied": "✓ 已复制",
+    "fullUrl": "完整 URL:",
+    "copyButton": "📋 复制",
+    "pageTitle": "页面标题:",
+    "tokens": "Token:",
+    "contentPreview": "内容预览:"
   }
 }

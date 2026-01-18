@@ -78,7 +78,7 @@ export const Header: React.FC<HeaderProps> = ({
   }, [dropdownOpen]);
 
   React.useEffect(() => {
-    // Update state when i18n language changes
+    // Update current language state when i18n language changes
     setCurrentLanguage((i18n.language as SupportedLanguage) || "en");
   }, [i18n.language]);
 
@@ -198,31 +198,37 @@ export const Header: React.FC<HeaderProps> = ({
           message={systemMessage.message}
           onDismiss={onDismissMessage}
           showConfirmButton={
-            // Session錯誤只顯示更新Session按鈕，不顯示確定按鈕
+            // Show confirm button for session errors except expired/connection issues
             !(
               systemMessage.type === "error" &&
-              (systemMessage.message.includes("會話已過期") ||
-                systemMessage.message.includes("無法維持會話"))
+              (systemMessage.message.includes(t("session.expiredTitle")) ||
+                systemMessage.message.includes(
+                  t("messages.sessionMaintainError")
+                ))
             ) &&
-            // Session更新成功的消息不需要確定按鈕
+            // Session update success message doesn't need confirm button
             !(
               systemMessage.type === "success" &&
-              systemMessage.message.includes("Session 更新成功")
+              systemMessage.message.includes(t("system.sessionUpdateSuccess"))
             )
           }
           showExtraButtonOnly={
-            // Session錯誤只顯示更新Session按鈕
+            // Only show update session button for session errors
             systemMessage.type === "error" &&
-            (systemMessage.message.includes("會話已過期") ||
-              systemMessage.message.includes("無法維持會話"))
+            (systemMessage.message.includes(t("session.expiredTitle")) ||
+              systemMessage.message.includes(
+                t("messages.sessionMaintainError")
+              ))
           }
           extraButton={
             systemMessage.type === "error" &&
-            (systemMessage.message.includes("會話已過期") ||
-              systemMessage.message.includes("無法維持會話")) &&
+            (systemMessage.message.includes(t("session.expiredTitle")) ||
+              systemMessage.message.includes(
+                t("messages.sessionMaintainError")
+              )) &&
             onRestartSession
               ? {
-                  text: "更新 Session",
+                  text: t("buttons.updateSession"),
                   onClick: onRestartSession,
                   className: "btn btn-sm btn-warning",
                 }

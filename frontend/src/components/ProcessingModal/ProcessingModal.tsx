@@ -54,10 +54,10 @@ const ProcessingModal: React.FC<ProcessingModalProps> = ({
           <div className="modal-header">
             <h5 className="modal-title">
               {isError
-                ? t("processing.error.processingFailed", "Processing Failed")
+                ? t("processing.error.processingFailed")
                 : isCompleted
-                  ? t("processing.stage.complete", "Processing Complete")
-                  : t("processing.title", "Processing Document")}
+                  ? t("processing.stage.complete")
+                  : t("processing.title")}
             </h5>
           </div>
 
@@ -65,7 +65,7 @@ const ProcessingModal: React.FC<ProcessingModalProps> = ({
             {/* Source Info */}
             <div className="mb-3">
               <p className="text-muted mb-1">
-                <strong>{t("labels.documents", "Documents")}:</strong>
+                <strong>{t("labels.documents")}:</strong>
               </p>
               <p className="mb-0">
                 {sourceType === "PDF" && "📄"} {sourceType === "TEXT" && "📝"}{" "}
@@ -86,33 +86,24 @@ const ProcessingModal: React.FC<ProcessingModalProps> = ({
               <div>
                 <div className="alert alert-success mb-3" role="alert">
                   <i className="bi bi-check-circle-fill me-2"></i>
-                  {t(
-                    "processing.complete.message",
-                    "Document processed successfully!"
-                  )}
+                  {t("processing.complete.message")}
                 </div>
 
                 {chunkCount && (
                   <p className="text-muted mb-2">
                     <i className="bi bi-file-text me-2"></i>
-                    {t(
-                      "processing.complete.chunks",
-                      "{{count}} text chunks created",
-                      {
-                        count: chunkCount,
-                      }
-                    )}
+                    {t("processing.complete.chunks", {
+                      count: chunkCount,
+                    })}
                   </p>
                 )}
 
-                {/* T089+ 顯示 Token 和頁面信息 */}
+                {/* Display token and page information */}
                 <div className="processing-stats mb-3">
                   {tokensUsed > 0 && (
                     <p className="text-muted mb-1">
                       <i className="bi bi-lightning-fill me-2 stat-icon-tokens"></i>
-                      <strong>
-                        {t("processing.complete.tokensUsed", "Tokens Used")}:
-                      </strong>{" "}
+                      <strong>{t("processing.complete.tokensUsed")}:</strong>{" "}
                       {tokensUsed.toLocaleString()}
                     </p>
                   )}
@@ -130,7 +121,7 @@ const ProcessingModal: React.FC<ProcessingModalProps> = ({
               </div>
             )}
 
-            {/* 處理中 */}
+            {/* Processing in progress */}
             {!isError && !isCompleted && (
               <div>
                 <p className="text-muted mb-2">{processingStage}</p>
@@ -150,10 +141,7 @@ const ProcessingModal: React.FC<ProcessingModalProps> = ({
                 </div>
 
                 <p className="small text-muted text-center">
-                  {t(
-                    "processing.pleaseWait",
-                    "Please wait, this may take a few moments..."
-                  )}
+                  {t("processing.pleaseWait")}
                 </p>
               </div>
             )}
@@ -166,7 +154,7 @@ const ProcessingModal: React.FC<ProcessingModalProps> = ({
                 className="btn btn-primary"
                 onClick={onConfirm}
               >
-                {t("buttons.confirm", "Confirm")}
+                {t("buttons.confirm")}
               </button>
             )}
           </div>

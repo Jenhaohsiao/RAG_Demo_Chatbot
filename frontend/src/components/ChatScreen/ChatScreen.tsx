@@ -188,7 +188,7 @@ ${summary}`,
         errorCount = 0;
         setMetricsErrorCount(0);
         // Clear error state but not session expired notification on success
-        if (error && !error.includes("Session expired")) {
+        if (error && !error.includes(t("messages.sessionExpired"))) {
           setError(null);
         }
       } catch (err: any) {
@@ -205,10 +205,7 @@ ${summary}`,
       }
     };
 
-    // 初始載入
     updateMetrics();
-
-    // 設置低頻率輪詢：30秒一次
     interval = setInterval(updateMetrics, 30000);
 
     return () => {
@@ -218,13 +215,11 @@ ${summary}`,
     };
   }, [sessionId]);
 
-  // 獲取 session 信息（document_count, vector_count）
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     let errorCount = 0;
 
     const fetchSessionInfo = async () => {
-      // 如果連續失敗超過3次，停止輪詢
       if (errorCount >= 3) {
         if (interval) {
           clearInterval(interval);
@@ -239,22 +234,19 @@ ${summary}`,
           document_count: data.document_count,
           vector_count: data.vector_count,
         });
-        // 成功時重置錯誤計數
         errorCount = 0;
         setSessionErrorCount(0);
-        // 成功獲取session信息時，清除錯誤狀態但不重置session過期通知
-        if (error && !error.includes("Session已過期")) {
+        if (error && !error.includes(t("messages.sessionExpired"))) {
           setError(null);
         }
       } catch (err: any) {
         errorCount++;
         setSessionErrorCount(errorCount);
-        // 檢查是否為Session過期錯誤，且尚未通知過
         if (
           !sessionExpiredNotified &&
           (err.status === 401 || err.status === 403)
         ) {
-          setError("Session已過期，請重新登入或刷新頁面");
+          setError(t("messages.sessionExpiredDetail"));
           setSessionExpiredNotified(true);
         }
       }
@@ -262,7 +254,6 @@ ${summary}`,
 
     fetchSessionInfo();
 
-    // 設置低頻率輪詢：60秒一次
     interval = setInterval(fetchSessionInfo, 60000);
 
     return () => {
@@ -272,7 +263,6 @@ ${summary}`,
     };
   }, [sessionId]);
 
-  // 重置Session過期通知狀態和錯誤計數器（當sessionId改變時）
   useEffect(() => {
     setSessionExpiredNotified(false);
     setError(null);
@@ -284,7 +274,6 @@ ${summary}`,
     setError(null);
     setIsLoading(true);
 
-    // 新增使用者訊息
     const userMessage: ChatMessageType = {
       message_id: crypto.randomUUID(),
       session_id: sessionId,
@@ -296,10 +285,8 @@ ${summary}`,
     setMessages((prev) => [...prev, userMessage]);
 
     try {
-      // 發送查詢
       const response = await onSendQuery(content);
 
-      // 新增助理回應
       const assistantMessage: ChatMessageType = {
         message_id: response.message_id,
         session_id: sessionId,
@@ -310,13 +297,11 @@ ${summary}`,
 
       setMessages((prev) => [...prev, assistantMessage]);
 
-      // 記錄回應類型（用於顯示 CANNOT_ANSWER 樣式）
       setResponseTypes((prev) => ({
         ...prev,
         [response.message_id]: response.response_type,
       }));
 
-      // 記錄建議問題（如果有）
       if (response.suggestions && response.suggestions.length > 0) {
         setSuggestions((prev) => ({
           ...prev,
@@ -324,16 +309,14 @@ ${summary}`,
         }));
       }
 
-      // 查詢後立即更新 metrics
       const updatedMetrics = await getSessionMetrics(sessionId);
       setMetrics(updatedMetrics);
     } catch (err: any) {
-      // 檢查是否為Session過期錯誤
       if (
         !sessionExpiredNotified &&
         (err.status === 401 || err.status === 403)
       ) {
-        setError("Session已過期，請重新登入或刷新頁面");
+        setError(t("messages.sessionExpiredDetail"));
         setSessionExpiredNotified(true);
       } else if (!sessionExpiredNotified) {
         setError(err.response?.data?.detail || t("chat.error.sendFailed"));
@@ -345,7 +328,6 @@ ${summary}`,
 
   return (
     <div className="chat-screen">
-      {/* 文件摘要區域 */}
       {documentSummary &&
         (() => {
           const { content, isTranslationNote } =
@@ -362,11 +344,11 @@ ${summary}`,
                     style={{ color: PRIMARY_COLOR, fontWeight: "bold" }}
                   >
                     <i className="bi bi-file-earmark-text me-2"></i>
-                    文件摘要
+                    {t("chat.documentSummary.title")}
                     {isTranslationNote && (
                       <span
                         className="badge bg-info ms-2"
-                        title="此摘要包含語言說明"
+                        title={t("chat.documentSummary.translationNote")}
                       >
                         <i className="bi bi-translate"></i>
                       </span>
@@ -389,7 +371,11 @@ ${summary}`,
                       className="btn btn-sm btn-link text-decoration-none"
                       onClick={() => setIsSummaryExpanded(!isSummaryExpanded)}
                       style={{ color: PRIMARY_COLOR }}
-                      title={isSummaryExpanded ? "收起" : "展開"}
+                      title={
+                        isSummaryExpanded
+                          ? t("chat.documentSummary.collapse")
+                          : t("chat.documentSummary.expand")
+                      }
                     >
                       <i
                         className={`bi bi-chevron-${
@@ -419,7 +405,6 @@ ${summary}`,
       <div className="row chat-main-content">
         <div className="col-md-12 right-panel">
           <div className="interaction-area">
-            {/* 聊天對話區 */}
             <div className="chat-area">
               <div className="messages-container">
                 {messages.length === 0 && (
@@ -430,10 +415,7 @@ ${summary}`,
                     <div className="initial-suggestions">
                       {areSuggestionsLoading ? (
                         <div className="suggestions-loading">
-                          {t(
-                            "chat.suggestions.loading",
-                            "Generating suggested questions..."
-                          )}
+                          {t("chat.suggestions.loading")}
                         </div>
                       ) : (
                         <div className="suggestion-chips">
@@ -467,7 +449,6 @@ ${summary}`,
                         : undefined
                     }
                     onSuggestionClick={(suggestion) => {
-                      // 點擊建議問題時，自動發送該問題
                       handleSendMessage(suggestion);
                     }}
                   />
@@ -484,16 +465,12 @@ ${summary}`,
               </div>
             </div>
 
-            {/* 提問區 */}
             <div className="input-area">
               {error && <div className="error-banner">❌ {error}</div>}
               <ChatInput
                 onSendMessage={handleSendMessage}
                 disabled={isLoading}
-                placeholder={t(
-                  "chat.input.placeholder_new",
-                  "歡迎討論跟上傳資料相關的話題"
-                )}
+                placeholder={t("chat.input.placeholder_new")}
               />
             </div>
           </div>

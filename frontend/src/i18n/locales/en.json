@@ -24,7 +24,36 @@
     "settings": "Settings",
     "about": "About Project",
     "contact": "Contact Me",
-    "understand": "Understood"
+    "understand": "Understood",
+    "submit": "Submit Message",
+    "submitting": "Submitting...",
+    "updateSession": "Update Session",
+    "ok": "OK"
+  },
+  "contactModal": {
+    "title": "Contact Me",
+    "nameLabel": "Your Name",
+    "namePlaceholder": "Please enter your name",
+    "emailLabel": "Email Address",
+    "emailOptional": "(Optional)",
+    "emailPlaceholder": "your.email@example.com",
+    "emailHint": "If you want a reply, please provide your email",
+    "messageLabel": "Message",
+    "messagePlaceholder": "Please enter your message or question... (10-200 characters)",
+    "characterCount": "characters",
+    "minCharactersHint": "(at least 10 characters)",
+    "required": "*",
+    "validation": {
+      "nameRequired": "Please enter your name",
+      "nameMinLength": "Name must be at least 2 characters",
+      "nameMaxLength": "Name cannot exceed 100 characters",
+      "messageRequired": "Please enter a message",
+      "messageMinLength": "Message must be at least 10 characters",
+      "messageMaxLength": "Message cannot exceed 200 characters"
+    },
+    "success": "Message sent successfully! Thank you for contacting us.",
+    "errorDefault": "Failed to send. Please try again later.",
+    "errorNetwork": "Network error. Please check your connection."
   },
   "step2": {
     "system": {
@@ -186,6 +215,8 @@
   "messages": {
     "sessionCreated": "Session created successfully",
     "sessionExpired": "Session has expired",
+    "sessionExpiredDetail": "Session has expired, please log in again or refresh the page",
+    "sessionMaintainError": "Unable to maintain session",
     "uploadSuccess": "Document uploaded successfully",
     "uploadFailed": "Upload failed",
     "processingDocument": "Processing document...",
@@ -365,7 +396,9 @@
     "urlNote": "{{count}} URLs crawled and ready for processing",
     "error": {
       "emptyUrl": "Please enter a website URL",
-      "invalidUrl": "Please enter a valid URL"
+      "invalidUrl": "Please enter a valid URL",
+      "emptyTextList": "Cannot embed empty text list",
+      "failed": "Failed to crawl website"
     },
     "tokenHint": {
       "small": "Suitable for small websites",
@@ -413,12 +446,46 @@
       "title": "Debug Info"
     }
   },
+  "resourceConsumption": {
+    "operation": {
+      "websiteCrawler": "Website Crawler",
+      "pdfProcessing": "PDF Processing",
+      "textProcessing": "Text Processing",
+      "documentProcessing": "Document Processing"
+    },
+    "tokenConsumption": "Token Consumption",
+    "of": "of",
+    "textChunks": "Text Chunks",
+    "avgTokensPerChunk": "Avg {{tokens}} tokens/chunk",
+    "none": "None",
+    "avgPerPage": "Avg per page",
+    "tokensPerPage": "tokens/page",
+    "crawlTime": "Crawl Time",
+    "processingTime": "Processing Time",
+    "sec": "sec",
+    "highConsumptionWarning": "High resource consumption. Consider adjusting parameters for future uploads."
+  },
+  "toast": {
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Info",
+    "success": "Success"
+  },
   "chat": {
     "title": "Chat",
     "subtitle": "Ask questions about your documents",
     "empty": {
       "message": "No messages yet",
       "hint": "Start by typing a question about the uploaded document"
+    },
+    "documentSummary": {
+      "title": "Document Summary",
+      "translationNote": "This summary contains language notes",
+      "collapse": "Collapse",
+      "expand": "Expand"
+    },
+    "suggestions": {
+      "loading": "Generating suggested questions..."
     },
     "input": {
       "placeholder": "Ask a question about the document...",
@@ -438,6 +505,10 @@
       "you": "You",
       "assistant": "Assistant"
     },
+    "message": {
+      "settingsHint": "Tip: If answers are frequently not found, try adjusting the 'Similarity Threshold' (reduce to 0.5-0.6) or 'Chunk Size' (increase to 800-1000) to improve retrieval.",
+      "maybeYouWantToAsk": "You might want to ask:"
+    },
     "retrieved": {
       "title": "Retrieved Sources",
       "chunks": "{{count}} relevant chunks found",
@@ -447,16 +518,29 @@
   "metrics": {
     "title": "📊 Real-time Metrics",
     "loading": "Loading metrics...",
-    "tokens": "Token Usage",
-    "tokenInput": "Input Tokens",
-    "tokenOutput": "Output Tokens",
-    "tokenTotal": "Total Tokens",
-    "tokenPercent": "Usage Percentage",
-    "context": "Context Window",
-    "contextTokens": "Context Tokens Used",
-    "contextPercent": "Context Percentage",
-    "vectors": "Vector Database",
-    "vectorCount": "Vectors Stored",
+    "tokens": {
+      "title": "Token Usage",
+      "warning": "High Usage",
+      "total": "Total",
+      "input": "Input",
+      "output": "Output",
+      "avgPerQuery": "Avg/Query"
+    },
+    "queries": {
+      "title": "Query Statistics",
+      "total": "Total Queries",
+      "answered": "Answered",
+      "unanswered": "Unanswered",
+      "avgChunks": "Avg Chunks"
+    },
+    "common": {
+      "queries": "queries",
+      "requests": "requests",
+      "perQuery": "per query"
+    },
+    "warnings": {
+      "highUnanswered": "High unanswered rate. Consider uploading more relevant documents."
+    },
     "tokenWarning": "⚠️ Token usage is above 80%. Consider starting a new session."
   },
   "dialogs": {
@@ -787,5 +871,23 @@
     "reloadMessage": "Page reloaded. Session reset.",
     "restartMessage": "You clicked Restart. Session reset.",
     "startNewSession": "OK"
+  },
+  "documentInfo": {
+    "title": "Document Analysis Summary",
+    "ready": "✓ Document processed, vector data saved to Vector DB. Ready for Q&A."
+  },
+  "crawledUrls": {
+    "title": "🌐 Crawled URLs",
+    "pagesCount": "pages",
+    "totalTokens": "Total Tokens",
+    "average": "Average",
+    "baseUrl": "Base URL",
+    "copyUrl": "Copy URL",
+    "copied": "✓ Copied",
+    "fullUrl": "Full URL:",
+    "copyButton": "📋 Copy",
+    "pageTitle": "Page Title:",
+    "tokens": "Tokens:",
+    "contentPreview": "Content Preview:"
   }
 }

@@ -93,13 +93,6 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
     return tokens.toString();
   };
 
-  // Check if crawler is completed
-  const isCrawlCompleted =
-    crawlResults &&
-    (crawlResults.crawl_status === "completed" ||
-      crawlResults.crawl_status === "token_limit_reached" ||
-      crawlResults.crawl_status === "page_limit_reached");
-
   return (
     <div className="">
       {/* Crawler Form - Always show, even after completion */}

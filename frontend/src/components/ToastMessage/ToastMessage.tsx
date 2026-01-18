@@ -1,4 +1,5 @@
 ﻿import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import "./ToastMessage.scss";
 
 interface ToastMessageProps {
@@ -22,6 +23,7 @@ const ToastMessage: React.FC<ToastMessageProps> = ({
   showExtraButtonOnly = false,
   extraButton,
 }) => {
+  const { t } = useTranslation();
   const [show, setShow] = useState(true);
   const [animationState, setAnimationState] = useState<
     "initial" | "animating" | "static"
@@ -65,36 +67,6 @@ const ToastMessage: React.FC<ToastMessageProps> = ({
     }, 150);
   };
 
-  const getBootstrapClass = () => {
-    switch (type) {
-      case "error":
-        return "bg-danger text-white";
-      case "warning":
-        return "bg-warning text-dark"; // Dark text for yellow background
-      case "info":
-        return "bg-info text-white";
-      case "success":
-        return "bg-success text-white";
-      default:
-        return "bg-secondary text-white";
-    }
-  };
-
-  const getIcon = () => {
-    switch (type) {
-      case "error":
-        return "bi-exclamation-triangle-fill";
-      case "warning":
-        return "bi-exclamation-triangle-fill";
-      case "info":
-        return "bi-info-circle-fill";
-      case "success":
-        return "bi-check-circle-fill";
-      default:
-        return "bi-info-circle-fill";
-    }
-  };
-
   const handleClose = () => {
     if (!showConfirmButton) {
       handleConfirm();
@@ -127,10 +99,10 @@ const ToastMessage: React.FC<ToastMessageProps> = ({
             } me-2`}
           ></i>
           <strong className="me-auto">
-            {type === "error" && "Error"}
-            {type === "warning" && "Warning"}
-            {type === "info" && "Info"}
-            {type === "success" && "Success"}
+            {type === "error" && t("toast.error", "Error")}
+            {type === "warning" && t("toast.warning", "Warning")}
+            {type === "info" && t("toast.info", "Info")}
+            {type === "success" && t("toast.success", "Success")}
           </strong>
           {!showConfirmButton && (
             <button
@@ -165,7 +137,7 @@ const ToastMessage: React.FC<ToastMessageProps> = ({
                   className="btn btn-sm btn-primary"
                   onClick={handleConfirm}
                 >
-                  OK
+                  {t("buttons.ok", "OK")}
                 </button>
               )}
             </div>

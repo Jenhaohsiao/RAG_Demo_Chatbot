@@ -1,13 +1,4 @@
-﻿/**
- * API Key Input Component
- * T032: Allow users to input Gemini API key if not configured or invalid
- *
- * Handles API Key validation and input:
- * - Checks backend API Key status
- * - Allows user to input their own API Key
- * - Validates API Key validity
- */
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
   checkApiKeyStatus,

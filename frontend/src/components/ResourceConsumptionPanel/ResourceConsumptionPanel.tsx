@@ -54,10 +54,10 @@ const ResourceConsumptionPanel: React.FC<ResourceConsumptionPanelProps> = ({
 
   // Get operation label
   const getOperationLabel = () => {
-    if (isWebCrawl) return " Website Crawler";
-    if (isFilePdf) return " PDF Processing";
-    if (isFileText) return " Text Processing";
-    return " Document Processing";
+    if (isWebCrawl) return t("resourceConsumption.operation.websiteCrawler");
+    if (isFilePdf) return t("resourceConsumption.operation.pdfProcessing");
+    if (isFileText) return t("resourceConsumption.operation.textProcessing");
+    return t("resourceConsumption.operation.documentProcessing");
   };
 
   // Get resource consumption risk level
@@ -82,10 +82,12 @@ const ResourceConsumptionPanel: React.FC<ResourceConsumptionPanelProps> = ({
         <div className="consumption-card token-card">
           <div className="card-icon"></div>
           <div className="card-content">
-            <div className="card-label">Token Consumption</div>
+            <div className="card-label">
+              {t("resourceConsumption.tokenConsumption")}
+            </div>
             <div className="card-value">{tokensUsed.toLocaleString()}</div>
             <div className="card-sublabel">
-              {tokenPercent.toFixed(1)}% of{" "}
+              {tokenPercent.toFixed(1)}% {t("resourceConsumption.of")}{" "}
               {(totalTokenLimit / 1000).toFixed(0)}K
             </div>
           </div>
@@ -105,12 +107,16 @@ const ResourceConsumptionPanel: React.FC<ResourceConsumptionPanelProps> = ({
         <div className="consumption-card chunks-card">
           <div className="card-icon"></div>
           <div className="card-content">
-            <div className="card-label">Text Chunks</div>
+            <div className="card-label">
+              {t("resourceConsumption.textChunks")}
+            </div>
             <div className="card-value">{chunkCount}</div>
             <div className="card-sublabel">
               {chunkCount > 0
-                ? `Avg ${Math.round(tokensUsed / chunkCount)} tokens/chunk`
-                : "None"}
+                ? t("resourceConsumption.avgTokensPerChunk", {
+                    tokens: Math.round(tokensUsed / chunkCount),
+                  })
+                : t("resourceConsumption.none")}
             </div>
           </div>
         </div>
@@ -120,9 +126,13 @@ const ResourceConsumptionPanel: React.FC<ResourceConsumptionPanelProps> = ({
           <div className="consumption-card crawler-card">
             <div className="card-icon"></div>
             <div className="card-content">
-              <div className="card-label">Avg per page</div>
+              <div className="card-label">
+                {t("resourceConsumption.avgPerPage")}
+              </div>
               <div className="card-value">{avgTokensPerPage}</div>
-              <div className="card-sublabel">tokens/page</div>
+              <div className="card-sublabel">
+                {t("resourceConsumption.tokensPerPage")}
+              </div>
             </div>
           </div>
         )}
@@ -133,12 +143,16 @@ const ResourceConsumptionPanel: React.FC<ResourceConsumptionPanelProps> = ({
             <div className="card-icon"></div>
             <div className="card-content">
               <div className="card-label">
-                {isWebCrawl ? "Crawl Time" : "Processing Time"}
+                {isWebCrawl
+                  ? t("resourceConsumption.crawlTime")
+                  : t("resourceConsumption.processingTime")}
               </div>
               <div className="card-value">
                 {processingTimeSeconds.toFixed(1)}
               </div>
-              <div className="card-sublabel">sec</div>
+              <div className="card-sublabel">
+                {t("resourceConsumption.sec")}
+              </div>
             </div>
           </div>
         )}
@@ -149,8 +163,7 @@ const ResourceConsumptionPanel: React.FC<ResourceConsumptionPanelProps> = ({
         <div className="warning-message">
           <span className="warning-icon"></span>
           <span className="warning-text">
-            High resource consumption. Consider adjusting parameters for future
-            uploads.
+            {t("resourceConsumption.highConsumptionWarning")}
           </span>
         </div>
       )}

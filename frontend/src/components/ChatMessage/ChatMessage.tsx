@@ -50,12 +50,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
       {cannotAnswer && (
         <div className="settings-hint">
           <i className="bi bi-info-circle me-1"></i>
-          <small className="text-muted">
-            {t(
-              "chat.message.settingsHint",
-              "提示：如果經常無法找到答案，可嘗試調整「相似度閾值」(降低至 0.5-0.6) 或「分塊大小」(增加至 800-1000) 來改善檢索效果。"
-            )}
-          </small>
+          <small className="text-muted">{t("chat.message.settingsHint")}</small>
         </div>
       )}
 
@@ -64,7 +59,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
         <div className="suggestion-bubbles">
           <div className="suggestion-label">
             <i className="bi bi-lightbulb me-1"></i>
-            {t("chat.message.maybeYouWantToAsk", "也許您想問：")}
+            {t("chat.message.maybeYouWantToAsk")}
           </div>
           <div className="suggestion-list">
             {suggestions.map((suggestion, index) => (
