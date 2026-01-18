@@ -6,7 +6,6 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { moderateMultipleContent } from "../../services/moderationService";
-import type { ContentModerationResponse } from "../../services/moderationService";
 import { useToast } from "../../hooks/useToast";
 import "./ContentReviewStep.scss";
 

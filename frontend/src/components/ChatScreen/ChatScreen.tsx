@@ -11,10 +11,6 @@ import { useTranslation } from "react-i18next";
 import i18n from "../../i18n/config";
 import { ChatMessage } from "../ChatMessage/ChatMessage";
 import { ChatInput } from "../ChatInput/ChatInput";
-import { MetricsPanel } from "../MetricsPanel/MetricsPanel";
-import { DocumentInfoCard } from "../DocumentInfoCard/DocumentInfoCard";
-import ResourceConsumptionPanel from "../ResourceConsumptionPanel/ResourceConsumptionPanel";
-import CrawledUrlsPanel from "../CrawledUrlsPanel/CrawledUrlsPanel";
 import {
   ChatRole,
   ResponseType,

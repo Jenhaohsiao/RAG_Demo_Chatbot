@@ -10,7 +10,6 @@
 
 import React, { ReactNode, ErrorInfo } from "react";
 import "./ErrorBoundary.scss";
-import { useTranslation } from "react-i18next";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
