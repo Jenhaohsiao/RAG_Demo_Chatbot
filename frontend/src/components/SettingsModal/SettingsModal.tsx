@@ -63,9 +63,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             <div className="mb-4">
               <label className="form-label fw-bold">
                 {t("settings.threshold.label", "Similarity Threshold")}
-                <span
-                  className="badge bg-secondary ms-2"
-                >
+                <span className="badge bg-secondary ms-2">
                   {getThresholdLabel(threshold)}
                 </span>
               </label>
@@ -89,7 +87,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
             <div className="alert alert-info small">
               <i className="bi bi-info-circle me-2"></i>
-              {t("settings.threshold.description", "Higher threshold retrieves more relevant but fewer chunks.")}
+              {t(
+                "settings.threshold.description",
+                "Higher threshold retrieves more relevant but fewer chunks."
+              )}
             </div>
 
             <div className="card bg-light">
@@ -100,15 +101,24 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 <ul className="small mb-0">
                   <li>
                     <strong>0.3-0.4:</strong>{" "}
-                    {t("settings.threshold.rec_lenient", "General queries, creative tasks")}
+                    {t(
+                      "settings.threshold.rec_lenient",
+                      "General queries, creative tasks"
+                    )}
                   </li>
                   <li>
                     <strong>0.5-0.6:</strong>{" "}
-                    {t("settings.threshold.rec_balanced", "Standard queries, balanced results")}
+                    {t(
+                      "settings.threshold.rec_balanced",
+                      "Standard queries, balanced results"
+                    )}
                   </li>
                   <li>
                     <strong>0.7-0.9:</strong>{" "}
-                    {t("settings.threshold.rec_strict", "Specific queries, precise answering")}
+                    {t(
+                      "settings.threshold.rec_strict",
+                      "Specific queries, precise answering"
+                    )}
                   </li>
                 </ul>
               </div>
@@ -126,9 +136,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                   className="btn btn-sm btn-outline-info"
                   onClick={() => setShowPromptHelp(!showPromptHelp)}
                 >
-                  <i
-                    className="bi bi-question-circle"
-                  ></i>
+                  <i className="bi bi-question-circle"></i>
                 </button>
               </label>
 
@@ -137,7 +145,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                   <strong>Available Variables:</strong>
                   <ul className="mb-0 mt-1">
                     <li>
-                      <code>{`{{language}}`}</code> - Response language (Chinese, English, etc.)
+                      <code>{`{{language}}`}</code> - Response language
+                      (Chinese, English, etc.)
                     </li>
                     <li>
                       <code>{`{{context}}`}</code> - Retrieved document chunks
@@ -159,7 +168,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 rows={6}
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
-                placeholder={t("settings.customPrompt.placeholder", "Enter custom system prompt...")}
+                placeholder={t(
+                  "settings.customPrompt.placeholder",
+                  "Enter custom system prompt..."
+                )}
               />
 
               {customPrompt && (

@@ -306,13 +306,19 @@ const App: React.FC = () => {
       // Show success message
       setSystemMessage({
         type: "success",
-        message: t("system.sessionUpdateSuccess", "Session updated successfully!"),
+        message: t(
+          "system.sessionUpdateSuccess",
+          "Session updated successfully!"
+        ),
       });
     } catch (err) {
       // Show error message
       setSystemMessage({
         type: "error",
-        message: t("system.sessionUpdateFailed", "Failed to update session, please try again later."),
+        message: t(
+          "system.sessionUpdateFailed",
+          "Failed to update session, please try again later."
+        ),
       });
     }
   };
@@ -351,13 +357,19 @@ const App: React.FC = () => {
       // Show success message
       setSystemMessage({
         type: "success",
-        message: t("system.sessionRestartSuccess", "Session restarted successfully! System reset to initial state."),
+        message: t(
+          "system.sessionRestartSuccess",
+          "Session restarted successfully! System reset to initial state."
+        ),
       });
     } catch (err) {
       // Show error message
       setSystemMessage({
         type: "error",
-        message: t("system.sessionRestartFailed", "Failed to restart session, please try again later."),
+        message: t(
+          "system.sessionRestartFailed",
+          "Failed to restart session, please try again later."
+        ),
       });
     }
   };

@@ -48,8 +48,8 @@ const ResourceConsumptionPanel: React.FC<ResourceConsumptionPanelProps> = ({
   const displayTimeSeconds = isWebCrawl
     ? crawlDurationSeconds
     : processingTimeMs
-    ? processingTimeMs / 1000
-    : 0;
+      ? processingTimeMs / 1000
+      : 0;
   const processingTimeSeconds = Math.round(displayTimeSeconds * 100) / 100;
 
   // Get operation label
@@ -149,7 +149,8 @@ const ResourceConsumptionPanel: React.FC<ResourceConsumptionPanelProps> = ({
         <div className="warning-message">
           <span className="warning-icon"></span>
           <span className="warning-text">
-            High resource consumption. Consider adjusting parameters for future uploads.
+            High resource consumption. Consider adjusting parameters for future
+            uploads.
           </span>
         </div>
       )}

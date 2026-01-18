@@ -338,9 +338,7 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
                   <small className="text-muted d-block">
                     {t("textProcessingStep.vectorDb", "Vector DB")}
                   </small>
-                  <span
-                    className="fw-bold"
-                  >
+                  <span className="fw-bold">
                     {!hasStarted
                       ? t("textProcessingStep.vectorPending", "Waiting")
                       : t(

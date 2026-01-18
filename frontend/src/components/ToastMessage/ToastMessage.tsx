@@ -120,10 +120,10 @@ const ToastMessage: React.FC<ToastMessageProps> = ({
               type === "success"
                 ? "bi-check-circle-fill text-success"
                 : type === "error"
-                ? "bi-x-circle-fill text-danger"
-                : type === "warning"
-                ? "bi-exclamation-triangle-fill text-warning"
-                : "bi-info-circle-fill text-primary"
+                  ? "bi-x-circle-fill text-danger"
+                  : type === "warning"
+                    ? "bi-exclamation-triangle-fill text-warning"
+                    : "bi-info-circle-fill text-primary"
             } me-2`}
           ></i>
           <strong className="me-auto">

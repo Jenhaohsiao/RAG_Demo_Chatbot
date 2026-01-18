@@ -159,7 +159,9 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
                 onClick={() => setShowKey(!showKey)}
                 disabled={isValidating}
               >
-                <i className={`bi ${showKey ? "bi-eye-slash-fill" : "bi-eye-fill"}`}></i>
+                <i
+                  className={`bi ${showKey ? "bi-eye-slash-fill" : "bi-eye-fill"}`}
+                ></i>
               </button>
             </div>
             {error && (
