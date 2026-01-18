@@ -1,12 +1,12 @@
-/**
+ï»¿/**
  * useUserActivity Hook
- * ??½?¨æˆ¶æ´»å?ï¼ˆæ?é¼ ç§»?•ã€é??Šã€éµ?¤ç?ï¼?
+ * Monitors user activity (mouse, keyboard, scroll, etc.)
  */
 import { useEffect, useRef, useCallback } from 'react';
 
 interface UseUserActivityOptions {
   onActivity?: () => void;
-  throttleTime?: number; // ç¯€æµæ??“ï??¿å??æ–¼?»ç?è§¸ç™¼
+  throttleTime?: number; // Throttling time (avoid excessive callbacks)
 }
 
 interface UseUserActivityReturn {
@@ -15,15 +15,15 @@ interface UseUserActivityReturn {
 
 /**
  * Custom hook for tracking user activity
- * 
+ *
  * Features:
  * - Monitor mouse movement, clicks, keyboard events
  * - Throttle activity detection to avoid excessive API calls
  * - Trigger heartbeat on any user activity
  */
 export const useUserActivity = (options: UseUserActivityOptions = {}): UseUserActivityReturn => {
-  const { onActivity, throttleTime = 60000 } = options; // ?è¨­1?†é?ç¯€æµ?
-  
+  const { onActivity, throttleTime = 60000 } = options; // Default 1 minute throttle
+
   const lastActivityRef = useRef<number>(Date.now());
   const throttleTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -32,24 +32,24 @@ export const useUserActivity = (options: UseUserActivityOptions = {}): UseUserAc
    */
   const handleActivity = useCallback(() => {
     const now = Date.now();
-    
-    // æª¢æŸ¥?¯å¦?¨ç?æµæ??“å…§
+
+    // Check if within throttle period
     if (now - lastActivityRef.current < throttleTime) {
       return;
     }
-    
+
     lastActivityRef.current = now;
-    
-    // æ¸…é™¤ä¹‹å??„ç?æµè??‚å™¨
+
+    // Clear previous throttle timer
     if (throttleTimerRef.current) {
       clearTimeout(throttleTimerRef.current);
     }
-    
-    // è§¸ç™¼æ´»å??èª¿
+
+    // Trigger activity callback
     if (onActivity) {
       onActivity();
     }
-    
+
   }, [onActivity, throttleTime]);
 
   /**
@@ -58,24 +58,24 @@ export const useUserActivity = (options: UseUserActivityOptions = {}): UseUserAc
   useEffect(() => {
     const events = [
       'mousedown',
-      'mousemove', 
+      'mousemove',
       'keypress',
       'scroll',
       'touchstart',
       'click'
     ];
 
-    // æ·»å?äº‹ä»¶??½??
+    // Bind event listeners
     events.forEach(event => {
       document.addEventListener(event, handleActivity, { passive: true });
     });
 
-    // æ¸…ç??½æ•¸
+    // Cleanup listeners
     return () => {
       events.forEach(event => {
         document.removeEventListener(event, handleActivity);
       });
-      
+
       if (throttleTimerRef.current) {
         clearTimeout(throttleTimerRef.current);
       }
@@ -83,6 +83,6 @@ export const useUserActivity = (options: UseUserActivityOptions = {}): UseUserAc
   }, [handleActivity]);
 
   return {
-    isActive: true // ç°¡å?å¯¦ç¾ï¼Œç¸½?¯è??true
+    isActive: true // Always true for now
   };
 };

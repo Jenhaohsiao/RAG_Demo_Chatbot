@@ -1,10 +1,10 @@
-/**
+﻿/**
  * useUpload Hook
- * 上傳流程整合與狀態管理
+ * Upload workflow integration and state management
  * 
  * Constitutional Compliance:
- * - Principle II (Testability): 獨立 Hook 邏輯
- * - User Story US2: Document Upload 完整流程
+ * - Principle II (Testability): Independent Hook logic
+ * - User Story US2: Document Upload complete workflow
  */
 
 import { useState, useCallback } from 'react';
@@ -45,12 +45,12 @@ export interface UseUploadReturn {
 }
 
 /**
- * 上傳流程管理 Hook
+ * Upload workflow management Hook
  * 
  * @param sessionId - Session ID
- * @param onComplete - 完成回調函式
- * @param onError - 錯誤回調函式
- * @returns 上傳狀態與操作函式
+ * @param onComplete - Completion callback
+ * @param onError - Error callback
+ * @returns Upload state and action functions
  */
 export const useUpload = (
   sessionId: string,
@@ -63,7 +63,7 @@ export const useUpload = (
   const [error, setError] = useState<string | null>(null);
 
   /**
-   * 重置狀態
+   * Reset state
    */
   const reset = useCallback(() => {
     setUploadState(UploadState.IDLE);
@@ -73,7 +73,7 @@ export const useUpload = (
   }, []);
 
   /**
-   * 處理檔案上傳
+   * Handle file upload
    */
   const handleFileUpload = useCallback(
     async (file: File) => {
@@ -81,44 +81,38 @@ export const useUpload = (
         setUploadState(UploadState.UPLOADING);
         setError(null);
 
-        // 上傳檔案
+        // Upload file
         const response = await uploadFile(sessionId, file);
         setUploadResponse(response);
 
-        // 開始輪詢狀態
+        // Start polling status
         setUploadState(UploadState.PROCESSING);
 
         const finalStatus = await pollUploadStatus(
           sessionId,
           response.document_id,
           (status) => {
-            // 更新進度
+            // Update progress
             setStatusResponse(status);
           }
         );
 
-        // 完成
-        setStatusResponse(finalStatus);
+        // Completed
         setUploadState(UploadState.COMPLETED);
-
-        if (onComplete) {
-          onComplete(finalStatus);
-        }
+        setStatusResponse(finalStatus);
+        onComplete?.(finalStatus);
       } catch (err) {
+        setUploadState(UploadState.FAILED);
         const errorMessage = err instanceof Error ? err.message : 'Upload failed';
         setError(errorMessage);
-        setUploadState(UploadState.FAILED);
-
-        if (onError) {
-          onError(errorMessage);
-        }
+        onError?.(errorMessage);
       }
     },
     [sessionId, onComplete, onError]
   );
 
   /**
-   * 處理 URL 上傳
+   * Handle URL upload
    */
   const handleUrlUpload = useCallback(
     async (url: string) => {
@@ -126,49 +120,35 @@ export const useUpload = (
         setUploadState(UploadState.UPLOADING);
         setError(null);
 
-        // 上傳 URL - 使用網站爬蟲功能
-        const response = await uploadWebsite(sessionId, url);
+        // Upload URL
+        const response = await uploadUrl(sessionId, url);
         setUploadResponse(response);
 
-        // 開始輪詢狀態
+        // Start polling status
         setUploadState(UploadState.PROCESSING);
 
         const finalStatus = await pollUploadStatus(
           sessionId,
           response.document_id,
           (status) => {
-            // 更新進度
+            // Update progress
             setStatusResponse(status);
           }
         );
 
-        // 完成
-        setStatusResponse(finalStatus);
+        // Completed
         setUploadState(UploadState.COMPLETED);
-
-        if (onComplete) {
-          onComplete(finalStatus);
-        }
+        setStatusResponse(finalStatus);
+        onComplete?.(finalStatus);
       } catch (err) {
+        setUploadState(UploadState.FAILED);
         const errorMessage = err instanceof Error ? err.message : 'Upload failed';
         setError(errorMessage);
-        setUploadState(UploadState.FAILED);
-
-        if (onError) {
-          onError(errorMessage);
-        }
+        onError?.(errorMessage);
       }
     },
     [sessionId, onComplete, onError]
   );
-
-  /**
-   * 輔助計算屬性
-   */
-  const isUploading = uploadState === UploadState.UPLOADING;
-  const isProcessing = uploadState === UploadState.PROCESSING;
-  const isCompleted = uploadState === UploadState.COMPLETED;
-  const isFailed = uploadState === UploadState.FAILED;
 
   return {
     uploadState,
@@ -178,11 +158,9 @@ export const useUpload = (
     handleFileUpload,
     handleUrlUpload,
     reset,
-    isUploading,
-    isProcessing,
-    isCompleted,
-    isFailed,
+    isUploading: uploadState === UploadState.UPLOADING,
+    isProcessing: uploadState === UploadState.PROCESSING,
+    isCompleted: uploadState === UploadState.COMPLETED,
+    isFailed: uploadState === UploadState.FAILED,
   };
 };
-
-export default useUpload;

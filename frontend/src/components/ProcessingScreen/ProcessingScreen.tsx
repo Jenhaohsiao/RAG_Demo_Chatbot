@@ -1,10 +1,10 @@
 /**
  * Processing Screen Component
- * 文件處理進度顯示
+ * Document processing progress display
  *
  * Constitutional Compliance:
- * - Principle II (Testability): 獨立 React 組件
- * - User Story US2: Document Upload 進度追蹤
+ * - Principle II (Testability): Independent React component
+ * - User Story US2: Document Upload Progress Tracking
  * - User Story US5: Real-time Metrics Display (T081)
  */
 
@@ -40,7 +40,7 @@ export interface ProcessingScreenProps {
     context_percent: number;
     vector_count: number;
   } | null;
-  // T089+ Token 和頁面信息
+  // T089+ Token and page info
   tokensUsed?: number;
   pagesCrawled?: number;
 }
@@ -64,7 +64,7 @@ const ProcessingScreen: React.FC<ProcessingScreenProps> = ({
   const { t } = useTranslation();
 
   /**
-   * 取得當前處理階段文字
+   * Get current processing stage text
    */
   const getProcessingStageText = (): string => {
     if (extractionStatus === ExtractionStatus.FAILED) {
@@ -95,7 +95,7 @@ const ProcessingScreen: React.FC<ProcessingScreenProps> = ({
   };
 
   /**
-   * 取得進度顏色
+   * Get progress color
    */
   const getProgressColor = (): string => {
     if (

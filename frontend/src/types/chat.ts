@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ChatMessage entity types
  * Matches backend/src/models/chat.py and backend/src/api/routes/chat.py
  */
@@ -47,7 +47,7 @@ export interface ChatResponse {
   token_output: number;
   token_total: number;
   timestamp: string;
-  suggestions?: string[]; // 建議問題（當無法回答時提供）
+  suggestions?: string[]; // Suggested questions (from LLM if requested)
 }
 
 // Chat history from GET /chat/{session_id}/history

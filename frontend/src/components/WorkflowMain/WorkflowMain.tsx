@@ -20,7 +20,7 @@ export interface WorkflowMainProps {
   ragContextWindow?: number;
   ragCitationStyle?: string;
   ragFallbackMode?: string;
-  onShowRagSummary?: () => void; // 新增
+  onShowRagSummary?: () => void; // Added
 }
 
 const WorkflowMain: React.FC<WorkflowMainProps> = ({

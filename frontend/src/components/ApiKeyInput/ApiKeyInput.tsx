@@ -1,11 +1,11 @@
-/**
+ï»¿/**
  * API Key Input Component
  * T032: Allow users to input Gemini API key if not configured or invalid
  *
- * ?¨æ–¼?•ç? API Key å¤±æ??–æœª?ç½®?„æ?æ³?
- * - æª¢æŸ¥å¾Œç«¯??API Key ?€??
- * - ?è¨±ä½¿ç”¨?…è¼¸?¥è‡ªå·±ç? API Key
- * - é©—è? API Key ?‰æ???
+ * Handles API Key validation and input:
+ * - Checks backend API Key status
+ * - Allows user to input their own API Key
+ * - Validates API Key validity
  */
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -37,7 +37,7 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
     has_valid_api_key: boolean;
   } | null>(null);
 
-  // ?¨ç?ä»¶è??¥æ?æª¢æŸ¥ API Key ?€??
+  // Check API Key status on component mount
   useEffect(() => {
     checkStatus();
   }, []);
@@ -47,7 +47,7 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
       const status = await checkApiKeyStatus();
       setKeyStatus(status);
 
-      // å¦‚æ??‰æ??ˆç? API Key (ä¾†è‡ª?°å?è®Šæ•¸)ï¼Œç›´?¥å???
+      // If valid API Key exists (from env vars), validate immediately
       if (status.has_valid_api_key && status.source === "env") {
         onApiKeyValidated?.("");
       }
@@ -73,7 +73,7 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
       const result = await validateUserApiKey(apiKey);
 
       if (result.valid) {
-        // é©—è??å?ï¼Œä?å­˜åˆ° session storage (å®‰å…¨?ƒæ…®)
+        // Validation successful, save to session storage (security consideration)
         sessionStorage.setItem("user_gemini_api_key", apiKey);
         onApiKeyValidated?.(apiKey);
       } else {
@@ -92,7 +92,7 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
     }
   };
 
-  // å¦‚æ??‰æ??ˆç??°å?è®Šæ•¸ API Keyï¼Œä?é¡¯ç¤ºæ­¤ç?ä»?
+  // If env var API Key is valid, do not show this component
   if (keyStatus?.has_valid_api_key && keyStatus?.source === "env") {
     return null;
   }
@@ -106,7 +106,7 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
         </div>
 
         <div className="api-key-body">
-          {/* ?€?‹èªª??*/}
+          {/* Status Message */}
           <div className="status-message">
             {keyStatus?.status === "missing" && (
               <div className="alert alert-warning">
@@ -122,7 +122,7 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
             )}
           </div>
 
-          {/* API Key èªªæ? */}
+          {/* API Key Description */}
           <div className="info-section mb-4">
             <h5>{t("apiKey.what_is_it")}</h5>
             <p className="text-muted">{t("apiKey.description")}</p>
@@ -137,7 +137,7 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
             </a>
           </div>
 
-          {/* API Key è¼¸å…¥ */}
+          {/* API Key Input */}
           <div className="input-section">
             <label htmlFor="apiKey" className="form-label">
               {t("apiKey.input_label")}
@@ -159,7 +159,7 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
                 onClick={() => setShowKey(!showKey)}
                 disabled={isValidating}
               >
-                <i className={`bi bi-eye${showKey ? "-slash" : ""}-fill`}></i>
+                <i className={`bi ${showKey ? "bi-eye-slash-fill" : "bi-eye-fill"}`}></i>
               </button>
             </div>
             {error && (
@@ -170,13 +170,13 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
             )}
           </div>
 
-          {/* å®‰å…¨?ç¤º */}
+          {/* Security Note */}
           <div className="security-note mt-3">
             <i className="bi bi-shield-check text-success me-2"></i>
             <small className="text-muted">{t("apiKey.security_note")}</small>
           </div>
 
-          {/* ?‰é? */}
+          {/* Buttons */}
           <div className="button-section mt-4">
             <button
               className="btn btn-primary w-100"

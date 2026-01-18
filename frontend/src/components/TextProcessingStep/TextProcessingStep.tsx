@@ -1,6 +1,6 @@
-/**
+﻿/**
  * Step 5: Text Processing Component
- * 文本切割與向量嵌入步驟 - 處理文件切塊和向量化
+ * Text chunking and embedding step - Handle document chunking and vectorization
  */
 
 import React, { useState, useEffect } from "react";
@@ -34,16 +34,16 @@ export interface TextProcessingStepProps {
   onProcessingStatusChange?: (isCompleted: boolean) => void;
   documents?: any[];
   crawledUrls?: any[];
-  onLoadingChange?: (isLoading: boolean, message?: string) => void; // 通知父組件 loading 狀態
-  shouldStartProcessing?: boolean; // 從外部控制是否開始處理
+  onLoadingChange?: (isLoading: boolean, message?: string) => void; // Notify parent component loading state
+  shouldStartProcessing?: boolean; // Control start from external
   savedProcessingResults?: {
     jobs: ProcessingJob[];
     overallProgress: number;
-  } | null; // 保存的處理結果
+  } | null; // Saved processing results
   onSaveProcessingResults?: (results: {
     jobs: ProcessingJob[];
     overallProgress: number;
-  }) => void; // 保存處理結果回調
+  }) => void; // Save processing results callback
 }
 
 const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
@@ -69,19 +69,19 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
   );
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // 追蹤是否已經初始化過（用於判斷是否需要載入新作業）
+  // Track if initialized (to avoid reloading new jobs)
   const [hasInitialized, setHasInitialized] = useState(() => {
     return savedProcessingResults && savedProcessingResults.jobs.length > 0;
   });
 
-  // 載入處理作業，當文檔或URL變化時重新加載（只在沒有保存結果時）
+  // Load processing jobs, reload when documents or URLs change (only if no saved results)
   useEffect(() => {
     if (
       sessionId &&
       (documents.length > 0 || crawledUrls.length > 0) &&
       !hasInitialized
     ) {
-      // 使用 setTimeout 避免在渲染期間執行狀態更新
+      // Use setTimeout to avoid state updates during render
       setTimeout(() => {
         loadProcessingJobs();
         setHasInitialized(true);
@@ -89,7 +89,7 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
     }
   }, [sessionId, documents, crawledUrls, hasInitialized]);
 
-  // 當外部觸發開始處理時
+  // When external trigger starts processing
   useEffect(() => {
     if (
       shouldStartProcessing &&
@@ -97,15 +97,15 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
       jobs.length > 0 &&
       jobs.some((j) => j.status === "pending")
     ) {
-      // 使用 setTimeout 延遲執行，避免在渲染期間更新父組件狀態
+      // Use setTimeout to delay execution, avoiding state update during parent render
       setTimeout(() => {
         startProcessing();
       }, 0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shouldStartProcessing, jobs.length]); // 依賴觸發信號和作業數量
+  }, [shouldStartProcessing, jobs.length]); // Depend on trigger signal and job count
 
-  // 計算整體進度並在完成時保存結果
+  // Calculate overall progress and save results on completion
   useEffect(() => {
     if (jobs.length > 0) {
       const avgProgress =
@@ -115,15 +115,15 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
       const allCompleted = jobs.every((job) => job.status === "completed");
       const anyError = jobs.some((job) => job.status === "error");
 
-      // 使用 setTimeout 延遲執行，避免在渲染期間更新父組件狀態
+      // Use setTimeout to delay execution
       setTimeout(() => {
-        // 通知父組件狀態變化
+        // Notify parent of status change
         onProcessingStatusChange?.(
           allCompleted && !anyError && jobs.length > 0
         );
 
         if (allCompleted && !anyError) {
-          // 保存處理結果到父組件
+          // Save processing results to parent
           onSaveProcessingResults?.({
             jobs: jobs,
             overallProgress: avgProgress,
@@ -132,7 +132,7 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
         }
       }, 0);
     } else {
-      // 沒有作業時設置為未完成
+      // Set to incomplete when no jobs
       setTimeout(() => {
         onProcessingStatusChange?.(false);
       }, 0);
@@ -145,24 +145,24 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
   ]);
 
   const loadProcessingJobs = async () => {
-    // 使用實際上傳的文檔數據
+    // Use actual uploaded document data
     const jobsFromDocuments = documents.map((doc, index) => ({
-      id: `doc-${doc.id || index}`,
-      filename: doc.name || doc.filename || `document-${index + 1}`,
+      id: `doc-${index}`,
+      filename: doc.name || doc.filename || `document-${index}`,
       status: "pending" as const,
       progress: 0,
       chunks: 0,
-      totalChunks: Math.floor(Math.random() * 20) + 10, // 模擬預估分塊數
+      totalChunks: Math.floor(Math.random() * 20) + 10, // Simulate estimated chunks
       startTime: new Date().toISOString(),
     }));
 
     const jobsFromUrls = crawledUrls.map((url, index) => ({
-      id: `url-${url.id || index}`,
-      filename: url.title || url.url || `website-${index + 1}`,
+      id: `url-${index}`,
+      filename: url.title || url.url || `website-${index}`,
       status: "pending" as const,
       progress: 0,
       chunks: 0,
-      totalChunks: Math.floor(Math.random() * 15) + 5, // 模擬預估分塊數
+      totalChunks: Math.floor(Math.random() * 15) + 5, // Simulate estimated chunks
       startTime: new Date().toISOString(),
     }));
 
@@ -173,7 +173,7 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
   const startProcessing = async () => {
     setIsProcessing(true);
 
-    // 通知父組件開始 loading
+    // Notify parent to start loading
     if (onLoadingChange) {
       onLoadingChange(
         true,
@@ -181,18 +181,18 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
       );
     }
 
-    // 模擬處理過程
+    // Simulate processing
     for (let i = 0; i < jobs.length; i++) {
       const job = jobs[i];
 
-      // 開始切塊
+      // Start chunking
       setJobs((prev) =>
         prev.map((j) =>
           j.id === job.id ? { ...j, status: "chunking", progress: 5 } : j
         )
       );
 
-      // 模擬切塊進度
+      // Simulate chunking progress
       for (let progress = 10; progress <= 50; progress += 10) {
         await new Promise((resolve) => setTimeout(resolve, 300));
         setJobs((prev) =>
@@ -208,14 +208,14 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
         );
       }
 
-      // 開始向量嵌入
+      // Start embedding
       setJobs((prev) =>
         prev.map((j) =>
           j.id === job.id ? { ...j, status: "embedding", progress: 60 } : j
         )
       );
 
-      // 模擬嵌入進度
+      // Simulate embedding progress
       for (let progress = 70; progress <= 100; progress += 10) {
         await new Promise((resolve) => setTimeout(resolve, 400));
         setJobs((prev) =>
@@ -238,7 +238,7 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
 
     setIsProcessing(false);
 
-    // 通知父組件結束 loading
+    // Notify parent loading ended
     if (onLoadingChange) {
       onLoadingChange(false);
     }
@@ -294,11 +294,11 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
 
   return (
     <div className="text-processing-step">
-      {/* 簡化版狀態卡片 - 只顯示關鍵資訊 */}
+      {/* Simplified Status Card - Show key info only */}
       <div className="card surface-card active-card-border mb-4">
         <div className="card-body p-4">
           <div className="row g-3 align-items-center">
-            {/* Collection 資訊 */}
+            {/* Collection Info */}
             <div className="col-md-4">
               <div className="d-flex align-items-center">
                 <i className="bi bi-database-fill text-primary fs-4 me-3"></i>
@@ -313,7 +313,7 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
               </div>
             </div>
 
-            {/* 來源文件數 */}
+            {/* Source Files */}
             <div className="col-md-4">
               <div className="d-flex align-items-center">
                 <i className="bi bi-file-earmark-text text-info fs-4 me-3"></i>
@@ -330,7 +330,7 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
               </div>
             </div>
 
-            {/* 向量總數 */}
+            {/* Total Vectors */}
             <div className="col-md-4">
               <div className="d-flex align-items-center">
                 <i className="bi bi-cpu text-success fs-4 me-3"></i>
@@ -339,7 +339,7 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
                     {t("textProcessingStep.vectorDb", "Vector DB")}
                   </small>
                   <span
-                    className={`fw-bold ${!hasStarted ? "text-muted" : "text-success"}`}
+                    className="fw-bold"
                   >
                     {!hasStarted
                       ? t("textProcessingStep.vectorPending", "Waiting")
@@ -356,7 +356,7 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
             </div>
           </div>
 
-          {/* 配置摘要 - 收合在一行 */}
+          {/* Config Summary - Collapsed in one line */}
           <div className="mt-3 pt-3 border-top">
             <div className="d-flex flex-wrap gap-3 small text-muted">
               <span>
@@ -388,7 +388,7 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
         </div>
       </div>
 
-      {/* 執行按鈕區域 - 置頂且醒目 */}
+      {/* Execute Button Area - Prominent */}
       {!jobs.some((j) => j.status === "completed") && !isProcessing && (
         <div className="text-center mb-4">
           <button
@@ -417,7 +417,7 @@ const TextProcessingStep: React.FC<TextProcessingStepProps> = ({
         </div>
       )}
 
-      {/* 處理完成狀態 */}
+      {/* Processing Complete State */}
       {jobs.length > 0 && jobs.every((j) => j.status === "completed") && (
         <div className="text-center mb-4">
           <div

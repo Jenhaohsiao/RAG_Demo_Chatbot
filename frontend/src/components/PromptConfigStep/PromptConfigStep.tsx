@@ -1,7 +1,7 @@
 /**
- * Step 2: AI 行為與回答規則設定
+ * Step 2: AI Behavior & Answer Rules Configuration
  * AI Behavior & Response Configuration
- * 分為 2 區塊：系統規則 / 回答政策
+ * Divided into 2 sections: System Rules / Response Policy
  */
 
 import React from "react";
@@ -10,26 +10,26 @@ import "./PromptConfigStep.scss";
 
 export interface PromptConfigStepProps {
   parameters: {
-    // A. 系統規則 (System Rules) - Session 固定
-    allow_inference: boolean; // 允許推論
-    answer_language: "zh-TW" | "zh-CN" | "en" | "fr" | "auto"; // 回答語言
-    strict_rag_mode: boolean; // 嚴格 RAG 模式
-    // external_knowledge: false;       // 外部知識（永遠關閉，唯讀）
+    // A. System Rules - Fixed per Session
+    allow_inference: boolean; // Allow inference
+    answer_language: "zh-TW" | "zh-CN" | "en" | "fr" | "auto"; // Answer language
+    strict_rag_mode: boolean; // Strict RAG mode
+    // external_knowledge: false;       // External knowledge (Always off, read-only)
 
-    // B. 回答政策 (Response Policy) - 對話中可調整
+    // B. Response Policy - Adjustable during conversation
     response_style: "brief" | "kid_friendly";
     response_tone: "friendly" | "rigorous" | "urgent";
     persona: "elementary_teacher" | "show_host" | "workplace_veteran";
-    citation_style: "inline" | "document" | "none"; // 引用方式
+    citation_style: "inline" | "document" | "none"; // Citation style
 
-    // C. 執行限制 (Runtime Constraints) - 部分固定
-    max_response_tokens: number; // 最大回應 Token (512-4096)
-    context_warning_threshold: number; // Context 預警閾值 (50-90%)
+    // C. Runtime Constraints - Partially fixed
+    max_response_tokens: number; // Max Response Tokens (512-4096)
+    context_warning_threshold: number; // Context Warning Threshold (50-90%)
     retrieval_top_k: number; // Retrieval Top-K (1-10)
-    similarity_threshold: number; // 相似度閾值 (0-1)
-    max_context_tokens: number; // 最大 Context Token (1000-8000)
+    similarity_threshold: number; // Similarity Threshold (0-1)
+    max_context_tokens: number; // Max Context Tokens (1000-8000)
 
-    // 舊參數保留（供向後相容）
+    // Deprecated parameters retained for backward compatibility
     token_threshold?: number;
     professional_level?: "casual" | "professional" | "academic";
     creativity_level?: "conservative" | "balanced" | "creative";
@@ -41,10 +41,14 @@ export interface PromptConfigStepProps {
   disabled?: boolean;
 }
 
-// 回答語言選項
+// Answer language options
 const ANSWER_LANGUAGE_OPTIONS = [
-  { value: "zh-TW", label: "繁體中文", labelKey: "step2.system.lang.zhTW" },
-  { value: "auto", label: "自動偵測", labelKey: "step2.system.lang.auto" },
+  {
+    value: "zh-TW",
+    label: "Traditional Chinese",
+    labelKey: "step2.system.lang.zhTW",
+  },
+  { value: "auto", label: "Auto Detect", labelKey: "step2.system.lang.auto" },
   {
     value: "zh-CN",
     label: "Simplified Chinese",
@@ -54,46 +58,46 @@ const ANSWER_LANGUAGE_OPTIONS = [
   { value: "fr", label: "Français", labelKey: "step2.system.lang.fr" },
 ];
 
-// 回答風格選項
+// Response style options
 const RESPONSE_STYLE_OPTIONS = [
   {
     value: "brief",
-    label: "簡要",
+    label: "Brief",
     labelKey: "step2.policy.style.brief",
     descriptionKey: "step2.summary.style.brief",
-    description: "快速給重點",
+    description: "Quick summary",
   },
   {
     value: "kid_friendly",
-    label: "試著讓小孩也能懂",
+    label: "Explain Like I'm 5",
     labelKey: "step2.policy.style.kidFriendly",
     descriptionKey: "step2.summary.style.kidFriendly",
-    description: "用淺顯比喻讓孩子懂",
+    description: "Simple analogies for kids",
   },
 ];
 
-// 回答語氣選項
+// Response tone options
 const RESPONSE_TONE_OPTIONS = [
   {
     value: "friendly",
-    label: "親切",
+    label: "Friendly",
     labelKey: "step2.policy.tone.friendly",
     descriptionKey: "step2.summary.tone.friendly",
-    description: "溫暖易親近",
+    description: "Warm and approachable",
   },
   {
     value: "rigorous",
-    label: "嚴謹",
+    label: "Rigorous",
     labelKey: "step2.policy.tone.rigorous",
     descriptionKey: "step2.summary.tone.rigorous",
-    description: "精確、邏輯清晰",
+    description: "Precise and logical",
   },
   {
     value: "urgent",
-    label: "急促",
+    label: "Urgent",
     labelKey: "step2.policy.tone.urgent",
     descriptionKey: "step2.summary.tone.urgent",
-    description: "簡短直入重點，快速輸出",
+    description: "Short and direct, fast output",
   },
 ];
 

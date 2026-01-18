@@ -1,6 +1,6 @@
-/**
+﻿/**
  * useToast Hook
- * 管理toast通知顯示
+ * Manages toast message display
  */
 import { useState, useCallback } from 'react';
 
@@ -21,7 +21,7 @@ interface UseToastReturn {
 
 /**
  * Custom hook for toast message management
- * 
+ *
  * Features:
  * - Add/remove toast messages
  * - Auto-dismiss after duration
@@ -34,7 +34,7 @@ export const useToast = (): UseToastReturn => {
    * Show a new toast message
    */
   const showToast = useCallback((toast: Omit<ToastInfo, 'id'>) => {
-    const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+    const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);    
     const newToast: ToastInfo = {
       id,
       autoClose: true,

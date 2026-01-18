@@ -1,6 +1,6 @@
 /**
  * ChatScreen Component
- * 聊天介面主畫面
+ * Main chat interface screen
  *
  * T082: Integrate MetricsPanel into ChatScreen updating after each query-response cycle
  * T089+: Display token tracking and page crawl statistics
@@ -30,18 +30,18 @@ import { getSuggestions as getChatSuggestions } from "../../services/chatService
 import { type CrawledPage } from "../../services/uploadService";
 import "./ChatScreen.scss";
 
-// 檢測文本是否主要為英文
+// Check if text is primarily English
 const isEnglishText = (text: string): boolean => {
   if (!text || text.length < 10) return false;
 
-  // 計算英文字符的比例
+  // Calculate ratio of English characters
   const englishChars = text.match(/[a-zA-Z\s\.,!?;:"'-]/g) || [];
   const totalChars = text.replace(/\s/g, "").length;
 
   if (totalChars === 0) return false;
 
   const englishRatio = englishChars.length / text.length;
-  return englishRatio > 0.7; // 如果70%以上是英文字符，認為是英文文本
+  return englishRatio > 0.7; // If over 70% characters are English, consider it English text
 };
 
 interface ChatScreenProps {
@@ -80,7 +80,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   onSendQuery,
 }) => {
   const { t } = useTranslation();
-  // 初始化時使用保存的訊息
+  // Use saved messages on initialization
   const [messages, setMessages] = useState<ChatMessageType[]>(
     savedChatMessages || []
   );
@@ -89,7 +89,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   const [responseTypes, setResponseTypes] = useState<
     Record<string, ResponseType>
   >({});
-  const [suggestions, setSuggestions] = useState<Record<string, string[]>>({}); // 每條訊息的建議問題
+  const [suggestions, setSuggestions] = useState<Record<string, string[]>>({}); // Suggestions for each message
   const [metrics, setMetrics] = useState<SessionMetrics | null>(null);
   const [sessionInfo, setSessionInfo] = useState<{
     document_count: number;
@@ -124,7 +124,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   }, [sessionId, messages.length, i18n.language]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // 處理文檔摘要的語言顯示
+  // Handle language display for document summary
   const getLocalizedDocumentSummary = (
     summary: string
   ): {
@@ -133,24 +133,24 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   } => {
     if (!summary) return { content: "", isTranslationNote: false };
 
-    const currentLang = i18n.language; // 獲取當前語言
+    const currentLang = i18n.language; // Get current language
 
-    // 如果當前是中文界面（zh-TW 或 zh-CN）但摘要是英文，提供翻譯說明
+    // If interface is Chinese (zh-TW or zh-CN) but summary is English, provide translation note
     if (currentLang.startsWith("zh") && isEnglishText(summary)) {
       return {
-        content: `🌐 此文件摘要以原始語言（英文）顯示。RAG 系統能夠理解和回答中文問題，無論源文件語言為何。
+        content: `🌐 This summary is shown in original language (English). The RAG system understands and answers in Chinese regardless of source language.
 
-原文摘要：
+Original Summary:
 ${summary}`,
         isTranslationNote: true,
       };
     }
 
-    // 顯示完整摘要，不進行截斷
+    // Show full summary, no truncation
     return { content: summary, isTranslationNote: false };
   };
 
-  // 自動滾動到最新訊息
+  // Auto scroll to latest message
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -159,20 +159,20 @@ ${summary}`,
     scrollToBottom();
   }, [messages]);
 
-  // 當訊息變化時保存到父組件
+  // Save to parent component on message change
   useEffect(() => {
     if (messages.length > 0 && onSaveChatMessages) {
       onSaveChatMessages(messages);
     }
   }, [messages, onSaveChatMessages]);
 
-  // 定期更新 metrics
+  // Periodically update metrics
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     let errorCount = 0;
 
     const updateMetrics = async () => {
-      // 如果連續失敗超過3次，停止輪詢
+      // Stop polling if more than 3 consecutive errors
       if (errorCount >= 3) {
         if (interval) {
           clearInterval(interval);
@@ -184,17 +184,17 @@ ${summary}`,
       try {
         const data = await getSessionMetrics(sessionId);
         setMetrics(data);
-        // 成功時重置錯誤計數
+        // Reset error count on success
         errorCount = 0;
         setMetricsErrorCount(0);
-        // 成功獲取metrics時，清除錯誤狀態但不重置session過期通知
-        if (error && !error.includes("Session已過期")) {
+        // Clear error state but not session expired notification on success
+        if (error && !error.includes("Session expired")) {
           setError(null);
         }
       } catch (err: any) {
         errorCount++;
         setMetricsErrorCount(errorCount);
-        // 檢查是否為Session過期錯誤，且尚未通知過
+        // Check if Session expired error and not yet notified
         if (
           !sessionExpiredNotified &&
           (err.status === 401 || err.status === 403)

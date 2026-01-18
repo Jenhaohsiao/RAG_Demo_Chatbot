@@ -8,7 +8,7 @@ import ContentReviewStep from "../ContentReviewStep/ContentReviewStep";
 import TextProcessingStep from "../TextProcessingStep/TextProcessingStep";
 import AiChatStep from "../AiChatStep/AiChatStep";
 import LoadingOverlay from "../LoadingOverlay/LoadingOverlay";
-// import TestStep6 from "../TestStep6/TestStep6"; // 測試組件已替換為真實組件
+// import TestStep6 from "../TestStep6/TestStep6"; // Test component has been replaced with actual component
 import FixedRagFlow from "../FixedRagFlow/FixedRagFlow";
 import {
   uploadFile,
@@ -31,7 +31,7 @@ interface WorkflowStepperProps {
     type: "error" | "warning" | "info" | "success";
     message: string;
   }) => void;
-  onShowRagSummary?: () => void; // 新增：通知父組件顯示 RAG 總結
+  onShowRagSummary?: () => void; // Added: Notify parent component to show RAG summary
 }
 
 const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
@@ -55,12 +55,12 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   const [errorDialogTitle, setErrorDialogTitle] = useState<string>("");
   const [errorDialogMessage, setErrorDialogMessage] = useState<string>("");
 
-  // 成功對話框，用於爬蟲成功等情況
+  // Success dialog, used for crawler success, etc.
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [successDialogTitle, setSuccessDialogTitle] = useState<string>("");
   const [successDialogMessage, setSuccessDialogMessage] = useState<string>("");
 
-  // 全局 Loading 狀態
+  // Global Loading state
   const processingLabel = t(
     "workflow.loading.processingShort",
     "Processing..."
@@ -72,7 +72,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   const [isGlobalLoading, setIsGlobalLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState(defaultLoadingMessage);
 
-  // RAG 總結對話框 - 移除本地狀態，改用父組件的 AboutProjectModal
+  // RAG summary dialog - Removed local state, use parent component's AboutProjectModal
   // const [showRagSummaryDialog, setShowRagSummaryDialog] = useState(false);
 
   const [stepCompletion, setStepCompletion] = useState({
@@ -95,7 +95,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
         sessionId || "",
         documentId,
         (status) => {
-          // 更新文檔的chunks 狀態 (Flow 3 不可靠，因為chunk_count 可能為0，改檢查 extraction_status)
+          // Update document chunks state (Flow 3 is unreliable because chunk_count might be 0, check extraction_status instead)
           if (
             status.extraction_status === "COMPLETED" ||
             status.chunk_count > 0
@@ -107,10 +107,10 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
               status: "processing",
             };
 
-            // 更新 documents 列表中的對應項目（使用更穩定的匹配邏輯）
+            // Update corresponding item in documents list (use more stable matching logic)
             let docUpdated = false;
             const updatedDocs = documents.map((doc) => {
-              // 強制匹配邏輯：優先使用filename，然後檢查其他屬性
+              // Forced matching logic: prioritize filename, then check other attributes
               const filenameMatch =
                 doc.filename === identifier ||
                 doc.filename === docItem.filename;
@@ -140,21 +140,21 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             }
           }
         },
-        2000, // 2秒輪詢一次
-        30 // 最多輪詢30次（1分鐘）
+        2000, // Poll every 2 seconds
+        30 // Max 30 polls (1 minute)
       );
 
-      // 最終更新，確保不會意外清空documents
+      // Final update to ensure documents are not accidentally cleared
       if (
         finalStatus.extraction_status === "COMPLETED" ||
         finalStatus.chunk_count > 0
       ) {
-        // 檢查 token 數量是否足夠（至少50 tokens）
+        // Check if token count is sufficient (at least 50 tokens)
         const MIN_TOKENS_REQUIRED = 50;
         const tokensUsed = finalStatus.tokens_used || 0;
 
         if (tokensUsed > 0 && tokensUsed < MIN_TOKENS_REQUIRED) {
-          // Token 數量不足，顯示錯誤對話框
+          // Insufficient tokens, show error dialog
           const isUrlType = docItem.type === "url";
           setErrorDialogTitle("Insufficient content");
           setErrorDialogMessage(
@@ -166,7 +166,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           );
           setShowErrorDialog(true);
 
-          // 移除該文件
+          // Remove the file
           const filteredDocs = documents.filter((doc) => {
             const filenameMatch =
               doc.filename === identifier || doc.filename === docItem.filename;
@@ -180,13 +180,13 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
         const finalDoc = {
           ...docItem,
           chunks: finalStatus.chunk_count,
-          preview: finalStatus.summary || "處理完成",
+          preview: finalStatus.summary || "Processing complete",
           status: "completed",
         };
 
         let docFound = false;
         const finalDocs = documents.map((doc) => {
-          // 強制匹配邏輯
+          // Forced matching logic
           const filenameMatch =
             doc.filename === identifier || doc.filename === docItem.filename;
           const typeMatch = doc.type === docItem.type;
@@ -209,9 +209,9 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           return doc;
         });
 
-        // 如果沒有找到對應的檔案，直接添加（但要避免重複）
+        // If no corresponding file found, add directly (but avoid duplication)
         if (!docFound) {
-          // 檢查是否已經存在同樣的檔案（避免重複添加）
+          // Check if same file exists (avoid duplicate addition)
           const existingDoc = finalDocs.find(
             (doc) =>
               doc.filename === finalDoc.filename ||
@@ -228,31 +228,31 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           }
         }
 
-        // 安全檢查：確保不意外清空documents
+        // Safety check: ensure documents are not accidentally cleared
         if (finalDocs.length === 0 && documents.length > 0) {
-          return; // 不執行可能清空documents的更新
+          return; // Do not execute update that might clear documents
         }
 
         onDocumentsUpdate?.(finalDocs);
 
-        // 現在在這裡顯示最終處理訊息，包含chunks信息
+        // Now show final processing message here, including chunks info
         // onShowMessage?.({
         //   type: "success",
         //   message: `${
-        //     docItem.type === "file" ? "檔案" : "URL"
-        //   } ${identifier} 處理完成！產生${
+        //     docItem.type === "file" ? "File" : "URL"
+        //   } ${identifier} processed! Generated ${
         //     finalStatus.chunk_count
-        //   } 個文字段落。`,
+        //   } text chunks.`,
         // });
       }
 
-      // 輪詢完成，調用回調
+      // Polling complete, call callback
       onComplete?.();
     } catch (error) {
-      // 錯誤也要調用回調
+      // Call callback on error too
       onComplete?.();
 
-      // 檢查是否為內容審核錯誤 - 如果是則不在流程3顯示錯誤（改為審核步驟處理）
+      // Check if it is content review error - if so, do not show error in flow 3 (handled in review step)
       const errorMessage =
         error instanceof Error ? error.message : String(error);
       const isContentBlockedError =
@@ -269,7 +269,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           errorMessage.toLowerCase().includes("access denied") ||
           errorMessage.toLowerCase().includes("robot");
 
-        // 檢查是否為內容不足錯誤
+        // Check if it is insufficient content error
         const isEmptyContentError =
           errorMessage.toLowerCase().includes("empty text list") ||
           errorMessage.toLowerCase().includes("empty text") ||
@@ -294,17 +294,17 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           displayMessage = `File ${identifier} failed: ${errorMessage}\n\nPlease try another file or use the sample file.`;
         }
 
-        // 對顯示非內容審核類的錯誤，使用對話框而非toast
+        // Use dialog instead of toast for non-content-review errors
         setErrorDialogTitle(displayTitle);
         setErrorDialogMessage(displayMessage);
         setShowErrorDialog(true);
       } else {
-        // 內容審核錯誤僅記錄日誌，不顯示toast
+        // Content review error only logs to console, no toast shown
       }
     }
   };
 
-  // 文件狀態輪詢函數
+  // File status polling function
   const pollFileStatus = async (
     documentId: string,
     docItem: any,
@@ -314,28 +314,28 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     return pollDocumentStatus(documentId, docItem, filename, onComplete);
   };
 
-  // 添加審核狀態管理
+  // Add review status management
   const [reviewPassed, setReviewPassed] = useState(false);
   const [shouldStartReview, setShouldStartReview] = useState(false);
 
-  // 保存審核結果，用於從其他步驟恢復時還原
+  // Save review results, to restore when recovering from other steps
   const [savedReviewResults, setSavedReviewResults] = useState<{
     completed: string[];
     failed: string[];
   } | null>(null);
 
-  // 添加文本處理狀態管理
+  // Add text processing status management
   const [textProcessingCompleted, setTextProcessingCompleted] = useState(false);
   const [shouldStartProcessing, setShouldStartProcessing] = useState(false);
 
-  // 保存文本處理結果，用於從其他步驟恢復時還原
+  // Save text processing results, to restore from other steps
   const [savedProcessingResults, setSavedProcessingResults] =
     useState<any>(null);
 
-  // 保存聊天記錄，用於從其他步驟恢復時還原
+  // Save chat history, to restore from other steps
   const [savedChatMessages, setSavedChatMessages] = useState<any[]>([]);
 
-  // 當下 sessionId 變更，重置所有狀態
+  // When sessionId changes, reset all states
   React.useEffect(() => {
     if (sessionId) {
       setStepCompletion({
@@ -356,7 +356,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     }
   }, [sessionId]);
 
-  // 輔助函數：當上傳等改變，重置後續步驟狀態
+  // Helper function: Reset downstream steps state
   const resetDownstreamSteps = () => {
     setReviewPassed(false);
     setShouldStartReview(false);
@@ -374,37 +374,37 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     }));
   };
 
-  // 計算流程1是否應該被禁用
-  // 只要流程3上傳成功有documents 或crawledUrls 不為空，就禁用流程1的部分配置
+  // Calculate if flow 1 should be disabled
+  // Maintain logic: Disable step 1 config if step 3 upload success has documents or crawledUrls
   const shouldDisableConfigSteps = React.useMemo(() => {
     const hasDocuments = documents && documents.length > 0;
     const hasCrawledUrls = crawledUrls && crawledUrls.length > 0;
     return hasDocuments || hasCrawledUrls;
   }, [documents, crawledUrls]);
 
-  // 處理步驟變更
-  // 注意：不要設置審核成功旗標，確保已審核不會重複
+  // Handle step change
+  // Note: Do not set review passed flag, ensure reviewed not repeated
   React.useEffect(() => {
-    // 切入步驟後不做任何操作，但不設置已審核旗標
+    // Do nothing on step entry, but do not set reviewed flag
     if (currentStep === 4 && !reviewPassed) {
-      // 切入步驟4但不明確審核，可能需要開始審核
-      // 注意：shouldStartReview 由其他控制，不自動開始
+      // Step 4 entry but not explicit review, might need to start review
+      // Note: shouldStartReview controlled by others, not automatic
     }
     if (currentStep === 5 && !textProcessingCompleted) {
-      // 切入步驟5但不明確處理，可能需要開始處理
-      // 注意：shouldStartProcessing 由其他控制，不自動開始
+      // Step 5 entry but not explicit processing, might need to start processing
+      // Note: shouldStartProcessing controlled by others, not automatic
     }
   }, [currentStep, reviewPassed, textProcessingCompleted]);
 
-  // 當審核完成後，重置shouldStartReview
+  // Reset shouldStartReview when review complete
   React.useEffect(() => {
     if (currentStep === 4 && reviewPassed) {
-      // 審核完成則設置shouldStartReview為false
+      // Review complete, set shouldStartReview to false
       setShouldStartReview(false);
     }
   }, [currentStep, reviewPassed]);
 
-  // 當有上傳成功則標記步驟3完成
+  // Mark step 3 complete when upload success
   React.useEffect(() => {
     const hasDocuments = documents && documents.length > 0;
     const hasCrawledUrls = crawledUrls && crawledUrls.length > 0;
@@ -419,7 +419,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
         3: true,
       }));
     } else {
-      // 如果沒有上傳內容，取消步驟標記完成
+      // If no content uploaded, cancel step completion mark
       setStepCompletion((prev) => ({
         ...prev,
         3: false,
@@ -488,21 +488,21 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
   ];
 
   const isStepCompleted = (stepId: number) => {
-    // 如果步驟已被確實記為完成，直接返回 true
+    // If step is marked as complete, return true
     if (stepCompletion[stepId as keyof typeof stepCompletion]) {
       return true;
     }
-    // 如果當前步驟大於這個步驟，說明已經被訪問過，也算完成
+    // If current step > this step, it was visited, so complete
     if (stepId < currentStep) {
       return true;
     }
     return false;
   };
   const isStepActive = (stepId: number) => stepId === currentStep;
-  const isStepDisabled = (stepId: number) => stepId > currentStep + 1; // 允許跳一步
+  const isStepDisabled = (stepId: number) => stepId > currentStep + 1; // Allow skipping one step
 
   const handleStepClick = (stepId: number) => {
-    // 禁用流程的點擊功能，只能靠上一步下一步按鈕移動
+    // Disable click on flow, only use prev/next buttons
     // if (!isStepDisabled(stepId)) {
     //   onStepChange(stepId);
     // }
@@ -516,7 +516,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     setShowToast(true);
   };
 
-  // 輔助函數：獲取回應樣式文字
+  // Helper function: Get response style text
   const getResponseStyleText = (style: string | undefined) => {
     switch (style) {
       case "concise":
@@ -530,7 +530,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     }
   };
 
-  // 輔助函數：獲取專業度文字
+  // Helper function: Get professional level text
   const getProfessionalLevelText = (level: string | undefined) => {
     switch (level) {
       case "casual":
@@ -544,7 +544,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     }
   };
 
-  // 輔助函數：獲取創造度文字
+  // Helper function: Get creativity level text
   const getCreativityLevelText = (level: string | undefined) => {
     switch (level) {
       case "conservative":
@@ -558,14 +558,14 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
     }
   };
 
-  // 检查步骤是否可以继续
+  // Check if step can proceed
   const canProceedToNextStep = () => {
     if (currentStep === 3) {
-      // 步骤3：資料上傳 - 需要文档或爬蟲內容才可继续
+      // Step 3: Data Upload - Needs document or crawler content to proceed
       const hasDocuments = documents && documents.length > 0;
       const hasCrawledUrls = crawledUrls && crawledUrls.length > 0;
 
-      // 檢查文件是否就緒
+      // Check if files are ready
       const allDocsReady =
         !documents ||
         documents.every(
@@ -576,7 +576,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             doc.status === "COMPLETED"
         );
 
-      // 檢查URL是否就緒
+      // Check if URLs are ready
       const allUrlsReady =
         !crawledUrls ||
         crawledUrls.every(
@@ -590,52 +590,52 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       return (hasDocuments || hasCrawledUrls) && allDocsReady && allUrlsReady;
     }
     if (currentStep === 4) {
-      // 步骤4：內容審核 - 需要所有審核項目都通過
+      // Step 4: Content Review - Needs all review items passed
       return reviewPassed;
     }
     if (currentStep === 5) {
-      // 步骤5：資料處理 - 需要所有資料處理已完成
+      // Step 5: Data Processing - Needs all data processing completed
       return textProcessingCompleted;
     }
-    // 其他步骤暂时允许继续
+    // Other steps temporarily allow proceed
     return true;
   };
 
-  // 處理上一步點擊
+  // Handle previous step click
   const handlePreviousStepClick = () => {
-    // 如果從步驟（內容審核）返回流程3（資料上傳），重置審核失敗
+    // If returning from Step 4 (Content Review) to Step 3 (Data Upload), reset review failure
     if (
       currentStep === 4 &&
       reviewPassed === false &&
       savedReviewResults?.failed &&
       savedReviewResults.failed.length > 0
     ) {
-      // 清除已上傳資料
+      // Clear uploaded data
       onDocumentsUpdate?.([]);
       onCrawledUrlsUpdate?.([]);
 
-      // 重置審核狀態
+      // Reset review status
       setReviewPassed(false);
       setSavedReviewResults(null);
       setShouldStartReview(false);
 
-      // 顯示 toast 訊息
+      // Show toast message
       onShowMessage?.({
         type: "info",
         message:
           "Existing content detected. Please confirm parameters before proceeding.",
       });
 
-      // 返回上一步
+      // Return to previous step
       onStepChange(currentStep - 1);
       return;
     }
 
-    // 否則直接返回上一步驟，保留已上傳資料狀態
+    // Otherwise return to previous step directly, keeping uploaded data status
     onStepChange(currentStep - 1);
   };
   const handleNextStepClick = async () => {
-    // 檢查是否正在處理
+    // Check if processing
     if (isGlobalLoading) {
       onShowMessage?.({
         type: "info",
@@ -644,12 +644,12 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       return;
     }
 
-    // 檢查是否已到最後一步
+    // Check if last step
     if (currentStep === steps.length) {
       return;
     }
 
-    // 檢查步驟3是否可以進入下一步
+    // Check if step 3 can proceed to next step
     if (currentStep === 3 && !canProceedToNextStep()) {
       setToastContent({
         title: t("workflow.warning", "警告"),
@@ -662,7 +662,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       return;
     }
 
-    // 檢查步驟4是否可以進入下一步
+    // Check if step 4 can proceed to next step
     if (currentStep === 4 && !canProceedToNextStep()) {
       if (!reviewPassed) {
         setToastContent({
@@ -677,7 +677,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       return;
     }
 
-    // 檢查步驟5是否可以進入下一步
+    // Check if step 5 can proceed to next step
     if (currentStep === 5 && !canProceedToNextStep()) {
       setToastContent({
         title: t("workflow.warning", "警告"),
@@ -690,10 +690,10 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       return;
     }
 
-    // 如果從步驟5進入步驟6，更新並儲存 custom_prompt
+    // If entering step 6 from step 5, update and save custom_prompt
     if (currentStep === 5 && sessionId && parameters) {
       try {
-        // 使用流程2的邏輯生成custom_prompt
+        // Generate custom_prompt using logic from flow 2
         const customPrompt = generateCustomPrompt(parameters);
         if (customPrompt) {
           const { updateCustomPrompt } =
@@ -701,65 +701,65 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
           await updateCustomPrompt(sessionId, customPrompt);
         }
       } catch (error) {
-        // 不阻擋進入步驟6
+        // Do not block entering step 6
       }
     }
 
-    // 如果從步驟3進入步驟4，直接進入下一步
+    // If entering step 4 from step 3, proceed directly
     if (currentStep === 3) {
       onStepChange(currentStep + 1);
       return;
     }
-    // 继续下一步
+    // Continue to next step
     onStepChange(currentStep + 1);
   };
 
-  // 使用流程2的參數生成 custom_prompt（新增4 塊架構）
+  // Generate custom_prompt using parameters from flow 2 (added 4 blocks structure)
   const generateCustomPrompt = (params: any): string | null => {
     const {
-      // A. 系統規則
+      // A. System Rules
       allow_inference,
       answer_language,
       strict_rag_mode,
-      // B. 回應風格
+      // B. Response Style
       response_style,
       response_tone,
       persona,
       citation_style,
-      // C. 技術控制
+      // C. Technical Control
       max_response_tokens,
       retrieval_top_k,
       similarity_threshold,
     } = params;
 
-    // Persona 對照
+    // Persona Mapping
     const personaMap: Record<string, string> = {
       elementary_teacher: "小學老師 - 用簡單例子循序漸進，耐心讓孩子理解。",
       show_host: "節目主持人 - 生動活潑、帶節奏，讓內容更有趣也容易跟上。",
       workplace_veteran: "職場老手 - 實戰經驗豐富，提供務實可落地的建議。",
     };
 
-    // 回應風格對照
+    // Response Style Mapping
     const styleMap: Record<string, string> = {
       brief: "簡要回答，直接給出重點與結論。",
       kid_friendly: "用淺顯比喻與例子，讓小孩也能聽懂。",
     };
 
-    // 回應語氣對照
+    // Response Tone Mapping
     const toneMap: Record<string, string> = {
       friendly: "親切溫和的語氣，保持陪伴感。",
       rigorous: "嚴謹精確的語氣，條理清晰。",
       urgent: "急促直接，快速給出答案。",
     };
 
-    // 引用樣式對照
+    // Citation Style Mapping
     const citationMap: Record<string, string> = {
       inline: "請勿在回答中插入 [文件ID] 或 [文件x] 等引用標記。直接回答即可。",
       document: "在回答最尾統一列出參考文件來源。",
       none: "不需要標註出處來源。",
     };
 
-    // 語言對照
+    // Language Mapping
     const languageMap: Record<string, string> = {
       "zh-TW": "Traditional Chinese (繁體中文)",
       "zh-CN": "Simplified Chinese (简体中文)",
@@ -768,18 +768,18 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       auto: "{{language}}", // 使用變數，由後端決定
     };
 
-    // 推論政策
+    // Inference Policy
     const inferencePolicy = allow_inference
       ? "你可以基於文件內容做適當推論，但必須清楚標示哪些是直接引用。"
       : "你只能回答文件中明確記載的內容，不可進行推論。";
 
-    // 嚴格 RAG 模式
+    // Strict RAG Mode
     const strictRagPolicy =
       strict_rag_mode !== false
         ? "若檢索到的文件無法回答問題，必須明確拒絕回答，並告知使用者找不到相關資料。"
         : "若文件內容不足，可以適度使用一般知識補充，但需標示哪些來自文件及哪些是補充。";
 
-    // 組裝提示
+    // Assemble Prompt
     const personaInstruction =
       personaMap[persona] || personaMap["workplace_veteran"];
     const styleInstruction = styleMap[response_style] || styleMap["brief"];
@@ -788,7 +788,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       citationMap[citation_style] || citationMap["inline"];
     const responseLanguage = languageMap[answer_language] || "{{language}}";
 
-    // 組合完整的custom_prompt
+    // Assemble complete custom_prompt
     return `你是一個RAG (Retrieval-Augmented Generation) 助理。
 
 **角色設定**: ${personaInstruction}
@@ -833,12 +833,12 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
       [stepId]: true,
     }));
 
-    // 步驟4（內容審核）完成後不自動跳轉，等待用戶點擊下一步
+    // Step 4 (Content Review) complete, do not auto-jump, wait for user click next
     if (stepId === 4) {
-      return; // 不自動跳轉，讓用戶控制
+      return; // Do not auto-jump, let user control
     }
 
-    // 其他步驟自動跳到下一步
+    // Other steps auto-jump to next
     if (stepId < steps.length) {
       onStepChange(stepId + 1);
     }
@@ -874,7 +874,7 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
             crawledUrls={crawledUrls}
             onFileUpload={async (file) => {
               try {
-                // 顯示全局 Loading
+                // Show global loading
                 setIsGlobalLoading(true);
                 setLoadingMessage(
                   t(
@@ -886,13 +886,13 @@ const WorkflowStepper: React.FC<WorkflowStepperProps> = ({
 
                 const response = await uploadFile(sessionId!, file);
 
-                // 建立新的文件項目
+                // Create new document item
                 const newDoc = {
                   filename: file.name,
                   size: file.size,
                   uploadTime: new Date().toISOString(),
                   type: "file",
-                  chunks: 0, // 初始化0，等待輪詢更新
+                  chunks: 0, // Init 0, wait for poll update
                   preview: response.preview || processingLabel,
                   status: "processing",
                 };

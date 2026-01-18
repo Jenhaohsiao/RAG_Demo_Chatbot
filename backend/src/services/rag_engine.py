@@ -1,10 +1,10 @@
 """
 RAG Engine Service
-RAG 查詢引擎：向量搜尋、Prompt 建構、LLM 生成、Metrics 追蹤
+RAG Query Engine: Vector search, Prompt construction, LLM generation, Metrics tracking
 
 Constitutional Compliance:
-- Principle V (Strict RAG): 僅基於檢索內容回答，相似度閾值 ≥0.6
-- Principle III (Gemini-Only): 使用 Gemini 模型 (gemini-1.5-pro - cost-efficient)
+- Principle V (Strict RAG): Answer only based on retrieved content, similarity threshold >= 0.6
+- Principle III (Gemini-Only): Use Gemini model (gemini-1.5-pro - cost-efficient)
 """
 
 import logging

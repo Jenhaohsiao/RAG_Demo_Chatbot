@@ -753,6 +753,20 @@
   "common": {
     "processing": "處理中..."
   },
+  "system": {
+    "sessionUpdateSuccess": "Session 更新成功！",
+    "sessionUpdateFailed": "Session 更新失敗，請稍後再試。",
+    "sessionRestartSuccess": "Session 重啟成功！系統已重置為初始狀態。",
+    "sessionRestartFailed": "Session 重啟失敗，請稍後再試。"
+  },
+  "error": {
+    "serverError": "伺服器錯誤，請稍後再試。",
+    "invalidRequest": "請求參數無效。",
+    "resourceNotFound": "找不到資源。",
+    "validationError": "驗證錯誤。",
+    "serviceUnavailable": "服務暫時無法使用。",
+    "requestFailed": "請求失敗： "
+  },
   "session": {
     "expiredTitle": "Session已過期",
     "expiredMessage": "閒置超過 10 分鐘，Session 已過期。互動資料已被清除，將回到初始畫面。",

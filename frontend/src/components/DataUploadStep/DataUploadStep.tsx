@@ -1,6 +1,6 @@
-/**
+ï»¿/**
  * Step 3: Data Upload Component
- * è³‡è?ä¸Šå‚³æ­¥é? - ?´å??ƒæ•¸è¨­å??Œæ?æ¡ˆä???
+ * Data Upload Step - Parameter settings and file management
  */
 
 import React from "react";
@@ -21,10 +21,10 @@ export interface DataUploadStepProps {
   onFileUpload?: (file: File) => void;
   onUrlUpload?: (url: string) => void;
   onCrawlerUpload?: (url: string, maxTokens: number, maxPages: number) => void;
-  // ?°å?ï¼šè??†çˆ¬?²æ??Ÿç??èª¿
+  // Note: Crawler success callback
   onCrawlerSuccess?: (result: any) => void;
-  documents?: any[]; // å·²ä??³æ?ä»¶å?è¡?
-  crawledUrls?: any[]; // å·²çˆ¬?–URL?—è¡¨
+  documents?: any[]; // Uploaded document list
+  crawledUrls?: any[]; // Crawled URL list
 }
 
 const DataUploadStep: React.FC<DataUploadStepProps> = ({
@@ -40,12 +40,12 @@ const DataUploadStep: React.FC<DataUploadStepProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  // æª¢æŸ¥?¯å¦?‰ä??³å…§å®¹ï?å¿…é??‰æ?ä»¶ä??€?‰æ?ä»¶éƒ½å·²å??è??†ï?
+  // Check if there is any content (must have at least one file or crawled website)
   const hasAnyContent =
     (documents && documents.length > 0) ||
     (crawledUrls && crawledUrls.length > 0);
 
-  // æª¢æŸ¥?€?‰æ?ä»¶æ˜¯?¦éƒ½å·²å??è??†ï?chunks > 0 è¡¨ç¤º?•ç?å®Œæ?ï¼?
+  // Check if all files are processed (chunks > 0 indicates processing complete)
   const allFilesProcessed = documents.every(
     (doc) => doc.chunks && doc.chunks > 0
   );
@@ -53,19 +53,13 @@ const DataUploadStep: React.FC<DataUploadStepProps> = ({
     (url) => url.chunks && url.chunks > 0
   );
 
-  // ?ªæ??¨æ??§å®¹ä¸”å…¨?¨è??†å??æ??é¡¯ç¤ºã€Œä??³å??ã€?
+  // If there is content and all are processed, show "Ready"
   const hasUploadedContent =
     hasAnyContent && allFilesProcessed && allCrawlsProcessed;
 
-  //   documents: documents?.length || 0,
-  //   crawledUrls: crawledUrls?.length || 0,
-  //   allFilesProcessed,
-  //   allCrawlsProcessed,
-  // });
-
   return (
     <div className="data-upload-step">
-      {/* ?´æ¥é¡¯ç¤º UploadScreenï¼Œå??¸è¨­å®šå·²?´å??°å? tab */}
+      {/* Directly show UploadScreen, integrating settings tab */}
       {sessionId && (
         <UploadScreen
           sessionId={sessionId}
@@ -85,7 +79,7 @@ const DataUploadStep: React.FC<DataUploadStepProps> = ({
           hasUploadedContent={hasUploadedContent}
           uploadedFiles={documents}
           crawledUrls={crawledUrls}
-          // ?³é??ƒæ•¸è¨­å??¸é? props
+          // Parameter settings props
           parameters={parameters}
           onParameterChange={onParameterChange}
         />

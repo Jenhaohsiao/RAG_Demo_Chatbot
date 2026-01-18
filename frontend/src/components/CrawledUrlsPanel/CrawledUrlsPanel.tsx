@@ -1,16 +1,16 @@
 /**
  * Crawled URLs Panel Component
- * 顯示網站爬蟲抓取的所有 URL 及其詳細信息
- * 
- * 包括：
- * - URL 列表
- * - 每個 URL 的標題、Token、狀態
- * - 可展開查看詳情
- * - URL 複製功能
+ * Displays all URLs crawled by the web crawler and their details
+ *
+ * Includes:
+ * - URL list
+ * - Title, Tokens, and Status for each URL
+ * - Expandable details view
+ * - Copy URL functionality
  */
 
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export interface CrawledPage {
   url: string;
@@ -28,7 +28,7 @@ export interface CrawledUrlsPanelProps {
 
 const CrawledUrlsPanel: React.FC<CrawledUrlsPanelProps> = ({
   pages = [],
-  baseUrl = '',
+  baseUrl = "",
   totalPages = 0,
   totalTokens = 0,
 }) => {
@@ -64,7 +64,8 @@ const CrawledUrlsPanel: React.FC<CrawledUrlsPanelProps> = ({
     }
   };
 
-  const avgTokensPerPage = pages.length > 0 ? Math.round(totalTokens / pages.length) : 0;
+  const avgTokensPerPage =
+    pages.length > 0 ? Math.round(totalTokens / pages.length) : 0;
 
   return (
     <div className="crawled-urls-panel">
@@ -72,9 +73,7 @@ const CrawledUrlsPanel: React.FC<CrawledUrlsPanelProps> = ({
       <div className="panel-header">
         <div className="header-left">
           <h3 className="panel-title">🌐 爬蟲 URL 列表</h3>
-          <span className="url-count">
-            {pages.length} 個頁面
-          </span>
+          <span className="url-count">{pages.length} 個頁面</span>
         </div>
         <div className="header-stats">
           <div className="stat-item">
@@ -99,7 +98,7 @@ const CrawledUrlsPanel: React.FC<CrawledUrlsPanelProps> = ({
               onClick={() => handleCopyUrl(baseUrl)}
               title="複製 URL"
             >
-              {copiedUrl === baseUrl ? '✓ 已複製' : '📋'}
+              {copiedUrl === baseUrl ? "✓ 已複製" : "📋"}
             </button>
           </div>
         </div>
@@ -116,7 +115,7 @@ const CrawledUrlsPanel: React.FC<CrawledUrlsPanelProps> = ({
             >
               <div className="url-header-left">
                 <span className="expand-icon">
-                  {expandedUrl === page.url ? '▼' : '▶'}
+                  {expandedUrl === page.url ? "▼" : "▶"}
                 </span>
                 <span className="url-index">#{index + 1}</span>
                 <div className="url-title-section">
@@ -127,9 +126,7 @@ const CrawledUrlsPanel: React.FC<CrawledUrlsPanelProps> = ({
                 </div>
               </div>
               <div className="url-tokens">
-                <span className="token-badge">
-                  ⚡ {page.tokens}
-                </span>
+                <span className="token-badge">⚡ {page.tokens}</span>
               </div>
             </div>
 
@@ -148,7 +145,7 @@ const CrawledUrlsPanel: React.FC<CrawledUrlsPanelProps> = ({
                       }}
                       title="複製 URL"
                     >
-                      {copiedUrl === page.url ? '✓ 已複製' : '📋 複製'}
+                      {copiedUrl === page.url ? "✓ 已複製" : "📋 複製"}
                     </button>
                   </div>
                 </div>
@@ -163,7 +160,7 @@ const CrawledUrlsPanel: React.FC<CrawledUrlsPanelProps> = ({
                 <div className="detail-row">
                   <span className="detail-label">Token:</span>
                   <div className="detail-value">
-                    {page.tokens.toLocaleString()} 
+                    {page.tokens.toLocaleString()}
                     <span className="percentage">
                       ({((page.tokens / totalTokens) * 100).toFixed(1)}%)
                     </span>
@@ -175,7 +172,7 @@ const CrawledUrlsPanel: React.FC<CrawledUrlsPanelProps> = ({
                     <span className="detail-label">內容預覽:</span>
                     <div className="detail-value content-preview">
                       {page.content.substring(0, 200)}
-                      {page.content.length > 200 ? '...' : ''}
+                      {page.content.length > 200 ? "..." : ""}
                     </div>
                   </div>
                 )}

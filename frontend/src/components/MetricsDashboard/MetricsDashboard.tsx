@@ -1,6 +1,6 @@
 /**
  * Metrics Dashboard Component
- * 顯示 Session 運作狀況：Token 使用、查詢統計、Vector DB 使用、警告狀態
+ * Displays Session operational status: Token usage, query statistics, Vector DB usage, warning states
  */
 
 import React, { useState, useEffect } from "react";
@@ -37,7 +37,7 @@ export const MetricsDashboard: React.FC<MetricsDashboardProps> = ({
 
   return (
     <div className="metrics-dashboard">
-      {/* Token 使用情況 */}
+      {/* Token Usage */}
       <div className="metrics-section token-section">
         <div className="section-header">
           <span className="section-title">

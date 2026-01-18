@@ -1,12 +1,12 @@
-/**
+﻿/**
  * Resource Consumption Panel Component
- * 顯示文檔上傳/爬蟲操作消耗的資源
+ * Displays resource consumption for document upload/crawler operations
  *
- * 包括：
- * - Token 消耗量和百分比
- * - 處理時間
- * - 文本塊數量
- * - 操作類型
+ * Includes:
+ * - Token consumption and percentage
+ * - Processing time
+ * - Chunk count
+ * - Operation type
  */
 
 import React from "react";
@@ -34,17 +34,17 @@ const ResourceConsumptionPanel: React.FC<ResourceConsumptionPanelProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  // 調試信息 - 臨時添加
-  // 計算資源百分比
+  // Debug info - temporary
+  // Calculate resource percentage
   const tokenPercent = Math.min(100, (tokensUsed / totalTokenLimit) * 100);
 
-  // 判斷操作類型 - 需要先定義，因為後面會用到
+  // Determine operation type - define first as used later
   const isWebCrawl =
     sourceType === "URL" && (crawlDurationSeconds > 0 || avgTokensPerPage > 0);
   const isFilePdf = sourceType === "PDF";
   const isFileText = sourceType === "TEXT";
 
-  // 使用爬蟲時間或處理時間
+  // Use crawl time or processing time
   const displayTimeSeconds = isWebCrawl
     ? crawlDurationSeconds
     : processingTimeMs
@@ -52,44 +52,44 @@ const ResourceConsumptionPanel: React.FC<ResourceConsumptionPanelProps> = ({
     : 0;
   const processingTimeSeconds = Math.round(displayTimeSeconds * 100) / 100;
 
-  // 獲取操作類型標籤
+  // Get operation label
   const getOperationLabel = () => {
-    if (isWebCrawl) return "🔍 網站爬蟲";
-    if (isFilePdf) return "📄 PDF 轉檔";
-    if (isFileText) return "📝 文本閱讀";
-    return "📦 處理文檔";
+    if (isWebCrawl) return " Website Crawler";
+    if (isFilePdf) return " PDF Processing";
+    if (isFileText) return " Text Processing";
+    return " Document Processing";
   };
 
-  // 獲取資源消耗的風險級別
+  // Get resource consumption risk level
   const getResourceLevel = (percent: number) => {
-    if (percent < 30) return { level: "low", color: "#10b981" }; // 綠色 - 低
-    if (percent < 70) return { level: "medium", color: "#f59e0b" }; // 黃色 - 中
-    return { level: "high", color: "#ef4444" }; // 紅色 - 高
+    if (percent < 30) return { level: "low", color: "#10b981" }; // Green - Low
+    if (percent < 70) return { level: "medium", color: "#f59e0b" }; // Yellow - Medium
+    return { level: "high", color: "#ef4444" }; // Red - High
   };
 
   const resourceLevel = getResourceLevel(tokenPercent);
 
   return (
     <div className="resource-consumption-panel">
-      {/* 標題 */}
+      {/* Header */}
       <div className="panel-header">
         <h3 className="panel-title">{getOperationLabel()}</h3>
       </div>
 
-      {/* 資源消耗卡片 */}
+      {/* Consumption Cards */}
       <div className="consumption-cards">
-        {/* Token 消耗 */}
+        {/* Token Consumption */}
         <div className="consumption-card token-card">
-          <div className="card-icon">⚡</div>
+          <div className="card-icon"></div>
           <div className="card-content">
-            <div className="card-label">Token 消耗</div>
+            <div className="card-label">Token Consumption</div>
             <div className="card-value">{tokensUsed.toLocaleString()}</div>
             <div className="card-sublabel">
               {tokenPercent.toFixed(1)}% of{" "}
               {(totalTokenLimit / 1000).toFixed(0)}K
             </div>
           </div>
-          {/* 進度條 */}
+          {/* Progress Bar */}
           <div className="progress-bar">
             <div
               className="progress-fill"
@@ -101,55 +101,55 @@ const ResourceConsumptionPanel: React.FC<ResourceConsumptionPanelProps> = ({
           </div>
         </div>
 
-        {/* 塊數 */}
+        {/* Text Chunks */}
         <div className="consumption-card chunks-card">
-          <div className="card-icon">📦</div>
+          <div className="card-icon"></div>
           <div className="card-content">
-            <div className="card-label">文本塊</div>
+            <div className="card-label">Text Chunks</div>
             <div className="card-value">{chunkCount}</div>
             <div className="card-sublabel">
               {chunkCount > 0
-                ? `平均 ${Math.round(tokensUsed / chunkCount)} tokens/塊`
-                : "無"}
+                ? `Avg ${Math.round(tokensUsed / chunkCount)} tokens/chunk`
+                : "None"}
             </div>
           </div>
         </div>
 
-        {/* 額外信息：爬蟲特定 */}
+        {/* Extra Info: Crawler Specific */}
         {isWebCrawl && avgTokensPerPage > 0 && (
           <div className="consumption-card crawler-card">
-            <div className="card-icon">📊</div>
+            <div className="card-icon"></div>
             <div className="card-content">
-              <div className="card-label">平均每頁</div>
+              <div className="card-label">Avg per page</div>
               <div className="card-value">{avgTokensPerPage}</div>
-              <div className="card-sublabel">tokens/頁</div>
+              <div className="card-sublabel">tokens/page</div>
             </div>
           </div>
         )}
 
-        {/* 處理時間卡片 - 所有模式都顯示 */}
+        {/* Processing Time Card - Show for all modes */}
         {processingTimeSeconds > 0 && (
           <div className="consumption-card time-card">
-            <div className="card-icon">⏱️</div>
+            <div className="card-icon"></div>
             <div className="card-content">
               <div className="card-label">
-                {isWebCrawl ? "爬蟲時間" : "處理時間"}
+                {isWebCrawl ? "Crawl Time" : "Processing Time"}
               </div>
               <div className="card-value">
                 {processingTimeSeconds.toFixed(1)}
               </div>
-              <div className="card-sublabel">秒</div>
+              <div className="card-sublabel">sec</div>
             </div>
           </div>
         )}
       </div>
 
-      {/* 警告信息 */}
+      {/* Warning Message */}
       {resourceLevel.level === "high" && (
         <div className="warning-message">
-          <span className="warning-icon">⚠️</span>
+          <span className="warning-icon"></span>
           <span className="warning-text">
-            資源消耗較高，請考慮後續上傳時調整參數
+            High resource consumption. Consider adjusting parameters for future uploads.
           </span>
         </div>
       )}

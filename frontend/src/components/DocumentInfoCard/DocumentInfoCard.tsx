@@ -1,6 +1,6 @@
 /**
  * DocumentInfoCard Component
- * 顯示上傳文檔的摘要和向量數據庫信息
+ * Displays uploaded document summary and vector database information
  */
 
 import React, { useEffect, useState } from "react";
@@ -30,7 +30,7 @@ export const DocumentInfoCard: React.FC<DocumentInfoCardProps> = ({
   const [sessionInfo, setSessionInfo] = useState<SessionInfo | null>(null);
   const [isExpanded, setIsExpanded] = useState(true);
 
-  // 獲取 session 信息（document_count, vector_count）
+  // Get session info (document_count, vector_count)
   useEffect(() => {
     const fetchSessionInfo = async () => {
       try {
@@ -39,23 +39,22 @@ export const DocumentInfoCard: React.FC<DocumentInfoCardProps> = ({
           document_count: data.document_count,
           vector_count: data.vector_count,
         });
-      } catch (err) {
-      }
+      } catch (err) {}
     };
 
     fetchSessionInfo();
 
-    // 每 5 秒更新一次
+    // Update every 5 seconds
     const interval = setInterval(fetchSessionInfo, 5000);
     return () => clearInterval(interval);
   }, [sessionId]);
 
-  // 只要有 sessionInfo 就顯示卡片（即使沒有 summary）
+  // Show card only if sessionInfo exists (even without summary)
   if (!sessionInfo) {
     return null;
   }
 
-  // Debug: 檢查 props
+  // Debug: Check props
   return (
     <div className="card mb-3 border-primary">
       <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
@@ -75,10 +74,10 @@ export const DocumentInfoCard: React.FC<DocumentInfoCardProps> = ({
 
       {isExpanded && (
         <div className="card-body">
-          {/* 文檔摘要 */}
+          {/* Document Summary */}
           {documentSummary && <div className="bg">{documentSummary}</div>}
 
-          {/* 狀態指示器 */}
+          {/* Status Indicator */}
           {sessionInfo && sessionInfo.vector_count > 0 && (
             <div className="mt-3">
               <div className="alert alert-success mb-0 py-2 d-flex align-items-center">
@@ -86,7 +85,7 @@ export const DocumentInfoCard: React.FC<DocumentInfoCardProps> = ({
                 <small>
                   {t(
                     "documentInfo.ready",
-                    "✓ 文檔已處理完成，向量數據已存入 Vector DB，可以開始提問"
+                    "✓ Document processed, vector data saved to Vector DB. Ready for Q&A."
                   )}
                 </small>
               </div>

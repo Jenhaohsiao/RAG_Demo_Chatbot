@@ -3,14 +3,14 @@ import ReactDOM from "react-dom/client";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
-// 確保Bootstrap JavaScript正確載入
+// Ensure Bootstrap JavaScript is loaded correctly
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
-// 導入統一的SCSS樣式系統
-// 包含全局變數、mixins、工具類和既有CSS檔案
+// Import unified SCSS style system
+// Includes global variables, mixins, utilities and existing CSS files
 import "./styles/index.scss";
-import "./main.scss"; // 主樣式檔案（已轉換為SCSS）
-import "./components/ToastMessage/ToastMessage.scss"; // 顯式導入，以供 main.tsx 使用
+import "./main.scss"; // Main style file (converted to SCSS)
+import "./components/ToastMessage/ToastMessage.scss"; // Explicit import for use in main.tsx
 import "./i18n/config";
 import { useTranslation } from "react-i18next";
 import i18n from "./i18n/config";
@@ -306,13 +306,13 @@ const App: React.FC = () => {
       // Show success message
       setSystemMessage({
         type: "success",
-        message: "Session 更新成功！",
+        message: t("system.sessionUpdateSuccess", "Session updated successfully!"),
       });
     } catch (err) {
       // Show error message
       setSystemMessage({
         type: "error",
-        message: "Session 更新失敗，請稍後再試。",
+        message: t("system.sessionUpdateFailed", "Failed to update session, please try again later."),
       });
     }
   };
@@ -351,13 +351,13 @@ const App: React.FC = () => {
       // Show success message
       setSystemMessage({
         type: "success",
-        message: "Session 重新啟動成功！系統已重置為初始狀態。",
+        message: t("system.sessionRestartSuccess", "Session restarted successfully! System reset to initial state."),
       });
     } catch (err) {
-      // 显示错误提示
+      // Show error message
       setSystemMessage({
         type: "error",
-        message: "Session 重新啟動失敗，請稍後再試。",
+        message: t("system.sessionRestartFailed", "Failed to restart session, please try again later."),
       });
     }
   };
@@ -376,7 +376,7 @@ const App: React.FC = () => {
     }
   };
 
-  // 取得處理階段文字
+  // Get processing stage text
   const getProcessingStage = (): string => {
     if (isFailed) {
       return t("processing.stage.failed", "Processing Failed");

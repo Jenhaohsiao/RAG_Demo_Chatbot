@@ -1,6 +1,6 @@
-/**
+﻿/**
  * Metrics Service
- * 獲取和管理 Session 運作指標（Token 使用、查詢統計、警告狀態）
+ * Get and manage Session operational metrics (Token usage, query stats, warning status)
  */
 
 import axios from 'axios';
@@ -21,9 +21,9 @@ export interface SessionMetrics {
 }
 
 /**
- * 取得 Session 指標
+ * Get Session Metrics
  * @param sessionId - Session ID
- * @returns 包含所有運作指標的對象
+ * @returns Object containing all operational metrics
  */
 export const getSessionMetrics = async (sessionId: string): Promise<SessionMetrics> => {
   try {
@@ -32,7 +32,7 @@ export const getSessionMetrics = async (sessionId: string): Promise<SessionMetri
     );
     return response.data;
   } catch (error) {
-    // 返回默認值而不是拋出錯誤
+    // Return default values instead of throwing error
     return {
       session_id: sessionId,
       total_queries: 0,
@@ -50,7 +50,7 @@ export const getSessionMetrics = async (sessionId: string): Promise<SessionMetri
 };
 
 /**
- * 格式化 Token 數量（顯示為 K 或 M）
+ * Format Token count (display as K or M)
  */
 export const formatTokenCount = (tokens: number): string => {
   if (tokens >= 1000000) {
@@ -63,7 +63,7 @@ export const formatTokenCount = (tokens: number): string => {
 };
 
 /**
- * 計算 Token 使用百分比
+ * Calculate Token usage percentage
  */
 export const getTokenPercentage = (current: number, threshold: number): number => {
   if (threshold === 0) return 0;
@@ -71,7 +71,7 @@ export const getTokenPercentage = (current: number, threshold: number): number =
 };
 
 /**
- * 格式化無法回答的比率為百分比
+ * Format unanswered ratio as percentage
  */
 export const formatUnansweredRatio = (ratio: number): string => {
   return `${(ratio * 100).toFixed(1)}%`;

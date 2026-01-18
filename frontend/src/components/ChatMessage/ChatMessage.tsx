@@ -1,6 +1,6 @@
 /**
  * ChatMessage Component
- * 顯示單一聊天訊息（使用者或助理）
+ * Helper component to display a single chat message (user or assistant)
  */
 
 import React from "react";
@@ -14,9 +14,9 @@ import {
 
 interface ChatMessageProps {
   message: ChatMessageType;
-  responseType?: ResponseType; // 僅助理訊息需要
-  suggestions?: string[]; // 建議問題（當無法回答時提供）
-  onSuggestionClick?: (suggestion: string) => void; // 點擊建議問題的回調
+  responseType?: ResponseType; // Only required for assistant messages
+  suggestions?: string[]; // Suggested follow-up questions (provided when unable to answer)
+  onSuggestionClick?: (suggestion: string) => void; // Callback for clicking a suggestion
 }
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -46,7 +46,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
         {message.content}
       </div>
 
-      {/* 無法回答時的設定建議提示 */}
+      {/* Settings hint when unable to answer */}
       {cannotAnswer && (
         <div className="settings-hint">
           <i className="bi bi-info-circle me-1"></i>
@@ -59,7 +59,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
         </div>
       )}
 
-      {/* 建議氣泡標籤 */}
+      {/* Suggestion bubbles */}
       {suggestions && suggestions.length > 0 && (
         <div className="suggestion-bubbles">
           <div className="suggestion-label">

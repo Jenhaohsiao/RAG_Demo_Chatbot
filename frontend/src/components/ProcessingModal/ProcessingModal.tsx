@@ -1,6 +1,6 @@
 /**
  * Processing Modal Component
- * 處理進度對話框
+ * Processing progress dialog
  */
 
 import React from "react";
@@ -18,7 +18,7 @@ export interface ProcessingModalProps {
   isCompleted?: boolean;
   summary?: string;
   chunkCount?: number;
-  // T089+ Token 和頁面信息
+  // T089+ Token and page info
   tokensUsed?: number;
   pagesCrawled?: number;
   onConfirm: () => void;
@@ -56,13 +56,13 @@ const ProcessingModal: React.FC<ProcessingModalProps> = ({
               {isError
                 ? t("processing.error.processingFailed", "Processing Failed")
                 : isCompleted
-                ? t("processing.stage.complete", "Processing Complete")
-                : t("processing.title", "Processing Document")}
+                  ? t("processing.stage.complete", "Processing Complete")
+                  : t("processing.title", "Processing Document")}
             </h5>
           </div>
 
           <div className="modal-body">
-            {/* 來源資訊 */}
+            {/* Source Info */}
             <div className="mb-3">
               <p className="text-muted mb-1">
                 <strong>{t("labels.documents", "Documents")}:</strong>
@@ -73,7 +73,7 @@ const ProcessingModal: React.FC<ProcessingModalProps> = ({
               </p>
             </div>
 
-            {/* 錯誤訊息 */}
+            {/* Error Message */}
             {isError && errorMessage && (
               <div className="alert alert-danger mb-3" role="alert">
                 <i className="bi bi-exclamation-triangle-fill me-2"></i>
@@ -81,7 +81,7 @@ const ProcessingModal: React.FC<ProcessingModalProps> = ({
               </div>
             )}
 
-            {/* 成功訊息 */}
+            {/* Success Message */}
             {isCompleted && !isError && (
               <div>
                 <div className="alert alert-success mb-3" role="alert">

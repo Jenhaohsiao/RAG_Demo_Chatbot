@@ -1,13 +1,13 @@
-/**
+﻿/**
  * Chat API Service
- * 處理 RAG 查詢與聊天歷史
+ * Handles RAG queries and chat history
  */
 
 import api from './api';
 import type { ChatResponse, ChatHistoryResponse } from '../types/chat';
 
 /**
- * 提交查詢
+ * Submit query
  */
 export async function submitQuery(
   sessionId: string,
@@ -26,7 +26,7 @@ export async function submitQuery(
 }
 
 /**
- * 取得聊天歷史
+ * Get chat history
  */
 export async function getChatHistory(
   sessionId: string,
@@ -41,14 +41,14 @@ export async function getChatHistory(
 }
 
 /**
- * 清除聊天歷史
+ * Clear chat history
  */
 export async function clearHistory(sessionId: string): Promise<void> {
   await api.delete(`/chat/${sessionId}/history`);
 }
 
 /**
- * 取得建議問題
+ * Get suggested questions
  */
 export async function getSuggestions(
   sessionId: string,
@@ -63,7 +63,7 @@ export async function getSuggestions(
 }
 
 /**
- * 驗證查詢輸入
+ * Validate query input
  */
 export function validateQuery(query: string): {
   valid: boolean;
@@ -81,4 +81,3 @@ export function validateQuery(query: string): {
   
   return { valid: true };
 }
-

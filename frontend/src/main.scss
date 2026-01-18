@@ -1,7 +1,10 @@
-/**
+﻿/**
  * Global Styles - Main Entry Point
- * 全局樣式主入口檔案
+ * Main entry point for global styles
  */
+
+// Import Bootstrap
+@import "bootstrap/scss/bootstrap";
 
 // Import global partials
 @import "./styles/variables";
@@ -251,7 +254,9 @@ body {
   padding: $input-padding-y $input-padding-x;
   border: 1px solid $input-border-color;
   border-radius: $input-border-radius;
-  transition: border-color $transition-base, box-shadow $transition-base;
+  transition:
+    border-color $transition-base,
+    box-shadow $transition-base;
 
   &:focus {
     border-color: $color-primary;

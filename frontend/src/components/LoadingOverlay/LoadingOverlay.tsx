@@ -1,6 +1,6 @@
 /**
  * Loading Overlay Component
- * 全局等候轉動圖示 - 半透明背景覆蓋整個頁面，轉動圖示居中顯示
+ * Global loading overlay - Semi-transparent background covering the page with centered spinner
  */
 
 import React from "react";

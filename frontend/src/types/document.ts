@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Document and DocumentChunk entity types
  * Matches backend/src/models/document.py
  */
@@ -38,7 +38,7 @@ export interface Document {
   chunk_count: number;
   error_code?: string | null;
   error_message?: string | null;
-  // T089+ 新增 token 追蹤
+  // T089+ Token tracking fields
   tokens_used?: number;
   pages_crawled?: number;
 }

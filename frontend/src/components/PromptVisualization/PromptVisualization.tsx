@@ -1,6 +1,6 @@
 /**
  * Prompt Visualization Component
- * 顯示系統使用的 AI Prompt 模板和當前 Session 的實際 Prompt
+ * Displays the AI Prompt template used by the system and the actual Prompt for the current Session
  */
 
 import React, { useState, useEffect } from "react";
@@ -81,7 +81,7 @@ const PromptVisualization: React.FC<PromptVisualizationProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 參數狀態管理
+  // Parameter state management
   const [parameters, setParameters] = useState<PromptParameters>({
     response_language: "zh",
     input_language: "auto",

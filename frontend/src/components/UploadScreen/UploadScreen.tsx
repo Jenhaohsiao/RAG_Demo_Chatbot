@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Upload Screen Component
  * File upload interface (supports file drag & drop and URL input)
  *
@@ -28,13 +28,13 @@ export interface UploadScreenProps {
   crawlerMaxTokens?: number;
   crawlerMaxPages?: number;
   disabled?: boolean;
-  hasUploadedContent?: boolean; // 是否已有上傳內容
-  uploadedFiles?: any[]; // 已上傳文件列表
-  crawledUrls?: any[]; // 已爬取URL列表
-  onTabChange?: (tab: "file" | "crawler") => void; // tab 切換回調
-  // 新增：僅用於更新爬蟲結果狀態的回調
+  hasUploadedContent?: boolean; // Whether there is uploaded content
+  uploadedFiles?: any[]; // Uploaded files list
+  crawledUrls?: any[]; // Crawled URLs list
+  onTabChange?: (tab: "file" | "crawler") => void; // Tab switch callback
+  // Added: Callback for updating crawler result status only
   onCrawlerSuccess?: (result: any) => void;
-  // 新增：參數設定相關 props
+  // Added: Parameter settings props
   parameters?: {
     session_ttl_minutes: number;
     max_file_size_mb: number;
@@ -65,44 +65,43 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
   onParameterChange,
 }) => {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<"file" | "crawler">("file"); // 移除 URL 選項
+  const [activeTab, setActiveTab] = useState<"file" | "crawler">("file"); // Remove URL option
   const tabTitle =
     activeTab === "file"
-      ? t("uploadWizard.tabs.file", t("upload.tab.file", "檔案上傳"))
-      : t("uploadWizard.tabs.crawler", t("upload.tab.crawler", "網站爬蟲"));
+      ? t("uploadWizard.tabs.file", "File Upload")
+      : t("uploadWizard.tabs.crawler", "Website Crawler");
   const tabDescription =
     activeTab === "file"
       ? t(
           "uploadWizard.tabs.fileDesc",
-          "快速設定檔案限制並上傳文件，確保格式與大小符合規範。"
+          "Quickly set file limits and upload documents, ensuring format and size compliance."
         )
       : t(
           "uploadWizard.tabs.crawlerDesc",
-          "設定爬蟲安全範圍與抓取上限，輸入網址即可開始擷取內容。"
+          "Set crawler safety scope and limits, enter URL to start capturing content."
         );
   const cardWrapperClasses =
     "card shadow-sm mx-auto upload-card-wrapper active-card-border";
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showErrorDialog, setShowErrorDialog] = useState(false); // 錯誤對話框狀態
-  const [errorDialogMessage, setErrorDialogMessage] = useState<string>(""); // 錯誤對話框訊息
+  const [showErrorDialog, setShowErrorDialog] = useState(false); // Error dialog state
+  const [errorDialogMessage, setErrorDialogMessage] = useState<string>(""); // Error dialog message
   const [errorDialogTitle, setErrorDialogTitle] = useState<string>(
-    t("uploadWizard.dialog.uploadFailed", "檔案上傳失敗")
-  ); // 錯誤對話框標題
-  const [uploadSubStep, setUploadSubStep] = useState<1 | 2>(1); // 1: 參數設定, 2: 上傳介面
+    t("uploadWizard.dialog.uploadFailed", "Upload Failed")
+  ); // Error dialog title
+  const [uploadSubStep, setUploadSubStep] = useState<1 | 2>(1); // 1: Parameters, 2: Upload interface
   const [crawlerLoading, setCrawlerLoading] = useState(false); // Added: Crawler loading state
   const [crawlerError, setCrawlerError] = useState<string | null>(null); // Added: Crawler error
   const [crawlerResults, setCrawlerResults] = useState<any | null>(null); // Added: Crawler results
-  const [hasCrawlerFailed, setHasCrawlerFailed] = useState(false); // 標記爬蟲是否失敗
+  const [hasCrawlerFailed, setHasCrawlerFailed] = useState(false); // Flag if crawler failed
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 動態檔案大小限制（根據參數設定）
+  // Dynamic file size limit (based on settings)
   const MAX_FILE_SIZE = maxFileSizeMB * 1024 * 1024;
 
-  // 檢查爬蟲是否已完成且有有效內容
+  // Check if crawler completed with valid content
   const isCrawlerCompleted =
     crawlerResults &&
-    // 必須是成功狀態，不能是 FAILED
     crawlerResults.extraction_status !== "FAILED" &&
     crawlerResults.error_code !== "ERR_PROCESSING_FAILED" &&
     crawlerResults.crawled_pages &&
@@ -112,18 +111,17 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
       crawlerResults.crawl_status === "token_limit_reached" ||
       crawlerResults.crawl_status === "page_limit_reached");
 
-  // Log crawler state
-  // 處理使用範例文件
+  // Handle sample file usage
   const handleUseSampleFile = async () => {
     try {
       setError(null);
-      // 從 public 目錄獲取範例文件
+      // Get sample file from public directory
       const response = await fetch("/docs/Alices Adventures in wonderland.txt");
       if (!response.ok) {
         throw new Error(
           t(
             "uploadWizard.errors.sampleFileLoad",
-            "無法載入範例文件，請手動上傳。"
+            "Unable to load sample file, please upload manually."
           )
         );
       }
@@ -132,9 +130,9 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
         type: "text/plain",
       });
 
-      // 驗證文件
+      // Validate file
       if (!validateDynamicFileType(file)) {
-        setError(t("upload.error.type", "不支援的檔案格式"));
+        setError(t("upload.error.type", "Unsupported file format"));
         return;
       }
 
@@ -142,7 +140,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
         setError(
           t(
             "upload.error.size",
-            `檔案大小超過限制 (${formatFileSize(MAX_FILE_SIZE)})`
+            `File size exceeds limit (${formatFileSize(MAX_FILE_SIZE)})`
           )
         );
         return;
@@ -154,13 +152,13 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
       setError(
         t(
           "uploadWizard.errors.sampleFileLoad",
-          "無法載入範例文件，請手動上傳。"
+          "Unable to load sample file, please upload manually."
         )
       );
     }
   };
 
-  // 生成支援檔案格式顯示文字
+  // Generate supported formats display text
   const getSupportedFormatsText = () => {
     const formatMap: Record<string, string> = {
       pdf: "PDF",
@@ -173,11 +171,11 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
 
     const displayFormats = supportedFileTypes
       .map((type) => formatMap[type.toLowerCase()] || type.toUpperCase())
-      .join("、");
+      .join(", ");
 
     return t(
       "uploadWizard.supportedFormats",
-      `支援格式：${displayFormats}（最大 ${formatFileSize(MAX_FILE_SIZE)}）`,
+      `Supported: ${displayFormats} (Max ${formatFileSize(MAX_FILE_SIZE)})`,
       {
         formats: displayFormats,
         maxSize: formatFileSize(MAX_FILE_SIZE),
@@ -185,12 +183,12 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
     );
   };
 
-  // 生成檔案接受屬性
+  // Generate file accept attribute
   const getAcceptAttribute = () => {
-    return supportedFileTypes.map((type) => `.${type.toLowerCase()}`).join(",");
+    return supportedFileTypes.map((type) => `.${type}`).join(",");
   };
 
-  // 動態檔案類型驗證
+  // Dynamic file type validation
   const validateDynamicFileType = (file: File): boolean => {
     const fileName = file.name.toLowerCase();
     const fileExtension = fileName.split(".").pop();
@@ -199,7 +197,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
       : false;
   };
 
-  // 生成動態錯誤訊息
+  // Generate dynamic error message
   const getFileTypeErrorMessage = (): string => {
     const formatMap: Record<string, string> = {
       pdf: "PDF",
@@ -212,11 +210,11 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
 
     const displayFormats = supportedFileTypes
       .map((type) => formatMap[type.toLowerCase()] || type.toUpperCase())
-      .join("、");
+      .join(", ");
 
     return t(
       "uploadWizard.acceptFormatsOnly",
-      `僅支援 ${displayFormats} 格式檔案`,
+      `Only supports ${displayFormats} file formats`,
       {
         formats: displayFormats,
       }
@@ -224,7 +222,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
   };
 
   /**
-   * 處理檔案選擇
+   * Handle file selection
    */
   const handleFileSelect = useCallback(
     (file: File) => {
@@ -234,7 +232,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
       if (!validateDynamicFileType(file)) {
         const errorMsg = t(
           "uploadWizard.errors.unsupportedFormats",
-          `${getFileTypeErrorMessage()}\n\n請使用其他檔案或點擊下方「使用範例檔案」按鈕。`,
+          `${getFileTypeErrorMessage()}\n\nPlease use another file or click "Use Sample File" below.`,
           {
             formats: supportedFileTypes
               .map((type) => type.toUpperCase())
@@ -242,7 +240,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
           }
         );
         setErrorDialogTitle(
-          t("uploadWizard.dialog.invalidFormat", "檔案格式不支援")
+          t("uploadWizard.dialog.invalidFormat", "Unsupported File Format")
         );
         setErrorDialogMessage(errorMsg);
         setShowErrorDialog(true);
@@ -258,12 +256,12 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
         if (file.size === 0) {
           errorMsg = t(
             "uploadWizard.errors.fileEmpty",
-            `檔案是空的，無法上傳。\n\n請使用其他檔案或點擊下方「使用範例檔案」按鈕。`
+            `File is empty, cannot upload.\n\nPlease use another file or click "Use Sample File" below.`
           );
         } else {
           errorMsg = t(
             "uploadWizard.errors.fileTooLarge",
-            `檔案太大：${fileSizeFormatted}（超過限制 ${maxSizeFormatted}）\n\n請使用其他檔案或點擊下方「使用範例檔案」按鈕。`,
+            `File too large: ${fileSizeFormatted} (Exceeds ${maxSizeFormatted})\n\nPlease use another file or click "Use Sample File" below.`,
             {
               fileSize: fileSizeFormatted,
               maxSize: maxSizeFormatted,
@@ -272,7 +270,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
         }
 
         setErrorDialogTitle(
-          t("uploadWizard.dialog.uploadFailed", "檔案上傳失敗")
+          t("uploadWizard.dialog.uploadFailed", "Upload Failed")
         );
         setErrorDialogMessage(errorMsg);
         setShowErrorDialog(true);
@@ -286,7 +284,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
   );
 
   /**
-   * 處理檔案輸入改變
+   * Handle file input change
    */
   const handleFileInputChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -298,7 +296,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
   };
 
   /**
-   * 處理拖放事件
+   * Handle drag events
    */
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
@@ -329,14 +327,14 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
   };
 
   /**
-   * 觸發檔案選擇對話框
+   * Trigger file browser
    */
   const handleBrowseClick = () => {
     fileInputRef.current?.click();
   };
 
   /**
-   * 處理網站爬蟲提交
+   * Handle website crawler submit
    */
   const handleCrawlerSubmit = async (
     url: string,
@@ -344,20 +342,18 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
     maxPages: number
   ) => {
     setCrawlerError(null);
-    setCrawlerResults(null); // 清空之前的結果
-    setHasCrawlerFailed(false); // 清除失敗標記
+    setCrawlerResults(null); // Clear previous results
+    setHasCrawlerFailed(false); // Clear failure flag
     setCrawlerLoading(true);
 
     try {
       const response = await uploadWebsite(sessionId, url, maxTokens, maxPages);
-      // 驗證爬蟲結果 - 優先檢查 extraction_status 和 error_code
-      // 確保大小寫不敏感
+      // Validate crawler results - check extraction_status and error_code
       const status = response.extraction_status?.toUpperCase();
       const isFailed = status === "FAILED";
       const hasErrorCode = response.error_code === "ERR_PROCESSING_FAILED";
 
-      // 檢查是否有有效內容 (必須要有頁面且 Token > 0)
-      // 放寬檢查：如果有 pages_found > 0 也視為有頁面（兼容後端可能未返回 crawled_pages 的情況）
+      // Check for valid content
       const hasPages =
         (response.crawled_pages && response.crawled_pages.length > 0) ||
         (response.pages_found && response.pages_found > 0);
@@ -365,26 +361,25 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
       const totalTokens = response.total_tokens || 0;
       const hasTokens = totalTokens > 0;
 
-      // 最小 token 數量檢查 (至少需要 50 tokens 才能形成有效的向量資料庫)
+      // Min token check
       const MIN_TOKENS_REQUIRED = 50;
       const hasSufficientTokens = totalTokens >= MIN_TOKENS_REQUIRED;
 
       const noCrawledPages = !hasPages;
       const noTokens = !hasTokens;
       const insufficientTokens = hasTokens && !hasSufficientTokens;
-      // 檢查資料量是否過少（有 tokens 但不足最低要求）
+
       if (insufficientTokens) {
         setCrawlerResults(null);
-        throw new Error(`INSUFFICIENT_DATA:${totalTokens}`);
+        throw new Error("INSUFFICIENT_DATA:");
       }
 
       if (isFailed || hasErrorCode || noCrawledPages || noTokens) {
-        // 爬蟲失敗或沒有獲取到有效內容，視為失敗
-        // 使用 API 返回的錯誤訊息，如果沒有則使用默認訊息
-        // 構建詳細的錯誤原因以便調試
+        // Construct detailed error
         const failureReasons = [];
         if (isFailed) failureReasons.push(`Status: ${status}`);
-        if (hasErrorCode) failureReasons.push(`Error: ${response.error_code}`);
+        if (hasErrorCode)
+          failureReasons.push(`Error: ${response.error_message}`);
         if (noCrawledPages)
           failureReasons.push(
             `No pages found (found: ${response.pages_found}, list: ${response.crawled_pages?.length})`
@@ -396,39 +391,28 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
         const errorMsg =
           (response.error_message || "Cannot embed empty text list") +
           debugInfo;
-        // 確保清除先前的結果
+
         setCrawlerResults(null);
         throw new Error(errorMsg);
       }
 
-      // 只有驗證通過後才設置成功狀態
       setCrawlerResults(response);
 
-      // Auto-submit crawler results for processing
-      // Crawler has already uploaded content, now just start processing flow
-      // 優先使用 onCrawlerSuccess 回調（如果父組件有提供）以避免重複 API 呼叫
       if (onCrawlerSuccess) {
         onCrawlerSuccess(response);
       } else {
-        // 向後兼容：如果沒有 onCrawlerSuccess，才調用 onUrlSubmitted
-        // 但注意這可能會觸發父組件的 uploadUrl API 造成錯誤
         onUrlSubmitted(url);
       }
-    } catch (err) {
-      // 設置失敗標記
+    } catch (err: any) {
       setHasCrawlerFailed(true);
-
-      // 清空爬蟲結果，確保不顯示舊的成功畫面
       setCrawlerResults(null);
 
-      // 增強錯誤訊息，包含防爬提示
       const errorMessage =
         err instanceof Error ? err.message : "Failed to crawl website";
-      // 檢查是否為資料量過少錯誤
+
       const isInsufficientDataError =
         errorMessage.startsWith("INSUFFICIENT_DATA:");
 
-      // 檢查是否為防爬相關錯誤
       const isBlockedError =
         errorMessage.toLowerCase().includes("blocked") ||
         errorMessage.toLowerCase().includes("forbidden") ||
@@ -439,57 +423,53 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
 
       let errorMsg: string;
       if (isInsufficientDataError) {
-        // 解析實際的 token 數量
-        const actualTokens = errorMessage.split(":")[1] || "少於 50";
+        const actualTokens = errorMessage.split(":")[1] || "less than 50";
         errorMsg = t(
           "uploadWizard.errors.crawlerInsufficient",
-          `爬取的網頁內容過少（僅 ${actualTokens} tokens），無法形成有效的資料建檔。\n\n請提供內容更豐富的網頁，或點擊下方「使用範例網站」按鈕。`,
+          `Crawled content too small (only ${actualTokens} tokens), cannot form valid data.\n\nPlease provide content-rich pages or use Sample Website.`,
           { tokens: actualTokens }
         );
         setErrorDialogTitle(
-          t("uploadWizard.dialog.uploadFailed", "資料量不足")
+          t("uploadWizard.dialog.uploadFailed", "Insufficient Data")
         );
       } else if (isBlockedError) {
         errorMsg = t(
           "uploadWizard.errors.crawlerBlocked",
-          "此網站無法被爬取（網站可能有防爬蟲機制）。\n\n請使用其他網站或點擊下方「使用範例網站」按鈕。"
+          "This website cannot be crawled (anti-crawler mechanism).\n\nPlease use another site or Sample Website."
         );
         setErrorDialogTitle(
-          t("uploadWizard.dialog.uploadFailed", "網頁爬取失敗")
+          t("uploadWizard.dialog.uploadFailed", "Website Crawl Failed")
         );
       } else {
         errorMsg = t(
           "uploadWizard.errors.crawlerFailed",
-          `爬取失敗：${errorMessage}\n\n請使用其他網站或點擊下方「使用範例網站」按鈕。`,
+          `Crawl failed: ${errorMessage}\n\nPlease use another site or Sample Website.`,
           { reason: errorMessage }
         );
         setErrorDialogTitle(
-          t("uploadWizard.dialog.uploadFailed", "網頁爬取失敗")
+          t("uploadWizard.dialog.uploadFailed", "Website Crawl Failed")
         );
       }
-      // 使用對話框顯示錯誤
       setErrorDialogMessage(errorMsg);
       setShowErrorDialog(true);
-      // 不調用 onUrlSubmitted，避免設置父組件的成功狀態
     } finally {
       setCrawlerLoading(false);
     }
   };
 
   /**
-   * 關閉錯誤對話框
+   * Close error dialog
    */
   const handleCloseErrorDialog = () => {
     setShowErrorDialog(false);
-    setCrawlerResults(null); // 清除爬蟲結果
-    setCrawlerError(null); // 清除爬蟲錯誤
-    setHasCrawlerFailed(false); // 清除失敗標記
-    // 確保回到初始的爬蟲輸入界面，不顯示任何成功訊息
+    setCrawlerResults(null);
+    setCrawlerError(null);
+    setHasCrawlerFailed(false);
   };
 
   return (
     <div className=" p-0">
-      {/* 錯誤對話框 */}
+      {/* Error Dialog */}
       {showErrorDialog && (
         <div
           className="modal show d-block"
@@ -528,17 +508,16 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
         </div>
       )}
 
-      {/* 如果已有上傳內容，顯示結果摘要 */}
+      {/* Upload Results Summary */}
       {hasUploadedContent && (
         <div className="upload-results-summary">
-          {/* 保持與上傳介面一致的卡片外框 */}
           <div className={cardWrapperClasses}>
             <div className="card-body p-4">
               <h5 className="card-title text-center mb-4 fw-bold text-primary">
-                {t("uploadWizard.summary.title", "上傳完成")}
+                {t("uploadWizard.summary.title", "Upload Completed")}
               </h5>
 
-              {/* 文件上傳結果 */}
+              {/* Uploaded Files */}
               {uploadedFiles.length > 0 && (
                 <div className="card mb-3 border active-card-border shadow-sm">
                   <div className="card-header active-card-bg text-white border-bottom-0 pt-3">
@@ -546,7 +525,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                       <i className="bi bi-file-earmark-check me-2"></i>
                       {t(
                         "uploadWizard.summary.uploadedFiles",
-                        "已上傳文件 ({{count}})",
+                        "Uploaded Files ({{count}})",
                         { count: uploadedFiles.length }
                       )}
                     </h6>
@@ -557,7 +536,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                         const fileName =
                           file.filename ||
                           file.name ||
-                          t("uploadWizard.summary.unnamed", "未命名檔案");
+                          t("uploadWizard.summary.unnamed", "Unnamed File");
                         const uploadedAt =
                           file.uploadTime ||
                           file.upload_time ||
@@ -565,7 +544,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                         const typeLabel =
                           file.type === "url"
                             ? t("uploadWizard.summary.fileType.url", "URL")
-                            : t("uploadWizard.summary.fileType.file", "檔案");
+                            : t("uploadWizard.summary.fileType.file", "File");
                         const sizeLabel =
                           typeof file.size === "number"
                             ? formatFileSize(file.size)
@@ -577,7 +556,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                           sizeLabel
                             ? t(
                                 "uploadWizard.summary.sizeLabel",
-                                `大小 ${sizeLabel}`,
+                                `Size ${sizeLabel}`,
                                 { size: sizeLabel }
                               )
                             : null,
@@ -597,10 +576,10 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                                   {fileName}
                                 </div>
                                 <small className="text-muted">
-                                  {metaParts.join(" • ") ||
+                                  {metaParts.join("  ") ||
                                     t(
                                       "uploadWizard.summary.completed",
-                                      "已完成"
+                                      "Completed"
                                     )}
                                 </small>
                               </div>
@@ -608,7 +587,6 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                                 <i className="bi bi-check-lg"></i>
                               </span>
                             </div>
-                            {/* 移除預覽文字 */}
                           </div>
                         );
                       })}
@@ -617,7 +595,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                 </div>
               )}
 
-              {/* 網站爬蟲結果 */}
+              {/* Crawler Results */}
               {crawledUrls.length > 0 && (
                 <div className="card border active-card-border shadow-sm">
                   <div className="card-header active-card-bg text-white border-bottom-0 pt-3">
@@ -625,7 +603,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                       <i className="bi bi-globe-americas me-2"></i>
                       {t(
                         "uploadWizard.summary.uploadedSites",
-                        "已爬取網站 ({{count}})",
+                        "Crawled Websites ({{count}})",
                         { count: crawledUrls.length }
                       )}
                     </h6>
@@ -645,11 +623,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                               <small className="text-muted">
                                 {t(
                                   "uploadWizard.summary.siteMeta",
-                                  `${formatFileSize(site.content_size)} • ${
-                                    site.pages_found || 1
-                                  } 頁 • ${new Date(
-                                    site.crawl_time
-                                  ).toLocaleString()}`,
+                                  `${formatFileSize(site.content_size)}   Pages ${site.pages_found || 1} `,
                                   {
                                     size: formatFileSize(site.content_size),
                                     pages: site.pages_found || 1,
@@ -664,7 +638,6 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                               <i className="bi bi-check-lg"></i>
                             </span>
                           </div>
-                          {/* 移除摘要文字 */}
                         </div>
                       ))}
                     </div>
@@ -676,14 +649,12 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
         </div>
       )}
 
-      {/* 如果沒有上傳內容，顯示上傳界面 */}
+      {/* Upload Interface */}
       {!hasUploadedContent && (
         <div className="upload-interface-container">
           <div className="upload-mode-toggle d-flex justify-content-center gap-3 mb-4">
             <button
-              className={`mode-toggle-btn ${
-                activeTab === "file" ? "active" : ""
-              }`}
+              className={`mode-toggle-btn ${activeTab === "file" ? "active" : ""}`}
               onClick={() => {
                 setActiveTab("file");
                 setUploadSubStep(1);
@@ -694,12 +665,10 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
               <span className="icon-circle">
                 <i className="bi bi-file-earmark-arrow-up"></i>
               </span>
-              <span>{t("upload.tab.file", "檔案上傳")}</span>
+              <span>{t("upload.tab.file", "File Upload")}</span>
             </button>
             <button
-              className={`mode-toggle-btn ${
-                activeTab === "crawler" ? "active" : ""
-              }`}
+              className={`mode-toggle-btn ${activeTab === "crawler" ? "active" : ""}`}
               onClick={() => {
                 setActiveTab("crawler");
                 setUploadSubStep(1);
@@ -710,44 +679,43 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
               <span className="icon-circle">
                 <i className="bi bi-globe"></i>
               </span>
-              <span>{t("upload.tab.crawler", "網站爬蟲")}</span>
+              <span>{t("upload.tab.crawler", "Website Crawler")}</span>
             </button>
           </div>
 
-          {/* 2. 卡片容器 (簡化風格) */}
+          {/* Cards */}
           <div className={cardWrapperClasses}>
             <div className="card-body p-4 ">
-              {/* 步驟 1: 參數設定 */}
+              {/* Step 1: Parameters */}
               {uploadSubStep === 1 && (
                 <div className="step-parameters fade-in">
                   <div className="section-header mb-4">
                     <div>
                       <div className="eyebrow text-uppercase">
-                        {t("uploadWizard.steps.eyebrow", "Step 3 · Configure")}
+                        {t("uploadWizard.steps.eyebrow", "Step 3  Configure")}
                       </div>
                       <h5 className="mb-0 fw-bold">
                         {t(
                           "uploadWizard.steps.basicParameters",
-                          `${tabTitle} 基本參數`,
+                          `${tabTitle} Basic Parameters`,
                           { tab: tabTitle }
                         )}
                       </h5>
                     </div>
                     <span className="pill pill-light">
-                      {t("uploadWizard.steps.stepIndicator", "步驟 1 / 2")}
+                      {t("uploadWizard.steps.stepIndicator", "Step 1 / 2")}
                     </span>
                   </div>
 
                   {activeTab === "file" ? (
-                    // 檔案參數
+                    // File Params
                     <div className="parameter-content">
-                      {/* 檔案大小限制 */}
                       <div className="surface-card mb-4">
                         <label className="form-label fw-bold text-dark mb-2">
                           <i className="bi bi-hdd me-2"></i>
                           {t(
                             "uploadWizard.steps.file.maxFileSize",
-                            "單檔大小限制"
+                            "Max File Size"
                           )}
                         </label>
                         <div className="d-flex align-items-center gap-3">
@@ -774,13 +742,12 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                         </div>
                       </div>
 
-                      {/* 支援檔案類型 */}
                       <div className="surface-card mb-3">
                         <label className="form-label fw-bold text-dark mb-3 d-flex align-items-center gap-2">
                           <i className="bi bi-file-earmark-check me-2"></i>
                           {t(
                             "uploadWizard.steps.file.supportedTypes",
-                            "支援檔案類型"
+                            "Supported File Types"
                           )}
                         </label>
                         <div className="row g-2">
@@ -826,15 +793,14 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                       </div>
                     </div>
                   ) : (
-                    // 爬蟲參數
+                    // Crawler Params
                     <div className="parameter-content">
-                      {/* 最大 Token 數 */}
                       <div className="surface-card mb-4">
                         <label className="form-label fw-bold text-dark mb-2">
                           <i className="bi bi-cpu me-2"></i>
                           {t(
                             "uploadWizard.steps.crawler.maxTokens",
-                            "最大 Token 數"
+                            "Max Tokens"
                           )}
                         </label>
                         <div className="d-flex align-items-center gap-3">
@@ -863,13 +829,12 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                         </div>
                       </div>
 
-                      {/* 最大頁面數 */}
                       <div className="surface-card mb-3">
                         <label className="form-label fw-bold text-dark mb-2">
                           <i className="bi bi-layers me-2"></i>
                           {t(
                             "uploadWizard.steps.crawler.maxPages",
-                            "最大頁面數"
+                            "Max Pages"
                           )}
                         </label>
                         <div className="d-flex align-items-center gap-3">
@@ -892,7 +857,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                           />
                           <span className="value-chip">
                             {parameters?.crawler_max_pages || crawlerMaxPages}{" "}
-                            {t("uploadWizard.steps.crawler.pageUnit", "頁")}
+                            {t("uploadWizard.steps.crawler.pageUnit", "Pages")}
                           </span>
                         </div>
                       </div>
@@ -910,10 +875,10 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                       }
                     >
                       {activeTab === "file"
-                        ? t("uploadWizard.steps.next.file", "下一步：選擇檔案")
+                        ? t("uploadWizard.steps.next.file", "Next: Select File")
                         : t(
                             "uploadWizard.steps.next.crawler",
-                            "下一步：輸入網址"
+                            "Next: Enter URL"
                           )}
                       <i className="bi bi-arrow-right ms-2"></i>
                     </button>
@@ -921,11 +886,10 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                 </div>
               )}
 
-              {/* 步驟 2: 上傳介面 */}
+              {/* Step 2: Upload Interface */}
               {uploadSubStep === 2 && (
                 <div className="step-upload fade-in">
                   <div className="substep-bar d-flex align-items-center mb-4 justify-content-between">
-                    {/* 只在爬蟲未完成時顯示返回按鈕 */}
                     {!(
                       activeTab === "crawler" &&
                       isCrawlerCompleted &&
@@ -935,7 +899,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                       <button
                         className="btn btn-link text-decoration-none p-0 me-3 text-secondary"
                         onClick={() => setUploadSubStep(1)}
-                        title={t("uploadWizard.steps.back", "返回設定")}
+                        title={t("uploadWizard.steps.back", "Back to settings")}
                       >
                         <i className="bi bi-arrow-left fs-4"></i>
                       </button>
@@ -944,23 +908,23 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                       {activeTab === "file"
                         ? t(
                             "uploadWizard.steps.upload.titleFile",
-                            "步驟 2/2: 上傳檔案"
+                            "Step 2/2: Upload File"
                           )
                         : isCrawlerCompleted &&
                             !hasCrawlerFailed &&
                             !showErrorDialog
                           ? t(
                               "uploadWizard.steps.upload.crawlerCompleted",
-                              "爬取完成"
+                              "Crawl Completed"
                             )
                           : t(
                               "uploadWizard.steps.upload.titleCrawler",
-                              "步驟 2/2: 開始爬取"
+                              "Step 2/2: Start Crawl"
                             )}
                     </h5>
                   </div>
 
-                  {/* 爬蟲完成時顯示結果摘要 */}
+                  {/* Crawler Completed Summary */}
                   {activeTab === "crawler" &&
                     isCrawlerCompleted &&
                     !hasCrawlerFailed &&
@@ -972,17 +936,13 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                             <strong>
                               {t(
                                 "uploadWizard.steps.crawlerSuccess.title",
-                                "網站爬取成功！"
+                                "Website Crawl Successful!"
                               )}
                             </strong>
                             <p className="mb-0 mt-1">
                               {t(
                                 "uploadWizard.steps.crawlerSuccess.description",
-                                `已成功爬取 ${crawlerResults.pages_found} 個頁面，共 ${(
-                                  crawlerResults.total_tokens / 1000
-                                ).toFixed(
-                                  1
-                                )}K tokens。資料已上傳至系統，請點擊下方「下一步」按鈕繼續處理流程。`,
+                                `Successfully crawled ${crawlerResults.pages_found} pages, total ${(crawlerResults.total_tokens / 1000).toFixed(1)}K tokens. Data uploaded. Click "Next" to continue.`,
                                 {
                                   pages: crawlerResults.pages_found,
                                   tokens: (
@@ -1000,7 +960,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                               <i className="bi bi-file-earmark-text me-2"></i>
                               {t(
                                 "uploadWizard.steps.crawlerSuccess.detailsTitle",
-                                "爬取結果詳情"
+                                "Crawl Result Details"
                               )}
                             </h6>
                           </div>
@@ -1012,7 +972,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                                   <div className="mt-2 fw-bold">
                                     {t(
                                       "uploadWizard.steps.stats.pages",
-                                      "站點頁面"
+                                      "Site Pages"
                                     )}
                                   </div>
                                   <div className="fs-4 text-primary">
@@ -1026,7 +986,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                                   <div className="mt-2 fw-bold">
                                     {t(
                                       "uploadWizard.steps.stats.tokens",
-                                      "總 TOKEN 數"
+                                      "Total Tokens"
                                     )}
                                   </div>
                                   <div className="fs-4 text-info">
@@ -1043,7 +1003,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                                   <div className="mt-2 fw-bold">
                                     {t(
                                       "uploadWizard.steps.stats.status",
-                                      "狀態"
+                                      "Status"
                                     )}
                                   </div>
                                   <div className="fs-6 text-success">
@@ -1051,19 +1011,19 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                                       "completed" &&
                                       t(
                                         "uploadWizard.steps.stats.statusComplete",
-                                        "完成"
+                                        "Completed"
                                       )}
                                     {crawlerResults.crawl_status ===
                                       "token_limit_reached" &&
                                       t(
                                         "uploadWizard.steps.stats.statusTokenLimit",
-                                        "達到 Token 限制"
+                                        "Token Limit Reached"
                                       )}
                                     {crawlerResults.crawl_status ===
                                       "page_limit_reached" &&
                                       t(
                                         "uploadWizard.steps.stats.statusPageLimit",
-                                        "達到頁面限制"
+                                        "Page Limit Reached"
                                       )}
                                   </div>
                                 </div>
@@ -1072,27 +1032,25 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                           </div>
                         </div>
 
-                        {/* 完成提示 */}
+                        {/* Completed Info */}
                         <div className="text-center mt-4">
                           <div className="alert alert-info">
                             <i className="bi bi-info-circle me-2"></i>
                             {t(
                               "uploadWizard.steps.info.autoNext",
-                              "資料已自動上傳至系統，系統將自動進入下一步「內容審核」流程。"
+                              "Data automatically uploaded. Proceeding to Content Review."
                             )}
                           </div>
                         </div>
                       </div>
                     )}
 
-                  {/* 爬蟲未完成或文件上傳時顯示原有界面 */}
+                  {/* Upload Interface if not crawler completed */}
                   {!(activeTab === "crawler" && isCrawlerCompleted) && (
                     <>
                       {activeTab === "file" && (
                         <div
-                          className={`file-upload-dropzone bg-white ${
-                            isDragging ? "dragging" : ""
-                          } ${disabled ? "disabled" : ""}`}
+                          className={`file-upload-dropzone bg-white ${isDragging ? "dragging" : ""}`}
                           onDragEnter={handleDragEnter}
                           onDragLeave={handleDragLeave}
                           onDragOver={handleDragOver}
@@ -1114,10 +1072,10 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                             </div>
                             <p className="mb-2 fw-medium">
                               {isDragging
-                                ? t("upload.dropzone.drop", "拖放檔案到此區域")
+                                ? t("upload.dropzone.drop", "Drop files here")
                                 : t(
                                     "upload.dropzone.dragOrClick",
-                                    "拖放檔案到此區域，或點擊進入"
+                                    "Drop files here or click to browse"
                                   )}
                             </p>
                             <small className="text-muted d-block">
@@ -1140,7 +1098,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                             <i className="bi bi-file-text me-2"></i>
                             {t(
                               "uploadWizard.steps.sampleFileButton",
-                              "使用範例文件（Alice in Wonderland）"
+                              "Use Sample File (Alice in Wonderland)"
                             )}
                           </button>
                         </div>
@@ -1172,7 +1130,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
         </div>
       )}
 
-      {/* 爬蟲執行中的 Loading Overlay */}
+      {/* Loading Overlay */}
       <LoadingOverlay
         isVisible={crawlerLoading}
         message={t("crawler.loading", "Crawling site content, please wait...")}

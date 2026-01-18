@@ -1,6 +1,6 @@
 /**
  * ChatInput Component
- * 聊天訊息輸入框
+ * Chat message input field
  *
  * T092: Added loading states and spinners during API calls
  */

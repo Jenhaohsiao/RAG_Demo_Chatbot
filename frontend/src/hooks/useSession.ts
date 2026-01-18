@@ -1,6 +1,6 @@
-/**
+﻿/**
  * useSession Hook
- * Manages session lifecycle with automatic heartbeat and activity monitoring
+ * Manages session lifecycle with automatic heartbeat and activity monitoring      
  */
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +11,7 @@ import type { SessionState, SessionResponse } from '../types/session';
 
 // Heartbeat interval: 3 minutes (session TTL is 10 minutes)
 const HEARTBEAT_INTERVAL = 3 * 60 * 1000;
-// Activity-based heartbeat: 30 seconds throttle (session TTL is 10 minutes)
+// Activity-based heartbeat: 30 seconds throttle (session TTL is 10 minutes)       
 const ACTIVITY_THROTTLE = 30 * 1000;
 
 interface UseSessionReturn {
@@ -35,27 +35,27 @@ interface UseSessionReturn {
  */
 export const useSession = (): UseSessionReturn => {
   const { i18n } = useTranslation();
-  
+
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [sessionState, setSessionState] = useState<SessionState | null>(null);
+  const [sessionState, setSessionState] = useState<SessionState | null>(null);     
   const [expiresAt, setExpiresAt] = useState<Date | null>(null);
   const [language, setLanguage] = useState<string>(i18n.language);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [isSessionExpired, setIsSessionExpired] = useState<boolean>(false);
-  
+  const [isSessionExpired, setIsSessionExpired] = useState<boolean>(false);        
+
   const heartbeatTimerRef = useRef<NodeJS.Timeout | null>(null);
   const errorSetRef = useRef<boolean>(false);
   const expirationCheckRef = useRef<NodeJS.Timeout | null>(null);
   const onSessionExpiredRef = useRef<(() => void) | undefined>(undefined);
-  
+
   /**
    * Set callback for session expiration
    */
   const setOnSessionExpired = useCallback((callback: (() => void) | undefined) => {
     onSessionExpiredRef.current = callback;
   }, []);
-  
+
   /**
    * Stop expiration check timer
    */
@@ -76,20 +76,20 @@ export const useSession = (): UseSessionReturn => {
     }
     stopExpirationCheck();
   }, [stopExpirationCheck]);
-  
+
   /**
    * Handle session expiration
    */
   const handleSessionExpiration = useCallback(() => {
     setIsSessionExpired(true);
     stopHeartbeat();
-    
-    // ?�置?�?�session?�??
+
+    // Clear session state
     setSessionId(null);
     setSessionState(null);
     setExpiresAt(null);
-    
-    // 觸發?�調
+
+    // Trigger callback
     if (onSessionExpiredRef.current) {
       onSessionExpiredRef.current();
     }
@@ -101,13 +101,13 @@ export const useSession = (): UseSessionReturn => {
    */
   const startExpirationCheck = useCallback((expirationTime: Date, lastActivityTime?: Date) => {
     stopExpirationCheck();
-    
+
     // Calculate duration based on server time if available, otherwise fallback to local time diff
     let timeUntilExpiration: number;
-    
+
     if (lastActivityTime) {
       // Calculate total TTL duration from server timestamps
-      const totalTTL = expirationTime.getTime() - lastActivityTime.getTime();
+      const totalTTL = expirationTime.getTime() - lastActivityTime.getTime();      
       // We assume we just received this response, so we set timeout for the full TTL duration
       // This is safer than comparing absolute clocks
       timeUntilExpiration = totalTTL;
@@ -115,15 +115,14 @@ export const useSession = (): UseSessionReturn => {
       // Fallback to absolute time comparison (prone to clock skew)
       timeUntilExpiration = expirationTime.getTime() - Date.now();
     }
-    
-    // Safety buffer: subtract 500ms to ensure backend expires first? 
+
+    // Safety buffer: subtract 500ms to ensure backend expires first?
     // No, we want frontend to expire slightly AFTER backend to allow for latency, 
     // OR slightly BEFORE to prevent 404s?
     // Actually, if we want to show "Session Expired" modal, we should sync closely.
     // If we expire locally first, we show modal.
-    // If backend expires first, next request fails with 404 -> show modal.
-    
-    
+    // If backend expires first, next request fails with 404 -> show modal.        
+
     if (timeUntilExpiration > 0) {
       expirationCheckRef.current = setTimeout(() => {
         handleSessionExpiration();
@@ -132,68 +131,64 @@ export const useSession = (): UseSessionReturn => {
       handleSessionExpiration();
     }
   }, [stopExpirationCheck, handleSessionExpiration]);
-  
+
   /**
    * Trigger heartbeat immediately (for user activity)
    */
   const triggerHeartbeat = useCallback(async () => {
     if (!sessionId) return;
-    
+
     try {
       const response = await sessionService.heartbeat(sessionId);
       const newExpiresAt = new Date(response.expires_at);
       const lastActivity = new Date(response.last_activity);
-      
+
       setExpiresAt(newExpiresAt);
       startExpirationCheck(newExpiresAt, lastActivity);
-      
+
       if (error) {
         setError(null);
         errorSetRef.current = false;
       }
     } catch (err: any) {
-      // Robust 404 detection - check both axios response and error message
+      // Robust 404 detection - check both axios response and error message        
       const status = err?.response?.status;
       const errorMessage = err?.message || '';
-      
+
       // Check for session not found errors (404, 410, or message contains keywords)
-      const isSessionNotFound = 
-        status === 404 || 
-        status === 410 || 
-        errorMessage.includes('404') || 
+      const isSessionNotFound =
+        status === 404 ||
+        status === 410 ||
+        errorMessage.includes('404') ||
         errorMessage.includes('410') ||
         errorMessage.toLowerCase().includes('not found') ||
         errorMessage.toLowerCase().includes('expired') ||
         errorMessage.includes('ERR_SESSION_NOT_FOUND');
-      
+
       if (isSessionNotFound) {
         handleSessionExpiration();
       }
     }
   }, [sessionId, error, handleSessionExpiration, startExpirationCheck]);
-  
-  // ??��?�戶活�?並觸?�heartbeat
+
+  // Use user activity hook to trigger heartbeat
   useUserActivity({
     onActivity: triggerHeartbeat,
     throttleTime: ACTIVITY_THROTTLE
   });
 
   /**
-   * Start heartbeat timer
-   * 
-   * ?��? 已�??�自?��??�器 - ?�通�??�戶活�?觸發 heartbeat
-   * ?��?：�??�用?��??��?作�??�話?�該??0?��?後自?��???
-   * 如�??�復?��? heartbeat，�?消�??�代碼�?註�?
+   * Start heartbeat timer - Legacy interval method
+   * (Commented out as we use activity-based heartbeat now)
    */
   const startHeartbeat = useCallback((currentSessionId: string) => {
-    // 清除?��?定�??��?如�?存在�?
+    // Clear previous timer if exists
     if (heartbeatTimerRef.current) {
       clearInterval(heartbeatTimerRef.current);
       heartbeatTimerRef.current = null;
     }
 
-    // ??禁用?��?定�???- ?�戶?��?作�??��??�話?�然?��?
-    // 如�??�復，�?消�??�代碼�?註�?�?
+    // Code for interval based heartbeat preserved for reference
     /*
     heartbeatTimerRef.current = setInterval(async () => {
       try {
@@ -201,7 +196,7 @@ export const useSession = (): UseSessionReturn => {
         const newExpiresAt = new Date(response.expires_at);
         setExpiresAt(newExpiresAt);
         startExpirationCheck(newExpiresAt);
-        
+
         if (error) {
           setError(null);
           errorSetRef.current = false;
@@ -209,9 +204,9 @@ export const useSession = (): UseSessionReturn => {
       } catch (err) {
         if (!errorSetRef.current) {
           if (err instanceof Error && (err.message.includes('404') || err.message.includes('410'))) {
-            handleSessionExpiration();
+             handleSessionExpiration();
           } else {
-            const errorMsg = '?��?維�??�話???，�?檢查網路???';
+            const errorMsg = 'Heartbeat failed: Check network connection';      
             setError(errorMsg);
             errorSetRef.current = true;
           }
@@ -219,7 +214,7 @@ export const useSession = (): UseSessionReturn => {
       }
     }, HEARTBEAT_INTERVAL);
     */
-    
+
   }, [error, handleSessionExpiration, startExpirationCheck]);
 
   /**
@@ -228,24 +223,23 @@ export const useSession = (): UseSessionReturn => {
   const createSession = useCallback(async (similarityThreshold: number = 0.5, customPrompt?: string) => {
     setIsLoading(true);
     setError(null);
-    // Don't reset isSessionExpired here - let the caller (modal confirm) do it
+    // Don't reset isSessionExpired here - let the caller (modal confirm) do it    
     errorSetRef.current = false;
 
     try {
-      const response = await sessionService.createSession(language, similarityThreshold, customPrompt);
-      
+      const response = await sessionService.createSession(language, similarityThreshold, customPrompt);                                                               
       setSessionId(response.session_id);
       setSessionState(response.state);
       const newExpiresAt = new Date(response.expires_at);
       // Use created_at as proxy for last_activity on creation
-      const lastActivity = new Date(response.created_at); 
-      
+      const lastActivity = new Date(response.created_at);
+
       setExpiresAt(newExpiresAt);
       setLanguage(response.language);
-      
+
       startHeartbeat(response.session_id);
       startExpirationCheck(newExpiresAt, lastActivity);
-      
+
     } catch (err: any) {
       setError(err.message || 'Failed to create session');
     } finally {
@@ -265,7 +259,7 @@ export const useSession = (): UseSessionReturn => {
     try {
       await sessionService.closeSession(sessionId);
       stopHeartbeat();
-      
+
       setSessionId(null);
       setSessionState(null);
       setExpiresAt(null);
@@ -290,12 +284,12 @@ export const useSession = (): UseSessionReturn => {
 
     try {
       const response = await sessionService.restartSession(sessionId);
-      
+
       setSessionId(response.session_id);
       setSessionState(response.state);
       setExpiresAt(new Date(response.expires_at));
       setLanguage(response.language);
-      
+
       startHeartbeat(response.session_id);
     } catch (err: any) {
       setError(err.message || 'Failed to restart session');
@@ -309,7 +303,6 @@ export const useSession = (): UseSessionReturn => {
    */
   const updateLanguage = useCallback(async (newLanguage: 'en' | 'zh-TW' | 'zh-CN' | 'fr', passedSessionId?: string | null) => {
     const targetSessionId = passedSessionId !== undefined ? passedSessionId : sessionId;
-
     if (!targetSessionId) {
       setLanguage(newLanguage);
       i18n.changeLanguage(newLanguage);
@@ -321,7 +314,6 @@ export const useSession = (): UseSessionReturn => {
 
     try {
       const response = await sessionService.updateLanguage(targetSessionId, newLanguage);
-      
       setLanguage(response.language);
       i18n.changeLanguage(response.language);
     } catch (err: any) {
@@ -342,7 +334,7 @@ export const useSession = (): UseSessionReturn => {
         // Use sendBeacon for reliable execution on unload
         // This ensures session is closed on browser close/reload
         const url = `${API_BASE_URL}/session/${sessionId}/close`;
-        const blob = new Blob([JSON.stringify({})], { type: 'application/json' });
+        const blob = new Blob([JSON.stringify({})], { type: 'application/json' }); 
         navigator.sendBeacon(url, blob);
       }
     };
@@ -356,7 +348,7 @@ export const useSession = (): UseSessionReturn => {
   }, [stopHeartbeat, sessionId]);
 
   /**
-   * Reset session expired state (called when user confirms the expired modal)
+   * Reset session expired state (called when user confirms the expired modal)     
    */
   const resetSessionExpired = useCallback(() => {
     setIsSessionExpired(false);

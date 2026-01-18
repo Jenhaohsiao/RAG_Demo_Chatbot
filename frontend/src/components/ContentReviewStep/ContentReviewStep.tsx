@@ -1,6 +1,6 @@
 /**
  * Step 4: Content Review Component
- * 內容預覽與審核步驟 - 顯示審核結果和上傳文件列表
+ * Content preview and moderation step - Displays review results and uploaded file list
  */
 
 import React, { useState, useEffect } from "react";
@@ -14,15 +14,15 @@ export interface ContentReviewStepProps {
   sessionId?: string;
   onReviewComplete?: () => void;
   onReviewStatusChange?: (canProceed: boolean) => void;
-  documents?: DocumentInfo[]; // 從父組件接收documents
-  crawledUrls?: any[]; // 從父組件接收crawledUrls
-  shouldStartReview?: boolean; // 外部控制是否開始審核
-  onLoadingChange?: (isLoading: boolean, message?: string) => void; // 通知父組件 loading 狀態
-  savedReviewResults?: { completed: string[]; failed: string[] } | null; // 保存的審核結果
+  documents?: DocumentInfo[]; // Received from parent component
+  crawledUrls?: any[]; // Received from parent component
+  shouldStartReview?: boolean; // Externally control whether to start review
+  onLoadingChange?: (isLoading: boolean, message?: string) => void; // Notify parent component of loading state
+  savedReviewResults?: { completed: string[]; failed: string[] } | null; // Saved review results
   onSaveReviewResults?: (results: {
     completed: string[];
     failed: string[];
-  }) => void; // 保存審核結果回調
+  }) => void; // Callback to save review results
 }
 
 interface DocumentInfo {
@@ -40,12 +40,12 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
   sessionId,
   onReviewComplete,
   onReviewStatusChange,
-  documents: propDocuments = [], // 從props接收
-  crawledUrls = [], // 從props接收
-  shouldStartReview = false, // 從props接收
+  documents: propDocuments = [], // Received from props
+  crawledUrls = [], // Received from props
+  shouldStartReview = false, // Received from props
   onLoadingChange,
-  savedReviewResults, // 保存的審核結果
-  onSaveReviewResults, // 保存審核結果回調
+  savedReviewResults, // Saved review results
+  onSaveReviewResults, // Callback to save review results
 }) => {
   const { t } = useTranslation();
   const { showToast } = useToast();
@@ -116,7 +116,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
     [t]
   );
 
-  // 添加審核進度狀態 - 如果有保存的結果，使用保存的結果初始化
+  // Add review progress state - Initialize with saved results if available
   const [reviewProgress, setReviewProgress] = useState(() => {
     if (
       savedReviewResults &&
@@ -140,7 +140,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
     };
   });
 
-  // 根據是否有保存的結果來初始化 hasStartedReview
+  // Initialize hasStartedReview based on saved results
   const [hasStartedReview, setHasStartedReview] = useState(() => {
     return (
       savedReviewResults &&
@@ -149,7 +149,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
     );
   });
 
-  // 重試處理
+  // Handle retry
   const handleRetry = async () => {
     setRetryCount((prev) => prev + 1);
     setShowRetryOption(false);
@@ -160,7 +160,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
       duration: 3000,
     });
 
-    // 重置審核狀態
+    // Reset review state
     setReviewProgress({
       currentItem: "",
       completed: [],
@@ -169,17 +169,17 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
       isRunning: false,
     });
 
-    // 重新開始審核
+    // Restart review
     await startReviewProcess();
   };
 
-  // 開始審核過程
+  // Start review process
   const startReviewProcess = async () => {
     if (!sessionId) {
       return;
     }
 
-    // 通知父組件開始 loading
+    // Notify parent component to start loading
     if (onLoadingChange) {
       onLoadingChange(
         true,

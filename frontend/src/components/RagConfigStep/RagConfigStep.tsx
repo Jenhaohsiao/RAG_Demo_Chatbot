@@ -15,7 +15,7 @@ interface RagConfigStepProps {
   };
   onParameterChange: (key: string, value: any) => void;
   onComplete?: () => void;
-  disabled?: boolean; // 當流程3完成後，禁用所有配置
+  disabled?: boolean; // Disable all configs when step 3 is complete
 }
 
 const RagConfigStep: React.FC<RagConfigStepProps> = ({
@@ -25,10 +25,10 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
   disabled = false,
 }) => {
   const { t } = useTranslation();
-  const statusLabel = disabled ? "已鎖定" : "即時可調";
+  const statusLabel = disabled ? "Locked" : "Adjustable";
   const statusTone = disabled
-    ? "資料上傳後鎖定，確保檢索一致性"
-    : "調整後立即套用於檢索結果";
+    ? "Locked after data upload to ensure retrieval consistency"
+    : "Applied immediately to retrieval results";
 
   const chunkMaxPercent = Math.min(
     100,
@@ -45,7 +45,7 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
 
   return (
     <div className={`rag-config-step ${disabled ? "disabled-step" : ""}`}>
-      {/* 禁用狀態提示 */}
+      {/* Disabled state notice */}
       {disabled && (
         <div className="alert alert-info mb-2 py-2">
           <i className="bi bi-info-circle me-2"></i>
@@ -53,7 +53,7 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
         </div>
       )}
       <div className="row g-2">
-        {/* 相似度閾值卡片 */}
+        {/* Similarity Threshold Card */}
         <div className="col-lg-6">
           <div
             className={`card h-100 config-card ${
@@ -101,7 +101,7 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
           </div>
         </div>
 
-        {/* Top-K檢索卡片 */}
+        {/* Top-K Retrieval Card */}
         <div className="col-lg-6">
           <div
             className={`card h-100 config-card ${

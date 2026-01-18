@@ -5,7 +5,7 @@ import "./AboutProjectModal.scss";
 interface AboutProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
-  initialView?: "about" | "summary"; // 新增：初始視圖參數
+  initialView?: "about" | "summary"; // Added: Initial view parameter
 }
 
 type ViewMode = "about" | "summary";
@@ -13,12 +13,12 @@ type ViewMode = "about" | "summary";
 const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
   isOpen,
   onClose,
-  initialView = "about", // 預設為 "about"
+  initialView = "about", // Default to "about"
 }) => {
   const { t } = useTranslation();
   const [viewMode, setViewMode] = useState<ViewMode>(initialView);
 
-  // 當 initialView 改變時，更新 viewMode
+  // Update viewMode when initialView changes
   useEffect(() => {
     if (isOpen) {
       setViewMode(initialView);
@@ -57,7 +57,7 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
           </div>
           <div className="modal-body">
             {viewMode === "about" ? (
-              // 關於本專案內容
+              // About project content
               <>
                 <div className="intro-section mb-2">
                   <h5 className="header-subtitle mb-2 fw-bold">
@@ -143,7 +143,7 @@ const AboutProjectModal: React.FC<AboutProjectModalProps> = ({
                 </div>
               </>
             ) : (
-              // RAG 技術總結內容
+              // RAG technology summary content
               <div className="row g-2">
                 <div className="col-12">
                   <div className="card border-warning">

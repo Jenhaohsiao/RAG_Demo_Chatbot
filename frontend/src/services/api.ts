@@ -4,6 +4,7 @@
  */
 
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
+import i18n from '../i18n/config';
 
 // Base URL from environment variable or default to /api/v1
 // Note: Vite dev server proxies /api/* to http://localhost:8000
@@ -46,17 +47,17 @@ apiClient.interceptors.response.use(
       // Handle specific status codes
       switch (status) {
         case 400:
-          throw new Error(data?.detail || 'Invalid request');
+          throw new Error(data?.detail || i18n.t('error.invalidRequest', 'Invalid request'));
         case 404:
-          throw new Error(data?.detail || 'Resource not found');
+          throw new Error(data?.detail || i18n.t('error.resourceNotFound', 'Resource not found'));
         case 422:
-          throw new Error(data?.detail || 'Validation error');
+          throw new Error(data?.detail || i18n.t('error.validationError', 'Validation error'));
         case 500:
-          throw new Error('Server error. Please try again later.');
+          throw new Error(i18n.t('error.serverError', 'Server error. Please try again later.'));
         case 503:
-          throw new Error('Service unavailable. Please try again later.');
+          throw new Error(i18n.t('error.serviceUnavailable', 'Service unavailable. Please try again later.'));
         default:
-          throw new Error(data?.detail || `Request failed with status ${status}`);
+          throw new Error(data?.detail || i18n.t('error.requestFailed', 'Request failed with status {{status}}', { status }));
       }
     } else if (error.request) {
       // Request made but no response received

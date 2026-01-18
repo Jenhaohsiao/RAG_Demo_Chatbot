@@ -1,6 +1,6 @@
 """
 Content Moderation Service
-使用 Gemini Safety API 檢查內容安全性，阻擋有害或不當內容
+Uses Gemini Safety API to check content safety, blocking harmful or inappropriate content
 """
 import logging
 from enum import Enum
@@ -13,9 +13,9 @@ logger = logging.getLogger(__name__)
 
 
 class ModerationStatus(str, Enum):
-    """內容審核狀態"""
-    APPROVED = "APPROVED"  # 內容安全，允許處理
-    BLOCKED = "BLOCKED"    # 內容被阻擋，包含有害材料
+    """Content moderation status"""
+    APPROVED = "APPROVED"  # Content safe, allows processing
+    BLOCKED = "BLOCKED"    # Content blocked, contains harmful material
 
 
 class HarmCategory(str, Enum):

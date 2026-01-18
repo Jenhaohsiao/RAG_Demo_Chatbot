@@ -135,13 +135,13 @@ class WebCrawler:
                 continue
 
             try:
-                # 添加日誌以便調試
+                # Add logs for debugging
                 logger.info(f"Crawling page: {url}")
                 
                 # Fetch page with shorter timeout
                 response = requests.get(
                     url,
-                    timeout=10,  # 縮短為10秒
+                    timeout=10,  # Shorten to 10 seconds
                     headers={"User-Agent": CRAWLER_USER_AGENT},
                     allow_redirects=True
                 )

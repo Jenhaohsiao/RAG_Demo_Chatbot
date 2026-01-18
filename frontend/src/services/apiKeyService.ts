@@ -1,6 +1,6 @@
-/**
+ï»¿/**
  * API Key Service
- * ?•ç? API Key é©—è??Œç??‹æª¢??
+ * API Key Validation and Status Check
  */
 import axios from "axios";
 
@@ -18,8 +18,8 @@ export interface ApiKeyValidationResult {
 }
 
 /**
- * æª¢æŸ¥?¶å? API Key ?€??
- * ?¥è©¢å¾Œç«¯ä»¥ç¢ºå®šæ˜¯?¦æ??‰æ??„ç’°å¢ƒè???API Key
+ * Check current API Key status
+ * Query backend to determine if API Key is configured in environment
  */
 export async function checkApiKeyStatus(): Promise<ApiKeyStatus> {
   try {
@@ -35,10 +35,10 @@ export async function checkApiKeyStatus(): Promise<ApiKeyStatus> {
 }
 
 /**
- * é©—è?ä½¿ç”¨?…æ?ä¾›ç? API Key
+ * Validate user provided API Key
  * 
- * @param apiKey - ä½¿ç”¨?…è¼¸?¥ç? Gemini API Key
- * @returns é©—è?çµæ?
+ * @param apiKey - User input Gemini API Key
+ * @returns Validation result
  */
 export async function validateUserApiKey(apiKey: string): Promise<ApiKeyValidationResult> {
   try {
@@ -62,21 +62,21 @@ export async function validateUserApiKey(apiKey: string): Promise<ApiKeyValidati
 }
 
 /**
- * å¾?session storage ?²å?ä½¿ç”¨?…ç? API Key
+ * Get user API Key from session storage
  */
 export function getUserApiKey(): string | null {
   return sessionStorage.getItem("user_gemini_api_key");
 }
 
 /**
- * æ¸…é™¤ä½¿ç”¨?…ç? API Key
+ * Clear user API Key
  */
 export function clearUserApiKey(): void {
   sessionStorage.removeItem("user_gemini_api_key");
 }
 
 /**
- * ??axios è«‹æ?æ·»å? API Key header
+ * Add API Key header to axios request
  */
 export function addApiKeyHeader(config: any): any {
   const userApiKey = getUserApiKey();

@@ -766,5 +766,26 @@
     "startHint": "Chunk documents and convert to vectors, then store in the Vector DB",
     "successTitle": "Text processing completed!",
     "successSubtext": "Processed {{files}} file(s); generated {{chunks}} text chunks"
+  },
+  "system": {
+    "sessionUpdateSuccess": "Session updated successfully!",
+    "sessionUpdateFailed": "Failed to update session, please try again later.",
+    "sessionRestartSuccess": "Session restarted successfully! System reset to initial state.",
+    "sessionRestartFailed": "Failed to restart session, please try again later."
+  },
+  "error": {
+    "serverError": "Server error. Please try again later.",
+    "invalidRequest": "Invalid request parameters.",
+    "resourceNotFound": "Resource not found.",
+    "validationError": "Validation error.",
+    "serviceUnavailable": "Service temporarily unavailable.",
+    "requestFailed": "Request failed: "
+  },
+  "session": {
+    "expiredTitle": "Session Expired",
+    "expiredMessage": "Session has expired due to inactivity (10+ min). Data has been cleared and system reset.",
+    "reloadMessage": "Page reloaded. Session reset.",
+    "restartMessage": "You clicked Restart. Session reset.",
+    "startNewSession": "OK"
   }
 }

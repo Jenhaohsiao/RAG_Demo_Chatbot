@@ -1,6 +1,6 @@
 """
 Text Chunker Service
-將長文本分割成較小的語意塊，用於向量嵌入和 RAG 檢索
+Splits long text into smaller semantic chunks for vector embedding and RAG retrieval
 """
 import logging
 import re
@@ -9,10 +9,10 @@ from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
-# 分塊常數配置
-CHUNK_SIZE_CHARS = 2000      # 約 512 tokens (~4 chars per token)
-CHUNK_OVERLAP_CHARS = 500    # 約 128 tokens 重疊
-MIN_CHUNK_LENGTH = 50        # 最小塊長度（過濾掉過短的塊）
+# Chunking constants configuration
+CHUNK_SIZE_CHARS = 2000      # Approx 512 tokens (~4 chars per token)
+CHUNK_OVERLAP_CHARS = 500    # Approx 128 tokens overlap
+MIN_CHUNK_LENGTH = 50        # Minimum chunk length (filter out too short chunks)
 
 
 @dataclass

@@ -1,12 +1,12 @@
 """
 Embedder Service - Gemini Embedding API Integration
 
-將文字轉換為向量嵌入，用於向量資料庫儲存與相似度搜尋。
+Converts text to vector embeddings for vector database storage and similarity search.
 
 Constitutional Compliance:
-- Principle I (MVP-First): 使用 Gemini API 直接調用，無過度抽象
-- Principle II (Testability): 獨立服務類別，可模擬 API 進行測試
-- Principle VII (Fixed Tech Stack): 僅使用 Gemini API
+- Principle I (MVP-First): Direct call to Gemini API, no over-abstraction
+- Principle II (Testability): Independent service class, API can be mocked for testing
+- Principle VII (Fixed Tech Stack): Uses only Gemini API
 """
 
 import logging
@@ -16,7 +16,7 @@ import google.generativeai as genai
 
 from ..core.config import settings
 
-# 設定日誌
+# Set up logging
 logger = logging.getLogger(__name__)
 
 

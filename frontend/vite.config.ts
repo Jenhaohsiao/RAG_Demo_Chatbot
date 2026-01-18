@@ -23,7 +23,6 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       scss: {
-        additionalData: `@import "bootstrap/scss/bootstrap";`,
         silenceDeprecations: ['import', 'global-builtin', 'color-functions', 'if-function'],
       },
     },

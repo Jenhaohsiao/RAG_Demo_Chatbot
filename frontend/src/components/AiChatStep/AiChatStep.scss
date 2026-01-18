@@ -13,7 +13,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  overflow: hidden; // 防止此層產生滾動條
+  overflow: hidden; // Prevent scrollbar at this level
 }
 
 .ai-chat-step-container {
@@ -28,7 +28,7 @@
 
 .chat-container {
   flex: 1;
-  overflow: hidden; // 只讓內部 messages-container 滾動
+  overflow: hidden; // Only allow internal messages-container to scroll
   display: flex;
   flex-direction: column;
 }

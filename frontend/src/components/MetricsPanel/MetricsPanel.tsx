@@ -80,7 +80,7 @@ export const MetricsPanel: React.FC<MetricsPanelProps> = ({
         {/* Token Input */}
         <div className="metric-item-vertical">
           <div className="metric-label">
-            {t("metrics.tokenInput") || "輸入Token"}
+            {t("metrics.tokenInput", "Input Tokens")}
           </div>
           <div className="metric-value">
             {metrics.token_input.toLocaleString()}
@@ -90,7 +90,7 @@ export const MetricsPanel: React.FC<MetricsPanelProps> = ({
         {/* Token Output */}
         <div className="metric-item-vertical">
           <div className="metric-label">
-            {t("metrics.tokenOutput") || "輸出Token"}
+            {t("metrics.tokenOutput", "Output Tokens")}
           </div>
           <div className="metric-value">
             {metrics.token_output.toLocaleString()}
@@ -100,7 +100,7 @@ export const MetricsPanel: React.FC<MetricsPanelProps> = ({
         {/* Token Total */}
         <div className="metric-item-vertical">
           <div className="metric-label">
-            {t("metrics.tokenTotal") || "總Token"}
+            {t("metrics.tokenTotal") || "Total Tokens"}
           </div>
           <div className="metric-value">
             {metrics.token_total.toLocaleString()} /{" "}
@@ -111,7 +111,7 @@ export const MetricsPanel: React.FC<MetricsPanelProps> = ({
         {/* Token Percent with Progress Bar */}
         <div className="metric-item-vertical metric-item-progress">
           <div className="metric-label">
-            {t("metrics.tokenPercent") || "使用率 %"}
+            {t("metrics.tokenPercent") || "Usage %"}
           </div>
           <div className="metric-progress-vertical">
             <div className="progress-bar-container">
@@ -137,7 +137,7 @@ export const MetricsPanel: React.FC<MetricsPanelProps> = ({
         {/* Context Tokens */}
         <div className="metric-item-vertical">
           <div className="metric-label">
-            {t("metrics.contextTokens") || "上下文Token"}
+            {t("metrics.contextTokens") || "Context Tokens"}
           </div>
           <div className="metric-value">
             {metrics.context_tokens.toLocaleString()}
@@ -147,7 +147,7 @@ export const MetricsPanel: React.FC<MetricsPanelProps> = ({
         {/* Context Percent with Progress Bar */}
         <div className="metric-item-vertical metric-item-progress">
           <div className="metric-label">
-            {t("metrics.contextPercent") || "上下文 %"}
+            {t("metrics.contextPercent") || "Context %"}
           </div>
           <div className="metric-progress-vertical">
             <div className="progress-bar-container">
@@ -173,7 +173,7 @@ export const MetricsPanel: React.FC<MetricsPanelProps> = ({
         {/* Vector Count */}
         <div className="metric-item-vertical">
           <div className="metric-label">
-            {t("metrics.vectorCount") || "向量數量"}
+            {t("metrics.vectorCount") || "Vector Count"}
           </div>
           <div className="metric-value">
             {metrics.vector_count.toLocaleString()}

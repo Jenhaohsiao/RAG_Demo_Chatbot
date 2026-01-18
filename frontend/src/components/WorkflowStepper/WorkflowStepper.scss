@@ -144,17 +144,17 @@
   width: 100%;
 }
 
-/* AI Chat Step Container - 流程6專用 */
+/* AI Chat Step Container - Step 6 Only */
 .ai-chat-step-container {
-  height: calc(100vh - 280px); // 減去 stepper header 和導航的高度
+  height: calc(100vh - 280px); // Subtract stepper header and nav height
   display: flex;
   flex-direction: column;
-  overflow: hidden; // 防止多層滾動條
+  overflow: hidden; // Prevent multiple scrollbars
 }
 
 .ai-chat-content {
   flex: 1;
-  overflow: hidden; // 讓內部組件處理滾動
+  overflow: hidden; // Let internal components handle scrolling
 }
 
 /* Sticky flow diagram for step 6 */
@@ -166,7 +166,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* 水平排列的步驟項目 */
+/* Horizontally aligned step items */
 .stepper-header .d-flex {
   width: 100%;
   gap: 0;
@@ -178,7 +178,7 @@
   transition: all 0.3s ease;
   cursor: pointer;
   flex: 1;
-  min-width: 0; /* 允許彈性收縮 */
+  min-width: 0; /* Allow flex shrink */
 }
 
 .stepper-item:hover:not(.disabled) {
@@ -189,7 +189,7 @@
 
 .stepper-item.disabled {
   opacity: 0.5;
-  /* pointer-events: none; - 移除這個以允許顯示 toast */
+  /* pointer-events: none; - Removed to allow toast display */
 }
 
 .stepper-circle {
@@ -219,7 +219,7 @@
   border-color: #146c43;
 }
 
-/* 步驟文本樣式 */
+/* Step text styles */
 .stepper-text {
   margin-top: 10px;
   text-align: center;
@@ -231,7 +231,7 @@
   font-weight: 600;
   color: #495057;
   line-height: 1.2;
-  min-height: 32px; /* 確保所有標題高度一致 */
+  min-height: 32px; /* Ensure consistent height for all titles */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -252,15 +252,15 @@
   color: #6c757d;
   max-width: 100px;
   margin: 0 auto;
-  min-height: 26px; /* 確保所有描述高度一致 */
+  min-height: 26px; /* Ensure consistent height for all descriptions */
 }
 
-/* 水平連接線樣式 */
+/* Horizontal connector styles */
 .stepper-connector {
   position: absolute;
-  top: 30%; /* 調整到圓圈中心 */
+  top: 30%; /* Adjust to circle center */
   left: calc(100% - 20px);
-  width: 40px; /* 連接線寬度 */
+  width: 40px; /* Connector width */
   height: 4px;
   z-index: 1;
 }
@@ -277,7 +277,7 @@
   background: #198754; /* Green for completed steps */
 }
 
-/* 進度條樣式 */
+/* Progress bar styles */
 .progress {
   height: 6px !important;
   background-color: #e9ecef;
@@ -290,7 +290,7 @@
   background: linear-gradient(90deg, #0d6efd 0%, #0056b3 100%);
 }
 
-/* 當前步驟資訊樣式 */
+/* Current step info styles */
 .current-step-info {
   border-radius: 5px;
   padding: 10px 10px;
@@ -300,7 +300,7 @@
   background-color: #dddddd;
 }
 
-/* 導航按鈕樣式 */
+/* Navigation button styles */
 .stepper-navigation {
   border-top: 1px solid #dee2e6;
   padding: 20px 30px;
@@ -316,7 +316,7 @@
   color: #6c757d;
 }
 
-/* 步驟內容區域 */
+/* Step content area */
 .step-content {
   width: 100%;
   max-width: 100%;
@@ -327,10 +327,10 @@
   margin: 0;
   border: none;
   box-shadow: none;
-  overflow: hidden; // 防止此層產生滾動條
+  overflow: hidden; // Prevent scrollbar on this layer
 }
 
-/* 響應式設計 */
+/* Responsive design */
 @media (max-width: 1200px) {
   .stepper-title {
     font-size: 12px;
@@ -445,7 +445,7 @@
   color: #6c757d;
 }
 
-/* RAG設置卡片樣式 */
+/* RAG config card styles */
 .rag-config-step .card {
   transition:
     transform 0.2s ease,
@@ -482,7 +482,7 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-/* 響應式卡片佈局調整 */
+/* Responsive card layout adjustment */
 @media (max-width: 1400px) {
   .rag-config-step .col-xl-3 {
     flex: 0 0 33.333%;
@@ -501,7 +501,7 @@
   }
 }
 
-/* 動畫效果 */
+/* Animation effects */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -542,7 +542,7 @@
   animation-delay: 0.8s;
 }
 
-/* Prompt設置卡片樣式 */
+/* Prompt config card styles */
 .prompt-config-step .card {
   transition:
     transform 0.2s ease,
@@ -576,7 +576,7 @@
   animation-delay: 0.4s;
 }
 
-/* 動畫效果 */
+/* Animation effects */
 @keyframes pulse {
   0% {
     transform: scale(1);
@@ -597,7 +597,7 @@
   transition: width 0.5s ease-in-out;
 }
 
-/* 自定義步驟顏色 */
+/* Custom step colors */
 .bg-orange {
   background-color: #ff7849 !important;
 }
@@ -610,9 +610,9 @@
   background-color: #6610f2 !important;
 }
 
-/* 統一步驟狀態顏色 */
+/* Unified step status colors */
 .step-inactive {
-  background-color: #6c757d !important; /* 灰色背景 - 未執行 */
+  background-color: #6c757d !important; /* Gray background - Inactive */
 }
 
 .step-active {
@@ -625,20 +625,20 @@
   background-color: #198754 !important; /* Green background - Completed */
 }
 
-/* 數字文字樣式 - 白字灰色外框 */
+/* Number text styles - White text gray border */
 .stepper-circle span {
   color: white !important;
   text-shadow: none !important; /* Remove shadow for cleaner look */
   font-weight: 600;
 }
 
-/* 執行中標題文字顏色 */
+/* Active title text color */
 .stepper-item.active .stepper-title span {
   color: #0d6efd !important; /* Primary Blue */
   font-weight: 700 !important;
 }
 
-/* 脈衝動畫 - 用於當前步驟 */
+/* Pulse animation - For current step */
 @keyframes pulse {
   0% {
     transform: scale(1);
@@ -654,7 +654,7 @@
   }
 }
 
-/* 禁用步驟樣式 - 當流程3完成後，流程1、2應該被鎖定 */
+/* Disabled step styles - Lock steps 1, 2 after step 3 completes */
 .disabled-step {
   position: relative;
 

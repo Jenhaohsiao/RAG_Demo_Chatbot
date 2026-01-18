@@ -7,6 +7,26 @@
 
 ---
 
+## 📅 2026-01-17 - 多語言修正與流程警告修復 ✅
+
+**🎯 本次更新重點**:
+1. **多語言一致性**：crawler loading overlay、警示/成功對話框按鈕、Simplified Chinese 下拉項目全面改為 i18n，移除殘留中文硬編碼。
+2. **流程警告修復**：ContentReviewStep 將父層通知移出 setState，解決「Cannot update WorkflowStepper while rendering ContentReviewStep」警告。
+3. **回答語言選單擴充**：Answer Language 支援 Auto-detect + 繁中/簡中/English/Français，預設 Auto-detect，所有語系顯示對應翻譯。
+4. **LoadingOverlay 文案**：預設改為中性的 English，避免語系缺失時落回中文；crawler loading 文案使用 `crawler.loading` key。
+
+**主要變更**:
+- **WorkflowStepper**：成功/警示對話框按鈕改用 `buttons.confirm` / `buttons.understand`；完成提示與處理中徽章皆使用 i18n；移除重複 emoji。
+- **ContentReviewStep**：完成時先固化 state，再觸發父層 callbacks，消除跨組件 setState 警告。
+- **TextProcessingStep**：完成提示移除多餘 icon，維持全程 i18n 文案。
+- **UploadScreen / LoadingOverlay**：爬蟲處理 overlay 文案本地化；預設訊息改為 English；成功/錯誤對話框按鈕使用共用 i18n。
+- **Locales**：新增 `crawler.loading`、回答語言 labels（zhTW/zhCN/en/fr/auto），更新按鈕文案。
+
+**驗證**:
+- `npm run build` 成功（僅 Sass legacy API deprecation 與 bundle 體積警告）。
+
+---
+
 ## 📅 2026-01-17 - UI 簡化與聯絡表單功能整合 ✅
 
 **🎯 本次更新重點**:
