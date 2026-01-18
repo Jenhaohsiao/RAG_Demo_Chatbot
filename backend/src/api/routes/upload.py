@@ -193,33 +193,38 @@ def process_document(document: Document):
         logger.info(f"[{document.document_id}] Extraction complete: {len(extracted_text)} chars")
         logger.info(f"[{document.document_id}] TOKENS_USED CALCULATION: {len(extracted_text)} chars // 3 = {document.tokens_used} tokens")
         
-        # Step 2: Moderate 內容審核（憲法 Principle VI）
-        if settings.enable_content_moderation:
-            logger.info(f"[{document.document_id}] Starting moderation")
-            document.moderation_status = ModerationStatus.CHECKING
-            
-            mod_result = moderator.check_content_safety(
-                text=document.raw_content,
-                source_reference=document.source_reference
-            )
-            if mod_result.status == ModStatus.BLOCKED:
-                document.moderation_status = ModerationStatus.BLOCKED
-                document.moderation_categories = mod_result.blocked_categories
-                document.error_code = ErrorCode.MODERATION_BLOCKED
-                document.error_message = mod_result.reason
-                logger.warning(
-                    f"[{document.document_id}] Moderation BLOCKED: {mod_result.reason}"
-                )
-                # 更新 session 狀態為 ERROR
-                session_manager.update_state(document.session_id, SessionState.ERROR)
-                return
-            
-            document.moderation_status = ModerationStatus.APPROVED
-            logger.info(f"[{document.document_id}] Moderation APPROVED")
-        else:
-            # 跳過審核（測試模式）
-            document.moderation_status = ModerationStatus.APPROVED
-            logger.warning(f"[{document.document_id}] Moderation SKIPPED (testing mode)")
+        # Step 2: Moderate 內容審核
+        # 根據用戶需求，Flow 3 不再執行內容審核，改由 Flow 4 處理
+        # if settings.enable_content_moderation:
+        #     logger.info(f"[{document.document_id}] Starting moderation")
+        #     document.moderation_status = ModerationStatus.CHECKING
+        #     
+        #     mod_result = moderator.check_content_safety(
+        #         text=document.raw_content,
+        #         source_reference=document.source_reference
+        #     )
+        #     if mod_result.status == ModStatus.BLOCKED:
+        #         document.moderation_status = ModerationStatus.BLOCKED
+        #         document.moderation_categories = mod_result.blocked_categories
+        #         document.error_code = ErrorCode.MODERATION_BLOCKED
+        #         document.error_message = mod_result.reason
+        #         logger.warning(
+        #             f"[{document.document_id}] Moderation BLOCKED: {mod_result.reason}"
+        #         )
+        #         # 更新 session 狀態為 ERROR
+        #         session_manager.update_state(document.session_id, SessionState.ERROR)
+        #         return
+        #     
+        #     document.moderation_status = ModerationStatus.APPROVED
+        #     logger.info(f"[{document.document_id}] Moderation APPROVED")
+        # else:
+        #     # 跳過審核（測試模式）
+        #     document.moderation_status = ModerationStatus.APPROVED
+        #     logger.warning(f"[{document.document_id}] Moderation SKIPPED (testing mode)")
+        
+        # 直接標記為 APPROVED，因為 Flow 3 不再負責攔截
+        document.moderation_status = ModerationStatus.APPROVED
+        logger.info(f"[{document.document_id}] Moderation SKIPPED in Flow 3 (deferred to Flow 4)")
 
         
         # Step 3: Chunk 文字分塊
@@ -339,7 +344,6 @@ def process_document(document: Document):
                 "ko": f"문서가 업로드되고 처리되었습니다. 콘텐츠 미리보기: {content_preview}...",
                 "es": f"Documento cargado y procesado exitosamente. Vista previa: {content_preview}...",
                 "ja": f"ドキュメントがアップロードおよび処理されました。プレビュー: {content_preview}...",
-                "ar": f"تم تحميل المستند ومعالجته بنجاح. معاينة: {content_preview}...",
                 "fr": f"Document téléchargé et traité avec succès. Aperçu: {content_preview}..."
             }
             document.summary = fallback_messages.get(language, fallback_messages["en"])
@@ -623,12 +627,22 @@ async def upload_website(
         # 提取爬蟲的頁面
         crawled_pages = crawl_result.get('pages', [])
         
+        # 檢查爬蟲結果是否有效
+        if not crawled_pages or len(crawled_pages) == 0:
+            logger.error(f"Website crawl returned empty pages for {request.url}")
+            raise Exception("Cannot embed empty text list - no pages were successfully crawled")
+        
         # 為爬蟲結果建立主 Document
         # 將所有頁面的內容合併為一個文件
         combined_content = "\n\n---\n\n".join([
             f"# {page.get('title', 'Untitled')}\nURL: {page.get('url')}\n\n{page.get('content', '')}"
             for page in crawled_pages
         ])
+        
+        # 再次檢查合併後的內容是否為空
+        if not combined_content or combined_content.strip() == "":
+            logger.error(f"Website crawl resulted in empty combined content for {request.url}")
+            raise Exception("Cannot embed empty text list - crawled pages have no text content")
         
         crawl_document = Document(
             session_id=session_id,

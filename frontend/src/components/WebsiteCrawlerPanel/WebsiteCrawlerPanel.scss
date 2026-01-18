@@ -1,3 +1,7 @@
+@import "../../styles/variables";
+
+$prof-blue: $bg-card-green; // #2b6cb0
+
 /**
  * Website Crawler Panel Styles
  */
@@ -10,7 +14,7 @@
   background: transparent;
 }
 
-/* 爬蟲表單 */
+/* Crawler form */
 .crawler-form {
   display: flex;
   flex-direction: column;
@@ -33,7 +37,7 @@
   line-height: 1.5;
 }
 
-/* 表單組 */
+/* Form group */
 .form-group {
   display: flex;
   flex-direction: column;
@@ -56,26 +60,26 @@
 .page-display {
   font-size: 13px;
   font-weight: 600;
-  color: #4299e1;
+  color: $prof-blue;
   background: #edf2f7;
   padding: 2px 8px;
   border-radius: 4px;
 }
 
-/* URL 輸入 */
+/* URL input */
 .url-input {
   padding: 10px 12px;
   border: 1px solid #e2e8f0;
   border-radius: 6px;
   font-size: 14px;
   transition: all 0.2s ease;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .url-input:focus {
   outline: none;
-  border-color: #4299e1;
-  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+  border-color: $prof-blue;
+  box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.1);
 }
 
 .url-input.error {
@@ -89,7 +93,7 @@
   opacity: 0.6;
 }
 
-/* 錯誤訊息 */
+/* Error message */
 .error-message {
   font-size: 13px;
   color: #f56565;
@@ -99,7 +103,7 @@
   border-radius: 3px;
 }
 
-/* Token 滑塊 */
+/* Token slider */
 .token-slider,
 .page-slider {
   width: 100%;
@@ -119,7 +123,11 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  background: linear-gradient(
+    135deg,
+    $prof-blue 0%,
+    darken($prof-blue, 10%) 100%
+  );
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease;
@@ -128,7 +136,7 @@
 .token-slider::-webkit-slider-thumb:hover,
 .page-slider::-webkit-slider-thumb:hover {
   transform: scale(1.2);
-  box-shadow: 0 2px 8px rgba(66, 153, 225, 0.3);
+  box-shadow: 0 2px 8px rgba(43, 108, 176, 0.3);
 }
 
 .token-slider::-moz-range-thumb,
@@ -136,7 +144,11 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  background: linear-gradient(
+    135deg,
+    $prof-blue 0%,
+    darken($prof-blue, 10%) 100%
+  );
   cursor: pointer;
   border: none;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -149,13 +161,13 @@
   cursor: not-allowed;
 }
 
-/* Token 提示 */
+/* Token info */
 .token-info {
   font-size: 12px;
   color: #666;
   padding: 6px 8px;
   background: #f7fafc;
-  border-left: 3px solid #4299e1;
+  border-left: 3px solid $prof-blue;
   border-radius: 3px;
   display: flex;
   align-items: center;
@@ -174,11 +186,11 @@
   color: #2d3748;
 }
 
-/* 高級選項按鈕 */
+/* Advanced options button */
 .toggle-advanced {
   padding: 8px 12px;
   font-size: 13px;
-  color: #4299e1;
+  color: $prof-blue;
   background: none;
   border: none;
   cursor: pointer;
@@ -191,7 +203,7 @@
 }
 
 .toggle-advanced:hover:not(:disabled) {
-  color: #3182ce;
+  color: darken($prof-blue, 10%);
   background: #edf2f7;
   border-radius: 4px;
 }
@@ -201,12 +213,12 @@
   cursor: not-allowed;
 }
 
-/* 高級選項 */
+/* Advanced options */
 .advanced-options {
   padding: 12px;
   background: #f7fafc;
   border-radius: 6px;
-  border-left: 3px solid #4299e1;
+  border-left: 3px solid $prof-blue;
   animation: slideDown 0.2s ease;
 }
 
@@ -221,13 +233,17 @@
   }
 }
 
-/* 爬蟲按鈕 */
+/* Crawler button */
 .crawler-button {
   padding: 10px 16px;
   font-size: 14px;
   font-weight: 600;
   color: white;
-  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  background: linear-gradient(
+    135deg,
+    $prof-blue 0%,
+    darken($prof-blue, 10%) 100%
+  );
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -240,7 +256,7 @@
 }
 
 .crawler-button:hover:not(:disabled) {
-  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.4);
+  box-shadow: 0 4px 12px rgba(43, 108, 176, 0.4);
   transform: translateY(-2px);
 }
 
@@ -269,7 +285,7 @@
   }
 }
 
-/* 爬蟲結果 */
+/* Crawler results */
 .crawler-results {
   display: flex;
   flex-direction: column;
@@ -319,7 +335,7 @@
   padding: 10px 12px;
   background: #f7fafc;
   border-radius: 6px;
-  border-left: 3px solid #4299e1;
+  border-left: 3px solid $prof-blue;
 }
 
 .stat-label {
@@ -348,6 +364,7 @@
   background: #c6f6d5;
 }
 
+/* For warning/error status maybe keep them red/orange, but general status might use blue */
 .stat-status.status-token_limit_reached {
   color: #975a16;
   background: #feebc8;
@@ -359,11 +376,11 @@
 }
 
 .stat-status.status-crawling {
-  color: #2c5282;
+  color: darken($prof-blue, 20%);
   background: #bee3f8;
 }
 
-/* URL 列表 */
+/* URL list */
 .urls-list {
   display: flex;
   flex-direction: column;
@@ -389,7 +406,7 @@
   padding: 12px;
   background: #f7fafc;
   border-radius: 6px;
-  border-left: 3px solid #4299e1;
+  border-left: 3px solid $prof-blue;
   transition: all 0.2s ease;
 }
 
@@ -410,14 +427,14 @@
   flex: 1;
   font-size: 13px;
   font-weight: 500;
-  color: #4299e1;
+  color: $prof-blue;
   text-decoration: none;
   word-break: break-all;
   transition: all 0.2s ease;
 }
 
 .url-link:hover {
-  color: #3182ce;
+  color: darken($prof-blue, 10%);
   text-decoration: underline;
 }
 
@@ -453,7 +470,7 @@
   text-align: center;
 }
 
-/* 響應式設計 */
+/* Responsive design */
 @media (max-width: 768px) {
   .website-crawler-panel {
     padding: 16px;

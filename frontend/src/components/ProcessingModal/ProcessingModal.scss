@@ -1,0 +1,15 @@
+@import "../../styles/variables";
+
+.processing-modal-overlay {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.processing-stats {
+  .stat-icon-tokens {
+    color: $color-warning;
+  }
+
+  .stat-icon-pages {
+    color: $color-info;
+  }
+}

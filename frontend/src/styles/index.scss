@@ -1,13 +1,13 @@
 /**
  * Global Styles Index
- * 統一的樣式導入入口 - 所有全局SCSS檔案
+ * Unified styles import entry point - All global SCSS files
  * 
- * 使用方式：在main.tsx中導入此檔案
+ * Usage: Import this file in main.tsx
  * import './styles/index.scss';
  */
 
 // ========================================
-// 1. Variables & Design Tokens (必須最先導入)
+// 1. Variables & Design Tokens (Must be imported first)
 // ========================================
 @import "./variables";
 
@@ -26,7 +26,6 @@
 // ========================================
 @import "./badges";
 @import "./responsive";
-@import "./rtl";
 @import "./professional-header";
 
 // ========================================
@@ -35,45 +34,44 @@
 @import "./components";
 
 /*
-檔案結構說明：
+File Structure Layout:
 
 frontend/src/styles/
-├── _variables.scss           - 全局設計變數（顏色、間距、字型等）
-├── _mixins.scss              - 可重用的混合宏和動畫
-├── _utilities.scss           - 通用工具類（flex、spacing、text等）
-├── _badges.scss              - 徽章樣式
-├── _responsive.scss          - 響應式工具
-├── _rtl.scss                 - RTL（阿拉伯語）支援
-├── _professional-header.scss - 頭部樣式
-├── _components.scss          - 所有組件樣式（hero、toast、upload等）
-└── index.scss                - 統一導入入口（本檔案）
+├── _variables.scss           - Global design variables (colors, spacing, typography, etc.)
+├── _mixins.scss              - Reusable mixins and animations
+├── _utilities.scss           - Utility classes (flex, spacing, text, etc.)
+├── _badges.scss              - Badge styles
+├── _responsive.scss          - Responsive tools
+├── _professional-header.scss - Header styles
+├── _components.scss          - All component styles (hero, toast, upload, etc.)
+└── index.scss                - Unified entry point (this file)
 
-使用指南：
+Usage Guide:
 
-1. 使用設計變數：
+1. Using Design Variables:
    color: $color-primary;
    margin: $spacing-4;
    font-size: $font-size-lg;
 
-2. 使用Mixins：
+2. Using Mixins:
    @include flex-center;
    @include card;
    @include respond-to('md') { ... }
 
-3. 使用工具類（HTML中）：
+3. Using Utility Classes (in HTML):
    <div class="flex-center gap-4 p-4 rounded shadow-md">
    
-4. 響應式設計：
+4. Responsive Design:
    @include respond-to('md') {
-     // 在 768px 以上生效的樣式
+     // Styles applied above 768px
    }
 
-5. 動畫：
+5. Animations:
    @include fade-in;
    @include slide-in-right;
 
-組件樣式已統一：
+Component Styles Consolidated:
 
-所有組件樣式（hero、toast、upload、flow等）已整合到 _components.scss 中，
-使用設計變數和mixins確保一致性和可維護性。
+All component styles (hero, toast, upload, flow, etc.) are consolidated into _components.scss,
+using design variables and mixins to ensure consistency and maintainability.
 */

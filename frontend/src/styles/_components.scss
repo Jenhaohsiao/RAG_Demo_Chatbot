@@ -1,6 +1,6 @@
 /**
  * Components Styles
- * 整合所有組件樣式（hero, toast, upload, two-column-layout等）
+ * Consolidates all component styles (hero, toast, upload, two-column-layout, etc.)
  */
 
 @import "./variables";
@@ -331,7 +331,9 @@
   left: 50%;
   margin-left: -150px;
   opacity: 0;
-  transition: opacity $transition-base, visibility $transition-base;
+  transition:
+    opacity $transition-base,
+    visibility $transition-base;
   font-size: $font-size-base;
   line-height: $line-height-normal;
   word-wrap: break-word;

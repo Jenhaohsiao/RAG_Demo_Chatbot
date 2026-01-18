@@ -1,13 +1,13 @@
-/**
+﻿/**
  * Website Crawler Panel Component
- * 網站爬蟲面板（URL 輸入、Token 限制、爬蟲結果預覽）
+ * Website crawler panel (URL input, Token limit, Crawl result preview)
  *
  * Features:
- * - URL 輸入與驗證
- * - Token 限制滑塊（1K-500K）
- * - 爬蟲結果預覽（URL 列表、Token 計數）
- * - 爬蟲進度顯示
- * - 錯誤處理與友善提示
+ * - URL input and validation
+ * - Token limit slider (1K-500K)
+ * - Crawl result preview (URL list, Token count)
+ * - Crawl progress display
+ * - Error handling and friendly prompts
  */
 
 import React, { useState } from "react";
@@ -47,13 +47,13 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
   const handleCrawl = () => {
     setLocalError(null);
 
-    // 驗證 URL
+    // Validate URL
     if (!url.trim()) {
       setLocalError(t("crawler.error.emptyUrl", "Please enter a website URL"));
       return;
     }
 
-    // 規範化 URL - 自動添加協議前綴
+    // Normalize URL - automatically add protocol prefix
     const normalizedUrl = normalizeUrl(url);
 
     if (!validateUrl(normalizedUrl)) {
@@ -61,8 +61,17 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
       return;
     }
 
-    // 呼叫父組件回調，使用規範化後的 URL
+    // Call parent component callback, use normalized URL
     onCrawl(normalizedUrl, maxTokens, maxPages);
+  };
+
+  // Use sample website
+  const handleUseSampleWebsite = () => {
+    const sampleUrl = "https://www.gutenberg.org/";
+    setUrl(sampleUrl);
+    setLocalError(null);
+    // Automatically start crawling
+    onCrawl(sampleUrl, maxTokens, maxPages);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -73,7 +82,7 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
 
   const displayError = localError || error;
 
-  // 格式化 Token 數量顯示
+  // Format Token count display
   const formatTokens = (tokens: number) => {
     if (tokens >= 1000000) {
       return `${(tokens / 1000000).toFixed(1)}M`;
@@ -86,47 +95,22 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
 
   return (
     <div className="">
-      {/* 爬蟲表單 */}
+      {/* Crawler Form - Always show, even after completion */}
       <div className="crawler-form">
-        <p className="crawler-description">
+        <p className="crawler-description mb-3">
           {t(
             "crawler.description",
-            "輸入網站 URL 自動爬取內容。設定頁面數為 1 可爬取單一頁面，設定更多頁面可深度爬取整個網站。"
+            "Enter website URL to crawl content automatically. Set page limit to 1 for single page, or more for deep crawling."
           )}
         </p>
 
-        {/* 當前參數顯示 */}
-        <div className="mb-3 p-3 border rounded bg-light">
-          <h6 className="mb-2 text-muted">
-            <i className="bi bi-gear me-2"></i>
-            當前爬蟲參數
-          </h6>
-          <div className="row">
-            <div className="col-6">
-              <small className="text-muted">最大 Token 數:</small>
-              <div className="fw-bold text-primary">
-                {formatTokens(maxTokens)}
-              </div>
-            </div>
-            <div className="col-6">
-              <small className="text-muted">最大頁面數:</small>
-              <div className="fw-bold text-success">{maxPages} 頁</div>
-            </div>
-          </div>
-          <small className="text-muted">
-            <i className="bi bi-info-circle me-1"></i>
-            可在左側「參數設定」中調整
-          </small>
-        </div>
-
-        {/* URL 輸入 */}
-        <div className="form-group">
-          <label htmlFor="crawler-url">{t("crawler.url", "Website URL")}</label>
+        {/* URL Input */}
+        <div className="form-group mb-3">
           <input
             id="crawler-url"
             type="text"
-            className={`url-input ${displayError ? "error" : ""}`}
-            placeholder="https://example.com"
+            className="form-control"
+            placeholder="https://www.gutenberg.org/"
             value={url}
             onChange={(e) => {
               setUrl(e.target.value);
@@ -135,30 +119,48 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
             onKeyPress={handleKeyPress}
             disabled={isLoading || disabled}
           />
-          {displayError && <div className="error-message">{displayError}</div>}
+          {displayError && (
+            <div className="invalid-feedback">{displayError}</div>
+          )}
         </div>
 
-        {/* 提交按鈕 */}
+        {/* Submit Button */}
         <button
-          className="btn btn-primary w-100"
+          className="btn btn-primary w-100 py-2 rounded-pill mb-2"
           onClick={handleCrawl}
           disabled={isLoading || disabled || !url.trim()}
         >
           {isLoading ? (
             <>
-              <i className="bi bi-arrow-repeat spinner-border spinner-border-sm me-2"></i>
-              {t("crawler.crawling", "Crawling...")}
+              <span
+                className="spinner-border spinner-border-sm me-2"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              {t("crawler.crawling", "Processing...")}
             </>
           ) : (
             <>
               <i className="bi bi-play-circle me-2"></i>
-              {t("crawler.start", "Start Crawl")}
+              {t("crawler.start", "Start Crawling")}
             </>
           )}
         </button>
+
+        {/* Sample Website Button */}
+        <div className="text-center">
+          <button
+            className="btn btn-outline-secondary btn-sm"
+            onClick={handleUseSampleWebsite}
+            disabled={isLoading || disabled}
+          >
+            <i className="bi bi-globe me-2"></i>
+            {t("crawler.useSample", "Use sample website (Project Gutenberg)")}
+          </button>
+        </div>
       </div>
 
-      {/* 爬蟲結果 */}
+      {/* Crawler Results */}
       {crawlResults && (
         <div className="crawler-results">
           <div className="results-header">
@@ -182,18 +184,20 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
                 <span
                   className={`stat-status status-${crawlResults.crawl_status}`}
                 >
-                  {crawlResults.crawl_status === "completed" && "✓ Completed"}
+                  {crawlResults.crawl_status === "completed" &&
+                    t("crawler.status.completed", " Completed")}
                   {crawlResults.crawl_status === "token_limit_reached" &&
-                    "⚠ Token Limit"}
+                    t("crawler.status.tokenLimit", " Token Limit")}
                   {crawlResults.crawl_status === "page_limit_reached" &&
-                    "⚠ Page Limit"}
-                  {crawlResults.crawl_status === "crawling" && "⏳ Crawling..."}
+                    t("crawler.status.pageLimit", " Page Limit")}
+                  {crawlResults.crawl_status === "crawling" &&
+                    t("crawler.status.crawling", " Crawling...")}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* URL 列表 */}
+          {/* URL List */}
           <div className="urls-list">
             <h5>{t("crawler.urlList", "Crawled URLs")}</h5>
             <div className="urls-container">
@@ -206,10 +210,12 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
                       rel="noopener noreferrer"
                       className="url-link"
                     >
-                      {page.title || "Untitled"}
+                      {page.title || t("crawler.untitled", "Untitled")}
                     </a>
                     <span className="url-tokens">
-                      {formatTokens(page.tokens)} tokens
+                      {t("crawler.tokenCount", "{{count}} tokens", {
+                        count: page.tokens ?? 0,
+                      })}
                     </span>
                   </div>
                   <div className="url-content-preview">{page.content}</div>

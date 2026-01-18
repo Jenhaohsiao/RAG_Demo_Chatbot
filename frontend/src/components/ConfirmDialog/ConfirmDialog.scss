@@ -1,0 +1,23 @@
+@import "../../styles/variables";
+
+.confirm-dialog-backdrop {
+  display: block; // Force display
+  z-index: $z-index-modal-backdrop !important;
+  opacity: 0.5;
+}
+
+.confirm-dialog-modal {
+  display: block !important; // Force display
+  z-index: $z-index-modal !important;
+  background-color: transparent;
+
+  &.show {
+    opacity: 1 !important;
+  }
+
+  // Ensure the modal dialog content is fully opaque and visible
+  .modal-dialog {
+    // margin-top: 10vh; // Removed: let modal-dialog-centered handle it
+    z-index: $z-index-modal + 10;
+  }
+}

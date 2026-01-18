@@ -13,13 +13,13 @@ import type {
 /**
  * Create a new session
  * @param language Initial UI language (default: en)
- * @param similarityThreshold RAG similarity threshold (0.0-1.0, default: 0.5)
+ * @param similarityThreshold RAG similarity threshold (0.0-1.0, default: 0.3)
  * @param customPrompt Custom prompt template (optional)
  * @returns Session details
  */
 export const createSession = async (
   language: string = 'en', 
-  similarityThreshold: number = 0.5,
+  similarityThreshold: number = 0.3,
   customPrompt?: string
 ): Promise<SessionResponse> => {
   const params: any = { language, similarity_threshold: similarityThreshold };
@@ -59,7 +59,7 @@ export const getSessionWithMetrics = async (sessionId: string): Promise<SessionW
 export const heartbeat = async (sessionId: string): Promise<SessionResponse> => {
   const response = await api.post<SessionResponse>(
     `/session/${sessionId}/heartbeat`,
-    {}, // 空的 body
+    {}, // Empty body
     {
       headers: {
         'Content-Type': 'application/json'
@@ -99,7 +99,7 @@ export const restartSession = async (sessionId: string): Promise<SessionResponse
  */
 export const updateLanguage = async (
   sessionId: string, 
-  language: 'en' | 'zh-TW' | 'zh-CN' | 'ko' | 'es' | 'ja' | 'ar' | 'fr'
+  language: 'en' | 'zh-TW' | 'zh-CN' | 'fr'
 ): Promise<SessionResponse> => {
   const payload: LanguageUpdateRequest = { language };
   const response = await api.put<SessionResponse>(

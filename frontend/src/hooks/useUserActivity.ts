@@ -1,12 +1,12 @@
-/**
+﻿/**
  * useUserActivity Hook
- * 監聽用戶活動（滑鼠移動、點擊、鍵盤等）
+ * Monitors user activity (mouse, keyboard, scroll, etc.)
  */
 import { useEffect, useRef, useCallback } from 'react';
 
 interface UseUserActivityOptions {
   onActivity?: () => void;
-  throttleTime?: number; // 節流時間，避免過於頻繁觸發
+  throttleTime?: number; // Throttling time (avoid excessive callbacks)
 }
 
 interface UseUserActivityReturn {
@@ -15,15 +15,15 @@ interface UseUserActivityReturn {
 
 /**
  * Custom hook for tracking user activity
- * 
+ *
  * Features:
  * - Monitor mouse movement, clicks, keyboard events
  * - Throttle activity detection to avoid excessive API calls
  * - Trigger heartbeat on any user activity
  */
 export const useUserActivity = (options: UseUserActivityOptions = {}): UseUserActivityReturn => {
-  const { onActivity, throttleTime = 60000 } = options; // 預設1分鐘節流
-  
+  const { onActivity, throttleTime = 60000 } = options; // Default 1 minute throttle
+
   const lastActivityRef = useRef<number>(Date.now());
   const throttleTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -32,25 +32,24 @@ export const useUserActivity = (options: UseUserActivityOptions = {}): UseUserAc
    */
   const handleActivity = useCallback(() => {
     const now = Date.now();
-    
-    // 檢查是否在節流期間內
+
+    // Check if within throttle period
     if (now - lastActivityRef.current < throttleTime) {
       return;
     }
-    
+
     lastActivityRef.current = now;
-    
-    // 清除之前的節流計時器
+
+    // Clear previous throttle timer
     if (throttleTimerRef.current) {
       clearTimeout(throttleTimerRef.current);
     }
-    
-    // 觸發活動回調
+
+    // Trigger activity callback
     if (onActivity) {
       onActivity();
     }
-    
-    console.log('User activity detected, heartbeat triggered');
+
   }, [onActivity, throttleTime]);
 
   /**
@@ -59,24 +58,24 @@ export const useUserActivity = (options: UseUserActivityOptions = {}): UseUserAc
   useEffect(() => {
     const events = [
       'mousedown',
-      'mousemove', 
+      'mousemove',
       'keypress',
       'scroll',
       'touchstart',
       'click'
     ];
 
-    // 添加事件監聽器
+    // Bind event listeners
     events.forEach(event => {
       document.addEventListener(event, handleActivity, { passive: true });
     });
 
-    // 清理函數
+    // Cleanup listeners
     return () => {
       events.forEach(event => {
         document.removeEventListener(event, handleActivity);
       });
-      
+
       if (throttleTimerRef.current) {
         clearTimeout(throttleTimerRef.current);
       }
@@ -84,6 +83,6 @@ export const useUserActivity = (options: UseUserActivityOptions = {}): UseUserAc
   }, [handleActivity]);
 
   return {
-    isActive: true // 簡化實現，總是返回true
+    isActive: true // Always true for now
   };
 };

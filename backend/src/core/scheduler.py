@@ -25,7 +25,7 @@ class SessionScheduler:
         """Initialize ThreadPool-based scheduler"""
         self.cleanup_thread: Optional[threading.Thread] = None
         self.is_running = False
-        self.cleanup_interval = 60  # 1 minute in seconds
+        self.cleanup_interval = 5  # TEST MODE: Check every 5 seconds (was 60)
         logger.info("SessionScheduler initialized (thread-based, APScheduler-free)")
     
     def _cleanup_expired_sessions(self):
@@ -38,10 +38,10 @@ class SessionScheduler:
             expired_ids = session_manager.get_expired_sessions()
             
             if not expired_ids:
-                logger.debug("No expired sessions found")
+                # logger.debug("No expired sessions found") # Reduce noise
                 return
             
-            logger.info(f"Cleaning up {len(expired_ids)} expired sessions")
+            logger.info(f"[Scheduler] Found {len(expired_ids)} expired sessions: {expired_ids}")
             
             for session_id in expired_ids:
                 try:
@@ -56,19 +56,20 @@ class SessionScheduler:
                     if vector_store.collection_exists(collection_name):
                         success = vector_store.delete_collection(collection_name)
                         if success:
-                            logger.info(f"Deleted Qdrant collection: {collection_name}")
+                            logger.info(f"[Scheduler] Deleted Qdrant collection: {collection_name}")
                         else:
-                            logger.error(f"Failed to delete collection: {collection_name}")
+                            logger.error(f"[Scheduler] Failed to delete collection: {collection_name}")
                     
                     # Remove session from manager
                     session_manager.close_session(session_id)
+                    logger.info(f"[Scheduler] Session {session_id} fully cleaned up")
                 except Exception as e:
-                    logger.error(f"Error cleaning session {session_id}: {e}")
+                    logger.error(f"[Scheduler] Error cleaning session {session_id}: {e}")
             
-            logger.info(f"Cleanup complete: {len(expired_ids)} sessions removed")
+            logger.info(f"[Scheduler] Cleanup complete: {len(expired_ids)} sessions removed")
             
         except Exception as e:
-            logger.error(f"Error during session cleanup: {e}", exc_info=True)
+            logger.error(f"[Scheduler] Error during session cleanup: {e}", exc_info=True)
     
     def _cleanup_loop(self):
         """

@@ -1,0 +1,56 @@
+@import "../../styles/variables";
+
+.app-title {
+  background: linear-gradient(135deg, #ffffff, #e8f4fd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.5px;
+}
+
+.app-subtitle-container {
+  opacity: 0.5;
+}
+
+.language-selector-text {
+  max-width: 100px;
+}
+
+.language-option {
+  cursor: pointer;
+  color: #212529 !important;
+
+  &:hover,
+  &:focus {
+    background-color: #e9ecef !important;
+    color: #000 !important;
+  }
+
+  &.active {
+    background-color: $color-primary !important;
+    color: white !important;
+  }
+}
+
+// 語言下拉選單樣式
+.dropdown-menu {
+  .language-option {
+    color: #212529 !important;
+
+    &:hover,
+    &:focus {
+      background-color: #e9ecef !important;
+      color: #000 !important;
+    }
+
+    &.active {
+      background-color: $color-primary !important;
+      color: white !important;
+    }
+  }
+}
+
+.navbar-bg {
+  background-color: $bg-navbar !important;
+}

@@ -1,23 +1,23 @@
-/**
+﻿/**
  * Global Design Tokens & Variables
- * 全局設計變數 - 統一顏色、間距、字型等
+ * Variables definition - Colors, Spacing, Typography, etc.
  */
 
 // ========================================
-// Colors - 顏色系統
+// Colors
 // ========================================
 
-// Primary Colors - 主要顏色
+// Primary Colors
 $color-primary: #0d6efd;
 $color-primary-light: #ebf8ff;
 $color-primary-dark: #2b6cb0;
 
-// Secondary Colors - 次要顏色
+// Secondary Colors
 $color-secondary: #6c757d;
 $color-secondary-light: #f7fafc;
 $color-secondary-dark: #2d3748;
 
-// Semantic Colors - 語意顏色
+// Semantic Colors
 $color-success: #28a745;
 $color-success-light: #d4edda;
 $color-success-dark: #155724;
@@ -34,7 +34,7 @@ $color-info: #17a2b8;
 $color-info-light: #d1ecf1;
 $color-info-dark: #0c5460;
 
-// Neutral Colors - 中性色
+// Neutral Colors
 $color-white: #ffffff;
 $color-black: #000000;
 $color-gray-50: #f8f9fa;
@@ -48,24 +48,28 @@ $color-gray-700: #495057;
 $color-gray-800: #2d3748;
 $color-gray-900: #212529;
 
-// Text Colors - 文字顏色
-$color-text: #2d3748; // 主要文字顏色
-$color-text-dark: #1a202c; // 深色文字
-$color-text-secondary: #718096; // 次要文字顏色
-$color-text-muted: #a0aec0; // 淡化文字
+// Text Colors
+$color-text: #2d3748; // Primary text color
+$color-text-dark: #1a202c; // Dark text
+$color-text-secondary: #718096; // Secondary text color
+$color-text-muted: #a0aec0; // Muted text
 
-// Background Colors - 背景色
+// Background Colors
 $bg-light: #f8f9fa;
 $bg-dark: #212529;
 $bg-overlay: rgba(0, 0, 0, 0.3);
 $bg-overlay-light: rgba(0, 0, 0, 0.1);
-
-// Border Colors - 邊框顏色
+$bg-card-green: #2b6cb0; // Changed to Professional Blue (Primary Dark)
+$bg-navbar: #112d4e;
+$bg-body: #f4f6f8; // Changed to Light Blue-Gray for professional look
+$bg-working-flow-active: #0d6efd; // Changed to Primary Blue for active step       
+// Border Colors
 $color-border: #e1e8ed;
 $color-border-light: #f1f3f5;
+$bg-workflow-container: #ffffff; // Changed to White for clean look
 
 // ========================================
-// Spacing - 間距系統
+// Spacing
 // ========================================
 $spacing-0: 0;
 $spacing-1: 0.25rem; // 4px
@@ -81,7 +85,7 @@ $spacing-12: 3rem; // 48px
 $spacing-16: 4rem; // 64px
 
 // ========================================
-// Typography - 字型系統
+// Typography
 // ========================================
 $font-family-base: system-ui, -apple-system, "Segoe UI", Roboto,
   "Helvetica Neue", Arial, sans-serif;
@@ -112,7 +116,7 @@ $line-height-relaxed: 1.6;
 $line-height-loose: 2;
 
 // ========================================
-// Border Radius - 圓角
+// Border Radius
 // ========================================
 $border-radius-sm: 0.25rem; // 4px
 $border-radius: 0.5rem; // 8px
@@ -121,7 +125,7 @@ $border-radius-lg: 1rem; // 16px
 $border-radius-full: 50%;
 
 // ========================================
-// Shadows - 陰影
+// Shadows
 // ========================================
 $shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
 $shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -130,7 +134,7 @@ $shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);
 $shadow-xl: 0 8px 32px rgba(0, 0, 0, 0.2);
 
 // ========================================
-// Z-Index - 層級
+// Z-Index
 // ========================================
 $z-index-dropdown: 1000;
 $z-index-sticky: 1020;
@@ -143,14 +147,14 @@ $z-index-loading: 9999;
 $z-index-toast: 10000;
 
 // ========================================
-// Transitions - 過渡動畫
+// Transitions
 // ========================================
 $transition-fast: 0.15s ease;
 $transition-base: 0.3s ease;
 $transition-slow: 0.5s ease;
 
 // ========================================
-// Breakpoints - 響應式斷點
+// Breakpoints
 // ========================================
 $breakpoint-xs: 0;
 $breakpoint-sm: 576px;
@@ -167,7 +171,7 @@ $breakpoint-xxl: 1400px;
 $card-border-color: $color-gray-200;
 $card-border-radius: $border-radius;
 $card-padding: $spacing-4;
-
+$card-active-bg: $bg-card-green; // Uses correct variable
 // Buttons
 $btn-padding-y: $spacing-2;
 $btn-padding-x: $spacing-4;

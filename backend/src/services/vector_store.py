@@ -77,7 +77,7 @@ class VectorStore:
                         "Ensure Qdrant container is running: docker-compose up -d qdrant"
                     )
                     raise Exception(
-                        f"無法連接到 Qdrant 向量資料庫。請確保 Docker 容器正在運行。"
+                        f"Cannot connect to Qdrant vector database. Please ensure Docker container is running."
                     ) from e
                 
             elif settings.qdrant_mode == "cloud":

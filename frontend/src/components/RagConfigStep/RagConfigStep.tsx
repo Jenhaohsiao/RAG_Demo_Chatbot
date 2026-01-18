@@ -1,4 +1,6 @@
 ﻿import React from "react";
+import { useTranslation } from "react-i18next";
+import "./RagConfigStep.scss";
 interface RagConfigStepProps {
   parameters: {
     similarity_threshold: number;
@@ -13,7 +15,7 @@ interface RagConfigStepProps {
   };
   onParameterChange: (key: string, value: any) => void;
   onComplete?: () => void;
-  disabled?: boolean; // 當流程3完成後，禁用所有配置
+  disabled?: boolean; // Disable all configs when step 3 is complete
 }
 
 const RagConfigStep: React.FC<RagConfigStepProps> = ({
@@ -22,362 +24,177 @@ const RagConfigStep: React.FC<RagConfigStepProps> = ({
   onComplete,
   disabled = false,
 }) => {
+  const { t } = useTranslation();
+  const statusLabel = disabled ? "Locked" : "Adjustable";
+  const statusTone = disabled
+    ? "Locked after data upload to ensure retrieval consistency"
+    : "Applied immediately to retrieval results";
+
+  const chunkMaxPercent = Math.min(
+    100,
+    Math.max(0, ((parameters.chunk_max_size - 500) / (4000 - 500)) * 100)
+  );
+  const chunkMinPercent = Math.min(
+    100,
+    Math.max(0, ((parameters.chunk_min_size - 100) / (1000 - 100)) * 100)
+  );
+  const chunkOverlapPercent = Math.min(
+    100,
+    Math.max(0, ((parameters.chunk_overlap_size - 50) / (500 - 50)) * 100)
+  );
+
   return (
     <div className={`rag-config-step ${disabled ? "disabled-step" : ""}`}>
-      {/* 禁用狀態提示 */}
+      {/* Disabled state notice */}
       {disabled && (
-        <div className="alert alert-info mb-3">
+        <div className="alert alert-info mb-2 py-2">
           <i className="bi bi-info-circle me-2"></i>
-          資料已上傳處理，RAG 參數配置已鎖定，無法修改。
+          {t("workflow.steps.ragConfig.dataLocked")}
         </div>
       )}
-      {/* 設定項目卡片網格 */}
-      <div className="row g-3">
-        {/* 相似度閾值卡片 */}
-        <div className="col-lg-4 col-xl-3">
+      <div className="row g-2">
+        {/* Similarity Threshold Card */}
+        <div className="col-lg-6">
           <div
-            className={`card h-100 ${
-              disabled ? "border-secondary" : "border-primary"
+            className={`card h-100 config-card ${
+              disabled ? "border-secondary" : "active-card-border"
             }`}
           >
-            <div
-              className={`card-header ${
-                disabled ? "bg-secondary" : "bg-primary"
-              } text-white`}
-            >
-              <h6 className="card-title mb-0">相似度閾值</h6>
-            </div>
-            <div className="card-body">
-              <div className="mb-3">
-                <label className="form-label small">
-                  檢索精確度{" "}
-                  <span
-                    className={
-                      disabled
-                        ? "text-secondary fw-bold"
-                        : "text-primary fw-bold"
-                    }
-                  >
-                    {parameters.similarity_threshold}
-                  </span>
-                </label>
-                <input
-                  type="range"
-                  className="form-range"
-                  min="0.1"
-                  max="0.9"
-                  step="0.1"
-                  value={parameters.similarity_threshold}
-                  disabled={disabled}
-                  onChange={(e) =>
-                    onParameterChange(
-                      "similarity_threshold",
-                      parseFloat(e.target.value)
-                    )
-                  }
-                />
-                <div className="d-flex justify-content-between small text-muted">
-                  <span>0.1 (寬鬆)</span>
-                  <span>0.9 (嚴格)</span>
+            <div className="card-body p-3">
+              <div className="d-flex align-items-center justify-content-between mb-2">
+                <h5 className="card-title mb-0 fw-bold">
+                  {t("workflow.steps.ragConfig.similarityThreshold.title")}
+                </h5>
+                <div className="value-badge">
+                  {parameters.similarity_threshold.toFixed(1)}
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 上段數卡片 */}
-        <div className="col-lg-4 col-xl-3">
-          <div
-            className={`card h-100 ${
-              disabled ? "border-secondary" : "border-primary"
-            }`}
-          >
-            <div
-              className={`card-header ${
-                disabled ? "bg-secondary" : "bg-primary"
-              } text-white`}
-            >
-              <h6 className="card-title mb-0">上段數</h6>
-            </div>
-            <div className="card-body">
-              <div className="mb-3">
-                <label className="form-label small">
-                  每次檢索數量:{" "}
-                  <span
-                    className={
-                      disabled
-                        ? "text-secondary fw-bold"
-                        : "text-primary fw-bold"
-                    }
-                  >
-                    {parameters.rag_context_window}
-                  </span>
-                </label>
-                <input
-                  type="range"
-                  className="form-range"
-                  min="1"
-                  max="10"
-                  step="1"
-                  value={parameters.rag_context_window}
-                  disabled={disabled}
-                  onChange={(e) =>
-                    onParameterChange(
-                      "rag_context_window",
-                      parseInt(e.target.value)
-                    )
-                  }
-                />
-                <div className="d-flex justify-content-between small text-muted">
-                  <span>1個</span>
-                  <span>10個</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 引用策略卡片 */}
-        <div className="col-lg-4 col-xl-3">
-          <div
-            className={`card h-100 ${
-              disabled ? "border-secondary" : "border-primary"
-            }`}
-          >
-            <div
-              className={`card-header ${
-                disabled ? "bg-secondary" : "bg-primary"
-              } text-white`}
-            >
-              <h6 className="card-title mb-0">引用策略</h6>
-            </div>
-            <div className="card-body">
-              <select
-                className="form-select"
-                value={parameters.rag_citation_style}
+              <p className="small text-muted mb-2">
+                {t("workflow.steps.ragConfig.similarityThreshold.description")}
+              </p>
+              <input
+                type="range"
+                className="form-range glossy-range"
+                min="0.1"
+                max="0.9"
+                step="0.1"
+                value={parameters.similarity_threshold}
                 disabled={disabled}
                 onChange={(e) =>
-                  onParameterChange("rag_citation_style", e.target.value)
+                  onParameterChange(
+                    "similarity_threshold",
+                    parseFloat(e.target.value)
+                  )
                 }
-              >
-                <option value="numbered">編號引用 (如1, 2...)</option>
-                <option value="inline">行內引用 (如作者...)</option>
-                <option value="none">不顯示</option>
-              </select>
+              />
+              <div className="d-flex justify-content-between small text-muted">
+                <span>
+                  0.1 (
+                  {t("workflow.steps.ragConfig.similarityThreshold.lenient")})
+                </span>
+                <span>
+                  0.9 (
+                  {t("workflow.steps.ragConfig.similarityThreshold.strict")})
+                </span>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* 重排策略卡片 */}
-        <div className="col-lg-4 col-xl-3">
+        {/* Top-K Retrieval Card */}
+        <div className="col-lg-6">
           <div
-            className={`card h-100 ${
-              disabled ? "border-secondary" : "border-primary"
+            className={`card h-100 config-card ${
+              disabled ? "border-secondary" : "active-card-border"
             }`}
           >
-            <div
-              className={`card-header ${
-                disabled ? "bg-secondary" : "bg-primary"
-              } text-white`}
-            >
-              <h6 className="card-title mb-0">重排策略</h6>
-            </div>
-            <div className="card-body">
-              <select
-                className="form-select"
-                value={parameters.rag_fallback_mode}
+            <div className="card-body p-3">
+              <div className="d-flex align-items-center justify-content-between mb-2">
+                <h5 className="card-title mb-0 fw-bold">
+                  {t("workflow.steps.ragConfig.topK.title")}
+                </h5>
+                <div className="value-badge">{parameters.rag_top_k}</div>
+              </div>
+              <p className="small text-muted mb-2">
+                {t("workflow.steps.ragConfig.topK.description")}
+              </p>
+              <input
+                type="range"
+                className="form-range glossy-range"
+                min="1"
+                max="20"
+                step="1"
+                value={parameters.rag_top_k}
                 disabled={disabled}
                 onChange={(e) =>
-                  onParameterChange("rag_fallback_mode", e.target.value)
+                  onParameterChange("rag_top_k", parseInt(e.target.value, 10))
                 }
-              >
-                <option value="strict">嚴格模式 (僅基於檔案)</option>
-                <option value="flexible">彈性模式 (允許一般知識)</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Top-K檢索卡片 */}
-        <div className="col-lg-4 col-xl-3">
-          <div
-            className={`card h-100 ${
-              disabled ? "border-secondary" : "border-primary"
-            }`}
-          >
-            <div
-              className={`card-header ${
-                disabled ? "bg-secondary" : "bg-primary"
-              } text-white`}
-            >
-              <h6 className="card-title mb-0">Top-K檢索</h6>
-            </div>
-            <div className="card-body">
-              <div className="mb-3">
-                <label className="form-label small">
-                  檢索段落{" "}
-                  <span className="text-secondary fw-bold">
-                    {parameters.rag_top_k}
-                  </span>
-                </label>
-                <input
-                  type="range"
-                  className="form-range"
-                  min="3"
-                  max="20"
-                  step="1"
-                  value={parameters.rag_top_k}
-                  disabled={disabled}
-                  onChange={(e) =>
-                    onParameterChange("rag_top_k", parseInt(e.target.value))
-                  }
-                />
-                <div className="d-flex justify-content-between small text-muted">
-                  <span>3(精確)</span>
-                  <span>20(寬泛)</span>
-                </div>
+              />
+              <div className="d-flex justify-content-between small text-muted">
+                <span>1 ({t("workflow.steps.ragConfig.topK.minimal")})</span>
+                <span>
+                  20 ({t("workflow.steps.ragConfig.topK.comprehensive")})
+                </span>
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Chunk大小卡片 */}
-        <div className="col-lg-4 col-xl-3">
-          <div
-            className={`card h-100 ${
-              disabled ? "border-secondary" : "border-primary"
-            }`}
-          >
-            <div
-              className={`card-header ${
-                disabled ? "bg-secondary" : "bg-primary"
-              } text-white`}
-            >
-              <h6 className="card-title mb-0">Chunk大小</h6>
-            </div>
-            <div className="card-body">
-              <div className="mb-3">
-                <label className="form-label small">
-                  最大:{" "}
-                  <span className={disabled ? "text-secondary" : "text-danger"}>
-                    {parameters.chunk_max_size}
-                  </span>{" "}
-                  字
-                </label>
-                <input
-                  type="range"
-                  className="form-range"
-                  min="500"
-                  max="4000"
-                  step="500"
-                  value={parameters.chunk_max_size}
-                  disabled={disabled}
-                  onChange={(e) =>
-                    onParameterChange(
-                      "chunk_max_size",
-                      parseInt(e.target.value)
-                    )
-                  }
-                />
-                <div className="d-flex justify-content-between small text-muted">
-                  <span>500</span>
-                  <span>4K</span>
-                </div>
+      <div className="row g-2 mt-2">
+        <div className="col-12">
+          <div className="card border-secondary bg-light">
+            <div className="card-body p-3">
+              <div className="d-flex align-items-center mb-2">
+                <span className="badge bg-warning text-dark me-2">
+                  {t("workflow.steps.ragConfig.textChunking.optimized")}
+                </span>
+                <h6 className="mb-0 fw-bold">
+                  {t("workflow.steps.ragConfig.textChunking.title")}
+                </h6>
               </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Chunk最小值卡片 */}
-        <div className="col-lg-4 col-xl-3">
-          <div
-            className={`card h-100 ${
-              disabled ? "border-secondary" : "border-primary"
-            }`}
-          >
-            <div
-              className={`card-header ${
-                disabled ? "bg-secondary" : "bg-primary"
-              } text-white`}
-            >
-              <h6 className="card-title mb-0">Chunk最小</h6>
-            </div>
-            <div className="card-body">
-              <div className="mb-3">
-                <label className="form-label small">
-                  最小:{" "}
-                  <span
-                    className={disabled ? "text-secondary" : "text-warning"}
-                  >
-                    {parameters.chunk_min_size}
-                  </span>{" "}
-                  字
-                </label>
-                <input
-                  type="range"
-                  className="form-range"
-                  min="100"
-                  max="1000"
-                  step="100"
-                  value={parameters.chunk_min_size}
-                  disabled={disabled}
-                  onChange={(e) =>
-                    onParameterChange(
-                      "chunk_min_size",
-                      parseInt(e.target.value)
-                    )
-                  }
-                />
-                <div className="d-flex justify-content-between small text-muted">
-                  <span>100</span>
-                  <span>1000(2500)</span>
+              <div className="row g-2">
+                <div className="col-md-4">
+                  <div className="text-center p-2 bg-white rounded">
+                    <div className="small text-muted">
+                      {t("workflow.steps.ragConfig.textChunking.maxChunk")}
+                    </div>
+                    <div className="fw-bold text-dark">
+                      {parameters.chunk_max_size || 2000}
+                    </div>
+                    <div className="small text-muted">
+                      {t("workflow.steps.ragConfig.textChunking.characters")}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Chunk重疊卡片 */}
-        <div className="col-lg-4 col-xl-3">
-          <div
-            className={`card h-100 ${
-              disabled ? "border-secondary" : "border-primary"
-            }`}
-          >
-            <div
-              className={`card-header ${
-                disabled ? "bg-secondary" : "bg-primary"
-              } text-white`}
-            >
-              <h6 className="card-title mb-0">Chunk重疊</h6>
-            </div>
-            <div className="card-body">
-              <div className="mb-3">
-                <label className="form-label small">
-                  重疊段落數:{" "}
-                  <span className={disabled ? "text-secondary" : "text-info"}>
-                    {parameters.chunk_overlap_size}
-                  </span>{" "}
-                  字
-                </label>
-                <input
-                  type="range"
-                  className="form-range"
-                  min="50"
-                  max="500"
-                  step="50"
-                  value={parameters.chunk_overlap_size}
-                  disabled={disabled}
-                  onChange={(e) =>
-                    onParameterChange(
-                      "chunk_overlap_size",
-                      parseInt(e.target.value)
-                    )
-                  }
-                />
-                <div className="d-flex justify-content-between small text-muted">
-                  <span>50 (少)</span>
-                  <span>500 (多)</span>
+                <div className="col-md-4">
+                  <div className="text-center p-2 bg-white rounded">
+                    <div className="small text-muted">
+                      {t("workflow.steps.ragConfig.textChunking.minChunk")}
+                    </div>
+                    <div className="fw-bold text-dark">
+                      {parameters.chunk_min_size || 500}
+                    </div>
+                    <div className="small text-muted">
+                      {t("workflow.steps.ragConfig.textChunking.characters")}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="col-md-4">
+                  <div className="text-center p-2 bg-white rounded">
+                    <div className="small text-muted">
+                      {t("workflow.steps.ragConfig.textChunking.overlap")}
+                    </div>
+                    <div className="fw-bold text-dark">
+                      {parameters.chunk_overlap_size || 200}
+                    </div>
+                    <div className="small text-muted">
+                      {t("workflow.steps.ragConfig.textChunking.characters")}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

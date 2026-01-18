@@ -1,4 +1,12 @@
+@import "../../styles/variables";
+
 /* Workflow Stepper Styles */
+
+.workflow-container {
+  background-color: $bg-workflow-container !important;
+  border-color: $color-gray-300;
+  color: $color-gray-700 !important;
+}
 
 .workflow-stepper {
   padding: 20px 0;
@@ -16,6 +24,10 @@
   font-size: 0.9rem;
 }
 
+.model-badge {
+  font-size: 0.8rem;
+}
+
 .workflow-stepper-progress-container {
   width: 60%;
 }
@@ -25,7 +37,106 @@
 }
 
 .workflow-stepper-navigation {
-  width: 40%;
+  width: 60%;
+}
+
+.step-action-hero {
+  background: linear-gradient(135deg, #263c83 0%, #b1bce5 100%);
+  color: $color-white;
+  border-radius: $border-radius-lg;
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-3;
+  box-shadow: $shadow-md;
+
+  .eyebrow {
+    font-size: $font-size-xs;
+    letter-spacing: 1.2px;
+    color: rgba($color-white, 0.75);
+  }
+
+  h5 {
+    color: $color-white;
+    font-weight: 700;
+  }
+
+  .text-muted {
+    color: rgba($color-white, 0.8) !important;
+  }
+
+  .action-right .btn {
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+  }
+
+  .btn-outline-light {
+    color: $color-white;
+    border-color: rgba($color-white, 0.6);
+
+    &:hover {
+      background: rgba($color-white, 0.12);
+      color: $color-white;
+    }
+  }
+}
+
+.step-counter-pill {
+  background: rgba($color-white, 0.12);
+  color: $color-white;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  border: 1px solid rgba($color-white, 0.2);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-summary-pro {
+  background: linear-gradient(135deg, #b39646 0%, #4a5c2c 100%);
+  color: #ffffff !important;
+  border: none;
+  padding: 10px 24px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  i {
+    font-size: 1.1rem;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.45);
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: #ffffff;
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.35);
+  }
+
+  &:disabled {
+    background: linear-gradient(135deg, #e0e7ff 0%, #ede9fe 100%);
+    color: #4c1d95;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 2px 6px rgba(124, 58, 237, 0.15);
+    border: 1px solid #c4b5fd;
+    opacity: 1;
+
+    i {
+      color: #6b21a8;
+    }
+  }
 }
 
 .stepper-header {
@@ -33,17 +144,17 @@
   width: 100%;
 }
 
-/* AI Chat Step Container - 流程6專用 */
+/* AI Chat Step Container - Step 6 Only */
 .ai-chat-step-container {
-  height: calc(100vh - 280px); // 減去 stepper header 和導航的高度
+  height: calc(100vh - 280px); // Subtract stepper header and nav height
   display: flex;
   flex-direction: column;
-  overflow: hidden; // 防止多層滾動條
+  overflow: hidden; // Prevent multiple scrollbars
 }
 
 .ai-chat-content {
   flex: 1;
-  overflow: hidden; // 讓內部組件處理滾動
+  overflow: hidden; // Let internal components handle scrolling
 }
 
 /* Sticky flow diagram for step 6 */
@@ -55,7 +166,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* 水平排列的步驟項目 */
+/* Horizontally aligned step items */
 .stepper-header .d-flex {
   width: 100%;
   gap: 0;
@@ -67,7 +178,7 @@
   transition: all 0.3s ease;
   cursor: pointer;
   flex: 1;
-  min-width: 0; /* 允許彈性收縮 */
+  min-width: 0; /* Allow flex shrink */
 }
 
 .stepper-item:hover:not(.disabled) {
@@ -78,12 +189,12 @@
 
 .stepper-item.disabled {
   opacity: 0.5;
-  /* pointer-events: none; - 移除這個以允許顯示 toast */
+  /* pointer-events: none; - Removed to allow toast display */
 }
 
 .stepper-circle {
-  width: 60px;
-  height: 60px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -104,23 +215,23 @@
 }
 
 .stepper-item.completed .stepper-circle {
-  background-color: #198754 !important;
+  background-color: #88c7a9 !important;
   border-color: #146c43;
 }
 
-/* 步驟文本樣式 */
+/* Step text styles */
 .stepper-text {
   margin-top: 10px;
   text-align: center;
 }
 
 .stepper-title {
-  font-size: 13px;
+  font-size: 14px;
   margin-bottom: 5px;
   font-weight: 600;
   color: #495057;
   line-height: 1.2;
-  min-height: 32px; /* 確保所有標題高度一致 */
+  min-height: 32px; /* Ensure consistent height for all titles */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -141,15 +252,15 @@
   color: #6c757d;
   max-width: 100px;
   margin: 0 auto;
-  min-height: 26px; /* 確保所有描述高度一致 */
+  min-height: 26px; /* Ensure consistent height for all descriptions */
 }
 
-/* 水平連接線樣式 */
+/* Horizontal connector styles */
 .stepper-connector {
   position: absolute;
-  top: 30%; /* 調整到圓圈中心 */
+  top: 30%; /* Adjust to circle center */
   left: calc(100% - 20px);
-  width: 40px; /* 連接線寬度 */
+  width: 40px; /* Connector width */
   height: 4px;
   z-index: 1;
 }
@@ -157,16 +268,16 @@
 .connector-line {
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, #dee2e6 0%, #dee2e6 100%);
+  background: #e9ecef; /* Gray for unconnected steps */
   border-radius: 2px;
   position: relative;
 }
 
 .connector-line.completed {
-  background: linear-gradient(90deg, #198754 0%, #198754 100%);
+  background: #198754; /* Green for completed steps */
 }
 
-/* 進度條樣式 */
+/* Progress bar styles */
 .progress {
   height: 6px !important;
   background-color: #e9ecef;
@@ -179,17 +290,17 @@
   background: linear-gradient(90deg, #0d6efd 0%, #0056b3 100%);
 }
 
-/* 當前步驟資訊樣式 */
+/* Current step info styles */
 .current-step-info {
-  background: linear-gradient(135deg, #b7c8eb 0%, #ffffff 100%);
-  border-radius: 0;
+  border-radius: 5px;
   padding: 10px 10px;
-  border-left: 5px solid #0d6efd;
+  border: 2px solid #f8f9fa;
   box-shadow: none;
   width: 100%;
+  background-color: #dddddd;
 }
 
-/* 導航按鈕樣式 */
+/* Navigation button styles */
 .stepper-navigation {
   border-top: 1px solid #dee2e6;
   padding: 20px 30px;
@@ -205,7 +316,7 @@
   color: #6c757d;
 }
 
-/* 步驟內容區域 */
+/* Step content area */
 .step-content {
   width: 100%;
   max-width: 100%;
@@ -216,10 +327,10 @@
   margin: 0;
   border: none;
   box-shadow: none;
-  overflow: hidden; // 防止此層產生滾動條
+  overflow: hidden; // Prevent scrollbar on this layer
 }
 
-/* 響應式設計 */
+/* Responsive design */
 @media (max-width: 1200px) {
   .stepper-title {
     font-size: 12px;
@@ -334,9 +445,11 @@
   color: #6c757d;
 }
 
-/* RAG設置卡片樣式 */
+/* RAG config card styles */
 .rag-config-step .card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   border-width: 2px;
 }
 
@@ -369,7 +482,7 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-/* 響應式卡片佈局調整 */
+/* Responsive card layout adjustment */
 @media (max-width: 1400px) {
   .rag-config-step .col-xl-3 {
     flex: 0 0 33.333%;
@@ -388,7 +501,7 @@
   }
 }
 
-/* 動畫效果 */
+/* Animation effects */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -429,9 +542,11 @@
   animation-delay: 0.8s;
 }
 
-/* Prompt設置卡片樣式 */
+/* Prompt config card styles */
 .prompt-config-step .card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   border-width: 2px;
 }
 
@@ -461,7 +576,7 @@
   animation-delay: 0.4s;
 }
 
-/* 動畫效果 */
+/* Animation effects */
 @keyframes pulse {
   0% {
     transform: scale(1);
@@ -482,7 +597,7 @@
   transition: width 0.5s ease-in-out;
 }
 
-/* 自定義步驟顏色 */
+/* Custom step colors */
 .bg-orange {
   background-color: #ff7849 !important;
 }
@@ -495,34 +610,35 @@
   background-color: #6610f2 !important;
 }
 
-/* 統一步驟狀態顏色 */
+/* Unified step status colors */
 .step-inactive {
-  background-color: #6c757d !important; /* 灰色背景 - 未執行 */
+  background-color: #6c757d !important; /* Gray background - Inactive */
 }
 
 .step-active {
-  background-color: #ffc107 !important; /* 黃色背景 - 執行中 */
-  border: 3px solid #b8860b !important; /* 深黃/棕色邊框 */
+  background-color: $bg-working-flow-active !important; /* Blue background - Active */
+  border: 3px solid #9ec5fe !important; /* Light blue border */
+  box-shadow: 0 0 10px rgba(13, 110, 253, 0.5); /* Glow effect */
 }
 
 .step-completed {
-  background-color: #0d6efd !important; /* 藍色背景 - 執行完畢 */
+  background-color: #198754 !important; /* Green background - Completed */
 }
 
-/* 數字文字樣式 - 白字灰色外框 */
+/* Number text styles - White text gray border */
 .stepper-circle span {
   color: white !important;
-  text-shadow: -1px -1px 0 #6c757d, 1px -1px 0 #6c757d, -1px 1px 0 #6c757d,
-    1px 1px 0 #6c757d !important;
+  text-shadow: none !important; /* Remove shadow for cleaner look */
+  font-weight: 600;
 }
 
-/* 執行中標題文字顏色 */
+/* Active title text color */
 .stepper-item.active .stepper-title span {
-  color: #b8860b !important; /* 深黃/棕色 */
-  font-weight: 600 !important;
+  color: #0d6efd !important; /* Primary Blue */
+  font-weight: 700 !important;
 }
 
-/* 脈衝動畫 - 用於當前步驟 */
+/* Pulse animation - For current step */
 @keyframes pulse {
   0% {
     transform: scale(1);
@@ -538,7 +654,7 @@
   }
 }
 
-/* 禁用步驟樣式 - 當流程3完成後，流程1、2應該被鎖定 */
+/* Disabled step styles - Lock steps 1, 2 after step 3 completes */
 .disabled-step {
   position: relative;
 

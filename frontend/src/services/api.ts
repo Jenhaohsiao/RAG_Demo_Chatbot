@@ -4,6 +4,7 @@
  */
 
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
+import i18n from '../i18n/config';
 
 // Base URL from environment variable or default to /api/v1
 // Note: Vite dev server proxies /api/* to http://localhost:8000
@@ -24,16 +25,9 @@ const apiClient: AxiosInstance = axios.create({
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // Add timestamp for debugging
-    if (import.meta.env.DEV) {
-      console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, {
-        params: config.params,
-        data: config.data,
-      });
-    }
     return config;
   },
   (error: AxiosError) => {
-    console.error('[API Request Error]', error);
     return Promise.reject(error);
   }
 );
@@ -42,12 +36,6 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
     // Log successful responses in dev mode
-    if (import.meta.env.DEV) {
-      console.log(`[API Response] ${response.config.method?.toUpperCase()} ${response.config.url}`, {
-        status: response.status,
-        data: response.data,
-      });
-    }
     return response;
   },
   (error: AxiosError) => {
@@ -56,35 +44,26 @@ apiClient.interceptors.response.use(
       // Server responded with error status
       const status = error.response.status;
       const data = error.response.data as { detail?: string };
-
-      console.error(`[API Error ${status}]`, {
-        url: error.config?.url,
-        method: error.config?.method,
-        detail: data?.detail || error.message,
-      });
-
       // Handle specific status codes
       switch (status) {
         case 400:
-          throw new Error(data?.detail || 'Invalid request');
+          throw new Error(data?.detail || i18n.t('error.invalidRequest', 'Invalid request'));
         case 404:
-          throw new Error(data?.detail || 'Resource not found');
+          throw new Error(data?.detail || i18n.t('error.resourceNotFound', 'Resource not found'));
         case 422:
-          throw new Error(data?.detail || 'Validation error');
+          throw new Error(data?.detail || i18n.t('error.validationError', 'Validation error'));
         case 500:
-          throw new Error('Server error. Please try again later.');
+          throw new Error(i18n.t('error.serverError', 'Server error. Please try again later.'));
         case 503:
-          throw new Error('Service unavailable. Please try again later.');
+          throw new Error(i18n.t('error.serviceUnavailable', 'Service unavailable. Please try again later.'));
         default:
-          throw new Error(data?.detail || `Request failed with status ${status}`);
+          throw new Error(data?.detail || i18n.t('error.requestFailed', 'Request failed with status {{status}}', { status }));
       }
     } else if (error.request) {
       // Request made but no response received
-      console.error('[API Network Error]', error.request);
       throw new Error('Network error. Please check your connection.');
     } else {
       // Error in request setup
-      console.error('[API Setup Error]', error.message);
       throw new Error('Request failed. Please try again.');
     }
   }

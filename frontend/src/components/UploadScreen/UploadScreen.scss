@@ -1,33 +1,268 @@
+@import "../../styles/variables";
+
+.active-card-bg {
+  background-color: $card-active-bg !important;
+}
+
+.active-card-border {
+  border: 3px solid $card-active-bg !important;
+  box-shadow: 0 0 0 4px rgba($card-active-bg, 0.15) !important;
+}
+
 /* UploadScreen specific styles */
 .upload-screen-hidden-input {
   display: none;
 }
 
-/* Tab content wrapper */
-.tab-content-wrapper {
-  background-color: #fff;
+.upload-card-wrapper {
+  max-width: 820px;
 }
 
-/* Parameter section styling */
-.parameter-section {
-  h6 {
-    color: #495057;
-    font-weight: 600;
+.upload-hero-panel {
+  background: linear-gradient(135deg, #22376b 0%, #4e6dc6 60%, #7c91e0 100%);
+  color: $color-white;
+  border-radius: $border-radius-lg;
+
+  .card-body,
+  .hero-text,
+  h4,
+  p,
+  .eyebrow,
+  .status-chip,
+  .status-chip * {
+    color: $color-white !important;
+  }
+
+  .eyebrow {
+    letter-spacing: 1.2px;
+    font-size: $font-size-xs;
+    color: rgba($color-white, 0.75);
+  }
+
+  p {
+    color: rgba($color-white, 0.82) !important;
   }
 }
 
-/* Crawler section styling */
-.crawler-section {
-  .dropzone-icon-large {
-    margin-bottom: 10px;
+.upload-mode-toggle {
+  .mode-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 18px;
+    border-radius: 14px;
+    border: 1px solid $color-gray-300;
+    background: $color-white;
+    color: $color-gray-800;
+    font-weight: 600;
+    box-shadow: $shadow-sm;
+    transition: all 0.2s ease;
 
-    i {
-      font-size: 2.5rem;
+    .icon-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba($card-active-bg, 0.08);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: $card-active-bg;
+      font-size: 1rem;
+    }
+
+    &.active {
+      border-color: $card-active-bg;
+      background: linear-gradient(
+        120deg,
+        rgba($card-active-bg, 0.12),
+        rgba($card-active-bg, 0.05)
+      );
+      color: $card-active-bg;
+      box-shadow: 0 8px 20px rgba($card-active-bg, 0.12);
+
+      .icon-circle {
+        background: $card-active-bg;
+        color: $color-white;
+      }
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
     }
   }
 }
 
-/* 檔案上傳拖放區域樣式 */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: $font-size-sm;
+  font-weight: 600;
+  background: rgba($color-white, 0.14);
+  color: $color-white;
+  border: 1px solid rgba($color-white, 0.2);
+
+  &.pill-soft {
+    background: rgba($color-white, 0.12);
+  }
+
+  &.pill-outline {
+    background: rgba($color-white, 0.06);
+    border-color: rgba($color-white, 0.35);
+    color: $color-white;
+  }
+
+  &.pill-light {
+    background: rgba($card-active-bg, 0.08);
+    border-color: rgba($card-active-bg, 0.25);
+    color: $card-active-bg;
+  }
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: $border-radius;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  box-shadow: $shadow-md;
+
+  &.chip-live {
+    background: linear-gradient(120deg, #22d3ee 0%, #6366f1 100%);
+    color: $color-white;
+  }
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-3;
+
+  .eyebrow {
+    font-size: $font-size-xs;
+    letter-spacing: 1px;
+    color: $color-gray-500;
+  }
+}
+
+.surface-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f7f9ff 100%);
+  border: 1px solid $color-gray-200;
+  border-radius: $border-radius-lg;
+  padding: $spacing-3;
+  box-shadow: $shadow-sm;
+}
+
+.value-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: rgba($card-active-bg, 0.1);
+  color: $card-active-bg;
+  font-weight: 700;
+  border: 1px solid rgba($card-active-bg, 0.2);
+  white-space: nowrap;
+}
+
+.next-btn {
+  box-shadow: 0 10px 24px rgba($card-active-bg, 0.2);
+}
+
+.substep-bar {
+  padding: $spacing-2 $spacing-3;
+  background: #f7f9fb;
+  border-radius: $border-radius-lg;
+  border: 1px solid $color-gray-200;
+}
+
+.upload-card {
+  border-radius: $border-radius-lg;
+}
+
+/* Animation */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Professional Blue Theme Overrides */
+$prof-blue: $card-active-bg; // #2b6cb0
+
+.upload-interface-container,
+.upload-results-summary {
+  .text-primary {
+    color: $prof-blue !important;
+  }
+
+  .btn-primary {
+    background-color: $prof-blue;
+    border-color: $prof-blue;
+
+    &:hover {
+      background-color: darken($prof-blue, 10%);
+      border-color: darken($prof-blue, 10%);
+    }
+
+    &:disabled {
+      background-color: lighten($prof-blue, 20%);
+      border-color: lighten($prof-blue, 20%);
+    }
+  }
+
+  .btn-outline-primary {
+    color: $prof-blue;
+    border-color: $prof-blue;
+
+    &:hover {
+      background-color: $prof-blue;
+      color: white;
+      border-color: $prof-blue;
+    }
+  }
+}
+
+/* Parameter Content */
+.parameter-content {
+  .form-range {
+    height: 6px;
+
+    &::-webkit-slider-thumb {
+      background: $prof-blue;
+    }
+    &::-moz-range-thumb {
+      background: $prof-blue;
+    }
+  }
+
+  .form-check-input:checked {
+    background-color: $prof-blue;
+    border-color: $prof-blue;
+  }
+}
+
+/* File Upload Dropzone */
 .file-upload-dropzone {
   background-color: #f8f9fa;
   border: 2px dashed #dee2e6;
@@ -35,28 +270,29 @@
   padding: 40px 20px;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-height: 280px;
+  min-height: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
 
   &:hover {
     background-color: #e9ecef;
-    border-color: #0d6efd;
+    border-color: $prof-blue;
 
     .dropzone-icon-large i {
       transform: scale(1.1);
+      // text-primary overridden by general rule
     }
   }
 
   &.dragging {
     background-color: #e7f1ff;
-    border-color: #0d6efd;
+    border-color: $prof-blue;
     border-style: solid;
 
     .dropzone-icon-large i {
       transform: scale(1.2);
-      color: #0d6efd !important;
+      color: $prof-blue !important;
     }
   }
 
@@ -73,10 +309,5 @@
 
   .dropzone-icon-large {
     margin-bottom: 15px;
-
-    i {
-      font-size: 3rem;
-      transition: transform 0.3s ease;
-    }
   }
 }

@@ -1,16 +1,16 @@
 /**
  * Crawled URLs Panel Component
- * 顯示網站爬蟲抓取的所有 URL 及其詳細信息
- * 
- * 包括：
- * - URL 列表
- * - 每個 URL 的標題、Token、狀態
- * - 可展開查看詳情
- * - URL 複製功能
+ * Displays all URLs crawled by the web crawler and their details
+ *
+ * Includes:
+ * - URL list
+ * - Title, Tokens, and Status for each URL
+ * - Expandable details view
+ * - Copy URL functionality
  */
 
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export interface CrawledPage {
   url: string;
@@ -28,7 +28,7 @@ export interface CrawledUrlsPanelProps {
 
 const CrawledUrlsPanel: React.FC<CrawledUrlsPanelProps> = ({
   pages = [],
-  baseUrl = '',
+  baseUrl = "",
   totalPages = 0,
   totalTokens = 0,
 }) => {
@@ -50,7 +50,7 @@ const CrawledUrlsPanel: React.FC<CrawledUrlsPanelProps> = ({
     setExpandedUrl(expandedUrl === url ? null : url);
   };
 
-  // 提取相對路徑
+  // Extract relative path from URL
   const getPathFromUrl = (url: string, base: string) => {
     try {
       const urlObj = new URL(url);
@@ -64,59 +64,60 @@ const CrawledUrlsPanel: React.FC<CrawledUrlsPanelProps> = ({
     }
   };
 
-  const avgTokensPerPage = pages.length > 0 ? Math.round(totalTokens / pages.length) : 0;
+  const avgTokensPerPage =
+    pages.length > 0 ? Math.round(totalTokens / pages.length) : 0;
 
   return (
     <div className="crawled-urls-panel">
-      {/* 標題和統計 */}
+      {/* Header with title and statistics */}
       <div className="panel-header">
         <div className="header-left">
-          <h3 className="panel-title">🌐 爬蟲 URL 列表</h3>
+          <h3 className="panel-title">{t("crawledUrls.title")}</h3>
           <span className="url-count">
-            {pages.length} 個頁面
+            {pages.length} {t("crawledUrls.pagesCount")}
           </span>
         </div>
         <div className="header-stats">
           <div className="stat-item">
-            <span className="stat-label">總 Token</span>
+            <span className="stat-label">{t("crawledUrls.totalTokens")}</span>
             <span className="stat-value">{totalTokens?.toLocaleString()}</span>
           </div>
           <div className="stat-item">
-            <span className="stat-label">平均</span>
+            <span className="stat-label">{t("crawledUrls.average")}</span>
             <span className="stat-value">{avgTokensPerPage}</span>
           </div>
         </div>
       </div>
 
-      {/* 基礎 URL */}
+      {/* Base URL section */}
       {baseUrl && (
         <div className="base-url-section">
-          <div className="label">基礎 URL</div>
+          <div className="label">{t("crawledUrls.baseUrl")}</div>
           <div className="url-display">
             <span className="url-text">{baseUrl}</span>
             <button
               className="copy-btn"
               onClick={() => handleCopyUrl(baseUrl)}
-              title="複製 URL"
+              title={t("crawledUrls.copyUrl")}
             >
-              {copiedUrl === baseUrl ? '✓ 已複製' : '📋'}
+              {copiedUrl === baseUrl ? t("crawledUrls.copied") : "📋"}
             </button>
           </div>
         </div>
       )}
 
-      {/* URL 列表 */}
+      {/* URL list */}
       <div className="urls-list">
         {pages.map((page, index) => (
           <div key={`${page.url}-${index}`} className="url-item">
-            {/* URL 標題欄 */}
+            {/* URL header bar */}
             <div
               className="url-header"
               onClick={() => toggleExpanded(page.url)}
             >
               <div className="url-header-left">
                 <span className="expand-icon">
-                  {expandedUrl === page.url ? '▼' : '▶'}
+                  {expandedUrl === page.url ? "▼" : "▶"}
                 </span>
                 <span className="url-index">#{index + 1}</span>
                 <div className="url-title-section">
@@ -127,17 +128,17 @@ const CrawledUrlsPanel: React.FC<CrawledUrlsPanelProps> = ({
                 </div>
               </div>
               <div className="url-tokens">
-                <span className="token-badge">
-                  ⚡ {page.tokens}
-                </span>
+                <span className="token-badge">⚡ {page.tokens}</span>
               </div>
             </div>
 
-            {/* 展開的詳情 */}
+            {/* Expanded details */}
             {expandedUrl === page.url && (
               <div className="url-details">
                 <div className="detail-row">
-                  <span className="detail-label">完整 URL:</span>
+                  <span className="detail-label">
+                    {t("crawledUrls.fullUrl")}
+                  </span>
                   <div className="detail-value url-value">
                     <span className="url-text">{page.url}</span>
                     <button
@@ -146,24 +147,30 @@ const CrawledUrlsPanel: React.FC<CrawledUrlsPanelProps> = ({
                         e.stopPropagation();
                         handleCopyUrl(page.url);
                       }}
-                      title="複製 URL"
+                      title={t("crawledUrls.copyUrl")}
                     >
-                      {copiedUrl === page.url ? '✓ 已複製' : '📋 複製'}
+                      {copiedUrl === page.url
+                        ? t("crawledUrls.copied")
+                        : t("crawledUrls.copyButton")}
                     </button>
                   </div>
                 </div>
 
                 {page.title && (
                   <div className="detail-row">
-                    <span className="detail-label">頁面標題:</span>
+                    <span className="detail-label">
+                      {t("crawledUrls.pageTitle")}
+                    </span>
                     <div className="detail-value">{page.title}</div>
                   </div>
                 )}
 
                 <div className="detail-row">
-                  <span className="detail-label">Token:</span>
+                  <span className="detail-label">
+                    {t("crawledUrls.tokens")}
+                  </span>
                   <div className="detail-value">
-                    {page.tokens.toLocaleString()} 
+                    {page.tokens.toLocaleString()}
                     <span className="percentage">
                       ({((page.tokens / totalTokens) * 100).toFixed(1)}%)
                     </span>
@@ -172,10 +179,12 @@ const CrawledUrlsPanel: React.FC<CrawledUrlsPanelProps> = ({
 
                 {page.content && (
                   <div className="detail-row">
-                    <span className="detail-label">內容預覽:</span>
+                    <span className="detail-label">
+                      {t("crawledUrls.contentPreview")}
+                    </span>
                     <div className="detail-value content-preview">
                       {page.content.substring(0, 200)}
-                      {page.content.length > 200 ? '...' : ''}
+                      {page.content.length > 200 ? "..." : ""}
                     </div>
                   </div>
                 )}
@@ -456,7 +465,7 @@ const CrawledUrlsPanel: React.FC<CrawledUrlsPanelProps> = ({
           margin-left: 4px;
         }
 
-        /* RTL 支持 */
+        /* RTL support */
         .rtl-layout .panel-header {
           direction: rtl;
         }
@@ -479,7 +488,7 @@ const CrawledUrlsPanel: React.FC<CrawledUrlsPanelProps> = ({
           text-align: left;
         }
 
-        /* 響應式 */
+        /* Responsive design */
         @media (max-width: 768px) {
           .panel-header {
             flex-direction: column;

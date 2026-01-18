@@ -6,6 +6,8 @@ from pydantic import BaseModel, Field, field_validator
 from datetime import datetime, timedelta
 from enum import Enum
 from uuid import UUID, uuid4
+from src.core.config import settings
+from src.core.api_validator import get_default_api_key_status
 
 
 class SessionState(str, Enum):
@@ -28,32 +30,41 @@ class Session(BaseModel):
     qdrant_collection_name: str = Field(default="")
     document_count: int = Field(default=0, ge=0)
     vector_count: int = Field(default=0, ge=0)
-    language: str = Field(default="en", pattern="^(en|zh-TW|ko|es|ja|ar|fr|zh-CN)$")
-    similarity_threshold: float = Field(default=0.5, ge=0.0, le=1.0, description="RAG similarity threshold (0.0-1.0)")
+    language: str = Field(default="en", pattern="^(en|fr|zh-TW|zh-CN)$")
+    similarity_threshold: float = Field(default=0.3, ge=0.0, le=1.0, description="RAG similarity threshold (0.0-1.0)")
     custom_prompt: str | None = Field(default=None, description="Custom prompt template for RAG responses")
+    gemini_api_key: str | None = Field(default=None, exclude=True)
+    has_valid_api_key: bool = Field(default=False)
+    api_key_source: str = Field(default="none", description="none|env|user")
     
     def __init__(self, **data):
         super().__init__(**data)
         if not self.expires_at:
-            self.expires_at = self.created_at + timedelta(minutes=30)
+            # Session TTL: 10 minutes
+            self.expires_at = self.created_at + timedelta(minutes=10)
         if not self.qdrant_collection_name:
             # Remove hyphens from UUID for valid collection name
             clean_id = str(self.session_id).replace("-", "")
             self.qdrant_collection_name = f"session_{clean_id}"
+        # 初始化 API Key 狀態
+        if settings.gemini_api_key and get_default_api_key_status():
+            self.has_valid_api_key = True
+            self.api_key_source = "env"
     
     @field_validator('language')
     @classmethod
     def validate_language(cls, v: str) -> str:
-        """Validate language code is one of the 8 supported languages"""
-        valid_languages = ["en", "zh-TW", "ko", "es", "ja", "ar", "fr", "zh-CN"]
+        """Validate language code is one of the 4 supported languages"""
+        valid_languages = ["en", "fr", "zh-TW", "zh-CN"]
         if v not in valid_languages:
             raise ValueError(f"Language must be one of {valid_languages}")
         return v
     
     def update_activity(self) -> None:
-        """Update last_activity and extends expires_at by 30 minutes"""
+        """Update last_activity and extends expires_at by TTL (10 minutes)"""
         self.last_activity = datetime.utcnow()
-        self.expires_at = self.last_activity + timedelta(minutes=30)
+        # Session TTL: 10 minutes
+        self.expires_at = self.last_activity + timedelta(minutes=10)
     
     def is_expired(self) -> bool:
         """Check if session has expired"""
@@ -71,7 +82,7 @@ class Session(BaseModel):
                 "document_count": 0,
                 "vector_count": 0,
                 "language": "en",
-                "similarity_threshold": 0.5,
+                "similarity_threshold": 0.3,
                 "custom_prompt": None
             }
         }
@@ -90,6 +101,8 @@ class SessionResponse(BaseModel):
     document_count: int = 0
     vector_count: int = 0
     custom_prompt: str | None = None
+    has_valid_api_key: bool = False
+    api_key_source: str | None = None
     
     class Config:
         json_schema_extra = {

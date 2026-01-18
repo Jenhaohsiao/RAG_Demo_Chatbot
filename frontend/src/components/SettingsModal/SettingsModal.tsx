@@ -1,9 +1,10 @@
-/**
+﻿/**
  * Settings Modal Component
- * 相似度閾值設定對話框
+ * Similarity threshold settings dialog
  */
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import "./SettingsModal.scss";
 
 interface SettingsModalProps {
   show: boolean;
@@ -32,15 +33,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   const getThresholdLabel = (value: number): string => {
-    if (value >= 0.7) return t("settings.threshold.strict");
-    if (value >= 0.5) return t("settings.threshold.balanced");
-    return t("settings.threshold.lenient");
-  };
-
-  const getThresholdColor = (value: number): string => {
-    if (value >= 0.7) return "danger";
-    if (value >= 0.5) return "warning";
-    return "success";
+    if (value >= 0.7) return t("settings.threshold.strict", "Strict");
+    if (value >= 0.5) return t("settings.threshold.balanced", "Balanced");
+    return t("settings.threshold.lenient", "Lenient");
   };
 
   return (
@@ -50,7 +45,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           <div className="modal-header">
             <h5 className="modal-title">
               <i className="bi bi-sliders me-2"></i>
-              {t("settings.title")}
+              {t("settings.title", "Settings")}
             </h5>
             <button
               type="button"
@@ -61,10 +56,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           <div className="modal-body">
             <div className="mb-4">
               <label className="form-label fw-bold">
-                {t("settings.threshold.label")}
-                <span
-                  className={`badge bg-${getThresholdColor(threshold)} ms-2`}
-                >
+                {t("settings.threshold.label", "Similarity Threshold")}
+                <span className="badge bg-secondary ms-2">
                   {getThresholdLabel(threshold)}
                 </span>
               </label>
@@ -78,36 +71,48 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 onChange={(e) => setThreshold(parseFloat(e.target.value))}
               />
               <div className="d-flex justify-content-between text-muted small">
-                <span>{t("settings.threshold.low")} (0.3)</span>
+                <span>{t("settings.threshold.low", "Low")} (0.3)</span>
                 <span className="fw-bold text-primary">
                   {threshold.toFixed(1)}
                 </span>
-                <span>{t("settings.threshold.high")} (0.9)</span>
+                <span>{t("settings.threshold.high", "High")} (0.9)</span>
               </div>
             </div>
 
             <div className="alert alert-info small">
               <i className="bi bi-info-circle me-2"></i>
-              {t("settings.threshold.description")}
+              {t(
+                "settings.threshold.description",
+                "Higher threshold retrieves more relevant but fewer chunks."
+              )}
             </div>
 
             <div className="card bg-light">
               <div className="card-body">
                 <h6 className="card-subtitle mb-2">
-                  {t("settings.threshold.recommendations")}
+                  {t("settings.threshold.recommendations", "Recommendations:")}
                 </h6>
                 <ul className="small mb-0">
                   <li>
                     <strong>0.3-0.4:</strong>{" "}
-                    {t("settings.threshold.rec_lenient")}
+                    {t(
+                      "settings.threshold.rec_lenient",
+                      "General queries, creative tasks"
+                    )}
                   </li>
                   <li>
                     <strong>0.5-0.6:</strong>{" "}
-                    {t("settings.threshold.rec_balanced")}
+                    {t(
+                      "settings.threshold.rec_balanced",
+                      "Standard queries, balanced results"
+                    )}
                   </li>
                   <li>
                     <strong>0.7-0.9:</strong>{" "}
-                    {t("settings.threshold.rec_strict")}
+                    {t(
+                      "settings.threshold.rec_strict",
+                      "Specific queries, precise answering"
+                    )}
                   </li>
                 </ul>
               </div>
@@ -125,11 +130,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                   className="btn btn-sm btn-outline-info"
                   onClick={() => setShowPromptHelp(!showPromptHelp)}
                 >
-                  <i
-                    className={`bi bi-${
-                      showPromptHelp ? "eye-slash" : "question-circle"
-                    }`}
-                  ></i>
+                  <i className="bi bi-question-circle"></i>
                 </button>
               </label>
 
@@ -138,14 +139,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                   <strong>Available Variables:</strong>
                   <ul className="mb-0 mt-1">
                     <li>
-                      <code>{"{{language}}"}</code> - Response language (中文,
-                      English, etc.)
+                      <code>{`{{language}}`}</code> - Response language
+                      (Chinese, English, etc.)
                     </li>
                     <li>
-                      <code>{"{{context}}"}</code> - Retrieved document chunks
+                      <code>{`{{context}}`}</code> - Retrieved document chunks
                     </li>
                     <li>
-                      <code>{"{{query}}"}</code> - User's question
+                      <code>{`{{query}}`}</code> - User's question
                     </li>
                   </ul>
                   <div className="mt-2">
@@ -157,12 +158,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               )}
 
               <textarea
-                className="form-control font-monospace small"
+                className="form-control font-monospace small custom-prompt-textarea"
                 rows={6}
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
-                placeholder={t("settings.customPrompt.placeholder")}
-                style={{ fontSize: "0.85rem" }}
+                placeholder={t(
+                  "settings.customPrompt.placeholder",
+                  "Enter custom system prompt..."
+                )}
               />
 
               {customPrompt && (
@@ -188,14 +191,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               className="btn btn-secondary"
               onClick={onCancel}
             >
-              {t("common.cancel")}
+              {t("common.cancel", "Cancel")}
             </button>
             <button
               type="button"
               className="btn btn-primary"
               onClick={handleConfirm}
             >
-              {t("common.confirm")}
+              {t("common.confirm", "Confirm")}
             </button>
           </div>
         </div>

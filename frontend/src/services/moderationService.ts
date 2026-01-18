@@ -1,6 +1,6 @@
 /**
  * Content Moderation Service
- * 內容審核服務 - 調用後端Gemini Safety API檢測不當內容
+ * Content Moderation Service - Calls backend Gemini Safety API to detect inappropriate content
  */
 
 import axios from 'axios';
@@ -10,7 +10,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000
 export interface ContentModerationRequest {
   content: string;
   source_reference?: string;
-  academic_mode?: boolean; // 新增學術模式參數
+  academic_mode?: boolean; // Added academic mode parameter
 }
 
 export interface ContentModerationResponse {
@@ -26,15 +26,13 @@ export interface ModerationError extends Error {
 }
 
 /**
- * 檢查內容是否包含不當材料
+ * Check if content contains inappropriate material
  */
 export const moderateContent = async (
   sessionId: string,
   request: ContentModerationRequest
 ): Promise<ContentModerationResponse> => {
   try {
-    console.log(`[ModerationService] Checking content safety for ${request.source_reference}${request.academic_mode ? ' (Academic Mode)' : ''}`);
-    
     const response = await axios.post<ContentModerationResponse>(
       `${API_BASE_URL}/api/v1/upload/${sessionId}/moderate`,
       {
@@ -43,13 +41,9 @@ export const moderateContent = async (
         academic_mode: request.academic_mode || false
       }
     );
-
-    console.log(`[ModerationService] Moderation result:`, response.data);
     return response.data;
     
   } catch (error: any) {
-    console.error(`[ModerationService] Moderation failed:`, error);
-    
     const moderationError: ModerationError = new Error(
       error.response?.data?.detail || error.message || 'Content moderation failed'
     );
@@ -61,7 +55,7 @@ export const moderateContent = async (
 };
 
 /**
- * 檢查多個內容項目
+ * Check multiple content items
  */
 export const moderateMultipleContent = async (
   sessionId: string,
@@ -81,13 +75,12 @@ export const moderateMultipleContent = async (
         source_reference: item.source_reference
       });
     } catch (error) {
-      console.error(`Failed to moderate ${item.source_reference}:`, error);
-      // 如果單個項目失敗，標記為已阻擋
+      // If a single item fails, mark as blocked
       results.push({
         status: 'BLOCKED',
         is_approved: false,
         blocked_categories: ['MODERATION_ERROR'],
-        reason: `審核過程失敗: ${error}`,
+        reason: `Moderation process failed: ${error}`,
         source_reference: item.source_reference
       });
     }

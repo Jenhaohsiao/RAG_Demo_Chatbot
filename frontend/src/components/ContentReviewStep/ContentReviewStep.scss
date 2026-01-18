@@ -1,0 +1,298 @@
+@import "../../styles/variables";
+
+$prof-blue: $card-active-bg; // #2b6cb0
+
+.active-card-bg {
+  background-color: $card-active-bg !important;
+}
+
+.active-card-border {
+  border: 3px solid $card-active-bg !important;
+  box-shadow: 0 0 0 4px rgba($card-active-bg, 0.15) !important;
+}
+
+.review-hero {
+  background: linear-gradient(135deg, #22376b 0%, #4e6dc6 60%, #7c91e0 100%);
+  color: $color-white;
+  border-radius: $border-radius-lg;
+
+  .eyebrow {
+    letter-spacing: 1.2px;
+    font-size: $font-size-xs;
+    color: rgba($color-white, 0.8);
+  }
+
+  h4,
+  p,
+  .chip-row .pill,
+  .chip-row .status-chip {
+    color: $color-white;
+  }
+
+  .chip-row .pill {
+    background: rgba($color-white, 0.16);
+    border-color: rgba($color-white, 0.28);
+  }
+
+  .status-chip {
+    background: rgba($color-white, 0.14);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .hero-metrics .pill {
+    background: rgba($color-white, 0.08);
+    border-color: rgba($color-white, 0.25);
+  }
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: $font-size-sm;
+  font-weight: 600;
+  background: rgba($color-white, 0.14);
+  color: $color-white;
+  border: 1px solid rgba($color-white, 0.2);
+
+  &.pill-soft {
+    background: rgba($prof-blue, 0.1);
+    border-color: rgba($prof-blue, 0.2);
+    color: $prof-blue;
+  }
+
+  &.pill-outline {
+    background: rgba($color-gray-100, 0.8);
+    border-color: rgba($color-gray-400, 0.8);
+    color: $color-gray-800;
+  }
+
+  &.pill-light {
+    background: rgba($prof-blue, 0.08);
+    border-color: rgba($prof-blue, 0.25);
+    color: $prof-blue;
+  }
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: $border-radius;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  box-shadow: $shadow-md;
+
+  &.chip-live {
+    background: linear-gradient(120deg, #22d3ee 0%, #6366f1 100%);
+    color: $color-white;
+  }
+}
+
+.surface-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f7f9ff 100%);
+  border: 1px solid $color-gray-200;
+  border-radius: $border-radius-lg;
+  padding: $spacing-3;
+  box-shadow: $shadow-sm;
+
+  &.active-card-border {
+    border: 3px solid $card-active-bg !important;
+    box-shadow: 0 0 0 4px rgba($card-active-bg, 0.15) !important;
+    background: linear-gradient(180deg, #ffffff 0%, #f0f7ff 100%);
+  }
+
+  .card-header {
+    background: transparent;
+    color: $color-gray-800;
+    border: none;
+
+    h6 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+    }
+  }
+}
+
+.content-review-step {
+  padding: 0;
+
+  /* Card Styles */
+  .card {
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: $border-radius-lg;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    background-color: #fff;
+    margin-bottom: 2rem;
+
+    .card-header {
+      background-color: transparent;
+      color: $color-gray-900;
+      border-bottom: none;
+      padding: 1rem 1.25rem;
+      border-top-left-radius: $border-radius-lg;
+      border-top-right-radius: $border-radius-lg;
+
+      h6 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 1.05rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+  }
+
+  /* List Items */
+  .list-group-item {
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: #f8f9fa;
+    }
+
+    &.status-pending {
+      border-left-color: $color-secondary;
+    }
+
+    &.status-approved {
+      border-left-color: $color-success;
+      background-color: rgba($color-success, 0.05);
+    }
+
+    &.status-rejected {
+      border-left-color: $color-danger;
+      background-color: rgba($color-danger, 0.05);
+    }
+  }
+
+  /* Review Item Boxes */
+  .review-item-box {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    background-color: #f8f9fa;
+    border: 2px solid #e9ecef;
+    margin-bottom: 0.75rem;
+    transition: all 0.3s;
+
+    &.review-success {
+      background-color: rgba($color-success, 0.1);
+      border: 2px solid $color-success;
+      color: $color-success-dark;
+      box-shadow: 0 2px 8px rgba($color-success, 0.15);
+    }
+
+    &.review-error {
+      background-color: rgba($color-danger, 0.1);
+      border: 2px solid $color-danger;
+      color: $color-danger-dark;
+      box-shadow: 0 2px 8px rgba($color-danger, 0.15);
+    }
+
+    &.review-active {
+      background-color: rgba($prof-blue, 0.1);
+      border: 2px solid $prof-blue;
+      box-shadow: 0 2px 8px rgba($prof-blue, 0.2);
+      animation: pulse-border 1.5s ease-in-out infinite;
+    }
+
+    .item-icon {
+      font-size: 1.25rem;
+      margin-right: 0.75rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .item-text {
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+  }
+
+  /* Progress Bar */
+  .progress-container {
+    height: 10px;
+    background-color: #e9ecef;
+    border-radius: 5px;
+    overflow: hidden;
+
+    .progress-bar {
+      background-color: $prof-blue;
+    }
+  }
+
+  /* Action Area */
+  .action-area {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #dee2e6;
+    text-align: center;
+  }
+
+  .btn-start-review {
+    background-color: $prof-blue;
+    border-color: $prof-blue;
+    color: white;
+    padding: 0.75rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 50px;
+    box-shadow: 0 4px 6px rgba($prof-blue, 0.2);
+    transition: all 0.3s ease;
+
+    &:hover {
+      background-color: darken($prof-blue, 10%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba($prof-blue, 0.3);
+    }
+
+    &:disabled {
+      background-color: #a0aec0;
+      border-color: #a0aec0;
+      transform: none;
+      box-shadow: none;
+    }
+  }
+
+  /* Alerts and Info */
+  .alert-standards {
+    background-color: #ebf8ff;
+    border-color: #bee3f8;
+    color: #2c5282;
+
+    i {
+      color: $prof-blue;
+    }
+  }
+}
+
+// Animations
+@keyframes pulse-border {
+  0%,
+  100% {
+    border-color: $prof-blue;
+    box-shadow: 0 2px 8px rgba($prof-blue, 0.2);
+  }
+  50% {
+    border-color: lighten($prof-blue, 15%);
+    box-shadow: 0 2px 12px rgba($prof-blue, 0.4);
+  }
+}

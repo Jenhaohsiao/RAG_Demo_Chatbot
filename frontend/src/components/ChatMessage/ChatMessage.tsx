@@ -1,6 +1,6 @@
 /**
  * ChatMessage Component
- * 顯示單一聊天訊息（使用者或助理）
+ * Helper component to display a single chat message (user or assistant)
  */
 
 import React from "react";
@@ -14,9 +14,9 @@ import {
 
 interface ChatMessageProps {
   message: ChatMessageType;
-  responseType?: ResponseType; // 僅助理訊息需要
-  suggestions?: string[]; // 建議問題（當無法回答時提供）
-  onSuggestionClick?: (suggestion: string) => void; // 點擊建議問題的回調
+  responseType?: ResponseType; // Only required for assistant messages
+  suggestions?: string[]; // Suggested follow-up questions (provided when unable to answer)
+  onSuggestionClick?: (suggestion: string) => void; // Callback for clicking a suggestion
 }
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -31,31 +31,35 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
   return (
     <div className={`message-container ${isUser ? "user" : "assistant"}`}>
-      <div className="message-header">
-        <span className="message-role">
-          {isUser ? t("chat.messages.you") : t("chat.messages.assistant")}
-        </span>
-        <span className="message-time">
-          {new Date(message.timestamp).toLocaleTimeString()}
-        </span>
-      </div>
+      {!isUser && (
+        <div className="message-header">
+          <span className="message-role">
+            <i
+              className="bi bi-robot"
+              aria-label={t("chat.messages.assistant")}
+            ></i>
+          </span>
+        </div>
+      )}
 
       <div className={`message-content ${cannotAnswer ? "cannot-answer" : ""}`}>
         {message.content}
       </div>
 
+      {/* Settings hint when unable to answer */}
       {cannotAnswer && (
-        <div className="cannot-answer-note">
-          ⚠️ {t("chat.message.cannotAnswerNote")}
+        <div className="settings-hint">
+          <i className="bi bi-info-circle me-1"></i>
+          <small className="text-muted">{t("chat.message.settingsHint")}</small>
         </div>
       )}
 
-      {/* 建議氣泡標籤 */}
+      {/* Suggestion bubbles */}
       {suggestions && suggestions.length > 0 && (
         <div className="suggestion-bubbles">
           <div className="suggestion-label">
             <i className="bi bi-lightbulb me-1"></i>
-            {t("chat.message.maybeYouWantToAsk", "也許您想問：")}
+            {t("chat.message.maybeYouWantToAsk")}
           </div>
           <div className="suggestion-list">
             {suggestions.map((suggestion, index) => (

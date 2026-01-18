@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import "./ToastMessage.scss";
 
 interface ToastMessageProps {
@@ -22,36 +23,37 @@ const ToastMessage: React.FC<ToastMessageProps> = ({
   showExtraButtonOnly = false,
   extraButton,
 }) => {
+  const { t } = useTranslation();
   const [show, setShow] = useState(true);
   const [animationState, setAnimationState] = useState<
     "initial" | "animating" | "static"
   >("initial");
 
-  // 組件掛載後觸發動畫，但只執行一次
+  // Trigger animation after mount, but only once
   useEffect(() => {
     if (animationState === "initial") {
       const timer = setTimeout(() => {
         setAnimationState("animating");
-      }, 50); // 短暫延遲確保DOM已渲染
+      }, 50); // Short delay to ensure DOM is rendered
 
-      // 動畫完成後設為靜態狀態
+      // Set to static state after animation completes
       const animationTimer = setTimeout(() => {
         setAnimationState("static");
-      }, 400); // 300ms動畫 + 100ms緩衝
+      }, 400); // 300ms animation + 100ms buffer
 
       return () => {
         clearTimeout(timer);
         clearTimeout(animationTimer);
       };
     }
-  }, []); // 空依賴陣列，確保只執行一次
+  }, []); // Empty dependency array ensures this runs only once
 
-  // 如果沒有確定按鈕，自動在3秒後關閉
+  // If no confirm button, close automatically after 3 seconds
   useEffect(() => {
     if (!showConfirmButton) {
       const timer = setTimeout(() => {
         handleConfirm();
-      }, 3000); // 3秒後自動關閉
+      }, 3000); // Close automatically after 3 seconds
 
       return () => clearTimeout(timer);
     }
@@ -59,40 +61,10 @@ const ToastMessage: React.FC<ToastMessageProps> = ({
 
   const handleConfirm = () => {
     setShow(false);
-    // 延迟调用 onDismiss，让动画完成
+    // Delay calling onDismiss to let animation finish
     setTimeout(() => {
       onDismiss();
     }, 150);
-  };
-
-  const getBootstrapClass = () => {
-    switch (type) {
-      case "error":
-        return "bg-danger text-white";
-      case "warning":
-        return "bg-warning text-dark"; // 使用深色文字，適合黃色背景
-      case "info":
-        return "bg-info text-white";
-      case "success":
-        return "bg-success text-white";
-      default:
-        return "bg-secondary text-white";
-    }
-  };
-
-  const getIcon = () => {
-    switch (type) {
-      case "error":
-        return "bi-exclamation-triangle-fill";
-      case "warning":
-        return "bi-exclamation-triangle-fill";
-      case "info":
-        return "bi-info-circle-fill";
-      case "success":
-        return "bi-check-circle-fill";
-      default:
-        return "bi-info-circle-fill";
-    }
   };
 
   const handleClose = () => {
@@ -101,7 +73,7 @@ const ToastMessage: React.FC<ToastMessageProps> = ({
     }
   };
 
-  // Toast 定位样式
+  // Toast positioning style
   if (!show) {
     return null;
   }
@@ -109,22 +81,28 @@ const ToastMessage: React.FC<ToastMessageProps> = ({
   return (
     <div className="toast-container">
       <div
-        className={`toast show ${getBootstrapClass()} ${
-          animationState === "animating"
-            ? "toast-animated"
-            : animationState === "static"
-            ? "toast-static"
-            : ""
-        }`}
+        className={`toast show ${
+          animationState === "animating" ? "toast-animated" : ""
+        } ${animationState === "static" ? "toast-static" : ""}`}
         role="alert"
       >
         <div className="toast-header">
-          <i className={`bi ${getIcon()} me-2`}></i>
+          <i
+            className={`bi ${
+              type === "success"
+                ? "bi-check-circle-fill text-success"
+                : type === "error"
+                  ? "bi-x-circle-fill text-danger"
+                  : type === "warning"
+                    ? "bi-exclamation-triangle-fill text-warning"
+                    : "bi-info-circle-fill text-primary"
+            } me-2`}
+          ></i>
           <strong className="me-auto">
-            {type === "error" && "錯誤"}
-            {type === "warning" && "警告"}
-            {type === "info" && "信息"}
-            {type === "success" && "成功"}
+            {type === "error" && t("toast.error", "Error")}
+            {type === "warning" && t("toast.warning", "Warning")}
+            {type === "info" && t("toast.info", "Info")}
+            {type === "success" && t("toast.success", "Success")}
           </strong>
           {!showConfirmButton && (
             <button
@@ -146,11 +124,7 @@ const ToastMessage: React.FC<ToastMessageProps> = ({
                   type="button"
                   className={
                     extraButton.className ||
-                    `btn btn-sm ${
-                      type === "warning"
-                        ? "btn-outline-dark" // 警告類型使用深色輪廓按鈕
-                        : "btn-outline-light"
-                    }`
+                    "btn btn-sm btn-outline-secondary me-2"
                   }
                   onClick={extraButton.onClick}
                 >
@@ -160,12 +134,10 @@ const ToastMessage: React.FC<ToastMessageProps> = ({
               {showConfirmButton && !showExtraButtonOnly && (
                 <button
                   type="button"
-                  className={`btn btn-sm ${
-                    type === "warning" ? "btn-dark" : "btn-light" // 警告類型使用深色按鈕
-                  }`}
+                  className="btn btn-sm btn-primary"
                   onClick={handleConfirm}
                 >
-                  確定
+                  {t("buttons.ok", "OK")}
                 </button>
               )}
             </div>

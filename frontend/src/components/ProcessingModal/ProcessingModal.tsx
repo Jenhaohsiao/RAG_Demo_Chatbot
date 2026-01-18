@@ -1,10 +1,11 @@
 /**
  * Processing Modal Component
- * 處理進度對話框
+ * Processing progress dialog
  */
 
-import React from 'react';
-import { useTranslation } from 'react-i18next';
+import React from "react";
+import { useTranslation } from "react-i18next";
+import "./ProcessingModal.scss";
 
 export interface ProcessingModalProps {
   isOpen: boolean;
@@ -17,7 +18,7 @@ export interface ProcessingModalProps {
   isCompleted?: boolean;
   summary?: string;
   chunkCount?: number;
-  // T089+ Token 和頁面信息
+  // T089+ Token and page info
   tokensUsed?: number;
   pagesCrawled?: number;
   onConfirm: () => void;
@@ -44,36 +45,35 @@ const ProcessingModal: React.FC<ProcessingModalProps> = ({
 
   return (
     <div
-      className="modal show d-block"
+      className="modal show d-block processing-modal-overlay"
       tabIndex={-1}
       role="dialog"
-      style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
     >
       <div className="modal-dialog modal-dialog-centered" role="document">
         <div className="modal-content">
           <div className="modal-header">
             <h5 className="modal-title">
               {isError
-                ? t('processing.error.processingFailed', 'Processing Failed')
+                ? t("processing.error.processingFailed")
                 : isCompleted
-                  ? t('processing.stage.complete', 'Processing Complete')
-                  : t('processing.title', 'Processing Document')}
+                  ? t("processing.stage.complete")
+                  : t("processing.title")}
             </h5>
           </div>
 
           <div className="modal-body">
-            {/* 來源資訊 */}
+            {/* Source Info */}
             <div className="mb-3">
               <p className="text-muted mb-1">
-                <strong>{t('labels.documents', 'Documents')}:</strong>
+                <strong>{t("labels.documents")}:</strong>
               </p>
               <p className="mb-0">
-                {sourceType === 'PDF' && '📄'} {sourceType === 'TEXT' && '📝'}{' '}
-                {sourceType === 'URL' && '🌐'} {sourceReference}
+                {sourceType === "PDF" && "📄"} {sourceType === "TEXT" && "📝"}{" "}
+                {sourceType === "URL" && "🌐"} {sourceReference}
               </p>
             </div>
 
-            {/* 錯誤訊息 */}
+            {/* Error Message */}
             {isError && errorMessage && (
               <div className="alert alert-danger mb-3" role="alert">
                 <i className="bi bi-exclamation-triangle-fill me-2"></i>
@@ -81,42 +81,47 @@ const ProcessingModal: React.FC<ProcessingModalProps> = ({
               </div>
             )}
 
-            {/* 成功訊息 */}
+            {/* Success Message */}
             {isCompleted && !isError && (
               <div>
                 <div className="alert alert-success mb-3" role="alert">
                   <i className="bi bi-check-circle-fill me-2"></i>
-                  {t('processing.complete.message', 'Document processed successfully!')}
+                  {t("processing.complete.message")}
                 </div>
 
                 {chunkCount && (
                   <p className="text-muted mb-2">
                     <i className="bi bi-file-text me-2"></i>
-                    {t('processing.complete.chunks', '{{count}} text chunks created', {
+                    {t("processing.complete.chunks", {
                       count: chunkCount,
                     })}
                   </p>
                 )}
 
-                {/* T089+ 顯示 Token 和頁面信息 */}
+                {/* Display token and page information */}
                 <div className="processing-stats mb-3">
                   {tokensUsed > 0 && (
                     <p className="text-muted mb-1">
-                      <i className="bi bi-lightning-fill me-2" style={{ color: '#FFC107' }}></i>
-                      <strong>{t('processing.complete.tokensUsed', 'Tokens Used')}:</strong> {tokensUsed.toLocaleString()}
+                      <i className="bi bi-lightning-fill me-2 stat-icon-tokens"></i>
+                      <strong>{t("processing.complete.tokensUsed")}:</strong>{" "}
+                      {tokensUsed.toLocaleString()}
                     </p>
                   )}
                   {pagesCrawled > 0 && (
                     <p className="text-muted mb-0">
-                      <i className="bi bi-globe me-2" style={{ color: '#17A2B8' }}></i>
-                      <strong>{t('processing.complete.pagesCrawled', 'Pages Crawled')}:</strong> {pagesCrawled}
+                      <i className="bi bi-globe me-2 stat-icon-pages"></i>
+                      <strong>
+                        {t("processing.complete.pagesCrawled", "Pages Crawled")}
+                        :
+                      </strong>{" "}
+                      {pagesCrawled}
                     </p>
                   )}
                 </div>
               </div>
             )}
 
-            {/* 處理中 */}
+            {/* Processing in progress */}
             {!isError && !isCompleted && (
               <div>
                 <p className="text-muted mb-2">{processingStage}</p>
@@ -136,7 +141,7 @@ const ProcessingModal: React.FC<ProcessingModalProps> = ({
                 </div>
 
                 <p className="small text-muted text-center">
-                  {t('processing.pleaseWait', 'Please wait, this may take a few moments...')}
+                  {t("processing.pleaseWait")}
                 </p>
               </div>
             )}
@@ -149,7 +154,7 @@ const ProcessingModal: React.FC<ProcessingModalProps> = ({
                 className="btn btn-primary"
                 onClick={onConfirm}
               >
-                {t('buttons.confirm', 'Confirm')}
+                {t("buttons.confirm")}
               </button>
             )}
           </div>

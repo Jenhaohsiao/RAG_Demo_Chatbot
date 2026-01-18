@@ -1,39 +1,26 @@
 /**
  * LanguageSelector Component
- * Cycling animation through 7 languages, click to select
+ * Cycling animation through 4 languages, click to select
  *
  * Features:
- * - Auto-cycle button text through 7 language names every 1 second
+ * - Auto-cycle button text through 4 language names every 1 second
  * - Click button to toggle dropdown menu
  * - Language text animates with smooth transition
  * - Shows checkmark for currently selected language
- * - Supports RTL (Arabic) layout
  */
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useLanguage, type SupportedLanguage } from "../../hooks/useLanguage";
+import "./LanguageSelector.scss";
 
 const LANGUAGE_LABELS: Record<SupportedLanguage, string> = {
   en: "English",
-  "zh-TW": "繁體中文",
-  ko: "한국어",
-  es: "Español",
-  ja: "日本語",
-  ar: "العربية",
   fr: "Français",
+  "zh-TW": "繁體中文",
   "zh-CN": "简体中文",
 };
 
-const LANGUAGE_ORDER: SupportedLanguage[] = [
-  "en",
-  "zh-TW",
-  "ko",
-  "es",
-  "ja",
-  "ar",
-  "fr",
-  "zh-CN",
-];
+const LANGUAGE_ORDER: SupportedLanguage[] = ["en", "fr", "zh-TW", "zh-CN"];
 
 // Cycle interval: 1 second
 const CYCLE_INTERVAL = 1000;
@@ -46,12 +33,11 @@ interface LanguageSelectorProps {
  * Language selector with cycling animation
  *
  * Features:
- * - Auto-cycle button text through 7 languages every 1 second (when dropdown closed)
+ * - Auto-cycle button text through 4 languages every 1 second (when dropdown closed)
  * - Click button to toggle dropdown menu
  * - Click to select language from dropdown
  * - Shows checkmark for currently selected language
  * - Syncs with session language preference
- * - Supports RTL layout for Arabic
  */
 export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   onLanguageChange,
@@ -93,7 +79,6 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         onLanguageChange(selectedLanguage);
       }
     } catch (error) {
-      console.error("[LanguageSelector] Error changing language:", error);
       // Don't close dropdown on error so user can retry
     }
   };
@@ -110,47 +95,21 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       {/* Language Button with Cycling Animation */}
       <button
         data-testid="language-selector-button"
-        className="btn btn-sm btn-light border"
+        className="btn btn-sm btn-light border btn-language-selector"
         type="button"
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         aria-expanded={isDropdownOpen}
         title={t("labels.selectLanguage", "Select Language")}
-        style={{
-          minWidth: "140px",
-          transition: "all 0.3s ease",
-          position: "relative",
-          overflow: "hidden",
-        }}
       >
         <i className="bi bi-globe me-2"></i>
 
         {/* Cycling text animation */}
-        <span
-          style={{
-            display: "inline-block",
-            transition: "opacity 0.3s ease",
-            opacity: 1,
-            minWidth: "100px",
-            textAlign: "center",
-          }}
-        >
-          {cyclingLabel}
-        </span>
+        <span className="btn-label">{cyclingLabel}</span>
       </button>
 
       {/* Language Dropdown Menu */}
       {isDropdownOpen && (
-        <div
-          className="dropdown-menu dropdown-menu-end show"
-          style={{
-            position: "absolute",
-            top: "100%",
-            right: 0,
-            marginTop: "4px",
-            zIndex: 1000,
-            minWidth: "180px",
-          }}
-        >
+        <div className="dropdown-menu dropdown-menu-end show language-dropdown-menu">
           {/* Language Options */}
           {LANGUAGE_ORDER.map((lang) => (
             <button
@@ -158,32 +117,10 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
               data-testid="language-option"
               className={`dropdown-item ${language === lang ? "active" : ""}`}
               onClick={() => handleSelectLanguage(lang)}
-              style={{
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                textAlign: "left",
-                padding: "8px 16px",
-                border: "none",
-                background: "none",
-                width: "100%",
-                fontSize: "14px",
-                transition: "background-color 0.2s ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#f8f9fa";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
-              }}
             >
               <span>{LANGUAGE_LABELS[lang]}</span>
               {language === lang && (
-                <i
-                  className="bi bi-check-lg ms-2"
-                  style={{ color: "#0d6efd" }}
-                ></i>
+                <i className="bi bi-check-lg ms-2 check-icon"></i>
               )}
             </button>
           ))}
@@ -193,14 +130,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       {/* Close dropdown when clicking outside */}
       {isDropdownOpen && (
         <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 999,
-          }}
+          className="language-selector-backdrop"
           onClick={() => setIsDropdownOpen(false)}
         />
       )}

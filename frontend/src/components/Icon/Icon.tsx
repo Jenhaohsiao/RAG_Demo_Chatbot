@@ -1,4 +1,5 @@
 import React from "react";
+import "./Icon.scss";
 
 // Icon component for external SVG icons
 interface IconProps {
@@ -73,12 +74,8 @@ export const Icon: React.FC<IconProps> = ({
         alt={name}
         width={size}
         height={size}
-        className={className}
-        style={{
-          display: "inline-block",
-          verticalAlign: "middle",
-          ...style,
-        }}
+        className={`external-icon ${className}`}
+        style={style}
       />
     );
   }
@@ -86,7 +83,6 @@ export const Icon: React.FC<IconProps> = ({
   // Use internal SVG path
   const path = iconPaths[name];
   if (!path) {
-    console.warn(`Icon "${name}" not found`);
     return null;
   }
 

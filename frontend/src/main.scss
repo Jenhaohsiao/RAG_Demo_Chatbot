@@ -1,7 +1,10 @@
-/**
+﻿/**
  * Global Styles - Main Entry Point
- * 全局樣式主入口檔案
+ * Main entry point for global styles
  */
+
+// Import Bootstrap
+@import "bootstrap/scss/bootstrap";
 
 // Import global partials
 @import "./styles/variables";
@@ -29,22 +32,22 @@ body {
   font-size: $font-size-base;
   line-height: $line-height-normal;
   color: $color-gray-900;
-  background-color: $color-white;
+  background-color: $bg-body !important;
 }
 
 // ========================================
 // Main Layout Styles
 // ========================================
 
-.main-content-container {
-  min-height: calc(100vh - 80px);
-}
-
 .main-blocking-overlay {
   @include fixed-full;
   background-color: $bg-overlay;
   z-index: $z-index-modal-backdrop - 1; // 9998
   cursor: not-allowed;
+}
+
+.toast-container-wrapper {
+  z-index: $z-index-loading;
 }
 
 // ========================================
@@ -242,7 +245,7 @@ body {
 .form-label {
   margin-bottom: $spacing-2;
   font-weight: $font-weight-medium;
-  font-size: $font-size-sm;
+  font-size: $font-size-md;
   color: $color-gray-700;
 }
 
@@ -251,7 +254,9 @@ body {
   padding: $input-padding-y $input-padding-x;
   border: 1px solid $input-border-color;
   border-radius: $input-border-radius;
-  transition: border-color $transition-base, box-shadow $transition-base;
+  transition:
+    border-color $transition-base,
+    box-shadow $transition-base;
 
   &:focus {
     border-color: $color-primary;

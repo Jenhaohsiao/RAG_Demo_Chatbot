@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     qdrant_url: str | None = None  # For cloud mode
     
     # Session Configuration
-    session_ttl_minutes: int = 20
+    session_ttl_minutes: int = 10
     
     # RAG Configuration
     similarity_threshold: float = 0.5  # Lowered from 0.7 to improve recall
@@ -50,6 +50,13 @@ class Settings(BaseSettings):
     api_host: str = "0.0.0.0"
     api_port: int = 8000
     api_prefix: str = "/api/v1"
+    
+    # Email Configuration for Contact Form
+    contact_email_recipient: str = "jenhao.hsiao2@gmail.com"
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 587
+    smtp_username: str | None = None  # Gmail account
+    smtp_password: str | None = None  # Gmail app password
     
     # T091: Logging Configuration
     log_level: str = "INFO"  # Can be DEBUG, INFO, WARNING, ERROR, CRITICAL

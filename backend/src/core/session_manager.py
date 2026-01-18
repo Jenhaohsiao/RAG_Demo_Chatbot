@@ -9,6 +9,7 @@ import logging
 
 from src.models.session import Session, SessionState, SessionResponse
 from src.core.config import settings
+from src.core.api_validator import get_default_api_key_status
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +30,7 @@ class SessionManager:
         Create a new session with unique ID and Qdrant collection
         
         Args:
-            language: Initial UI language (default: en, supported: en, zh-TW, ko, es, ja, ar, fr, zh-CN)
+            language: Initial UI language (default: en, supported: en, fr, zh-TW, zh-CN)
             similarity_threshold: RAG similarity threshold (default: 0.5)
             custom_prompt: Custom prompt template (default: None)
             
@@ -43,10 +44,14 @@ class SessionManager:
             custom_prompt=custom_prompt,
             state=SessionState.INITIALIZING
         )
+
+        # 設定預設 API Key 狀態（來自環境變數）
+        session.has_valid_api_key = get_default_api_key_status()
+        session.api_key_source = "env" if session.has_valid_api_key else "none"
         
         self._sessions[session.session_id] = session
         
-        logger.info(f"Session created: {session.session_id} (language: {language}, custom_prompt: {bool(custom_prompt)})")
+        logger.info(f"[Session Created] ID: {session.session_id} | Lang: {language} | Expires: {session.expires_at}")
         return session
     
     def get_session(self, session_id: UUID) -> Optional[Session]:
@@ -62,7 +67,7 @@ class SessionManager:
         session = self._sessions.get(session_id)
         
         if session and session.is_expired():
-            logger.warning(f"Session {session_id} has expired")
+            logger.warning(f"[Session Expired Access] ID: {session_id} | Expired At: {session.expires_at}")
             return None
         
         return session
@@ -79,10 +84,12 @@ class SessionManager:
         """
         session = self.get_session(session_id)
         if not session:
+            logger.warning(f"[Session Update Failed] ID: {session_id} not found or expired")
             return False
         
+        old_expires = session.expires_at
         session.update_activity()
-        logger.debug(f"Session {session_id} activity updated, expires at {session.expires_at}")
+        logger.info(f"[Session Heartbeat] ID: {session_id} | Extended: {old_expires} -> {session.expires_at}")
         return True
     
     def update_state(self, session_id: UUID, state: SessionState) -> bool:
@@ -165,6 +172,34 @@ class SessionManager:
         session.vector_count = count
         logger.debug(f"Session {session_id} vector_count: {count}")
         return True
+
+    def set_api_key(self, session_id: UUID, api_key: str) -> bool:
+        """
+        Store a user-provided Gemini API key for this session.
+
+        Args:
+            session_id: UUID of the session
+            api_key: validated Gemini API key
+
+        Returns:
+            bool: True if stored, False if session not found
+        """
+        session = self.get_session(session_id)
+        if not session:
+            return False
+
+        session.gemini_api_key = api_key
+        session.has_valid_api_key = True
+        session.api_key_source = "user"
+        logger.info(f"Session {session_id} stored user API key (masked)")
+        return True
+
+    def get_effective_api_key(self, session_id: UUID) -> str | None:
+        """Return user-provided key if present, otherwise default env key."""
+        session = self.get_session(session_id)
+        if session and session.gemini_api_key:
+            return session.gemini_api_key
+        return settings.gemini_api_key
     
     def close_session(self, session_id: UUID) -> bool:
         """
@@ -179,10 +214,10 @@ class SessionManager:
         """
         if session_id in self._sessions:
             del self._sessions[session_id]
-            logger.info(f"Session {session_id} closed and removed")
+            logger.info(f"[Session Closed] ID: {session_id} removed from memory")
             return True
         
-        logger.warning(f"Session {session_id} not found for closure")
+        logger.warning(f"[Session Close Failed] ID: {session_id} not found")
         return False
     
     def get_expired_sessions(self) -> list[UUID]:
@@ -234,7 +269,9 @@ class SessionManager:
             similarity_threshold=session.similarity_threshold,
             document_count=session.document_count,
             vector_count=session.vector_count,
-            custom_prompt=session.custom_prompt
+            custom_prompt=session.custom_prompt,
+            has_valid_api_key=session.has_valid_api_key,
+            api_key_source=session.api_key_source
         )
 
 

@@ -4,7 +4,8 @@ Handles session lifecycle endpoints
 
 T089: Enhanced error handling with appropriate HTTP status codes
 """
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Request
+from pydantic import BaseModel
 from uuid import UUID
 import logging
 
@@ -16,25 +17,48 @@ from src.models.session import (
 )
 from src.models.metrics import Metrics
 from src.models.errors import ErrorCode
+from src.core.logger import session_activity_logger
+from src.core.api_validator import validate_gemini_api_key, get_default_api_key_status
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
 
+class ApiKeyRequest(BaseModel):
+    """使用者提交的 API Key"""
+    api_key: str
+
+
+class ApiKeyValidationResponse(BaseModel):
+    """API Key 驗證回應"""
+    valid: bool
+    message: str | None = None
+
+
+class ApiKeyStatusResponse(BaseModel):
+    """API Key 狀態回應"""
+    status: str  # valid | missing | invalid
+    source: str  # env | user | none
+    has_valid_api_key: bool
+
+
 @router.post("/create", response_model=SessionResponse, status_code=status.HTTP_201_CREATED)
-async def create_session(language: str = "en", similarity_threshold: float = 0.5, custom_prompt: str | None = None):
+async def create_session(request: Request, language: str = "en", similarity_threshold: float = 0.5, custom_prompt: str | None = None):
     """
     Create a new session with unique ID and Qdrant collection
     
     Args:
-        language: Initial UI language (default: en, supported: en, zh-TW, ko, es, ja, ar, fr, zh-CN)
+        language: Initial UI language (default: en, supported: en, fr, zh-TW, zh-CN)
         similarity_threshold: RAG similarity threshold (0.0-1.0, default: 0.5)
         custom_prompt: Custom prompt template (optional)
         
     Returns:
         SessionResponse: Session details
     """
+    # Get client IP for logging
+    client_ip = request.client.host if request.client else "unknown"
+    
     try:
         # Validate similarity_threshold
         if not 0.0 <= similarity_threshold <= 1.0:
@@ -62,11 +86,17 @@ async def create_session(language: str = "en", similarity_threshold: float = 0.5
         # Update state to READY_FOR_UPLOAD
         session_manager.update_state(session.session_id, SessionState.READY_FOR_UPLOAD)
         
+        # Log session creation with structured logger
+        session_activity_logger.session_created(
+            session.session_id, client_ip, language, similarity_threshold
+        )
+        
         logger.info(f"Session {session.session_id} created and ready")
         return session_manager.to_response(session)
         
     except Exception as e:
         logger.error(f"Failed to create session: {e}", exc_info=True)
+        session_activity_logger.error(None, "SESSION_CREATE_FAILED", str(e), client_ip)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create session"
@@ -145,7 +175,7 @@ async def get_session_with_metrics(session_id: UUID):
 
 
 @router.post("/{session_id}/heartbeat", response_model=SessionResponse)
-async def session_heartbeat(session_id: UUID):
+async def session_heartbeat(session_id: UUID, request: Request):
     """
     Update session activity and extend TTL
     
@@ -155,29 +185,36 @@ async def session_heartbeat(session_id: UUID):
     Returns:
         SessionResponse: Updated session details
     """
+    client_ip = request.client.host if request.client else "unknown"
+    
     success = session_manager.update_activity(session_id)
     
     if not success:
+        session_activity_logger.session_not_found(session_id, client_ip, "heartbeat")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Session {session_id} not found or expired"
         )
     
     session = session_manager.get_session(session_id)
+    session_activity_logger.session_heartbeat(session_id, client_ip, session.expires_at)
     return session_manager.to_response(session)
 
 
 @router.post("/{session_id}/close", status_code=status.HTTP_204_NO_CONTENT)
-async def close_session(session_id: UUID):
+async def close_session(session_id: UUID, request: Request):
     """
     Close session and delete associated data
     
     Args:
         session_id: UUID of the session
     """
+    client_ip = request.client.host if request.client else "unknown"
+    
     session = session_manager.get_session(session_id)
     
     if not session:
+        session_activity_logger.session_not_found(session_id, client_ip, "close")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Session {session_id} not found"
@@ -201,11 +238,13 @@ async def close_session(session_id: UUID):
     # Remove session
     session_manager.close_session(session_id)
     
+    # Log session close with structured logger
+    session_activity_logger.session_closed(session_id, client_ip, "user_closed")
     logger.info(f"Session {session_id} closed successfully")
 
 
 @router.post("/{session_id}/restart", response_model=SessionResponse, status_code=status.HTTP_201_CREATED)
-async def restart_session(session_id: UUID):
+async def restart_session(session_id: UUID, request: Request):
     """
     Close current session and create a new one
     
@@ -215,6 +254,7 @@ async def restart_session(session_id: UUID):
     Returns:
         SessionResponse: New session details
     """
+    client_ip = request.client.host if request.client else "unknown"
     old_session = session_manager.get_session(session_id)
     
     # Get language from old session (or default to 'en')
@@ -224,6 +264,7 @@ async def restart_session(session_id: UUID):
     if old_session:
         vector_store.delete_collection(old_session.qdrant_collection_name)
         session_manager.close_session(session_id)
+        session_activity_logger.session_closed(session_id, client_ip, "restart")
         logger.info(f"Old session {session_id} closed during restart")
     
     # Create new session (reuse create_session logic)
@@ -231,6 +272,8 @@ async def restart_session(session_id: UUID):
     vector_store.create_collection(new_session.qdrant_collection_name)
     session_manager.update_state(new_session.session_id, SessionState.READY_FOR_UPLOAD)
     
+    # Log new session creation
+    session_activity_logger.session_created(new_session.session_id, client_ip, language)
     logger.info(f"New session {new_session.session_id} created after restart")
     return session_manager.to_response(new_session)
 
@@ -284,3 +327,128 @@ async def update_custom_prompt(session_id: UUID, custom_prompt: str | None = Non
     logger.info(f"Session {session_id} custom_prompt updated (has_prompt: {bool(custom_prompt)})")
     
     return session_manager.to_response(session)
+
+
+@router.get("/{session_id}/api-key/status", response_model=ApiKeyStatusResponse)
+async def get_api_key_status(session_id: UUID):
+    """
+    檢查目前 Session 的 Gemini API Key 狀態。
+    如果存在使用者提供的 key，直接返回已驗證狀態；
+    否則回傳預設 key 的狀態。
+    """
+    session = session_manager.get_session(session_id)
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Session {session_id} not found"
+        )
+
+    # 優先使用使用者提供的 key 狀態
+    if session.gemini_api_key and session.has_valid_api_key:
+        return ApiKeyStatusResponse(
+            status="valid",
+            source="user",
+            has_valid_api_key=True
+        )
+
+    # 退回到預設 key 狀態
+    if get_default_api_key_status():
+        return ApiKeyStatusResponse(
+            status="valid",
+            source="env",
+            has_valid_api_key=True
+        )
+
+    return ApiKeyStatusResponse(
+        status="missing",
+        source="none",
+        has_valid_api_key=False
+    )
+
+
+@router.post("/{session_id}/api-key", response_model=ApiKeyStatusResponse)
+async def set_api_key(session_id: UUID, request: ApiKeyRequest):
+    """
+    讓使用者在 Session 層級提供 Gemini API Key。
+    會先做輕量驗證，成功後僅儲存在記憶體，不回傳給前端。
+    """
+    session = session_manager.get_session(session_id)
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Session {session_id} not found"
+        )
+
+    # 驗證 key
+    is_valid = validate_gemini_api_key(request.api_key)
+    if not is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=ErrorCode.API_KEY_INVALID.value
+        )
+
+    session_manager.set_api_key(session_id, request.api_key)
+
+    return ApiKeyStatusResponse(
+        status="valid",
+        source="user",
+        has_valid_api_key=True
+    )
+
+
+@router.get("/api-key/status", response_model=ApiKeyStatusResponse)
+async def get_api_key_status():
+    """
+    檢查當前 API Key 狀態（環境變數）
+    此端點不需要 session_id，用於應用啟動時檢查
+    
+    Returns:
+        ApiKeyStatusResponse: API Key 狀態資訊
+    """
+    default_key_valid = get_default_api_key_status()
+    
+    if default_key_valid:
+        return ApiKeyStatusResponse(
+            status="valid",
+            source="env",
+            has_valid_api_key=True
+        )
+
+    return ApiKeyStatusResponse(
+        status="missing",
+        source="none",
+        has_valid_api_key=False
+    )
+
+
+@router.post("/api-key/validate", response_model=ApiKeyValidationResponse)
+async def validate_api_key(request: ApiKeyRequest):
+    """
+    驗證使用者提供的 Gemini API Key
+    此端點不需要 session_id，用於註冊前驗證
+    
+    Args:
+        request: 包含 api_key 的請求體
+        
+    Returns:
+        ApiKeyValidationResponse: 驗證結果
+    """
+    try:
+        is_valid = validate_gemini_api_key(request.api_key)
+        
+        if is_valid:
+            return ApiKeyValidationResponse(
+                valid=True,
+                message="API key is valid"
+            )
+        else:
+            return ApiKeyValidationResponse(
+                valid=False,
+                message="API key validation failed"
+            )
+    except Exception as e:
+        logger.error(f"API key validation error: {e}")
+        return ApiKeyValidationResponse(
+            valid=False,
+            message=f"Validation error: {str(e)}"
+        )

@@ -10,7 +10,7 @@ import sessionService from '../services/sessionService';
 
 const LANGUAGE_STORAGE_KEY = 'rag-chatbot-language';
 
-const SUPPORTED_LANGUAGES = ['en', 'zh-TW', 'zh-CN', 'ko', 'es', 'ja', 'ar', 'fr'] as const;
+const SUPPORTED_LANGUAGES = ['en', 'fr', 'zh-TW', 'zh-CN'] as const;
 export type SupportedLanguage = typeof SUPPORTED_LANGUAGES[number];
 
 interface UseLanguageReturn {
@@ -29,7 +29,7 @@ interface UseLanguageReturn {
  * - Persist to localStorage
  * - Backend API sync (PUT /session/{sessionId}/language)
  * - Type-safe language codes
- * - RTL support for Arabic
+ * - Type-safe language codes
  * - Error handling for backend sync
  */
 export const useLanguage = (): UseLanguageReturn => {
@@ -61,9 +61,6 @@ export const useLanguage = (): UseLanguageReturn => {
     try {
       setIsUpdating(true);
       setError(null);
-
-      console.log('[useLanguage] Changing language to:', lang, 'with sessionId:', sessionId);
-
       // Update i18n (this also triggers RTL update via config listener)
       await i18n.changeLanguage(lang);
       
@@ -76,22 +73,16 @@ export const useLanguage = (): UseLanguageReturn => {
       // Sync with backend if sessionId provided
       if (sessionId) {
         try {
-          console.log('[useLanguage] Syncing language to backend for session:', sessionId);
           const response = await sessionService.updateLanguage(sessionId, lang);
-          console.log('[useLanguage] Backend language update successful:', response);
         } catch (backendError) {
           // Log error but don't fail - frontend language is already changed
           const errorMsg = backendError instanceof Error ? backendError.message : 'Failed to sync with backend';
-          console.warn('[useLanguage] Backend sync error (non-blocking):', errorMsg);
           setError(errorMsg);
           // Don't throw - language change succeeded locally
         }
       }
-
-      console.log('[useLanguage] Language successfully changed to:', lang);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Unknown error changing language';
-      console.error('[useLanguage] Error changing language:', errorMsg);
       setError(errorMsg);
       throw err;
     } finally {
@@ -106,7 +97,6 @@ export const useLanguage = (): UseLanguageReturn => {
     const handleLanguageChanged = (lng: string) => {
       if (SUPPORTED_LANGUAGES.includes(lng as SupportedLanguage)) {
         setLanguageState(lng as SupportedLanguage);
-        console.log('[useLanguage] i18n language changed to:', lng);
       }
     };
 

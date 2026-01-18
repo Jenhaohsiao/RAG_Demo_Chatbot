@@ -1,10 +1,19 @@
 @import "../../styles/variables";
 
+.active-card-bg {
+  background-color: $card-active-bg !important;
+}
+
+.active-card-border {
+  border: 3px solid $card-active-bg !important;
+  box-shadow: 0 0 0 4px rgba($card-active-bg, 0.15) !important;
+}
+
 .ai-chat-step {
   height: 100%;
   display: flex;
   flex-direction: column;
-  overflow: hidden; // 防止此層產生滾動條
+  overflow: hidden; // Prevent scrollbar at this level
 }
 
 .ai-chat-step-container {
@@ -19,7 +28,7 @@
 
 .chat-container {
   flex: 1;
-  overflow: hidden; // 只讓內部 messages-container 滾動
+  overflow: hidden; // Only allow internal messages-container to scroll
   display: flex;
   flex-direction: column;
 }

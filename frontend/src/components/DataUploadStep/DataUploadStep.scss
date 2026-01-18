@@ -1,0 +1,31 @@
+@import "../../styles/variables";
+
+.active-card-bg {
+  background-color: $card-active-bg !important;
+}
+
+.active-card-border {
+  border-color: $card-active-bg !important;
+}
+
+.nav-tabs .nav-link {
+  color: $color-primary-dark; // Or $color-gray-600 depending on inactive state, keeping default-ish
+
+  &.active {
+    color: $card-active-bg !important; // #2b6cb0
+    font-weight: 600;
+    border-color: $card-active-bg $card-active-bg #fff !important; // Bootstrap nav-tabs style override
+    border-bottom: 2px solid transparent; // Standard bootstrappy
+  }
+}
+
+/* Specific button overrides just in case DataUploadStep uses them directly */
+.data-upload-step {
+  .btn-primary {
+    background-color: $card-active-bg;
+    border-color: $card-active-bg;
+    &:hover {
+      background-color: darken($card-active-bg, 10%);
+    }
+  }
+}

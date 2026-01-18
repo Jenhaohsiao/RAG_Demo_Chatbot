@@ -1,9 +1,10 @@
 /**
  * Fixed RAG Process Flow Component
- * 固定在頁面上方的RAG系統流程圖
+ * Fixed RAG process flowchart at the top of the page
  */
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import "./FixedRagFlow.scss";
 
 interface FixedRagFlowProps {
   currentStep?:
@@ -39,56 +40,44 @@ const FixedRagFlow: React.FC<FixedRagFlowProps> = ({
     {
       id: "prepare",
       title: "Prepare Data",
-      titleZh: "準備資料",
       description: "Adjust parameters",
-      descriptionZh: "調整參數",
       tooltip:
-        "此階段讓使用者調整Prompt模板、相似度闾值、分塊策略等分析參數，確保後續RAG檢索能夠精準匹配使用者意圖並生成高品質回應",
+        "Allows users to adjust parameters like Prompt templates, similarity thresholds, and chunking strategies to ensure precise retrieval matching user intent and high-quality responses.",
     },
     {
       id: "upload",
       title: "Document Upload",
-      titleZh: "文檔上傳",
       description: "Upload files or URLs",
-      descriptionZh: "上傳檔案或網址",
       tooltip:
-        "支援PDF、TXT文件上傳以及網站URL爬取，系統會自動檢測文件格式並進行內容提取，上傳完成後進入安全性審核流程",
+        "Supports PDF/TXT upload and URL crawling. Automatically detects format and extracts content. Enters security review after upload.",
     },
     {
       id: "processing",
       title: "Content Moderation",
-      titleZh: "內容審核",
       description: "Safety validation",
-      descriptionZh: "安全性檢驗",
       tooltip:
-        "使用Gemini Safety API對上傳內容進行全面安全性檢測，包含仇恨言論、暴力內容、成人內容等有害資訊過濾，確保符合AI安全準則",
+        "Uses Gemini Safety API for comprehensive content safety checks, filtering hate speech, violence, and adult content to meet AI safety guidelines.",
     },
     {
       id: "chunking",
       title: "Text Chunking",
-      titleZh: "文本切割",
       description: "Split into segments",
-      descriptionZh: "分割成片段",
       tooltip:
-        "將通過審核的文本內容智能分割為適合向量化的片段，保持語意完整性的同時優化檢索效能，為後續的嵌入和儲存做準備",
+        "Intelligently splits approved text into vector-ready segments, preserving semantic integrity while optimizing retrieval performance.",
     },
     {
       id: "embedding",
       title: "Vector Embedding",
-      titleZh: "向量嵌入",
       description: "Generate embeddings",
-      descriptionZh: "生成向量表示",
       tooltip:
-        "使用Gemini Embedding API將文本片段轉換為高維度向量表示，儲存至Qdrant向量資料庫中，建立語意搜尋索引以支持後RAG檢索",
+        "Uses Gemini Embedding API to convert text segments into high-dimensional vectors stored in Qdrant, building semantic search indices for RAG.",
     },
     {
       id: "ready",
       title: "AI Response",
-      titleZh: "AI回應",
       description: "Ready for chat",
-      descriptionZh: "準備對話",
       tooltip:
-        "系統已完成所有準備工作，現在可以開始對話。當使用者提問時，系統會執行向量搜尋、檢索相關內容並結合Gemini AI生成準確的答案",
+        "System is ready. When users ask questions, it executes vector search, retrieves relevant content, and uses Gemini AI to generate accurate answers.",
     },
   ];
 
@@ -96,7 +85,7 @@ const FixedRagFlow: React.FC<FixedRagFlowProps> = ({
     steps.findIndex((step) => step.id === stepId);
   const currentStepIndex = getStepIndex(currentStep);
 
-  // 滑鼠移入事件 - 顯示tooltip
+  // Mouse enter event - Show tooltip
   const handleMouseEnter = (
     event: React.MouseEvent,
     step: (typeof steps)[0]
@@ -106,11 +95,11 @@ const FixedRagFlow: React.FC<FixedRagFlowProps> = ({
       visible: true,
       content: step.tooltip,
       x: rect.left + rect.width / 2,
-      y: rect.bottom + 10, // 改為下方顯示
+      y: rect.bottom + 10, // Show below
     });
   };
 
-  // 滑鼠移出事件 - 隱藏tooltip
+  // Mouse leave event - Hide tooltip
   const handleMouseLeave = () => {
     setTooltip({
       visible: false,
@@ -126,38 +115,12 @@ const FixedRagFlow: React.FC<FixedRagFlowProps> = ({
         <div
           className="custom-tooltip"
           style={{
-            position: "fixed",
             left: tooltip.x,
             top: tooltip.y,
-            transform: "translateX(-50%)",
-            backgroundColor: "#6c757d", // 更淡的背景色
-            color: "white",
-            padding: "8px 12px",
-            borderRadius: "6px",
-            fontSize: "0.85rem",
-            fontWeight: "400", // 字重調輕一些
-            maxWidth: "300px",
-            zIndex: 9999,
-            pointerEvents: "none",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.1)", // 陰影調淡
-            whiteSpace: "normal",
-            lineHeight: "1.4",
           }}
         >
           {tooltip.content}
-          <div
-            style={{
-              position: "absolute",
-              bottom: "100%", // 箭頭在tooltip上方
-              left: "50%",
-              transform: "translateX(-50%)",
-              width: 0,
-              height: 0,
-              borderLeft: "6px solid transparent",
-              borderRight: "6px solid transparent",
-              borderBottom: "6px solid #6c757d", // 箭頭指向上方
-            }}
-          />
+          <div className="tooltip-arrow" />
         </div>
       )}
 
@@ -177,16 +140,10 @@ const FixedRagFlow: React.FC<FixedRagFlowProps> = ({
                           isCurrent
                             ? "bg-primary text-white"
                             : isActive
-                            ? "text-white"
-                            : "bg-white border text-muted"
+                              ? "text-white step-completed"
+                              : "bg-white border text-muted"
                         }`}
-                        style={{
-                          minWidth: "120px",
-                          cursor: "pointer",
-                          backgroundColor:
-                            isActive && !isCurrent ? "#d4edda" : undefined,
-                        }}
-                        aria-label={`${step.titleZh}: ${step.tooltip}`}
+                        aria-label={`${step.title}: ${step.tooltip}`}
                         onMouseEnter={(e) => handleMouseEnter(e, step)}
                         onMouseLeave={handleMouseLeave}
                         tabIndex={0}
@@ -203,10 +160,7 @@ const FixedRagFlow: React.FC<FixedRagFlowProps> = ({
                       >
                         <div className="step-content d-flex align-items-center">
                           {isActive && !isCurrent && (
-                            <i
-                              className="bi bi-check-circle-fill text-success me-2"
-                              style={{ fontSize: "1.2rem" }}
-                            ></i>
+                            <i className="bi bi-check-circle-fill text-success me-2 step-check-icon"></i>
                           )}
                         </div>
                       </button>

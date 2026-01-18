@@ -1,0 +1,72 @@
+services:
+  - type: web
+    name: rag-chatbot-backend
+    env: python
+    region: oregon  # 選擇最近的區域
+    plan: free  # 免費方案
+    buildCommand: |
+      cd backend
+      pip install -r requirements.txt
+    startCommand: |
+      cd backend
+      uvicorn src.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      # Python 版本
+      - key: PYTHON_VERSION
+        value: "3.11"
+      
+      # Qdrant 配置 (使用 Qdrant Cloud)
+      - key: QDRANT_MODE
+        value: cloud
+      - key: QDRANT_URL
+        sync: false  # 需要在 Render Dashboard 手動設定
+      - key: QDRANT_API_KEY
+        sync: false  # 需要在 Render Dashboard 手動設定
+      
+      # Gemini API (系統預設 Key)
+      - key: GEMINI_API_KEY
+        sync: false  # 需要在 Render Dashboard 手動設定
+      - key: GEMINI_MODEL
+        value: gemini-2.0-flash-exp
+      - key: GEMINI_EMBEDDING_MODEL
+        value: text-embedding-004
+      - key: GEMINI_TEMPERATURE
+        value: "0.1"
+      
+      # 會話配置
+      - key: SESSION_TTL_MINUTES
+        value: "30"
+      
+      # RAG 配置
+      - key: SIMILARITY_THRESHOLD
+        value: "0.6"
+      - key: CHUNK_SIZE
+        value: "512"
+      - key: CHUNK_OVERLAP
+        value: "128"
+      
+      # Email 配置 (SMTP)
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USERNAME
+        sync: false  # 需要在 Render Dashboard 手動設定
+      - key: SMTP_PASSWORD
+        sync: false  # 需要在 Render Dashboard 手動設定
+      - key: CONTACT_EMAIL_RECIPIENT
+        value: jenhao.hsiao2@gmail.com
+      
+      # CORS 配置 (允許您的 A2 Hosting 網域)
+      - key: CORS_ORIGINS
+        value: https://yourdomain.com,https://www.yourdomain.com
+      
+      # 日誌配置
+      - key: LOG_LEVEL
+        value: INFO
+    
+    # 健康檢查
+    healthCheckPath: /health
+    
+    # 自動部署
+    autoDeploy: true

@@ -83,7 +83,6 @@ export const useMetrics = (): UseMetricsReturn => {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch metrics';
       setError(errorMessage);
-      console.error('Error fetching metrics:', err);
       setMetrics(DEFAULT_METRICS);
     } finally {
       setIsLoading(false);

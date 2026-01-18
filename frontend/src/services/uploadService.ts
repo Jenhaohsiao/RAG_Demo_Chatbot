@@ -1,35 +1,35 @@
-/**
+﻿/**
  * Upload Service
- * 文件上傳 API 呼叫封裝
+ * File upload API call wrapper
  * 
  * Constitutional Compliance:
- * - Principle II (Testability): 獨立服務模組
- * - Principle VIII (API Contract Stability): 遵循 contracts/upload.openapi.yaml
+ * - Principle II (Testability): Independent service module
+ * - Principle VIII (API Contract Stability): Follows contracts/upload.openapi.yaml
  */
 
 import api from './api';
 import { SourceType, ExtractionStatus, ModerationStatus } from '../types/document';
 
 /**
- * 規範化 URL - 自動添加協議前綴
+ * Normalize URL - automatically add protocol prefix
  * 
- * @param url - 用戶輸入的 URL
- * @returns 包含協議的完整 URL
+ * @param url - User input URL
+ * @returns Full URL with protocol
  */
 export const normalizeUrl = (url: string): string => {
   const trimmed = url.trim();
   
-  // 如果已經有協議，直接返回
+  // Return directly if protocol exists
   if (/^https?:\/\//i.test(trimmed)) {
     return trimmed;
   }
   
-  // 自動添加 https:// 前綴
-  return `https://${trimmed}`;
+  // Automatically add https:// prefix
+  return 'https://' + trimmed;
 };
 
 /**
- * 上傳回應（202 Accepted）
+ * Upload response (202 Accepted)
  */
 export interface UploadResponse {
   document_id: string;
@@ -42,10 +42,12 @@ export interface UploadResponse {
   chunk_count?: number;
   content_size?: number;
   preview?: string;
+  error_code?: string;
+  error_message?: string;
 }
 
 /**
- * 爬蟲抓取的單個頁面
+ * Single crawled page
  */
 export interface CrawledPage {
   url: string;
@@ -55,7 +57,7 @@ export interface CrawledPage {
 }
 
 /**
- * 上傳狀態查詢回應
+ * Upload status query response
  */
 export interface UploadStatusResponse {
   document_id: string;
@@ -80,23 +82,23 @@ export interface UploadStatusResponse {
 }
 
 /**
- * URL 上傳請求
+ * URL upload request
  */
 export interface UrlUploadRequest {
   url: string;
 }
 
 /**
- * 網站爬蟲上傳請求
+ * Website crawler upload request
  */
 export interface WebsiteUploadRequest {
   url: string;
-  max_tokens?: number;  // 默認 100K
-  max_pages?: number;   // 默認 100
+  max_tokens?: number;  // Default 100K
+  max_pages?: number;   // Default 100
 }
 
 /**
- * 網站爬蟲上傳回應
+ * Website crawler upload response
  */
 export interface WebsiteUploadResponse extends UploadResponse {
   pages_found: number;
@@ -108,12 +110,12 @@ export interface WebsiteUploadResponse extends UploadResponse {
 }
 
 /**
- * 上傳檔案
+ * Upload file
  * 
  * @param sessionId - Session ID
- * @param file - 檔案物件（PDF 或 TXT）
- * @returns 上傳回應
- * @throws Error 當上傳失敗時
+ * @param file - File object (PDF or TXT)
+ * @returns Upload response
+ * @throws Error when upload fails
  */
 export const uploadFile = async (
   sessionId: string,
@@ -136,12 +138,12 @@ export const uploadFile = async (
 };
 
 /**
- * 上傳 URL
+ * Upload URL
  * 
  * @param sessionId - Session ID
- * @param url - URL 地址
- * @returns 上傳回應
- * @throws Error 當上傳失敗時
+ * @param url - URL address
+ * @returns Upload response
+ * @throws Error when upload fails
  */
 export const uploadUrl = async (
   sessionId: string,
@@ -156,14 +158,14 @@ export const uploadUrl = async (
 };
 
 /**
- * 爬蟲網站內容
+ * Crawl website content
  * 
  * @param sessionId - Session ID
- * @param url - 網站 URL
- * @param maxTokens - 最大 Token 數（默認 100K）
- * @param maxPages - 最大頁面數（默認 100）
- * @returns 爬蟲上傳回應（包含 URL 列表）
- * @throws Error 當爬蟲失敗時
+ * @param url - Website URL
+ * @param maxTokens - Max token count (default 100K)
+ * @param maxPages - Max page count (default 100)
+ * @returns Crawler upload response (including URL list)
+ * @throws Error when crawl fails
  */
 export const uploadWebsite = async (
   sessionId: string,
@@ -171,7 +173,7 @@ export const uploadWebsite = async (
   maxTokens: number = 100000,
   maxPages: number = 100
 ): Promise<WebsiteUploadResponse> => {
-  // 規範化 URL - 自動添加協議前綴
+  // Normalize URL - automatically add protocol prefix
   const normalizedUrl = normalizeUrl(url);
   
   const response = await api.post<WebsiteUploadResponse>(
@@ -187,12 +189,12 @@ export const uploadWebsite = async (
 };
 
 /**
- * 查詢上傳狀態
+ * Query upload status
  * 
  * @param sessionId - Session ID
  * @param documentId - Document ID
- * @returns 狀態回應
- * @throws Error 當查詢失敗時
+ * @returns Status response
+ * @throws Error when query fails
  */
 export const getUploadStatus = async (
   sessionId: string,
@@ -202,23 +204,16 @@ export const getUploadStatus = async (
     `/upload/${sessionId}/status/${documentId}`
   );
 
-  // 調試日誌：檢查摘要是否在響應中（一定會顯示）
-  console.warn('[getUploadStatus] Response Summary Check:', {
-    hasSummary: !!response.data.summary,
-    summaryLength: response.data.summary?.length,
-    summary: response.data.summary?.substring(0, 100),
-    processing_progress: response.data.processing_progress
-  });
-
+  // Debug log: Check if summary is in response (it should be)
   return response.data;
 };
 
 /**
- * 列出 session 中的所有文件
+ * List all documents in session
  * 
  * @param sessionId - Session ID
- * @returns 文件清單
- * @throws Error 當查詢失敗時
+ * @returns Document list
+ * @throws Error when query fails
  */
 export const listDocuments = async (
   sessionId: string
@@ -231,15 +226,15 @@ export const listDocuments = async (
 };
 
 /**
- * 輪詢上傳狀態直到完成或失敗
+ * Poll upload status until complete or failed
  * 
  * @param sessionId - Session ID
  * @param documentId - Document ID
- * @param onProgress - 進度回調函式
- * @param interval - 輪詢間隔（毫秒），預設 2000ms
- * @param maxAttempts - 最大輪詢次數，預設 150（5 分鐘）
- * @returns 最終狀態
- * @throws Error 當達到最大輪詢次數或處理失敗時
+ * @param onProgress - Progress callback function
+ * @param interval - Polling interval (ms), default 2000ms
+ * @param maxAttempts - Max polling attempts, default 150 (5 minutes)
+ * @returns Final status
+ * @throws Error when max attempts reached or processing failed
  */
 export const pollUploadStatus = async (
   sessionId: string,
@@ -253,36 +248,31 @@ export const pollUploadStatus = async (
   while (attempts < maxAttempts) {
     const status = await getUploadStatus(sessionId, documentId);
 
-    // 呼叫進度回調
+    // Call progress callback
     if (onProgress) {
       onProgress(status);
     }
 
-    // 檢查是否完成
+    // Check if completed
     if (status.processing_progress === 100) {
-      console.warn('[pollUploadStatus] COMPLETED - Returning:', {
-        hasSummary: !!status.summary,
-        summaryLength: status.summary?.length,
-        summary: status.summary?.substring(0, 50)
-      });
       return status;
     }
 
-    // 檢查是否失敗
+    // Check if failed
     if (status.extraction_status === ExtractionStatus.FAILED) {
       throw new Error(
         status.error_message || 'Document processing failed'
       );
     }
 
-    // 檢查是否被審核阻擋
+    // Check if blocked by moderation
     if (status.moderation_status === ModerationStatus.BLOCKED) {
       throw new Error(
-        `Content blocked: ${status.error_message || 'Moderation failed'}`
+        `Content blocked: ${status.moderation_categories.join(', ')}`
       );
     }
 
-    // 等待下次輪詢
+    // Wait for next poll
     await new Promise(resolve => setTimeout(resolve, interval));
     attempts++;
   }
@@ -291,10 +281,10 @@ export const pollUploadStatus = async (
 };
 
 /**
- * 驗證檔案類型
+ * Validate file type
  * 
- * @param file - 檔案物件
- * @returns true 如果檔案類型有效
+ * @param file - File object
+ * @returns true if file type is valid
  */
 export const validateFileType = (file: File): boolean => {
   const allowedExtensions = ['.pdf', '.txt'];
@@ -303,11 +293,11 @@ export const validateFileType = (file: File): boolean => {
 };
 
 /**
- * 驗證檔案大小
+ * Validate file size
  * 
- * @param file - 檔案物件
- * @param maxSizeBytes - 最大檔案大小（位元組），預設 10MB
- * @returns true 如果檔案大小有效
+ * @param file - File object
+ * @param maxSizeBytes - Max file size (bytes), default 10MB
+ * @returns true if file size is valid
  */
 export const validateFileSize = (
   file: File,
@@ -317,10 +307,10 @@ export const validateFileSize = (
 };
 
 /**
- * 驗證 URL 格式
+ * Validate URL format
  * 
- * @param url - URL 字串
- * @returns true 如果 URL 格式有效
+ * @param url - URL string
+ * @returns true if URL format is valid
  */
 export const validateUrl = (url: string): boolean => {
   try {
@@ -332,10 +322,10 @@ export const validateUrl = (url: string): boolean => {
 };
 
 /**
- * 格式化檔案大小
+ * Format file size
  * 
- * @param bytes - 位元組數
- * @returns 格式化的字串（例如："5.2 MB"）
+ * @param bytes - Bytes
+ * @returns Formatted string (e.g. "5.2 MB")
  */
 export const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return '0 Bytes';

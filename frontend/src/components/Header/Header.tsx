@@ -6,6 +6,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import type { SupportedLanguage } from "../../hooks/useLanguage";
 import ToastMessage from "../ToastMessage/ToastMessage";
+import "./Header.scss";
 
 interface HeaderProps {
   sessionId: string | null;
@@ -13,6 +14,7 @@ interface HeaderProps {
   onLeave?: () => void;
   onRestart?: () => void;
   onAboutClick?: () => void;
+  onContactClick?: () => void;
   systemMessage?: {
     type: "error" | "warning" | "info" | "success";
     message: string;
@@ -23,12 +25,8 @@ interface HeaderProps {
 
 const SUPPORTED_LANGUAGES: { code: SupportedLanguage; name: string }[] = [
   { code: "en", name: "English" },
-  { code: "zh-TW", name: "繁體中文" },
-  { code: "ja", name: "日本語" },
-  { code: "es", name: "Español" },
-  { code: "ko", name: "한국어" },
-  { code: "ar", name: "العربية" },
   { code: "fr", name: "Français" },
+  { code: "zh-TW", name: "繁體中文" },
   { code: "zh-CN", name: "简体中文" },
 ];
 
@@ -46,6 +44,7 @@ export const Header: React.FC<HeaderProps> = ({
   onLeave,
   onRestart,
   onAboutClick,
+  onContactClick,
   systemMessage,
   onDismissMessage,
   onRestartSession,
@@ -56,9 +55,30 @@ export const Header: React.FC<HeaderProps> = ({
       (i18n.language as SupportedLanguage) || "en"
     );
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setDropdownOpen(false);
+      }
+    };
+
+    if (dropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownOpen]);
 
   React.useEffect(() => {
-    // Update state when i18n language changes
+    // Update current language state when i18n language changes
     setCurrentLanguage((i18n.language as SupportedLanguage) || "en");
   }, [i18n.language]);
 
@@ -75,25 +95,15 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header>
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
-        <div className="container-fluid">
+      <nav className="navbar navbar-expand-lg  navbar-bg ">
+        <div className="container container-fluid">
           {/* App Title */}
           <a className="navbar-brand" href="/">
-            <h3
-              className="mb-0 fw-bold"
-              style={{
-                background: "linear-gradient(135deg, #ffffff, #e8f4fd)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                textShadow: "0 0 20px rgba(255, 255, 255, 0.3)",
-                letterSpacing: "0.5px",
-              }}
-            >
-              {t("app.title")}
-            </h3>
-            <div className="small" style={{ opacity: 0.5 }}>
-              <h6 className="mb-0 mt-1">用視覺說明RAG運行的原理跟流程</h6>
+            <h3 className="mb-0 fw-bold app-title">{t("app.title")}</h3>
+            <div className="small app-subtitle-container">
+              <h6 className="mb-0 mt-1 text-white">
+                <b>{t("app.tagline")}</b>
+              </h6>
             </div>
           </a>
 
@@ -105,9 +115,23 @@ export const Header: React.FC<HeaderProps> = ({
                 className="btn btn-sm btn-outline-light border "
                 type="button"
                 onClick={onAboutClick}
-                title="關於本專案"
+                title={t("buttons.about")}
               >
-                <span className="d-none d-sm-inline">關於本專案</span>
+                <span className="d-none d-sm-inline">{t("buttons.about")}</span>
+              </button>
+            )}
+
+            {/* Contact Button */}
+            {onContactClick && (
+              <button
+                className="btn btn-sm btn-outline-light border"
+                type="button"
+                onClick={onContactClick}
+                title={t("buttons.contact")}
+              >
+                <span className="d-none d-sm-inline">
+                  {t("buttons.contact")}
+                </span>
               </button>
             )}
 
@@ -119,7 +143,6 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={onRestart}
                 title={t("buttons.restart")}
               >
-                <i className="bi bi-arrow-clockwise me-1"></i>
                 <span className="d-none d-sm-inline">
                   {t("buttons.restart")}
                 </span>
@@ -127,7 +150,7 @@ export const Header: React.FC<HeaderProps> = ({
             )}
 
             {/* Language Dropdown Selector - Moved to rightmost */}
-            <div className="dropdown">
+            <div className="dropdown" ref={dropdownRef}>
               <button
                 className="btn btn-sm btn-outline-light border dropdown-toggle"
                 type="button"
@@ -136,11 +159,7 @@ export const Header: React.FC<HeaderProps> = ({
                 aria-expanded={dropdownOpen}
                 title={t("labels.selectLanguage")}
               >
-                <i className="bi bi-globe me-2"></i>
-                <span
-                  className="d-none d-sm-inline text-truncate"
-                  style={{ maxWidth: "100px" }}
-                >
+                <span className="d-none d-sm-inline text-truncate language-selector-text">
                   {currentLangName}
                 </span>
               </button>
@@ -149,12 +168,11 @@ export const Header: React.FC<HeaderProps> = ({
                   {SUPPORTED_LANGUAGES.map((lang) => (
                     <li key={lang.code}>
                       <button
-                        className={`dropdown-item ${
+                        className={`dropdown-item language-option ${
                           currentLanguage === lang.code ? "active" : ""
                         }`}
                         data-testid={`language-option-${lang.code}`}
                         onClick={() => handleLanguageChange(lang.code)}
-                        style={{ cursor: "pointer" }}
                       >
                         <span className="me-2">
                           {currentLanguage === lang.code && (
@@ -180,31 +198,37 @@ export const Header: React.FC<HeaderProps> = ({
           message={systemMessage.message}
           onDismiss={onDismissMessage}
           showConfirmButton={
-            // Session錯誤只顯示更新Session按鈕，不顯示確定按鈕
+            // Show confirm button for session errors except expired/connection issues
             !(
               systemMessage.type === "error" &&
-              (systemMessage.message.includes("會話已過期") ||
-                systemMessage.message.includes("無法維持會話"))
+              (systemMessage.message.includes(t("session.expiredTitle")) ||
+                systemMessage.message.includes(
+                  t("messages.sessionMaintainError")
+                ))
             ) &&
-            // Session更新成功的消息不需要確定按鈕
+            // Session update success message doesn't need confirm button
             !(
               systemMessage.type === "success" &&
-              systemMessage.message.includes("Session 更新成功")
+              systemMessage.message.includes(t("system.sessionUpdateSuccess"))
             )
           }
           showExtraButtonOnly={
-            // Session錯誤只顯示更新Session按鈕
+            // Only show update session button for session errors
             systemMessage.type === "error" &&
-            (systemMessage.message.includes("會話已過期") ||
-              systemMessage.message.includes("無法維持會話"))
+            (systemMessage.message.includes(t("session.expiredTitle")) ||
+              systemMessage.message.includes(
+                t("messages.sessionMaintainError")
+              ))
           }
           extraButton={
             systemMessage.type === "error" &&
-            (systemMessage.message.includes("會話已過期") ||
-              systemMessage.message.includes("無法維持會話")) &&
+            (systemMessage.message.includes(t("session.expiredTitle")) ||
+              systemMessage.message.includes(
+                t("messages.sessionMaintainError")
+              )) &&
             onRestartSession
               ? {
-                  text: "更新 Session",
+                  text: t("buttons.updateSession"),
                   onClick: onRestartSession,
                   className: "btn btn-sm btn-warning",
                 }

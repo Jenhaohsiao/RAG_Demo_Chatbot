@@ -1,6 +1,6 @@
 """
 Content Moderation Service
-使用 Gemini Safety API 檢查內容安全性，阻擋有害或不當內容
+Uses Gemini Safety API to check content safety, blocking harmful or inappropriate content
 """
 import logging
 from enum import Enum
@@ -13,9 +13,9 @@ logger = logging.getLogger(__name__)
 
 
 class ModerationStatus(str, Enum):
-    """內容審核狀態"""
-    APPROVED = "APPROVED"  # 內容安全，允許處理
-    BLOCKED = "BLOCKED"    # 內容被阻擋，包含有害材料
+    """Content moderation status"""
+    APPROVED = "APPROVED"  # Content safe, allows processing
+    BLOCKED = "BLOCKED"    # Content blocked, contains harmful material
 
 
 class HarmCategory(str, Enum):
@@ -62,7 +62,7 @@ class ModerationService:
     使用 Gemini Safety API 檢查文字內容的安全性
     """
     
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: Optional[str]):
         """
         初始化審核服務
         
@@ -72,32 +72,28 @@ class ModerationService:
         Raises:
             ModerationError: 如果 API 金鑰無效或初始化失敗
         """
+        self.api_key = api_key
+        # 設定安全設定 - 設為BLOCK_NONE，由我們自己的邏輯判斷
+        self.safety_settings = {
+            HarmCategory.HARASSMENT: "BLOCK_NONE",
+            HarmCategory.HATE_SPEECH: "BLOCK_NONE", 
+            HarmCategory.SEXUALLY_EXPLICIT: "BLOCK_NONE",
+            HarmCategory.DANGEROUS_CONTENT: "BLOCK_NONE",
+        }
         if not api_key:
-            raise ModerationError("Gemini API key is required for content moderation")
-        
+            logger.warning("ModerationService initialized without API key; moderation will require user-provided key")
+            self.model = None
+            return
         try:
             genai.configure(api_key=api_key)
-            
-            # 設定安全設定 - 設為BLOCK_NONE，由我們自己的邏輯判斷
-            # 只阻擋真正有害的內容：騷擾、仇恨言論、性相關內容、危險內容
-            self.safety_settings = {
-                HarmCategory.HARASSMENT: "BLOCK_NONE",
-                HarmCategory.HATE_SPEECH: "BLOCK_NONE", 
-                HarmCategory.SEXUALLY_EXPLICIT: "BLOCK_NONE",
-                HarmCategory.DANGEROUS_CONTENT: "BLOCK_NONE",
-            }
-            
-            # 使用 Gemini 2.0 Flash 模型進行審核（最新穩定版本）
             self.model = genai.GenerativeModel(
                 model_name='gemini-2.0-flash',
                 safety_settings=self.safety_settings
             )
-            
             logger.info("Content moderation service initialized successfully")
-            
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"Failed to initialize moderation service: {e}")
-            raise ModerationError(f"Failed to configure Gemini API: {str(e)}")
+            self.model = None
     
     def check_content_safety(self, text: str, source_reference: str = "unknown", academic_mode: bool = False) -> ModerationResult:
         """

@@ -1,6 +1,6 @@
 /**
  * ChatScreen Component
- * 聊天介面主畫面
+ * Main chat interface screen
  *
  * T082: Integrate MetricsPanel into ChatScreen updating after each query-response cycle
  * T089+: Display token tracking and page crawl statistics
@@ -11,10 +11,6 @@ import { useTranslation } from "react-i18next";
 import i18n from "../../i18n/config";
 import { ChatMessage } from "../ChatMessage/ChatMessage";
 import { ChatInput } from "../ChatInput/ChatInput";
-import { MetricsPanel } from "../MetricsPanel/MetricsPanel";
-import { DocumentInfoCard } from "../DocumentInfoCard/DocumentInfoCard";
-import ResourceConsumptionPanel from "../ResourceConsumptionPanel/ResourceConsumptionPanel";
-import CrawledUrlsPanel from "../CrawledUrlsPanel/CrawledUrlsPanel";
 import {
   ChatRole,
   ResponseType,
@@ -26,21 +22,22 @@ import {
   type SessionMetrics,
 } from "../../services/metricsService";
 import { getSession } from "../../services/sessionService";
+import { getSuggestions as getChatSuggestions } from "../../services/chatService";
 import { type CrawledPage } from "../../services/uploadService";
 import "./ChatScreen.scss";
 
-// 檢測文本是否主要為英文
+// Check if text is primarily English
 const isEnglishText = (text: string): boolean => {
   if (!text || text.length < 10) return false;
 
-  // 計算英文字符的比例
+  // Calculate ratio of English characters
   const englishChars = text.match(/[a-zA-Z\s\.,!?;:"'-]/g) || [];
   const totalChars = text.replace(/\s/g, "").length;
 
   if (totalChars === 0) return false;
 
   const englishRatio = englishChars.length / text.length;
-  return englishRatio > 0.7; // 如果70%以上是英文字符，認為是英文文本
+  return englishRatio > 0.7; // If over 70% characters are English, consider it English text
 };
 
 interface ChatScreenProps {
@@ -79,7 +76,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   onSendQuery,
 }) => {
   const { t } = useTranslation();
-  // 初始化時使用保存的訊息
+  // Use saved messages on initialization
   const [messages, setMessages] = useState<ChatMessageType[]>(
     savedChatMessages || []
   );
@@ -88,7 +85,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   const [responseTypes, setResponseTypes] = useState<
     Record<string, ResponseType>
   >({});
-  const [suggestions, setSuggestions] = useState<Record<string, string[]>>({}); // 每條訊息的建議問題
+  const [suggestions, setSuggestions] = useState<Record<string, string[]>>({}); // Suggestions for each message
   const [metrics, setMetrics] = useState<SessionMetrics | null>(null);
   const [sessionInfo, setSessionInfo] = useState<{
     document_count: number;
@@ -98,9 +95,32 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   const [metricsErrorCount, setMetricsErrorCount] = useState(0);
   const [isSummaryExpanded, setIsSummaryExpanded] = useState(true);
   const [sessionErrorCount, setSessionErrorCount] = useState(0);
+  const [initialSuggestions, setInitialSuggestions] = useState<string[]>([]);
+  const [areSuggestionsLoading, setAreSuggestionsLoading] = useState(false);
+
+  const MODEL_NAME = "Gemini 2.0 Flash";
+  const PRIMARY_COLOR = "#2b6cb0";
+  const documentCount = sessionInfo?.document_count ?? 0;
+  const vectorCount = sessionInfo?.vector_count ?? 0;
+
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (messages.length === 0 && sessionId) {
+        setAreSuggestionsLoading(true);
+        try {
+          const suggs = await getChatSuggestions(sessionId, i18n.language);
+          setInitialSuggestions(suggs);
+        } catch (err) {
+        } finally {
+          setAreSuggestionsLoading(false);
+        }
+      }
+    };
+    fetchSuggestions();
+  }, [sessionId, messages.length, i18n.language]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // 處理文檔摘要的語言顯示
+  // Handle language display for document summary
   const getLocalizedDocumentSummary = (
     summary: string
   ): {
@@ -109,23 +129,24 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   } => {
     if (!summary) return { content: "", isTranslationNote: false };
 
-    const currentLang = i18n.language; // 獲取當前語言
+    const currentLang = i18n.language; // Get current language
 
-    // 如果當前是中文界面（zh-TW 或 zh-CN）但摘要是英文，提供翻譯說明
+    // If interface is Chinese (zh-TW or zh-CN) but summary is English, provide translation note
     if (currentLang.startsWith("zh") && isEnglishText(summary)) {
       return {
-        content: `🌐 此文件摘要以原始語言（英文）顯示。RAG 系統能夠理解和回答中文問題，無論源文件語言為何。
+        content: `🌐 This summary is shown in original language (English). The RAG system understands and answers in Chinese regardless of source language.
 
-原文摘要：
+Original Summary:
 ${summary}`,
         isTranslationNote: true,
       };
     }
 
+    // Show full summary, no truncation
     return { content: summary, isTranslationNote: false };
   };
 
-  // 自動滾動到最新訊息
+  // Auto scroll to latest message
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -134,22 +155,21 @@ ${summary}`,
     scrollToBottom();
   }, [messages]);
 
-  // 當訊息變化時保存到父組件
+  // Save to parent component on message change
   useEffect(() => {
     if (messages.length > 0 && onSaveChatMessages) {
       onSaveChatMessages(messages);
     }
   }, [messages, onSaveChatMessages]);
 
-  // 定期更新 metrics
+  // Periodically update metrics
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     let errorCount = 0;
 
     const updateMetrics = async () => {
-      // 如果連續失敗超過3次，停止輪詢
+      // Stop polling if more than 3 consecutive errors
       if (errorCount >= 3) {
-        console.warn("Metrics API failed too many times, stopping polling");
         if (interval) {
           clearInterval(interval);
           interval = null;
@@ -160,18 +180,17 @@ ${summary}`,
       try {
         const data = await getSessionMetrics(sessionId);
         setMetrics(data);
-        // 成功時重置錯誤計數
+        // Reset error count on success
         errorCount = 0;
         setMetricsErrorCount(0);
-        // 成功獲取metrics時，清除錯誤狀態但不重置session過期通知
-        if (error && !error.includes("Session已過期")) {
+        // Clear error state but not session expired notification on success
+        if (error && !error.includes(t("messages.sessionExpired"))) {
           setError(null);
         }
       } catch (err: any) {
-        console.error("Failed to update metrics:", err);
         errorCount++;
         setMetricsErrorCount(errorCount);
-        // 檢查是否為Session過期錯誤，且尚未通知過
+        // Check if Session expired error and not yet notified
         if (
           !sessionExpiredNotified &&
           (err.status === 401 || err.status === 403)
@@ -182,10 +201,7 @@ ${summary}`,
       }
     };
 
-    // 初始載入
     updateMetrics();
-
-    // 設置低頻率輪詢：30秒一次
     interval = setInterval(updateMetrics, 30000);
 
     return () => {
@@ -195,15 +211,12 @@ ${summary}`,
     };
   }, [sessionId]);
 
-  // 獲取 session 信息（document_count, vector_count）
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     let errorCount = 0;
 
     const fetchSessionInfo = async () => {
-      // 如果連續失敗超過3次，停止輪詢
       if (errorCount >= 3) {
-        console.warn("Session API failed too many times, stopping polling");
         if (interval) {
           clearInterval(interval);
           interval = null;
@@ -217,23 +230,19 @@ ${summary}`,
           document_count: data.document_count,
           vector_count: data.vector_count,
         });
-        // 成功時重置錯誤計數
         errorCount = 0;
         setSessionErrorCount(0);
-        // 成功獲取session信息時，清除錯誤狀態但不重置session過期通知
-        if (error && !error.includes("Session已過期")) {
+        if (error && !error.includes(t("messages.sessionExpired"))) {
           setError(null);
         }
       } catch (err: any) {
-        console.error("Failed to fetch session info:", err);
         errorCount++;
         setSessionErrorCount(errorCount);
-        // 檢查是否為Session過期錯誤，且尚未通知過
         if (
           !sessionExpiredNotified &&
           (err.status === 401 || err.status === 403)
         ) {
-          setError("Session已過期，請重新登入或刷新頁面");
+          setError(t("messages.sessionExpiredDetail"));
           setSessionExpiredNotified(true);
         }
       }
@@ -241,7 +250,6 @@ ${summary}`,
 
     fetchSessionInfo();
 
-    // 設置低頻率輪詢：60秒一次
     interval = setInterval(fetchSessionInfo, 60000);
 
     return () => {
@@ -251,7 +259,6 @@ ${summary}`,
     };
   }, [sessionId]);
 
-  // 重置Session過期通知狀態和錯誤計數器（當sessionId改變時）
   useEffect(() => {
     setSessionExpiredNotified(false);
     setError(null);
@@ -263,7 +270,6 @@ ${summary}`,
     setError(null);
     setIsLoading(true);
 
-    // 新增使用者訊息
     const userMessage: ChatMessageType = {
       message_id: crypto.randomUUID(),
       session_id: sessionId,
@@ -275,10 +281,8 @@ ${summary}`,
     setMessages((prev) => [...prev, userMessage]);
 
     try {
-      // 發送查詢
       const response = await onSendQuery(content);
 
-      // 新增助理回應
       const assistantMessage: ChatMessageType = {
         message_id: response.message_id,
         session_id: sessionId,
@@ -289,13 +293,11 @@ ${summary}`,
 
       setMessages((prev) => [...prev, assistantMessage]);
 
-      // 記錄回應類型（用於顯示 CANNOT_ANSWER 樣式）
       setResponseTypes((prev) => ({
         ...prev,
         [response.message_id]: response.response_type,
       }));
 
-      // 記錄建議問題（如果有）
       if (response.suggestions && response.suggestions.length > 0) {
         setSuggestions((prev) => ({
           ...prev,
@@ -303,21 +305,18 @@ ${summary}`,
         }));
       }
 
-      // 查詢後立即更新 metrics
       const updatedMetrics = await getSessionMetrics(sessionId);
       setMetrics(updatedMetrics);
     } catch (err: any) {
-      // 檢查是否為Session過期錯誤
       if (
         !sessionExpiredNotified &&
         (err.status === 401 || err.status === 403)
       ) {
-        setError("Session已過期，請重新登入或刷新頁面");
+        setError(t("messages.sessionExpiredDetail"));
         setSessionExpiredNotified(true);
       } else if (!sessionExpiredNotified) {
         setError(err.response?.data?.detail || t("chat.error.sendFailed"));
       }
-      console.error("Query failed:", err);
     } finally {
       setIsLoading(false);
     }
@@ -325,39 +324,62 @@ ${summary}`,
 
   return (
     <div className="chat-screen">
-      {/* 文件摘要區域 */}
       {documentSummary &&
         (() => {
           const { content, isTranslationNote } =
             getLocalizedDocumentSummary(documentSummary);
           return (
-            <div className="document-summary-header sticky-summary">
+            <div
+              className="document-summary-header sticky-summary"
+              style={{ borderBottom: `2px solid ${PRIMARY_COLOR}` }}
+            >
               <div className="document-summary-content">
                 <div className="d-flex justify-content-between align-items-center mb-2">
-                  <h5 className="summary-title mb-0">
-                    <i className="bi bi-file-text me-2"></i>
-                    文件摘要
+                  <h5
+                    className="summary-title mb-0"
+                    style={{ color: PRIMARY_COLOR, fontWeight: "bold" }}
+                  >
+                    <i className="bi bi-file-earmark-text me-2"></i>
+                    {t("chat.documentSummary.title")}
                     {isTranslationNote && (
                       <span
                         className="badge bg-info ms-2"
-                        title="此摘要包含語言說明"
+                        title={t("chat.documentSummary.translationNote")}
                       >
                         <i className="bi bi-translate"></i>
                       </span>
                     )}
                   </h5>
-                  <button
-                    className="btn btn-sm btn-outline-secondary"
-                    onClick={() => setIsSummaryExpanded(!isSummaryExpanded)}
-                    title={isSummaryExpanded ? "收起" : "展開"}
-                  >
-                    <i
-                      className={`bi bi-chevron-${
-                        isSummaryExpanded ? "up" : "down"
-                      }`}
-                    ></i>
-                    {isSummaryExpanded ? "收起" : "展開"}
-                  </button>
+
+                  <div className="d-flex align-items-center">
+                    <span
+                      className="badge me-3"
+                      style={{ backgroundColor: PRIMARY_COLOR }}
+                    >
+                      MODEL: {MODEL_NAME}
+                    </span>
+                    <small className="text-muted me-3">
+                      {tokensUsed
+                        ? `${tokensUsed.toLocaleString()} Tokens`
+                        : ""}
+                    </small>
+                    <button
+                      className="btn btn-sm btn-link text-decoration-none"
+                      onClick={() => setIsSummaryExpanded(!isSummaryExpanded)}
+                      style={{ color: PRIMARY_COLOR }}
+                      title={
+                        isSummaryExpanded
+                          ? t("chat.documentSummary.collapse")
+                          : t("chat.documentSummary.expand")
+                      }
+                    >
+                      <i
+                        className={`bi bi-chevron-${
+                          isSummaryExpanded ? "up" : "down"
+                        }`}
+                      ></i>
+                    </button>
+                  </div>
                 </div>
                 {isSummaryExpanded && (
                   <>
@@ -365,16 +387,9 @@ ${summary}`,
                       className={`summary-text ${
                         isTranslationNote ? "translation-note" : ""
                       }`}
+                      style={{ fontSize: "0.9rem", color: "#4a5568" }}
                     >
                       {content}
-                    </div>
-                    <div className="summary-meta">
-                      <small className="text-muted">
-                        <i className="bi bi-robot me-1"></i>
-                        由AI分析生成 •{sourceType && ` ${sourceType} • `}
-                        {chunkCount && `${chunkCount} 個文本段落 • `}
-                        {tokensUsed && `${tokensUsed.toLocaleString()} Tokens`}
-                      </small>
                     </div>
                   </>
                 )}
@@ -386,39 +401,54 @@ ${summary}`,
       <div className="row chat-main-content">
         <div className="col-md-12 right-panel">
           <div className="interaction-area">
-            <h5 className="section-title">💬 互動專區</h5>
-
-            {/* 聊天對話區 */}
             <div className="chat-area">
-              <h6 className="subsection-title">聊天對話區</h6>
               <div className="messages-container">
-                {messages.length === 0 ? (
+                {messages.length === 0 && (
                   <div className="empty-state">
                     <p>{t("chat.empty.message")}</p>
                     <p className="empty-hint">{t("chat.empty.hint")}</p>
+
+                    <div className="initial-suggestions">
+                      {areSuggestionsLoading ? (
+                        <div className="suggestions-loading">
+                          {t("chat.suggestions.loading")}
+                        </div>
+                      ) : (
+                        <div className="suggestion-chips">
+                          {initialSuggestions.map((s, i) => (
+                            <button
+                              key={i}
+                              className="suggestion-chip"
+                              onClick={() => handleSendMessage(s)}
+                            >
+                              {s}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                ) : (
-                  messages.map((msg) => (
-                    <ChatMessage
-                      key={msg.message_id}
-                      message={msg}
-                      responseType={
-                        msg.role === ChatRole.ASSISTANT
-                          ? responseTypes[msg.message_id]
-                          : undefined
-                      }
-                      suggestions={
-                        msg.role === ChatRole.ASSISTANT
-                          ? suggestions[msg.message_id]
-                          : undefined
-                      }
-                      onSuggestionClick={(suggestion) => {
-                        // 點擊建議問題時，自動發送該問題
-                        handleSendMessage(suggestion);
-                      }}
-                    />
-                  ))
                 )}
+
+                {messages.map((msg) => (
+                  <ChatMessage
+                    key={msg.message_id}
+                    message={msg}
+                    responseType={
+                      msg.role === ChatRole.ASSISTANT
+                        ? responseTypes[msg.message_id]
+                        : undefined
+                    }
+                    suggestions={
+                      msg.role === ChatRole.ASSISTANT
+                        ? suggestions[msg.message_id]
+                        : undefined
+                    }
+                    onSuggestionClick={(suggestion) => {
+                      handleSendMessage(suggestion);
+                    }}
+                  />
+                ))}
 
                 {isLoading && (
                   <div className="loading-indicator">
@@ -431,13 +461,12 @@ ${summary}`,
               </div>
             </div>
 
-            {/* 提問區 */}
             <div className="input-area">
-              <h6 className="subsection-title">提問區</h6>
               {error && <div className="error-banner">❌ {error}</div>}
               <ChatInput
                 onSendMessage={handleSendMessage}
                 disabled={isLoading}
+                placeholder={t("chat.input.placeholder_new")}
               />
             </div>
           </div>

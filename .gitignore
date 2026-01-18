@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.so
+.venv/
 .Python
 venv/
 env/
@@ -14,8 +15,10 @@ build/
 # Testing
 .pytest_cache/
 .coverage
+.coverage.*
 htmlcov/
 *.cover
+coverage/
 
 # IDEs
 .vscode/

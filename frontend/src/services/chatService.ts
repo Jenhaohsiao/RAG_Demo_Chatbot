@@ -1,34 +1,42 @@
-/**
+﻿/**
  * Chat API Service
- * 處理 RAG 查詢與聊天歷史
+ * Handles RAG queries and chat history
  */
 
 import api from './api';
 import type { ChatResponse, ChatHistoryResponse } from '../types/chat';
 
 /**
- * 提交查詢
+ * Submit query
+ * 支援用戶自帶 API Key（當系統配額用完時）
  */
 export async function submitQuery(
   sessionId: string,
   userQuery: string,
-  language?: string
+  language?: string,
+  userApiKey?: string // 可選的用戶 API Key
 ): Promise<ChatResponse> {
   const lang = language || 'en';
-  console.log('[chatService] Submitting query with language:', lang);
+  
+  // 構建 headers
+  const headers: Record<string, string> = {};
+  if (userApiKey) {
+    headers['X-User-API-Key'] = userApiKey;
+  }
   
   const response = await api.post<ChatResponse>(
     `/chat/${sessionId}/query`,
     { 
       user_query: userQuery,
       language: lang
-    }
+    },
+    { headers }
   );
   return response.data;
 }
 
 /**
- * 取得聊天歷史
+ * Get chat history
  */
 export async function getChatHistory(
   sessionId: string,
@@ -43,14 +51,29 @@ export async function getChatHistory(
 }
 
 /**
- * 清除聊天歷史
+ * Clear chat history
  */
 export async function clearHistory(sessionId: string): Promise<void> {
   await api.delete(`/chat/${sessionId}/history`);
 }
 
 /**
- * 驗證查詢輸入
+ * Get suggested questions
+ */
+export async function getSuggestions(
+  sessionId: string,
+  language?: string
+): Promise<string[]> {
+  const lang = language || 'en';
+  const response = await api.get<string[]>(
+    `/chat/${sessionId}/suggestions`,
+    { params: { language: lang } }
+  );
+  return response.data;
+}
+
+/**
+ * Validate query input
  */
 export function validateQuery(query: string): {
   valid: boolean;
