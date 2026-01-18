@@ -80,7 +80,7 @@ class RAGEngine:
         self,
         vector_store: Optional[VectorStore] = None,
         embedder: Optional[Embedder] = None,
-        similarity_threshold: float = 0.6,
+        similarity_threshold: float = 0.3,
         max_chunks: int = 5,
         temperature: float = 0.1,
         memory_limit: int = 100,  # 最多保留 100 個查詢
@@ -92,7 +92,7 @@ class RAGEngine:
         Args:
             vector_store: 向量儲存服務
             embedder: 嵌入服務
-            similarity_threshold: 相似度閾值（調整為 0.6 以提高問答覆蓋率）
+            similarity_threshold: 相似度閾值（調整為 0.3 以提高中文文本匹配效果）
             max_chunks: 最大檢索塊數
             temperature: LLM 溫度（research.md 建議 0.1）
             memory_limit: 滑動視窗記憶體限制（查詢數）
@@ -670,9 +670,9 @@ class RAGEngine:
                 score_threshold=threshold
             )
             
-            # 如果沒找到結果或結果太少，用較低閾值重試
+            # If no results or too few results, retry with lower threshold
             if not search_results or len(search_results) < 3:
-                retry_threshold = 0.2 if not search_results else 0.3
+                retry_threshold = 0.1 if not search_results else 0.2
                 logger.info(f"[{session_id}] Found only {len(search_results)} results, retrying with threshold {retry_threshold}")
                 search_results = self.vector_store.search_similar(
                     collection_name=collection_name,
@@ -871,83 +871,47 @@ class RAGEngine:
         logger.info(f"[{session_id}] Generating summary (language={language}, max_tokens={max_tokens})")
         
         try:
-            # 多語言摘要提示詞（包括繁體中文和簡體中文）
+            # Multi-language summary prompts (Traditional Chinese, Simplified Chinese, English, French)
             summary_prompts = {
-                "zh-TW": """請為以下文檔內容提供一段完整的摘要（約 150 字左右）。摘要應該：
+                "zh-TW": """請為以下文檔內容提供一段完整的摘要（約 150-200 字）。摘要應該：
 1. 使用繁體中文寫作
 2. 包含主要主題和關鍵點
 3. 簡潔清晰，適合快速瀏覽
 4. 完整描述，不要使用「...」或「等等」結尾
-5. 字數控制在 150 字左右即可，不強制限制
+5. 字數控制在 150-200 字左右
 
 文檔內容：
 """,
-                "zh-CN": """请为以下文档内容提供一段完整的摘要（约 150 字左右）。摘要应该：
+                "zh-CN": """请为以下文档内容提供一段完整的摘要（约 150-200 字）。摘要应该：
 1. 使用简体中文写作
 2. 包含主要主题和关键点
 3. 简洁清晰，适合快速浏览
 4. 完整描述，不要使用「...」或「等等」结尾
-5. 字数控制在 150 字左右即可，不强制限制
+5. 字数控制在 150-200 字左右
 
 文档内容：
 """,
-                "zh": """請為以下文檔內容提供一段完整的摘要（約 150 字左右）。摘要應該：
-1. 直接用中文寫作，無需翻譯聲明
-2. 包含主要主題和關鍵點
-3. 簡潔清晰，適合快速瀏覽
-4. 完整描述，不要使用「...」或「等等」結尾
-5. 字數控制在 150 字左右即可，不強制限制
-
-文檔內容：
-""",
-                "en": """Please provide a complete summary of the following document (approximately 150 words). The summary should:
-1. Be written directly in English
+                "en": """Please provide a complete summary of the following document (approximately 150-200 words). The summary should:
+1. Be written in English
 2. Include main topics and key points
 3. Be clear and suitable for quick scanning
 4. End with a complete sentence, DO NOT use "..." or "etc." at the end
-5. Target around 150 words, but no strict limit
+5. Target around 150-200 words
 
 Document content:
 """,
-                "ko": """다음 문서에 대한 완전한 요약을 제공하십시오(약 150단어). 요약은 다음과 같아야 합니다:
-1. 한국어로 직접 작성
-2. 주요 주제 및 핵심 포인트 포함
-3. 명확하고 빠른 스캔에 적합
-4. 완전한 문장으로 끝내고, "..." 또는 "등등"으로 끝내지 마세요
-5. 약 150단어 정도로 작성하되, 엄격한 제한은 없음
-
-문서 내용:
-""",
-                "es": """Proporcione un resumen completo del siguiente documento (aproximadamente 150 palabras). El resumen debe:
-1. Ser escrito directamente en español
-2. Incluir temas principales y puntos clave
-3. Ser claro y apto para escaneo rápido
-4. Terminar con una oración completa, NO use "..." o "etc." al final
-5. Apuntar a unas 150 palabras, pero sin límite estricto
-
-Contenido del documento:
-""",
-                "ja": """次のドキュメントの完全な要約を提供してください（約150語）。要約は次のようにしてください:
-1. 日本語で直接作成
-2. 主要なトピックと重要なポイントを含める
-3. 明確で、素早いスキャンに適している
-4. 完全な文で終わり、「...」や「など」で終わらせないでください
-5. 約150語を目標にしますが、厳密な制限はありません
-
-ドキュメント内容:
-""",
-                "fr": """Veuillez fournir un résumé complet du document suivant (environ 150 mots). Le résumé doit:
-1. Être écrit directement en français
+                "fr": """Veuillez fournir un résumé complet du document suivant (environ 150-200 mots). Le résumé doit:
+1. Être rédigé en français
 2. Inclure les sujets principaux et les points clés
 3. Être clair et approprié pour un balayage rapide
 4. Se terminer par une phrase complète, NE PAS utiliser "..." ou "etc." à la fin
-5. Viser environ 150 mots, mais sans limite stricte
+5. Viser environ 150-200 mots
 
 Contenu du document:
 """
             }
             
-            # 取得語言對應的提示詞，如果不存在則使用英文
+            # Get language-specific prompt, fallback to English if not found
             system_prompt = summary_prompts.get(language, summary_prompts["en"])
             
             # 若文檔過長，只取前面部分

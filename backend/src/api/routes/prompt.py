@@ -1,6 +1,6 @@
 """
 Prompt API Routes
-提供系統 Prompt 信息的 API 端點
+Provides system prompt information API endpoints
 """
 from fastapi import APIRouter
 from typing import Dict, Any, Optional
@@ -11,13 +11,13 @@ router = APIRouter()
 @router.get("/system-prompts", tags=["Prompt"])
 async def get_system_prompts() -> Dict[str, Any]:
     """
-    獲取系統使用的 Prompt 模板
+    Get system prompt templates
     
     Returns:
-        Dict: 包含各種 Prompt 模板的字典
+        Dict: Dictionary containing various prompt templates
     """
     
-    # RAG 系統主要 Prompt 模板
+    # Main RAG system prompt template
     rag_prompt_template = """You are a helpful multilingual assistant.
 
 **Term Definitions**:
@@ -40,65 +40,60 @@ async def get_system_prompts() -> Dict[str, Any]:
 
 **Your Answer** (in {{language}}):"""
 
-    # 摘要生成 Prompt 模板
+    # Summary generation prompt templates
     summary_prompt_templates = {
-        "zh-TW": """請為以下文檔內容提供一段簡潔的摘要（最多 300 個字）。摘要應該：
+        "zh-TW": """請為以下文檔內容提供一段完整的摘要（約 150-200 字）。摘要應該：
 1. 使用繁體中文寫作
 2. 包含主要主題和關鍵點
 3. 簡潔清晰，適合快速瀏覽
-4. 不超過 300 字
+4. 完整描述，不要使用「...」或「等等」結尾
+5. 字數控制在 150-200 字左右
 
 文檔內容：
 {{content}}""",
         
-        "zh-CN": """请为以下文档内容提供一段简洁的摘要（最多 300 个字）。摘要应该：
+        "zh-CN": """请为以下文档内容提供一段完整的摘要（约 150-200 字）。摘要应该：
 1. 使用简体中文写作
 2. 包含主要主题和关键点
 3. 简洁清晰，适合快速浏览
-4. 不超过 300 字
+4. 完整描述，不要使用「...」或「等等」结尾
+5. 字数控制在 150-200 字左右
 
 文档内容：
 {{content}}""",
         
-        "en": """Please provide a concise summary of the following document content (maximum 300 words). The summary should:
+        "en": """Please provide a complete summary of the following document (approximately 150-200 words). The summary should:
 1. Be written in English
 2. Include main themes and key points
 3. Be clear and suitable for quick browsing
-4. Not exceed 300 words
+4. End with a complete sentence, DO NOT use "..." or "etc." at the end
+5. Target around 150-200 words
 
 Document content:
 {{content}}""",
         
-        "ja": """以下の文書内容の簡潔な要約（最大300語）を提供してください。要約は：
-1. 日本語で書く
-2. 主要なテーマとキーポイントを含む
-3. 明確で素早い閲覧に適している
-4. 300語を超えない
+        "fr": """Veuillez fournir un résumé complet du document suivant (environ 150-200 mots). Le résumé doit:
+1. Être rédigé en français
+2. Inclure les thèmes principaux et les points clés
+3. Être clair et adapté à une lecture rapide
+4. Se terminer par une phrase complète, NE PAS utiliser "..." ou "etc." à la fin
+5. Viser environ 150-200 mots
 
-文書内容：
-{{content}}""",
-        
-        "ko": """다음 문서 내용의 간결한 요약(최대 300단어)을 제공해 주세요. 요약은：
-1. 한국어로 작성
-2. 주요 주제와 핵심 사항 포함
-3. 명확하고 빠른 검토에 적합
-4. 300단어를 초과하지 않음
-
-문서 내용：
+Contenu du document:
 {{content}}"""
     }
 
-    # 內容審核 Prompt
-    moderation_prompt = """請分析以下內容是否安全且適當：
+    # Content moderation prompt
+    moderation_prompt = """Please analyze whether the following content is safe and appropriate:
 
 {{content}}
 
-請回答：
-1. 內容是否適當？ (是/否)
-2. 如有問題，問題類型是什麼？
-3. 建議的處理方式"""
+Please answer:
+1. Is the content appropriate? (Yes/No)
+2. If there are issues, what type of issues?
+3. Recommended handling approach"""
 
-    # 無文檔時的 Prompt
+    # Prompt for when no documents are available
     no_documents_prompt = """You are a helpful multilingual assistant.
 
 **IMPORTANT RULES**:
@@ -113,35 +108,33 @@ Document content:
 
 **Your Answer** (in {{language}}):"""
 
-    # 語言映射
+    # Language mappings
     language_mappings = {
-        "zh": "Traditional Chinese (繁體中文)",
         "en": "English",
-        "ko": "Korean (한국어)",
-        "es": "Spanish (Español)",
-        "ja": "Japanese (日本語)",
-        "fr": "French (Français)"
+        "fr": "French (Français)",
+        "zh-TW": "Traditional Chinese (繁體中文)",
+        "zh-CN": "Simplified Chinese (简体中文)"
     }
 
-    # Constitutional Principles (憲法原則)
+    # Constitutional Principles
     constitutional_principles = [
-        "Principle I (MVP First): 優先實現核心功能",
-        "Principle II (Testability): 確保所有功能可測試",
-        "Principle III (Session Isolation): Session 之間嚴格隔離",
-        "Principle IV (Similarity Threshold): 嚴格相似度閾值 ≥ 0.7",
-        "Principle V (Strict Citations): 嚴格基於檢索內容回答",
-        "Principle VI (Token Awareness): 主動監控 Token 使用",
-        "Principle VII (Error Resilience): 優雅處理所有錯誤",
-        "Principle VIII (Multilingual): 支持多語言界面和回應",
-        "Principle IX (Performance): 響應時間 < 5 秒",
-        "Principle X (Security): 內容審核和安全防護",
-        "Principle XI (Monitoring): 完整的日誌和指標追蹤",
-        "Principle XII (Documentation): 清晰的 API 和功能文檔",
-        "Principle XIII (Scalability): 設計考慮擴展性",
-        "Principle XIV (Data Privacy): 嚴格保護用戶數據",
-        "Principle XV (Version Control): 規範的代碼版本管理",
-        "Principle XVI (Testing): 全面的自動化測試",
-        "Principle XVII (Deployment): 簡化的部署和維護"
+        "Principle I (MVP First): Prioritize core functionality implementation",
+        "Principle II (Testability): Ensure all features are testable",
+        "Principle III (Session Isolation): Strict isolation between sessions",
+        "Principle IV (Similarity Threshold): Strict similarity threshold ≥ 0.7",
+        "Principle V (Strict Citations): Answer strictly based on retrieved content",
+        "Principle VI (Token Awareness): Actively monitor token usage",
+        "Principle VII (Error Resilience): Handle all errors gracefully",
+        "Principle VIII (Multilingual): Support multilingual interface and responses",
+        "Principle IX (Performance): Response time < 5 seconds",
+        "Principle X (Security): Content moderation and security protection",
+        "Principle XI (Monitoring): Complete logging and metrics tracking",
+        "Principle XII (Documentation): Clear API and feature documentation",
+        "Principle XIII (Scalability): Design with scalability in mind",
+        "Principle XIV (Data Privacy): Strictly protect user data",
+        "Principle XV (Version Control): Standardized code version management",
+        "Principle XVI (Testing): Comprehensive automated testing",
+        "Principle XVII (Deployment): Simplified deployment and maintenance"
     ]
 
     logger.info("System prompts requested")
@@ -177,25 +170,23 @@ async def get_current_session_prompt(
     has_documents: bool = True
 ) -> Dict[str, Any]:
     """
-    獲取當前 Session 的實際 Prompt
+    Get the actual prompt for the current session
     
     Args:
         session_id: Session ID
-        language: 語言代碼
-        has_documents: 是否有文檔
+        language: Language code
+        has_documents: Whether documents are available
         
     Returns:
-        Dict: 當前 Session 使用的 Prompt
+        Dict: Prompt used by the current session
     """
     
-    # 語言映射
+    # Language mappings
     language_names = {
-        "zh": "Traditional Chinese (繁體中文)",
-        "en": "English", 
-        "ko": "Korean (한국어)",
-        "es": "Spanish (Español)",
-        "ja": "Japanese (日本語)",
-        "fr": "French (Français)"
+        "en": "English",
+        "fr": "French (Français)",
+        "zh-TW": "Traditional Chinese (繁體中文)",
+        "zh-CN": "Simplified Chinese (简体中文)"
     }
     
     response_language = language_names.get(language, "English")
@@ -238,7 +229,7 @@ async def get_current_session_prompt(
 
 **Your Answer** (in {language}):"""
     
-    # 填入語言
+    # Fill in language
     actual_prompt = template.format(language=response_language)
     
     logger.info(f"Current session prompt requested: {prompt_type}, language={language}")

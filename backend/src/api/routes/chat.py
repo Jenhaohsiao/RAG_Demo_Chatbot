@@ -27,18 +27,18 @@ logger = logging.getLogger(__name__)
 # Create chat router (prefix handled by parent router in api/__init__.py)
 router = APIRouter()
 
-# 全域服務實例
+# Global service instances
 rag_engine = get_rag_engine()
 
 
 class QueryRequest(BaseModel):
-    """查詢請求"""
-    user_query: str = Field(..., min_length=1, max_length=2000, description="使用者查詢")
-    language: str = Field(default="en", description="UI 語言代碼 (en, zh-TW, ko, es, ja, ar, fr, zh-CN)")
+    """Query request model"""
+    user_query: str = Field(..., min_length=1, max_length=2000, description="User query text")
+    language: str = Field(default="en", description="UI language code (en, zh-TW, ko, es, ja, ar, fr, zh-CN)")
 
 
 class RetrievedChunkResponse(BaseModel):
-    """檢索到的文字塊回應"""
+    """Retrieved document chunk response"""
     chunk_id: str
     text: str
     similarity_score: float
@@ -48,7 +48,7 @@ class RetrievedChunkResponse(BaseModel):
 
 
 class ChatResponse(BaseModel):
-    """Chat 回應"""
+    """Chat response model"""
     message_id: str
     session_id: str
     llm_response: str
@@ -59,17 +59,17 @@ class ChatResponse(BaseModel):
     token_output: int
     token_total: int
     timestamp: str
-    suggestions: Optional[List[str]] = None  # 建議問題（當無法回答時提供）
+    suggestions: Optional[List[str]] = None  # Suggested questions (provided when cannot answer)
 
 
 class ChatHistoryResponse(BaseModel):
-    """聊天歷史回應"""
+    """Chat history response"""
     messages: List[ChatMessage]
     total_count: int
 
 
 class MetricsResponse(BaseModel):
-    """Session Metrics 回應"""
+    """Session metrics response"""
     session_id: str
     total_queries: int
     total_tokens: int
@@ -83,7 +83,7 @@ class MetricsResponse(BaseModel):
     is_unanswered_warning: bool
 
 
-# 聊天歷史儲存（實際應使用資料庫）
+# Chat history storage (should use database in production)
 _chat_history: dict[UUID, List[ChatMessage]] = {}
 
 
@@ -91,33 +91,33 @@ _chat_history: dict[UUID, List[ChatMessage]] = {}
 async def query(
     session_id: UUID,
     request: QueryRequest,
-    x_user_api_key: Optional[str] = Header(None, description="用戶提供的 API Key (optional)")
+    x_user_api_key: Optional[str] = Header(None, description="User-provided API Key (optional)")
 ):
     """
-    執行 RAG 查詢
+    Execute RAG query
     
     Flow:
-    1. 驗證 session 存在且狀態為 READY_FOR_CHAT
-    2. 執行 RAG 查詢 (embed → search → generate)
-    3. 儲存聊天歷史
-    4. 回傳回應
+    1. Validate session exists and state is READY_FOR_CHAT
+    2. Execute RAG query (embed → search → generate)
+    3. Save chat history
+    4. Return response
     
-    支援用戶自帶 API Key：
-    - 當系統 API Key 配額用完時，用戶可在 Header 中提供自己的 Key
+    User-provided API Key support:
+    - When system API Key quota is exhausted, user can provide their own key in header
     - Header: X-User-API-Key: your_api_key_here
-    - 用戶的 Key 僅用於當前請求，不會被存儲
+    - User's key is only used for current request, not stored
     
     T089: Enhanced error handling:
     - 404 if session not found
     - 400 if query empty
     - 409 if session in invalid state
-    - 429 if quota exceeded (需要用戶提供 API Key)
+    - 429 if quota exceeded (requires user to provide API Key)
     - 500 if RAG processing fails
     """
-    # 延遲導入以避免循環導入
+    # Delayed import to avoid circular dependency
     from ...main import AppException
     
-    # 驗證 session 存在
+    # Validate session exists
     session = session_manager.get_session(session_id)
     if not session:
         logger.warning(f"Session {session_id} not found")
@@ -127,7 +127,7 @@ async def query(
             message=f"Session {session_id} not found or expired"
         )
     
-    # 驗證 session 狀態 (允許 READY_FOR_CHAT 或 CHATTING)
+    # Validate session state (allow READY_FOR_CHAT or CHATTING)
     if session.state not in (SessionState.READY_FOR_CHAT, SessionState.CHATTING):
         logger.warning(f"Session {session_id} in invalid state: {session.state}")
         raise AppException(
@@ -137,7 +137,7 @@ async def query(
             details={"current_state": session.state.value}
         )
     
-    # 驗證查詢非空
+    # Validate query is not empty
     user_query = request.user_query.strip()
     if not user_query:
         logger.warning(f"Empty query from session {session_id}")
@@ -148,8 +148,8 @@ async def query(
         )
     
     try:
-        # 執行 RAG 查詢（使用 session 特定的 similarity_threshold 和 custom_prompt）
-        # 如果用戶提供 API Key，傳遞給 RAG 引擎使用
+        # Execute RAG query (use session-specific similarity_threshold and custom_prompt)
+        # If user provides API Key, pass it to RAG engine
         logger.debug(
             f"[{session_id}] Processing query (threshold={session.similarity_threshold}, "
             f"language={request.language}, custom_prompt={bool(session.custom_prompt)})"
@@ -161,35 +161,35 @@ async def query(
             similarity_threshold=session.similarity_threshold,
             language=request.language,
             custom_prompt=session.custom_prompt,
-            api_key=x_user_api_key  # 傳遞用戶的 API Key（如有）
+            api_key=x_user_api_key  # Pass user's API Key (if provided)
         )
         
-        # 建立使用者訊息
+        # Create user message
         user_message = ChatMessage(
             session_id=session_id,
             role=ChatRole.USER,
             content=user_query
         )
         
-        # 建立助理訊息
+        # Create assistant message
         assistant_message = ChatMessage(
             session_id=session_id,
             role=ChatRole.ASSISTANT,
             content=rag_response.llm_response
         )
         
-        # 儲存聊天歷史
+        # Save chat history
         if session_id not in _chat_history:
             _chat_history[session_id] = []
         
         _chat_history[session_id].append(user_message)
         _chat_history[session_id].append(assistant_message)
         
-        # 更新 session 狀態
+        # Update session state
         session_manager.update_state(session_id, SessionState.CHATTING)
         session_manager.update_activity(session_id)
         
-        # 轉換檢索塊為回應格式
+        # Convert retrieved chunks to response format
         retrieved_chunks_response = [
             RetrievedChunkResponse(
                 chunk_id=chunk.chunk_id,
@@ -202,7 +202,7 @@ async def query(
             for chunk in rag_response.retrieved_chunks
         ]
         
-        # 記錄 metrics（若有警告）
+        # Log metrics (if warning threshold exceeded)
         if rag_response.metrics and rag_response.metrics.unanswered_ratio >= 0.8:
             logger.warning(
                 f"[{session_id}] HIGH UNANSWERED RATIO: {rag_response.metrics.unanswered_ratio:.1%}"
@@ -228,7 +228,7 @@ async def query(
         )
     
     except QuotaExceededError as e:
-        # 配額超限錯誤 - 返回 429 讓前端顯示 API Key 輸入對話框
+        # Quota exceeded error - return 429 to trigger API Key input dialog on frontend
         logger.warning(f"[{session_id}] API quota exceeded: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
@@ -241,7 +241,7 @@ async def query(
         )
     
     except InvalidApiKeyError as e:
-        # 用戶提供的 API Key 無效
+        # User-provided API Key is invalid
         logger.warning(f"[{session_id}] Invalid API key provided: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -281,17 +281,17 @@ async def get_history(
     offset: int = 0
 ):
     """
-    取得聊天歷史
+    Get chat history
     
     Args:
         session_id: Session ID
-        limit: 每頁數量（預設 50）
-        offset: 偏移量（預設 0）
+        limit: Items per page (default 50)
+        offset: Offset for pagination (default 0)
     
     Returns:
-        ChatHistoryResponse: 聊天歷史
+        ChatHistoryResponse: Chat history
     """
-    # 驗證 session
+    # Validate session
     session = session_manager.get_session(session_id)
     if not session:
         error = get_error_response(ErrorCode.SESSION_NOT_FOUND)
@@ -300,11 +300,11 @@ async def get_history(
             detail=error.dict()
         )
     
-    # 取得聊天歷史
+    # Get chat history
     messages = _chat_history.get(session_id, [])
     total_count = len(messages)
     
-    # 分頁
+    # Pagination
     paginated_messages = messages[offset:offset + limit]
     
     logger.info(
@@ -321,15 +321,15 @@ async def get_history(
 @router.delete("/{session_id}/history")
 async def clear_history(session_id: UUID):
     """
-    清除聊天歷史
+    Clear chat history
     
     Args:
         session_id: Session ID
     
     Returns:
-        dict: 成功訊息
+        dict: Success message
     """
-    # 驗證 session
+    # Validate session
     session = session_manager.get_session(session_id)
     if not session:
         error = get_error_response(ErrorCode.SESSION_NOT_FOUND)
@@ -338,7 +338,7 @@ async def clear_history(session_id: UUID):
             detail=error.dict()
         )
     
-    # 清除歷史
+    # Clear history
     if session_id in _chat_history:
         del _chat_history[session_id]
     
@@ -350,18 +350,18 @@ async def clear_history(session_id: UUID):
 @router.get("/{session_id}/metrics", response_model=MetricsResponse)
 async def get_metrics(session_id: UUID):
     """
-    取得 Session 指標（Token 使用、查詢統計、警告狀態）
+    Get session metrics (token usage, query statistics, warning states)
     
     Flow:
-    1. 驗證 session 存在
-    2. 從 RAG Engine 取得 metrics
-    3. 計算警告狀態
-    4. 返回詳細統計數據
+    1. Validate session exists
+    2. Get metrics from RAG Engine
+    3. Calculate warning states
+    4. Return detailed statistics
     
     Returns:
-        MetricsResponse: 包含所有運作指標
+        MetricsResponse: Contains all operational metrics
     """
-    # 驗證 session
+    # Validate session
     session = session_manager.get_session(session_id)
     if not session:
         error = get_error_response(ErrorCode.SESSION_NOT_FOUND)
@@ -371,11 +371,11 @@ async def get_metrics(session_id: UUID):
         )
     
     try:
-        # 從 RAG Engine 取得 metrics
+        # Get metrics from RAG Engine
         metrics = rag_engine.get_session_metrics(session_id)
         
         if metrics is None:
-            # 若尚無 metrics，返回初始值
+            # If no metrics yet, return initial values
             metrics = {
                 'total_queries': 0,
                 'total_tokens': 0,
@@ -386,7 +386,7 @@ async def get_metrics(session_id: UUID):
                 'unanswered_ratio': 0.0,
             }
         
-        # 取得 token 閾值
+        # Get token threshold
         token_threshold = rag_engine.token_threshold
         is_token_warning = metrics.get('total_tokens', 0) >= token_threshold
         is_unanswered_warning = metrics.get('unanswered_ratio', 0) >= 0.8

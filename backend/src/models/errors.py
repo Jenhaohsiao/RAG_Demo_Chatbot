@@ -1,9 +1,9 @@
 """
 Error Codes and Error Response Models
-統一的錯誤代碼定義與錯誤回應模型
+Unified error code definitions and error response models
 
 Constitutional Compliance:
-- Principle VIII (API Contract Stability): 統一錯誤代碼確保 API 穩定性
+- Principle VIII (API Contract Stability): Unified error codes ensure API stability
 """
 
 from enum import Enum
@@ -12,9 +12,9 @@ from pydantic import BaseModel
 
 class ErrorCode(str, Enum):
     """
-    錯誤代碼枚舉
+    Error code enumeration
     
-    命名規範：ERR_<CATEGORY>_<SPECIFIC_ERROR>
+    Naming convention: ERR_<CATEGORY>_<SPECIFIC_ERROR>
     """
     # Session Errors (4xx)
     SESSION_NOT_FOUND = "ERR_SESSION_NOT_FOUND"
@@ -59,9 +59,9 @@ class ErrorCode(str, Enum):
 
 class ErrorResponse(BaseModel):
     """
-    標準錯誤回應格式
+    Standard error response format
     
-    符合 OpenAPI 規格中的 Error schema
+    Conforms to Error schema in OpenAPI specification
     """
     error_code: ErrorCode
     message: str
@@ -79,7 +79,7 @@ class ErrorResponse(BaseModel):
         }
 
 
-# 錯誤訊息範本
+# Error message templates
 ERROR_MESSAGES = {
     # Session
     ErrorCode.SESSION_NOT_FOUND: "Session not found or expired",

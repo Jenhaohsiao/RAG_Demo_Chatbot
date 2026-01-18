@@ -1,53 +1,53 @@
 /**
- * SCSS遷移指南
+ * SCSS Migration Guide
  * 
- * 本專案已建立完整的SCSS架構，包含全局變數、mixins和工具類。
- * 此文件說明如何將現有CSS檔案遷移到SCSS。
+ * This project has established a complete SCSS architecture, including global variables, mixins, and utility classes.
+ * This document explains how to migrate existing CSS files to SCSS.
  */
 
-## 已建立的檔案結構
+## Established File Structure
 
 ```
 frontend/src/
-├── main.scss                  # 主樣式檔案（取代main.css）
+├── main.scss                  # Main style file (replaces main.css)
 └── styles/
-    ├── _variables.scss        # 設計變數（顏色、間距、字型等）
-    ├── _mixins.scss          # 混合宏和動畫
-    ├── _utilities.scss       # 通用工具類
-    └── index.scss            # 統一導入入口
+    ├── _variables.scss        # Design variables (colors, spacing, typography, etc.)
+    ├── _mixins.scss          # Mixins and animations
+    ├── _utilities.scss       # Common utility classes
+    └── index.scss            # Unified import entry point
 ```
 
-## 主要功能
+## Key Features
 
-### 1. 設計變數 (_variables.scss)
+### 1. Design Variables (_variables.scss)
 
-統一的設計token，包含：
-- 顏色系統（primary, secondary, semantic colors）
-- 間距系統（0-12等級）
-- 字型系統（sizes, weights, line-heights）
-- 圓角、陰影、z-index等
+Unified design tokens, including:
+- Color system (primary, secondary, semantic colors)
+- Spacing system (0-12 levels)
+- Typography system (sizes, weights, line-heights)
+- Border radius, shadows, z-index, etc.
 
 ### 2. Mixins (_mixins.scss)
 
-可重用的樣式模式：
-- 佈局：flex-center, flex-between, flex-column
-- 響應式：respond-to('md')
-- 視覺效果：card, overlay, hover-lift
-- 動畫：fade-in, slide-in-right, spinner
+Reusable style patterns:
+- Layout: flex-center, flex-between, flex-column
+- Responsive: respond-to('md')
+- Visual effects: card, overlay, hover-lift
+- Animations: fade-in, slide-in-right, spinner
 
-### 3. 工具類 (_utilities.scss)
+### 3. Utility Classes (_utilities.scss)
 
-常用的原子類：
-- 佈局：flex-center, flex-between
-- 間距：m-*, p-*, gap-*
-- 文字：text-*, font-*, leading-*
-- 顏色：text-*, bg-*
-- 邊框：border-*, rounded-*
-- 陰影：shadow-*
+Common atomic classes:
+- Layout: flex-center, flex-between
+- Spacing: m-*, p-*, gap-*
+- Text: text-*, font-*, leading-*
+- Colors: text-*, bg-*
+- Borders: border-*, rounded-*
+- Shadows: shadow-*
 
-## 使用方式
+## Usage
 
-### 在組件中使用SCSS
+### Using SCSS in Components
 
 ```scss
 // MyComponent.scss
@@ -70,7 +70,7 @@ frontend/src/
 }
 ```
 
-### 在HTML中使用工具類
+### Using Utility Classes in HTML
 
 ```tsx
 <div className="flex-center gap-4 p-4 rounded shadow-md">
@@ -78,19 +78,19 @@ frontend/src/
 </div>
 ```
 
-## 遷移步驟
+## Migration Steps
 
-### 步驟1：重命名檔案
-將 `.css` 改為 `.scss`
+### Step 1: Rename Files
+Rename `.css` to `.scss`
 
-### 步驟2：導入變數和mixins
-在檔案開頭添加：
+### Step 2: Import Variables and Mixins
+Add at the beginning of the file:
 ```scss
 @import '../../styles/variables';
 @import '../../styles/mixins';
 ```
 
-### 步驟3：替換硬編碼值
+### Step 3: Replace Hard-coded Values
 
 **Before:**
 ```css
@@ -112,7 +112,7 @@ frontend/src/
 }
 ```
 
-### 步驟4：使用嵌套
+### Step 4: Use Nesting
 
 **Before:**
 ```css
@@ -142,7 +142,7 @@ frontend/src/
 }
 ```
 
-### 步驟5：使用mixins
+### Step 5: Use Mixins
 
 **Before:**
 ```css
@@ -168,7 +168,7 @@ frontend/src/
 }
 ```
 
-### 步驟6：響應式設計
+### Step 6: Responsive Design
 
 **Before:**
 ```css
@@ -194,16 +194,16 @@ frontend/src/
 }
 ```
 
-## 設計變數參考
+## Design Variables Reference
 
-### 常用顏色
+### Common Colors
 - `$color-primary`: #0d6efd
 - `$color-success`: #28a745
 - `$color-warning`: #ffc107
 - `$color-danger`: #dc3545
 - `$color-info`: #17a2b8
 
-### 常用間距
+### Common Spacing
 - `$spacing-1`: 4px
 - `$spacing-2`: 8px
 - `$spacing-3`: 12px
@@ -211,7 +211,7 @@ frontend/src/
 - `$spacing-6`: 24px
 - `$spacing-8`: 32px
 
-### 字型大小
+### Font Sizes
 - `$font-size-xs`: 11px
 - `$font-size-sm`: 12px
 - `$font-size-base`: 14px
@@ -219,54 +219,54 @@ frontend/src/
 - `$font-size-lg`: 18px
 - `$font-size-xl`: 20px
 
-### 響應式斷點
+### Responsive Breakpoints
 - `xs`: < 576px
 - `sm`: >= 576px
 - `md`: >= 768px
 - `lg`: >= 992px
 - `xl`: >= 1200px
 
-## 常用Mixins
+## Common Mixins
 
 ```scss
-@include flex-center;           // 水平垂直置中
-@include flex-between;          // 兩端對齊
-@include card;                  // 卡片樣式
-@include hover-lift;            // 懸停浮起效果
-@include overlay;               // 遮罩層
-@include respond-to('md');      // 響應式斷點
-@include fade-in;               // 淡入動畫
-@include slide-in-right;        // 右側滑入
-@include smooth-scroll;         // 平滑滾動
+@include flex-center;           // Center horizontally and vertically
+@include flex-between;          // Space between
+@include card;                  // Card style
+@include hover-lift;            // Hover lift effect
+@include overlay;               // Overlay layer
+@include respond-to('md');      // Responsive breakpoint
+@include fade-in;               // Fade-in animation
+@include slide-in-right;        // Slide in from right
+@include smooth-scroll;         // Smooth scrolling
 ```
 
-## 建議優先遷移的檔案
+## Recommended Migration Priority
 
-1. **組件CSS** (依使用頻率)
+1. **Component CSS** (by usage frequency)
    - ChatMessage.css
    - WorkflowStepper.css
    - LoadingOverlay.css
    - ToastMessage.css
 
-2. **佈局CSS**
+2. **Layout CSS**
    - two-column-layout.css
    - responsive.css
 
-3. **主題CSS**
+3. **Theme CSS**
    - badges.css
    - card.css
 
-## 注意事項
+## Important Notes
 
-1. **向後兼容**：main.tsx仍會導入Bootstrap和既有CSS
-2. **逐步遷移**：不需要一次性全部遷移
-3. **測試**：遷移後確保視覺效果一致
-4. **命名**：SCSS部分檔案以底線開頭（如_variables.scss）表示是partial檔案
-5. **導入順序**：variables → mixins → utilities → components
+1. **Backward Compatible**: main.tsx still imports Bootstrap and existing CSS
+2. **Gradual Migration**: No need to migrate everything at once
+3. **Testing**: Ensure visual consistency after migration
+4. **Naming**: SCSS partial files start with underscore (e.g., _variables.scss)
+5. **Import Order**: variables → mixins → utilities → components
 
-## 下一步
+## Next Steps
 
-1. 更新 main.tsx 導入新的 main.scss
-2. 逐步將組件CSS遷移到SCSS
-3. 使用工具類減少重複樣式
-4. 統一設計token確保一致性
+1. Update main.tsx to import new main.scss
+2. Gradually migrate component CSS to SCSS
+3. Use utility classes to reduce duplicate styles
+4. Unify design tokens to ensure consistency

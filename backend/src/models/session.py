@@ -47,7 +47,7 @@ class Session(BaseModel):
             # Remove hyphens from UUID for valid collection name
             clean_id = str(self.session_id).replace("-", "")
             self.qdrant_collection_name = f"session_{clean_id}"
-        # 初始化 API Key 狀態
+        # Initialize API Key status
         if settings.gemini_api_key and get_default_api_key_status():
             self.has_valid_api_key = True
             self.api_key_source = "env"
@@ -147,11 +147,11 @@ class SessionWithMetrics(SessionResponse):
 
 class LanguageUpdateRequest(BaseModel):
     """Request to update session language"""
-    language: str = Field(pattern="^(en|zh-TW|ko|es|ja|ar|fr|zh-CN)$")
+    language: str = Field(pattern="^(en|fr|zh-TW|zh-CN)$")
     
     class Config:
         json_schema_extra = {
             "example": {
-                "language": "zh-TW"
+                "language": "en"
             }
         }
