@@ -102,6 +102,8 @@ npm run dev
 - **Semantic Search**: Cosine similarity search (default threshold 0.6)
 - **Multilingual UI**: Support for 4 languages with instant switching
 - **API Quota Management**: User can provide own API key when system quota exhausted
+  - User-provided API keys are never stored
+  - They are used only in-memory for the current request and discarded immediately
 - **Real-time Metrics**: Display token usage and query statistics
 
 ---
