@@ -132,19 +132,19 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
 
   const styleOption =
     RESPONSE_STYLE_OPTIONS.find(
-      (opt) => opt.value === (parameters.response_style || "brief")
+      (opt) => opt.value === (parameters.response_style || "brief"),
     ) || RESPONSE_STYLE_OPTIONS[0];
   const toneOption =
     RESPONSE_TONE_OPTIONS.find(
-      (opt) => opt.value === (parameters.response_tone || "friendly")
+      (opt) => opt.value === (parameters.response_tone || "friendly"),
     ) || RESPONSE_TONE_OPTIONS[0];
   const personaOption =
     PERSONA_OPTIONS.find(
-      (opt) => opt.value === (parameters.persona || "show_host")
+      (opt) => opt.value === (parameters.persona || "show_host"),
     ) || PERSONA_OPTIONS[1];
   const citationOption =
     CITATION_STYLE_OPTIONS.find(
-      (opt) => opt.value === (parameters.citation_style || "none")
+      (opt) => opt.value === (parameters.citation_style || "none"),
     ) || CITATION_STYLE_OPTIONS[2];
 
   return (

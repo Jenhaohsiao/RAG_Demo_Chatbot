@@ -115,7 +115,7 @@ export const Header: React.FC<HeaderProps> = ({
               systemMessage.type === "error" &&
               (systemMessage.message.includes(t("session.expiredTitle")) ||
                 systemMessage.message.includes(
-                  t("messages.sessionMaintainError")
+                  t("messages.sessionMaintainError"),
                 ))
             ) &&
             // Session update success message doesn't need confirm button
@@ -129,14 +129,14 @@ export const Header: React.FC<HeaderProps> = ({
             systemMessage.type === "error" &&
             (systemMessage.message.includes(t("session.expiredTitle")) ||
               systemMessage.message.includes(
-                t("messages.sessionMaintainError")
+                t("messages.sessionMaintainError"),
               ))
           }
           extraButton={
             systemMessage.type === "error" &&
             (systemMessage.message.includes(t("session.expiredTitle")) ||
               systemMessage.message.includes(
-                t("messages.sessionMaintainError")
+                t("messages.sessionMaintainError"),
               )) &&
             onRestartSession
               ? {
