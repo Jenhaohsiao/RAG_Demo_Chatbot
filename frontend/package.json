@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "private": true,
-  "description": "Multilingual RAG-Powered Chatbot - Frontend",
+  "description": "RAG-Powered Chatbot - Frontend (English-only UI)",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -15,7 +15,6 @@
     "bootstrap": "^5.3.2",
     "bootstrap-icons": "^1.13.1",
     "i18next": "^23.7.6",
-    "i18next-browser-languagedetector": "^8.2.0",
     "react": "^18.2.0",
     "react-bootstrap": "^2.9.1",
     "react-dom": "^18.2.0",

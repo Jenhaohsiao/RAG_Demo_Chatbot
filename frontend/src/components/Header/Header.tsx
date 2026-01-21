@@ -4,13 +4,11 @@
  */
 import React from "react";
 import { useTranslation } from "react-i18next";
-import type { SupportedLanguage } from "../../hooks/useLanguage";
 import ToastMessage from "../ToastMessage/ToastMessage";
 import "./Header.scss";
 
 interface HeaderProps {
   sessionId: string | null;
-  onLanguageChange?: (language: SupportedLanguage) => void;
   onLeave?: () => void;
   onRestart?: () => void;
   onAboutClick?: () => void;
@@ -32,7 +30,6 @@ interface HeaderProps {
  */
 export const Header: React.FC<HeaderProps> = ({
   sessionId,
-  onLanguageChange,
   onLeave,
   onRestart,
   onAboutClick,
@@ -41,7 +38,7 @@ export const Header: React.FC<HeaderProps> = ({
   onDismissMessage,
   onRestartSession,
 }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   return (
     <header>
