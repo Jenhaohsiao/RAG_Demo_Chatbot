@@ -23,20 +23,12 @@ interface HeaderProps {
   onRestartSession?: () => void;
 }
 
-const SUPPORTED_LANGUAGES: { code: SupportedLanguage; name: string }[] = [
-  { code: "en", name: "English" },
-  { code: "fr", name: "Français" },
-  { code: "zh-TW", name: "繁體中文" },
-  { code: "zh-CN", name: "简体中文" },
-];
-
 /**
  * Application header with navigation and controls
  *
  * Features:
  * - App title with i18n
- * - Language dropdown selector
- * - Leave/Restart buttons
+ * - Session controls
  */
 export const Header: React.FC<HeaderProps> = ({
   sessionId,
@@ -50,48 +42,6 @@ export const Header: React.FC<HeaderProps> = ({
   onRestartSession,
 }) => {
   const { t, i18n } = useTranslation();
-  const [currentLanguage, setCurrentLanguage] =
-    React.useState<SupportedLanguage>(
-      (i18n.language as SupportedLanguage) || "en"
-    );
-  const [dropdownOpen, setDropdownOpen] = React.useState(false);
-  const dropdownRef = React.useRef<HTMLDivElement>(null);
-
-  // Close dropdown when clicking outside
-  React.useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setDropdownOpen(false);
-      }
-    };
-
-    if (dropdownOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [dropdownOpen]);
-
-  React.useEffect(() => {
-    // Update current language state when i18n language changes
-    setCurrentLanguage((i18n.language as SupportedLanguage) || "en");
-  }, [i18n.language]);
-
-  const handleLanguageChange = (langCode: SupportedLanguage) => {
-    setCurrentLanguage(langCode);
-    setDropdownOpen(false);
-    i18n.changeLanguage(langCode);
-    onLanguageChange?.(langCode);
-  };
-
-  const currentLangName =
-    SUPPORTED_LANGUAGES.find((lang) => lang.code === currentLanguage)?.name ||
-    "Language";
 
   return (
     <header>
@@ -148,44 +98,6 @@ export const Header: React.FC<HeaderProps> = ({
                 </span>
               </button>
             )}
-
-            {/* Language Dropdown Selector - Moved to rightmost */}
-            <div className="dropdown" ref={dropdownRef}>
-              <button
-                className="btn btn-sm btn-outline-light border dropdown-toggle"
-                type="button"
-                data-testid="language-selector-button"
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                aria-expanded={dropdownOpen}
-                title={t("labels.selectLanguage")}
-              >
-                <span className="d-none d-sm-inline text-truncate language-selector-text">
-                  {currentLangName}
-                </span>
-              </button>
-              {dropdownOpen && (
-                <ul className="dropdown-menu dropdown-menu-end show">
-                  {SUPPORTED_LANGUAGES.map((lang) => (
-                    <li key={lang.code}>
-                      <button
-                        className={`dropdown-item language-option ${
-                          currentLanguage === lang.code ? "active" : ""
-                        }`}
-                        data-testid={`language-option-${lang.code}`}
-                        onClick={() => handleLanguageChange(lang.code)}
-                      >
-                        <span className="me-2">
-                          {currentLanguage === lang.code && (
-                            <i className="bi bi-check-lg"></i>
-                          )}
-                        </span>
-                        {lang.name}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
           </div>
         </div>
       </nav>

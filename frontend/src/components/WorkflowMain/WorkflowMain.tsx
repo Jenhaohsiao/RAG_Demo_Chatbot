@@ -53,7 +53,7 @@ const WorkflowMain: React.FC<WorkflowMainProps> = ({
 
     response_style: "brief" as "brief" | "kid_friendly",
     response_tone: "friendly" as "friendly" | "rigorous" | "urgent",
-    persona: "workplace_veteran" as
+    persona: "show_host" as
       | "elementary_teacher"
       | "show_host"
       | "workplace_veteran",

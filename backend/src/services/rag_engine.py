@@ -259,6 +259,96 @@ class RAGEngine:
                 time.sleep(current_delay)
                 current_delay = min(current_delay * 2, self.max_retry_delay)
 
+    def _validate_suggestions(self, session_id: UUID, questions: List[str], language: str = "zh-TW") -> List[str]:
+        """
+        Verify that questions are answerable by ACTUALLY EXECUTING the EXACT SAME RAG query.
+        This is the ONLY reliable way to ensure suggestions are answerable.
+        
+        Critical: We must use the EXACT SAME query() method that users will use,
+        not a simplified version, to ensure consistent results.
+        
+        The key insight: We save current metrics, run queries, then restore metrics.
+        This way validation uses identical logic but doesn't pollute statistics.
+        """
+        try:
+            validated = []
+            
+            logger.info(f"[{session_id}] Starting REAL execution validation for {len(questions)} suggestions...")
+
+            # Save current session metrics to restore later
+            saved_metrics = self._session_metrics.get(session_id)
+            saved_memory = self._session_memory.get(session_id)
+            
+            for q in questions:
+                if len(validated) >= 3:
+                    break
+
+                try:
+                    # ACTUALLY EXECUTE the EXACT SAME RAG query that users will use
+                    logger.debug(f"[{session_id}] Testing suggestion: '{q}'")
+                    
+                    # Call the SAME query method to ensure identical logic
+                    query_response = self.query(
+                        session_id=session_id,
+                        user_query=q,
+                        language=language,
+                        similarity_threshold=None,  # Use default threshold
+                        custom_prompt=None,
+                        api_key=None
+                    )
+                    
+                    # Check if the question is actually answerable
+                    if query_response.response_type == "ANSWERED":
+                        # Additional check: make sure response is not empty and meaningful
+                        response_text = query_response.llm_response.strip()
+                        
+                        # Check for patterns that indicate "cannot answer" even if type is ANSWERED
+                        cannot_answer_indicators = [
+                            "文件中沒有提到", "文件中未提到", "文件中找不到",
+                            "無法回答", "不能回答", "没有找到", "未能找到",
+                            "抱歉", "對不起", "沒有相關",
+                            "I cannot answer", "cannot find", "not mentioned",
+                            "unable to answer", "no information", "I'm sorry",
+                            "couldn't find"
+                        ]
+                        
+                        has_cannot_answer = any(indicator.lower() in response_text.lower() for indicator in cannot_answer_indicators)
+                        
+                        if len(response_text) > 20 and not has_cannot_answer:
+                            validated.append(q)
+                            logger.info(f"[{session_id}] ✓ VALIDATED: '{q}'")
+                            logger.debug(f"    Response preview: {response_text[:100]}...")
+                        else:
+                            logger.info(f"[{session_id}] ✗ REJECTED (Contains 'cannot answer' phrase): '{q}'")
+                            logger.debug(f"    Response: {response_text[:200]}...")
+                    else:
+                        logger.info(f"[{session_id}] ✗ REJECTED (response_type={query_response.response_type}): '{q}'")
+                
+                except Exception as e:
+                    logger.warning(f"[{session_id}] Validation execution error for '{q}': {e}")
+                    # If validation fails, don't include the question
+            
+            # Restore original metrics and memory after validation
+            if saved_metrics:
+                self._session_metrics[session_id] = saved_metrics
+            elif session_id in self._session_metrics:
+                del self._session_metrics[session_id]
+            
+            if saved_memory:
+                self._session_memory[session_id] = saved_memory
+            elif session_id in self._session_memory:
+                del self._session_memory[session_id]
+
+            logger.info(f"[{session_id}] Final validated count: {len(validated)} out of {len(questions)}")
+            
+            # If no questions passed validation, return empty list
+            # Don't fallback to unvalidated questions - better to show nothing than wrong suggestions
+            return validated
+            
+        except Exception as e:
+            logger.error(f"[{session_id}] Suggestion validation process failed: {e}")
+            return []  # Return empty on error - safer than returning unvalidated questions
+
     def _generate_suggestions(
         self,
         session_id: UUID,
@@ -342,13 +432,14 @@ class RAGEngine:
             suggestions = [s.strip() for s in suggestions_text.split('\n') if s.strip()]
             # 清理格式（移除數字開頭、符號等）
             cleaned = []
-            for s in suggestions[:3]:
+            for s in suggestions:
                 # 移除開頭的數字、點、破折號等
                 s = s.lstrip('0123456789.-•）) \t')
                 if s and len(s) > 5:  # 過濾太短的
                     cleaned.append(s)
             
-            return cleaned[:3] if cleaned else []
+            # Validate generated suggestions (T094)
+            return self._validate_suggestions(session_id, cleaned, language)
         except Exception as e:
             logger.warning(f"[{session_id}] Failed to generate suggestions: {e}")
             return []
@@ -485,73 +576,14 @@ class RAGEngine:
             
             suggestions = [s.strip() for s in suggestions_text.split('\n') if s.strip()]
             cleaned = []
-            for s in suggestions[:3]:
+            for s in suggestions:
                 s = s.lstrip('0123456789.-•）) \t')
                 if s and len(s) > 5:
                     cleaned.append(s)
             
-            # Validate questions by ACTUALLY TESTING if they can be answered
-            # This is the most reliable way to ensure question quality
-            validated_questions = []
-            for question in cleaned[:5]:  # Test up to 5 to get best 3
-                try:
-                    logger.debug(f"[{session_id}] Testing question: {question[:50]}...")
-                    
-                    # Test 1: Quick keyword check (fast filter)
-                    common_words = {'什麼', '哪', '誰', '為什麼', '如何', '是', '的', '了', '在', '用', '有', '嗎',
-                                   'what', 'who', 'where', 'when', 'why', 'how', 'is', 'are', 'the', 'a', 'an', 'do', 'does'}
-                    question_terms = set(question.lower().replace('？', '').replace('?', '').split())
-                    key_terms = question_terms - common_words
-                    
-                    doc_text_lower = doc_summary.lower()
-                    has_keyword_match = any(term in doc_text_lower for term in key_terms if len(term) > 1)
-                    
-                    if not has_keyword_match:
-                        logger.warning(f"[{session_id}] Question rejected (no keyword match): {question[:50]}...")
-                        continue
-                    
-                    # Test 2: Actually try to answer the question with RAG (most reliable)
-                    # Use SAME threshold as actual query to ensure consistency
-                    # Embed the question and search for relevant content
-                    test_embedding = self.embedder.embed_query(question)
-                    test_results = self.vector_store.search_similar(
-                        collection_name=collection_name,
-                        query_vector=test_embedding.vector,
-                        limit=5,
-                        score_threshold=self.similarity_threshold  # Use same threshold as actual queries!
-                    )
-                    
-                    # Require STRONG evidence that the question is answerable
-                    if test_results and len(test_results) >= 3:  # Need at least 3 chunks
-                        # Check if we have HIGH quality matches
-                        top_score = test_results[0]['score']
-                        avg_top3_score = sum(r['score'] for r in test_results[:3]) / 3
-                        
-                        # Stricter validation: require both high top score AND good average
-                        if top_score >= 0.45 and avg_top3_score >= 0.38:
-                            validated_questions.append(question)
-                            logger.info(f"[{session_id}] Question validated (top={top_score:.3f}, avg={avg_top3_score:.3f}): {question[:50]}...")
-                            
-                            # Stop when we have 3 good questions
-                            if len(validated_questions) >= 3:
-                                break
-                        else:
-                            logger.warning(f"[{session_id}] Question rejected (top={top_score:.3f}, avg={avg_top3_score:.3f}): {question[:50]}...")
-                    else:
-                        logger.warning(f"[{session_id}] Question rejected (insufficient results={len(test_results)}): {question[:50]}...")
-                        
-                except Exception as val_error:
-                    logger.warning(f"[{session_id}] Question validation error: {val_error}")
-                    # Don't include if validation fails - better safe than sorry
-                    continue
-            
-            if not validated_questions:
-                logger.warning(f"[{session_id}] No questions passed validation, returning best effort suggestions")
-                # Fallback: return original suggestions with warning
-                return cleaned[:3] if cleaned else []
-            
-            logger.info(f"[{session_id}] Successfully validated {len(validated_questions)}/5 questions")
-            return validated_questions[:3]
+            # Validate generated suggestions (T094)
+            # This ensures questions are robustly answerable before showing to users
+            return self._validate_suggestions(session_id, cleaned, language)
             
         except Exception as e:
             logger.warning(f"[{session_id}] Failed to generate initial suggestions: {e}")
@@ -730,20 +762,35 @@ class RAGEngine:
             # 判斷回應類型：是否為「無法回答」
             # 更精確的判斷：需要同時滿足「系統無法回答」的表述，而非內容中的「無法」描述
             cannot_answer_patterns = [
-                # 中文：明確的系統無法回答表述
+                # 繁體中文：明確的系統無法回答表述
                 "文件中沒有提到", "文件中未提到", "文件中找不到", "文件中沒有相關", 
                 "文件中無相關", "無法從文件", "無法在文件", "未能找到", "沒有找到相關",
+                "不在.*文件中", "答案不在.*文件", "問題.*答案.*不在",
+                "我接觸的文件中", "我所接觸的文件", "提供的文件",
                 "抱歉.*無法", "抱歉.*找不到", "對不起.*無法", "對不起.*找不到",
-                # 英文
+                "沒有.*資訊", "無.*資訊",
+                
+                # 簡體中文：簡體特有表述
+                "文件中没有提到", "文件中未提到", "文件中找不到", "文件中没有相关",
+                "无法从文件", "无法在文件", "未能找到", "没有找到相关",
+                "答案不在.*文件", "我接触的文件",
+                "抱歉.*无法", "抱歉.*找不到", "对不起.*无法", "对不起.*找不到",
+                "没有.*信息", "无.*信息",
+                
+                # 英文：English patterns
                 "document does not mention", "document doesn't mention", 
+                "not in.*document", "answer.*not.*in.*document",
                 "cannot find.*document", "no relevant.*found", "unable to find",
-                "sorry.*cannot", "sorry.*unable",
-                # 德文
-                "nicht finden",
-                # 韓文
-                "찾을 수 없",
-                # 日文
-                "見つかりません"
+                "no information", "not mentioned", "not available",
+                "sorry.*cannot", "sorry.*unable", "i'm sorry",
+                "cannot answer.*based on", "cannot answer.*document",
+                
+                # 法文：French patterns
+                "document ne mentionne pas", "ne trouve pas.*document",
+                "pas d'information", "aucune information",
+                "ne peut pas répondre", "impossible de répondre",
+                "désolé.*ne peut pas", "désolé.*impossible",
+                "absent.*document", "manque.*document"
             ]
             
             import re
@@ -1141,24 +1188,24 @@ Contenu du document:
         doc_def = document_definition.get(lang_key, document_definition['en'])
         
         if not retrieved_chunks:
-            # 沒有檢索到相關文檔片段時的 Prompt - 友善地說明無法找到資訊
-            prompt = f"""You are a friendly and helpful RAG (Retrieval-Augmented Generation) assistant.
+            # 沒有檢索到相關文檔片段時的 Prompt - 使用標準化表述
+            prompt = f"""You are a RAG (Retrieval-Augmented Generation) assistant.
 
 {doc_def}
 
 **CRITICAL RULES - YOU MUST FOLLOW**:
 1. **Response Language**: ALWAYS respond ONLY in {response_language}. This is mandatory.
-2. **Be Friendly and Apologetic**: Since no relevant document passages were found for this question, respond in a warm, friendly, and understanding tone.
-3. **Explain Politely**: Gently explain that you couldn't find information about this topic in the uploaded documents.
-4. **Offer Help**: Suggest that the user can ask questions about topics that ARE covered in the documents.
-5. **Conversational Tone**: Use a natural, conversational style - NOT formal or robotic. Be empathetic and helpful.
-6. **NO Red Flags**: Do NOT use phrases like "無法回答", "cannot answer", "找不到", "not found" - instead use softer phrases like "這個問題在文件中沒有相關資訊", "the documents don't cover this topic".
-7. **SINGLE LANGUAGE ONLY**: Your entire response must be in {response_language} only.
+2. **Standard Response**: Since no relevant document passages were found, you MUST respond with this EXACT phrase structure:
+   - For Chinese: "文件中沒有提到 [topic]，所以無法回答您的問題。"
+   - For English: "I cannot answer this question based on the uploaded documents."
+3. **NO Variations**: Do NOT use creative rephrasing. Use the EXACT standard phrase above.
+4. **Replace [topic]**: Replace [topic] with what the user is asking about.
+5. **SINGLE LANGUAGE ONLY**: Your entire response must be in {response_language} only.
 
 **User Question**:
 {user_query}
 
-**Your Answer** (MUST be ONLY in {response_language}, use a friendly and conversational tone to explain that this topic isn't covered in the documents, and offer to help with other questions):"""
+**Your Answer** (MUST use the EXACT standard phrase in {response_language}):"""
         else:
             # 有文檔時的標準 RAG Prompt - STRICT RAG with precise answer matching
             prompt = f"""You are a RAG (Retrieval-Augmented Generation) assistant that ONLY answers based on uploaded documents.
@@ -1167,25 +1214,40 @@ Contenu du document:
 
 **CRITICAL RULES - YOU MUST FOLLOW**:
 1. **Response Language**: ALWAYS respond ONLY in {response_language}. This is mandatory. DO NOT include any other language in your response. DO NOT include English translations or explanations in parentheses.
+
 2. **STRICT RAG POLICY**: ONLY answer based on the retrieved documents below.
+
 3. **DO NOT make up information** or use knowledge outside the documents.
-4. **ANSWER THE QUESTION DIRECTLY**: 
+
+4. **WHEN TO SAY "CANNOT ANSWER"**: If the documents do NOT contain the specific information requested, you MUST respond with:
+   - For Chinese: "文件中沒有提到 [topic]，所以無法回答您的問題。"
+   - For English: "I cannot answer this question based on the uploaded documents."
+   DO NOT try to answer from your own knowledge or make inferences.
+
+5. **ANSWER THE QUESTION DIRECTLY (only if information IS in documents)**: 
    - Read the user's question CAREFULLY and understand EXACTLY what they are asking
    - If they ask "是什麼" (what is), describe WHAT it is, not what it does
    - If they ask "做了什麼" (what did), describe the ACTIONS, not the identity
    - If they ask "為什麼" (why), explain the REASON, not just the fact
    - ALWAYS answer the SPECIFIC aspect of the question being asked
    - DO NOT give irrelevant information even if it's about the same topic
-5. **CONTENT TRANSFORMATION REQUESTS ARE ALLOWED**: If the user asks you to present the document content in a different way (e.g., "用5歲小孩也能懂的方式說", "simplify this", "explain like I'm 5", "用詩的形式", "make it funny"), you SHOULD do so based on the document content below.
-6. **GENERAL REQUESTS**: If the user asks to "explain", "summarize", or "describe" the document content (with or without a specific style/tone like "健身教練口氣"), provide a summary based on the retrieved document chunks below.
-7. **STYLE REQUESTS**: If the user requests a specific tone, persona, audience level, or format (e.g., "用老師口氣", "用健身教練口氣", "用朋友口吻", "for a 5-year-old", "in poem format"), adapt your response style accordingly while still basing content ONLY on the documents.
-8. **PARTIAL MATCH HANDLING**: If the documents contain related information but NOT the specific answer requested:
-   - Clearly state that the specific information asked for is NOT in the documents
-   - Then offer the related information that IS available
+
+6. **CONTENT TRANSFORMATION REQUESTS ARE ALLOWED**: If the user asks you to present the document content in a different way (e.g., "用5歲小孩也能懂的方式說", "simplify this", "explain like I'm 5", "用詩的形式", "make it funny"), you SHOULD do so based on the document content below.
+
+7. **GENERAL REQUESTS**: If the user asks to "explain", "summarize", or "describe" the document content (with or without a specific style/tone like "健身教練口氣"), provide a summary based on the retrieved document chunks below.
+
+8. **STYLE REQUESTS**: If the user requests a specific tone, persona, audience level, or format (e.g., "用老師口氣", "用健身教練口氣", "用朋友口吻", "for a 5-year-old", "in poem format"), adapt your response style accordingly while still basing content ONLY on the documents.
+
+9. **PARTIAL MATCH HANDLING**: If the documents contain related information but NOT the specific answer requested:
+   - First clearly state: "文件中沒有提到 [specific thing asked]"
+   - Then optionally add: "但文件中有提到 [related information available]"
    - Example: "文件中沒有描述獅鷲的外觀特徵，但有提到獅鷲做了這些事..."
-9. **CITE document numbers** when using information.
-10. Be accurate, precise, and directly answer what is asked.
-11. **SINGLE LANGUAGE ONLY**: Your entire response must be in {response_language} only. No bilingual content, no mixed languages.
+
+10. **CITE document numbers** when using information (e.g., [Document 1]).
+
+11. Be accurate, precise, and directly answer what is asked.
+
+12. **SINGLE LANGUAGE ONLY**: Your entire response must be in {response_language} only. No bilingual content, no mixed languages.
 
 **Retrieved Documents**:
 {context}
@@ -1193,7 +1255,7 @@ Contenu du document:
 **User Question**:
 {user_query}
 
-**Your Answer** (MUST be ONLY in {response_language}, based ONLY on the documents above. Answer the SPECIFIC question asked - don't give tangential information):"""
+**Your Answer** (MUST be ONLY in {response_language}, based ONLY on the documents above. If information is NOT in documents, use the standard "cannot answer" phrase. If information IS in documents, answer the SPECIFIC question asked):"""
         
         return prompt
     
@@ -1411,63 +1473,6 @@ Contenu du document:
         
         logger.info(f"[{session_id}] Session metrics and memory cleared")
 
-    def generate_initial_suggestions(self, session_id: UUID, language: str = "en") -> List[str]:
-        """
-        Generate 3 initial suggested questions based on document summary.
-        
-        Args:
-            session_id: Session ID
-            language: Language code
-            
-        Returns:
-            List[str]: List of 3 suggested questions
-        """
-        try:
-            # 1. Get document summary (or first chunk if summary not available)
-            # Since we don't store summary in RAGEngine, we might need to fetch from Qdrant or rely on what's passed.
-            # However, for simplicity and since we don't have easy access to document summary here without passing it,
-            # let's try to retrieve a few random chunks to generate questions.
-            
-            # Clean session ID for collection name
-            clean_session_id = str(session_id).replace("-", "")
-            collection_name = f"session_{clean_session_id}"
-            
-            # Retrieve a few random points (using vector search with a dummy vector or scroll)
-            # Here we use scroll to get some points
-            points, _ = self.vector_store.client.scroll(
-                collection_name=collection_name,
-                limit=3,
-                with_payload=True,
-                with_vectors=False
-            )
-            
-            if not points:
-                logger.warning(f"[{session_id}] No documents found for suggestions")
-                return []
-                
-            context_text = "\n".join([point.payload.get('text', '') for point in points])
-            
-            # 2. Construct prompt
-            prompt = f"""
-            Based on the following document context, generate 3 short, relevant questions that a user might ask.
-            The questions should be in {language} language.
-            Return ONLY the 3 questions, one per line. No numbering or bullets.
-            
-            Context:
-            {context_text[:2000]}
-            """
-            
-            # 3. Call LLM
-            model = genai.GenerativeModel(settings.gemini_model)
-            response = model.generate_content(prompt)
-            
-            # 4. Parse response
-            questions = [line.strip() for line in response.text.strip().split('\n') if line.strip()]
-            return questions[:3]
-            
-        except Exception as e:
-            logger.error(f"[{session_id}] Failed to generate initial suggestions: {e}")
-            return []
 
 
 class RAGError(Exception):
@@ -1490,3 +1495,4 @@ def get_rag_engine() -> RAGEngine:
     if _rag_engine is None:
         _rag_engine = RAGEngine()
     return _rag_engine
+

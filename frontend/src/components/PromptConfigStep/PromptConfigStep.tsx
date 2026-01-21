@@ -41,23 +41,6 @@ export interface PromptConfigStepProps {
   disabled?: boolean;
 }
 
-// Answer language options
-const ANSWER_LANGUAGE_OPTIONS = [
-  {
-    value: "zh-TW",
-    label: "Traditional Chinese",
-    labelKey: "step2.system.lang.zhTW",
-  },
-  { value: "auto", label: "Auto Detect", labelKey: "step2.system.lang.auto" },
-  {
-    value: "zh-CN",
-    label: "Simplified Chinese",
-    labelKey: "step2.system.lang.zhCN",
-  },
-  { value: "en", label: "English", labelKey: "step2.system.lang.en" },
-  { value: "fr", label: "Français", labelKey: "step2.system.lang.fr" },
-];
-
 // Response style options
 const RESPONSE_STYLE_OPTIONS = [
   {
@@ -157,8 +140,8 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
     ) || RESPONSE_TONE_OPTIONS[0];
   const personaOption =
     PERSONA_OPTIONS.find(
-      (opt) => opt.value === (parameters.persona || "workplace_veteran")
-    ) || PERSONA_OPTIONS[2];
+      (opt) => opt.value === (parameters.persona || "show_host")
+    ) || PERSONA_OPTIONS[1];
   const citationOption =
     CITATION_STYLE_OPTIONS.find(
       (opt) => opt.value === (parameters.citation_style || "none")
@@ -218,27 +201,6 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
               <h5 className="card-title mb-2 fw-bold">
                 {t("step2.system.title")}
               </h5>
-
-              {/* Answer language */}
-              <div className="mb-2">
-                <label className="form-label small mb-1">
-                  {t("step2.system.answerLanguage")}
-                </label>
-                <select
-                  className="form-select form-select-sm"
-                  value={parameters.answer_language || "auto"}
-                  disabled={disabled}
-                  onChange={(e) =>
-                    onParameterChange("answer_language", e.target.value)
-                  }
-                >
-                  {ANSWER_LANGUAGE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {t(option.labelKey)}
-                    </option>
-                  ))}
-                </select>
-              </div>
 
               {/* Strict RAG mode Toggle */}
               <div className="mb-2">
