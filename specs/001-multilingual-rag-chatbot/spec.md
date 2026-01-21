@@ -1,9 +1,11 @@
-# Feature Specification: Multilingual RAG-Powered Chatbot
+# Feature Specification: English-First RAG-Powered Chatbot
 
 **Feature Branch**: `001-multilingual-rag-chatbot`  
 **Created**: 2025-12-07  
 **Status**: Draft  
-**Input**: User description: "Build a multilingual RAG-powered chatbot that demonstrates embedding, vector database, and strict RAG capabilities for AI Engineer portfolio"
+**Input**: User description: "Build an English-first RAG-powered chatbot demonstrating embedding, vector database, and strict RAG capabilities for AI Engineer portfolio. UI is English-only."
+
+**Note**: Branch name retains "multilingual" for historical reasons, but the current specification targets English-only UI with multilingual document support.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -68,26 +70,7 @@ Users ask questions and receive answers strictly based on the uploaded documents
 
 ---
 
-### User Story 4 - Real-time Multilingual UI Language Switching (Priority: P4)
-
-Users can switch the interface language between 7 languages (English, Chinese, Korean, Spanish, Japanese, Arabic, French). The language selector button text cycles through language names every second. When language is changed, all UI elements update immediately while preserving chat history content in original languages.
-
-**Why this priority**: Demonstrates internationalization capability but not essential for core RAG functionality. Can be added after chatbot works.
-
-**Independent Test**: Select different languages from the dropdown and verify all UI labels, buttons, and system messages update accordingly. Verify button text animation cycles through languages.
-
-**Acceptance Scenarios**:
-
-1. **Given** user is on any screen, **When** viewing the language selector button, **Then** the button text cycles through "English, 中文, 한국어, Español, 日本語, العربية, Français" every 1 second
-2. **Given** user clicks the language dropdown, **When** dropdown opens, **Then** all 7 language options are displayed in their native scripts
-3. **Given** user selects a different language, **When** language change is applied, **Then** all UI text (buttons, labels, placeholders, system messages) update to selected language
-4. **Given** chat history exists, **When** language is changed, **Then** previous chat messages remain in their original language
-5. **Given** language is changed, **When** user sends a new message, **Then** system responses and UI elements appear in the newly selected language
-6. **Given** user changes language mid-conversation, **When** interacting with the system, **Then** subsequent interactions use the new language until changed again
-
----
-
-### User Story 5 - Real-time Metrics Display (Priority: P5)
+### User Story 4 - Real-time Metrics Display (Priority: P4)
 
 Throughout the upload and chat experience, users see real-time metrics including token input/output counts, token usage percentage, context usage, and vector database size. This provides transparency into resource consumption.
 
@@ -105,7 +88,7 @@ Throughout the upload and chat experience, users see real-time metrics including
 
 ---
 
-### User Story 6 - Session Management Controls (Priority: P6)
+### User Story 5 - Session Management Controls (Priority: P5)
 
 Users can explicitly close their session via a "Leave" button or restart the entire experience via a "Restart" button. Both actions trigger immediate cleanup of session data and Qdrant collection.
 
@@ -134,7 +117,6 @@ Users can explicitly close their session via a "Leave" button or restart the ent
 - What if user's network disconnects during file upload?
 - How does system behave when vector similarity search returns zero results?
 - What happens if user sends multiple questions rapidly before previous responses complete?
-- How does RTL (right-to-left) text rendering work for Arabic language?
 
 ## Requirements *(mandatory)*
 
@@ -154,17 +136,15 @@ Users can explicitly close their session via a "Leave" button or restart the ent
 - **FR-012**: System MUST respond "cannot answer based on uploaded documents" when no relevant context is found
 - **FR-013**: System MUST generate responses using Gemini API strictly based on retrieved context
 - **FR-014**: System MUST display real-time metrics: token_used, token_limit, token_percent, context_used, context_percent, vector_count
-- **FR-015**: System MUST support 7 UI languages: English, Chinese (Traditional), Korean, Spanish, Japanese, Arabic, French
-- **FR-016**: System MUST animate language selector button text cycling through language names every 1 second
-- **FR-017**: System MUST update all UI elements when language is changed while preserving chat history in original languages
-- **FR-018**: System MUST automatically delete session data and Qdrant collection after 30 minutes of inactivity (TTL)
-- **FR-019**: System MUST provide manual session termination via "Leave" button with immediate data cleanup
-- **FR-020**: System MUST provide session restart via "Restart" button creating new isolated session
-- **FR-021**: System MUST display processing progress indicator during document upload and embedding
-- **FR-022**: System MUST show confirmation dialog when upload processing completes successfully
-- **FR-023**: System MUST return specific error codes: ERR_EXTRACT_FAILED, ERR_FETCH_FAILED, ERR_MODERATION_BLOCKED
-- **FR-024**: System MUST maintain persistent UI header with: app name, language selector, Leave button, Restart button across all screens
-- **FR-025**: System MUST prevent user from uploading image files or unsupported formats
+- **FR-015**: System MUST automatically delete session data and Qdrant collection after 30 minutes of inactivity (TTL)
+- **FR-016**: System MUST provide manual session termination via "Leave" button with immediate data cleanup
+- **FR-017**: System MUST provide session restart via "Restart" button creating new isolated session
+- **FR-018**: System MUST display processing progress indicator during document upload and embedding
+- **FR-019**: System MUST show confirmation dialog when upload processing completes successfully
+- **FR-020**: System MUST return specific error codes: ERR_EXTRACT_FAILED, ERR_FETCH_FAILED, ERR_MODERATION_BLOCKED
+- **FR-021**: System MUST maintain persistent UI header with: app name, Leave button, Restart button across all screens
+- **FR-022**: System MUST prevent user from uploading image files or unsupported formats
+- **FR-023**: UI MUST be in English only - no multilingual UI language switching support
 
 ### Key Entities
 
@@ -173,7 +153,6 @@ Users can explicitly close their session via a "Leave" button or restart the ent
 - **DocumentChunk**: Represents a segment of processed document with chunk text, vector embedding, chunk index, parent document reference, and embedding timestamp
 - **ChatMessage**: Represents a single query-response pair with user query text, LLM response text, timestamp, retrieved context chunks, similarity scores, and token metrics
 - **Metrics**: Represents resource usage with token input count, token output count, token limit, token percentage, context size, context percentage, and vector database item count
-- **LanguagePreference**: Represents user's current UI language selection with language code and last changed timestamp
 
 ## Success Criteria *(mandatory)*
 
@@ -182,13 +161,12 @@ Users can explicitly close their session via a "Leave" button or restart the ent
 - **SC-001**: Users can upload a standard PDF document (3-5 pages) and see it processed and embedded within 30 seconds
 - **SC-002**: System correctly blocks 100% of content flagged by Gemini Safety API with appropriate error messages
 - **SC-003**: Chat responses demonstrate strict RAG - system returns "no information available" for 100% of queries outside uploaded document scope
-- **SC-004**: Language switching updates all UI elements within 500ms of selection with no visual glitches
-- **SC-005**: System successfully handles 10 concurrent user sessions with isolated Qdrant collections and no data leakage
-- **SC-006**: Metrics display updates within 1 second of each query/response cycle completion
-- **SC-007**: Session cleanup (manual or automatic) successfully deletes 100% of associated data from Qdrant within 5 seconds
-- **SC-008**: Vector similarity search returns relevant context chunks with >0.7 similarity score for queries answerable from documents
-- **SC-009**: UI remains responsive (<100ms interaction feedback) during file upload and embedding processing
-- **SC-010**: System provides clear error messages for all edge cases (unsupported files, fetch failures, moderation blocks) within 2 seconds of detection
+- **SC-004**: System successfully handles 10 concurrent user sessions with isolated Qdrant collections and no data leakage
+- **SC-005**: Metrics display updates within 1 second of each query/response cycle completion
+- **SC-006**: Session cleanup (manual or automatic) successfully deletes 100% of associated data from Qdrant within 5 seconds
+- **SC-007**: Vector similarity search returns relevant context chunks with >0.7 similarity score for queries answerable from documents
+- **SC-008**: UI remains responsive (<100ms interaction feedback) during file upload and embedding processing
+- **SC-009**: System provides clear error messages for all edge cases (unsupported files, fetch failures, moderation blocks) within 2 seconds of detection
 
 ## Assumptions
 
@@ -200,5 +178,5 @@ Users can explicitly close their session via a "Leave" button or restart the ent
 - Users access the application via modern browsers (Chrome, Firefox, Safari, Edge - last 2 versions)
 - Session TTL of 30 minutes is sufficient for typical demonstration scenarios
 - Similarity threshold of 0.7 provides good balance between precision and recall for RAG responses
-- UI text translations are provided (not generated dynamically by LLM)
+- UI is in English only - no internationalization or multilingual UI support required
 - Cloud deployment target supports both frontend (React) and backend (FastAPI) hosting
