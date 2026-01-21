@@ -57,17 +57,7 @@
     "validating": "Validation en cours...",
     "useMyKey": "Utiliser ma clé API"
   },
-  "step2": {
-    "system": {
-      "lang": {
-        "zhTW": "Chinois traditionnel",
-        "zhCN": "Chinois simplifié",
-        "en": "Anglais",
-        "fr": "Français",
-        "auto": "Détection automatique"
-      }
-    }
-  },
+
   "aboutModal": {
     "about": "À Propos du Projet",
     "ragSummary": "Résumé Technique RAG",
@@ -474,7 +464,9 @@
       "answerLanguage": "Langue de réponse",
       "lang": {
         "zhTW": "Chinois traditionnel",
+        "zhCN": "Chinois simplifié",
         "en": "Anglais",
+        "fr": "Français",
         "auto": "Détection automatique"
       },
       "strictRagMode": "Mode RAG strict",

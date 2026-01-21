@@ -57,17 +57,7 @@
     "errorDefault": "Failed to send. Please try again later.",
     "errorNetwork": "Network error. Please check your connection."
   },
-  "step2": {
-    "system": {
-      "lang": {
-        "zhTW": "Traditional Chinese",
-        "zhCN": "Simplified Chinese",
-        "en": "English",
-        "fr": "French",
-        "auto": "Auto detect"
-      }
-    }
-  },
+
   "aboutModal": {
     "about": "About this project",
     "ragSummary": "RAG Summary",
@@ -570,8 +560,10 @@
       "answerLanguage": "Answer Language",
       "lang": {
         "zhTW": "Traditional Chinese",
+        "zhCN": "Simplified Chinese",
         "en": "English",
-        "auto": "Auto-detect"
+        "fr": "French",
+        "auto": "Auto Detect"
       },
       "strictRagMode": "Strict RAG Mode",
       "strictRagOn": "ON: AI will refuse to answer when data is insufficient",

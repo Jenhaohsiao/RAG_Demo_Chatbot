@@ -82,17 +82,7 @@
     "validating": "验证中...",
     "useMyKey": "使用我的 API Key"
   },
-  "step2": {
-    "system": {
-      "lang": {
-        "zhTW": "繁体中文",
-        "zhCN": "简体中文",
-        "en": "英文",
-        "fr": "法文",
-        "auto": "自动检测"
-      }
-    }
-  },
+
   "aboutModal": {
     "about": "关于本项目",
     "ragSummary": "RAG 技术总结",
@@ -508,7 +498,9 @@
       "answerLanguage": "回答语言",
       "lang": {
         "zhTW": "繁体中文",
-        "en": "English",
+        "zhCN": "简体中文",
+        "en": "英文",
+        "fr": "法文",
         "auto": "自动检测"
       },
       "strictRagMode": "严格 RAG 模式",

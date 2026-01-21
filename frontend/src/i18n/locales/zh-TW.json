@@ -57,17 +57,7 @@
     "errorDefault": "送出失敗，請稍後再試。",
     "errorNetwork": "網路錯誤，請檢查您的連線。"
   },
-  "step2": {
-    "system": {
-      "lang": {
-        "zhTW": "繁體中文",
-        "zhCN": "簡體中文",
-        "en": "英文",
-        "fr": "法文",
-        "auto": "自動偵測"
-      }
-    }
-  },
+
   "aboutModal": {
     "about": "關於本專案",
     "ragSummary": "RAG 技術總結",
@@ -753,7 +743,9 @@
       "answerLanguage": "回答語言",
       "lang": {
         "zhTW": "繁體中文",
-        "en": "English",
+        "zhCN": "簡體中文",
+        "en": "英文",
+        "fr": "法文",
         "auto": "自動偵測"
       },
       "strictRagMode": "嚴格 RAG 模式",
