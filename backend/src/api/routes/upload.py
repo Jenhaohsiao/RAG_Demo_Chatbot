@@ -34,7 +34,6 @@ from ...services.vector_store import VectorStore
 from ...services.web_crawler import WebCrawler
 from ...services.vector_store import VectorStore
 from ...services.rag_engine import RAGEngine
-from ...services.name_translation_enhancer import NameTranslationEnhancer
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +46,6 @@ chunker = TextChunker()
 embedder = Embedder()
 vector_store = VectorStore()
 rag_engine = RAGEngine()
-name_enhancer = NameTranslationEnhancer()
 
 
 class UrlUploadRequest(BaseModel):
@@ -194,26 +192,13 @@ def process_document(document: Document):
                 source_reference=document.source_reference
             )
         
-        # Step 1.5: Enhance text with bilingual name annotations
-        logger.info(f"[{document.document_id}] Enhancing text with bilingual annotations")
-        try:
-            enhanced_text = name_enhancer.enhance_text(extracted_text)
-            enhancement_stats = name_enhancer.get_statistics(extracted_text, enhanced_text)
-            logger.info(
-                f"[{document.document_id}] Enhancement complete: "
-                f"{enhancement_stats['total_enhancements']} names enhanced, "
-                f"size: {enhancement_stats['original_length']} → {enhancement_stats['enhanced_length']} chars "
-                f"(+{enhancement_stats['size_increase_percent']:.1f}%)"
-            )
-            document.raw_content = enhanced_text
-        except Exception as e:
-            logger.error(f"[{document.document_id}] Enhancement failed: {e}, using original text")
-            document.raw_content = extracted_text
+        # Store extracted text directly (bilingual name enhancement removed)
+        document.raw_content = extracted_text
         document.extraction_status = ExtractionStatus.EXTRACTED
         # T089+ Calculate document tokens (1 token ≈ 3 characters)
-        document.tokens_used = max(1, len(enhanced_text) // 3)
-        logger.info(f"[{document.document_id}] Extraction complete: {len(enhanced_text)} chars")
-        logger.info(f"[{document.document_id}] TOKENS_USED CALCULATION: {len(enhanced_text)} chars // 3 = {document.tokens_used} tokens")
+        document.tokens_used = max(1, len(extracted_text) // 3)
+        logger.info(f"[{document.document_id}] Extraction complete: {len(extracted_text)} chars")
+        logger.info(f"[{document.document_id}] TOKENS_USED CALCULATION: {len(extracted_text)} chars // 3 = {document.tokens_used} tokens")
         
         # Step 2: Moderate content review
         # Based on user requirements, Flow 3 no longer performs content moderation, deferred to Flow 4

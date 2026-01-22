@@ -1,6 +1,30 @@
 version: '3.8'
 
+# =============================================================================
+# Docker Compose Configuration for RAG Demo Chatbot
+# =============================================================================
+#
+# TWO DEPLOYMENT MODES:
+#
+# 1. LOCAL DEVELOPMENT (with local Qdrant):
+#    docker-compose up
+#    - Starts both Qdrant and Backend containers
+#    - Backend uses QDRANT_MODE=docker
+#
+# 2. CLOUD DEPLOYMENT (with Qdrant Cloud):
+#    docker-compose up backend
+#    - Starts only Backend container
+#    - Backend uses QDRANT_MODE=cloud (set in .env file)
+#    - No local Qdrant needed
+#
+# =============================================================================
+
 services:
+  # -----------------------------------------------
+  # Qdrant Vector Database (Local Development Only)
+  # -----------------------------------------------
+  # NOTE: This service is OPTIONAL when using Qdrant Cloud
+  # To skip: docker-compose up backend
   qdrant:
     image: qdrant/qdrant:latest
     container_name: rag-chatbot-qdrant
@@ -14,13 +38,17 @@ services:
     restart: unless-stopped
     networks:
       - rag-chatbot-network
-# Temporarily disabled health check to debug startup issues
-    # healthcheck:
-    #   test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:6333 || exit 1"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 3
+    profiles:
+      - local  # Only start with: docker-compose --profile local up
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:6333 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
+  # -----------------------------------------------
+  # Backend API (FastAPI)
+  # -----------------------------------------------
   backend:
     build: 
       context: ./backend
@@ -29,16 +57,15 @@ services:
     ports:
       - "8000:8000"  # FastAPI server
     environment:
-      - QDRANT_MODE=docker
-      - QDRANT_HOST=qdrant
-      - QDRANT_PORT=6333
-      - QDRANT_URL=http://qdrant:6333
-      - ENABLE_CONTENT_MODERATION=true  # Enable content moderation
+      # Override these in .env file for different modes
+      # For local: QDRANT_MODE=docker, QDRANT_HOST=qdrant
+      # For cloud: QDRANT_MODE=cloud, QDRANT_URL=..., QDRANT_API_KEY=...
+      - ENABLE_CONTENT_MODERATION=true
     env_file:
       - ./backend/.env
       - ./backend/.env.local
-    depends_on:
-      - qdrant
+    # Conditional dependency: only depends on qdrant if using local mode
+    # For cloud mode, this dependency is ignored
     restart: unless-stopped
     networks:
       - rag-chatbot-network
