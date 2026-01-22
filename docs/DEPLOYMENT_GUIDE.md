@@ -1,7 +1,18 @@
 # 🚀 部署指南 - RAG Demo Chatbot
 
-**最後更新**: 2026-01-18  
-**部署策略**: 混合部署（前端 A2 Hosting + 後端 Render/Railway）
+**最後更新**: 2026-01-21  
+**部署策略**: 混合部署（前端 A2 Hosting + 後端 Render.com）
+**部署狀態**: ✅ 後端已上線
+
+---
+
+## 🌐 線上服務
+
+**後端 API**: https://rag-demo-chatbot-1.onrender.com/
+
+**健康檢查**: https://rag-demo-chatbot-1.onrender.com/health
+
+**API 文件**: https://rag-demo-chatbot-1.onrender.com/docs
 
 ---
 
@@ -14,9 +25,11 @@
     ↓
 [前端] A2 Hosting (靜態網站)
     ↓ API 請求
-[後端] Render.com (免費方案)
+[後端] Render.com ✅ 已部署
+    URL: rag-demo-chatbot-1.onrender.com
     ↓
-[Qdrant Cloud] (免費 1GB)
+[Qdrant Cloud] ✅ 已配置
+    Region: europe-west3 (Belgium)
 ```
 
 ### 成本分析
