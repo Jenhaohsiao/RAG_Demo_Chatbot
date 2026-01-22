@@ -104,10 +104,11 @@ app.add_middleware(SecurityHeadersMiddleware)  # Add security headers last (oute
 app.add_middleware(RequestValidationMiddleware)  # Validate requests
 app.add_middleware(RequestLoggingMiddleware)  # Log requests first (innermost)
 
-# CORS middleware
+# CORS middleware with regex pattern support for Vercel domains
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.get_cors_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",  # Match all Vercel preview/production domains
     allow_credentials=False,  # Stateless API, no cookies
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
     allow_headers=["*"],

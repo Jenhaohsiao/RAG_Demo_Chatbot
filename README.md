@@ -98,6 +98,20 @@ npm run dev
 
 - **Session Isolation**: Each user gets dedicated Qdrant collection
 - **Auto-Cleanup**: All data deleted after 30 minutes
+
+---
+
+## 🌐 Live Demo
+
+**Backend API**: https://rag-demo-chatbot-1.onrender.com/
+
+**API Health Check**: https://rag-demo-chatbot-1.onrender.com/health
+
+**Frontend** (Coming Soon): TBD
+
+> ⚠️ **Note**: Render free tier has cold start (30-60s) on first request after 15 minutes of inactivity.
+
+---
 - **Content Moderation**: Automatic filtering of inappropriate content
 - **Semantic Search**: Cosine similarity search (default threshold 0.6)
 - **Multilingual UI**: Support for 4 languages with instant switching
