@@ -33,9 +33,10 @@ class Session(BaseModel):
     language: str = Field(default="en", pattern="^(en|fr|zh-TW|zh-CN)$")
     similarity_threshold: float = Field(default=0.3, ge=0.0, le=1.0, description="RAG similarity threshold (0.0-1.0)")
     custom_prompt: str | None = Field(default=None, description="Custom prompt template for RAG responses")
-    gemini_api_key: str | None = Field(default=None, exclude=True)
-    has_valid_api_key: bool = Field(default=False)
-    api_key_source: str = Field(default="none", description="none|env|user")
+    # Removed: gemini_api_key field - API keys are not stored in session
+    # User keys are passed per-request via X-User-API-Key header
+    has_valid_api_key: bool = Field(default=False, description="Indicates if system default API key is available")
+    api_key_source: str = Field(default="none", description="none|env - tracks only system key availability")
     
     def __init__(self, **data):
         super().__init__(**data)
@@ -46,7 +47,7 @@ class Session(BaseModel):
             # Remove hyphens from UUID for valid collection name
             clean_id = str(self.session_id).replace("-", "")
             self.qdrant_collection_name = f"session_{clean_id}"
-        # 初始化 API Key 狀態
+        # Initialize API Key status
         if settings.gemini_api_key and get_default_api_key_status():
             self.has_valid_api_key = True
             self.api_key_source = "env"
@@ -146,11 +147,11 @@ class SessionWithMetrics(SessionResponse):
 
 class LanguageUpdateRequest(BaseModel):
     """Request to update session language"""
-    language: str = Field(pattern="^(en|zh-TW|ko|es|ja|ar|fr|zh-CN)$")
+    language: str = Field(pattern="^(en|fr|zh-TW|zh-CN)$")
     
     class Config:
         json_schema_extra = {
             "example": {
-                "language": "zh-TW"
+                "language": "en"
             }
         }

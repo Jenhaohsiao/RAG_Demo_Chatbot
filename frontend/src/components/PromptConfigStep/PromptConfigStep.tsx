@@ -41,23 +41,6 @@ export interface PromptConfigStepProps {
   disabled?: boolean;
 }
 
-// Answer language options
-const ANSWER_LANGUAGE_OPTIONS = [
-  {
-    value: "zh-TW",
-    label: "Traditional Chinese",
-    labelKey: "step2.system.lang.zhTW",
-  },
-  { value: "auto", label: "Auto Detect", labelKey: "step2.system.lang.auto" },
-  {
-    value: "zh-CN",
-    label: "Simplified Chinese",
-    labelKey: "step2.system.lang.zhCN",
-  },
-  { value: "en", label: "English", labelKey: "step2.system.lang.en" },
-  { value: "fr", label: "Français", labelKey: "step2.system.lang.fr" },
-];
-
 // Response style options
 const RESPONSE_STYLE_OPTIONS = [
   {
@@ -149,20 +132,20 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
 
   const styleOption =
     RESPONSE_STYLE_OPTIONS.find(
-      (opt) => opt.value === (parameters.response_style || "brief")
+      (opt) => opt.value === (parameters.response_style || "brief"),
     ) || RESPONSE_STYLE_OPTIONS[0];
   const toneOption =
     RESPONSE_TONE_OPTIONS.find(
-      (opt) => opt.value === (parameters.response_tone || "friendly")
+      (opt) => opt.value === (parameters.response_tone || "friendly"),
     ) || RESPONSE_TONE_OPTIONS[0];
   const personaOption =
     PERSONA_OPTIONS.find(
-      (opt) => opt.value === (parameters.persona || "workplace_veteran")
-    ) || PERSONA_OPTIONS[2];
+      (opt) => opt.value === (parameters.persona || "show_host"),
+    ) || PERSONA_OPTIONS[1];
   const citationOption =
     CITATION_STYLE_OPTIONS.find(
-      (opt) => opt.value === (parameters.citation_style || "inline")
-    ) || CITATION_STYLE_OPTIONS[0];
+      (opt) => opt.value === (parameters.citation_style || "none"),
+    ) || CITATION_STYLE_OPTIONS[2];
 
   return (
     <div className={`prompt-config-step ${disabled ? "disabled-step" : ""}`}>
@@ -219,27 +202,6 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                 {t("step2.system.title")}
               </h5>
 
-              {/* Answer language */}
-              <div className="mb-2">
-                <label className="form-label small mb-1">
-                  {t("step2.system.answerLanguage")}
-                </label>
-                <select
-                  className="form-select form-select-sm"
-                  value={parameters.answer_language || "auto"}
-                  disabled={disabled}
-                  onChange={(e) =>
-                    onParameterChange("answer_language", e.target.value)
-                  }
-                >
-                  {ANSWER_LANGUAGE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {t(option.labelKey)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
               {/* Strict RAG mode Toggle */}
               <div className="mb-2">
                 <div className="form-check form-switch">
@@ -269,7 +231,7 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                     className="form-check-input"
                     type="checkbox"
                     id="allowInference"
-                    checked={parameters.allow_inference || false}
+                    checked={parameters.allow_inference ?? true}
                     disabled={disabled}
                     onChange={(e) =>
                       onParameterChange("allow_inference", e.target.checked)
@@ -411,7 +373,7 @@ const PromptConfigStep: React.FC<PromptConfigStepProps> = ({
                 </label>
                 <select
                   className="form-select form-select-sm"
-                  value={parameters.citation_style || "inline"}
+                  value={parameters.citation_style || "none"}
                   disabled={disabled}
                   onChange={(e) =>
                     onParameterChange("citation_style", e.target.value)

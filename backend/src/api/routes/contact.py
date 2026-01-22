@@ -80,7 +80,7 @@ def send_email(name: str, email: Optional[str], message: str) -> bool:
         
         # Create message
         msg = MIMEMultipart("alternative")
-        msg["Subject"] = f"RAG Demo Chatbot - 新留言來自 {name}"
+        msg["Subject"] = f"RAG Demo Chatbot - New Contact Message from {name}"
         msg["From"] = settings.smtp_username
         msg["To"] = settings.contact_email_recipient
         msg["Reply-To"] = email if email else settings.smtp_username
@@ -92,16 +92,16 @@ def send_email(name: str, email: Optional[str], message: str) -> bool:
           <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
             <div style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border-radius: 10px;">
               <h2 style="color: #667eea; border-bottom: 2px solid #667eea; padding-bottom: 10px;">
-                新的聯絡表單留言
+                New Contact Form Message
               </h2>
               
               <div style="background-color: white; padding: 20px; border-radius: 5px; margin: 20px 0;">
-                <p style="margin: 10px 0;"><strong>留言者姓名：</strong> {name}</p>
-                <p style="margin: 10px 0;"><strong>留言者信箱：</strong> {email if email else "未提供"}</p>
-                <p style="margin: 10px 0;"><strong>留言時間：</strong> {timestamp}</p>
+                <p style="margin: 10px 0;"><strong>Name:</strong> {name}</p>
+                <p style="margin: 10px 0;"><strong>Email:</strong> {email if email else "Not provided"}</p>
+                <p style="margin: 10px 0;"><strong>Submitted:</strong> {timestamp}</p>
                 
                 <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
-                  <p style="margin: 10px 0;"><strong>留言內容：</strong></p>
+                  <p style="margin: 10px 0;"><strong>Message:</strong></p>
                   <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin-top: 10px;">
                     <p style="white-space: pre-wrap; margin: 0;">{message}</p>
                   </div>
@@ -110,9 +110,9 @@ def send_email(name: str, email: Optional[str], message: str) -> bool:
               
               <div style="margin-top: 20px; padding: 15px; background-color: #e8eaf6; border-radius: 5px;">
                 <p style="margin: 0; font-size: 12px; color: #666;">
-                  此郵件由 RAG Demo Chatbot 系統自動發送
+                  This email was automatically sent by RAG Demo Chatbot
                   <br>
-                  來源：聯絡表單提交
+                  Source: Contact Form Submission
                 </p>
               </div>
             </div>
@@ -168,7 +168,7 @@ async def submit_contact_form(request: ContactRequest) -> ContactResponse:
         if email_sent:
             return ContactResponse(
                 success=True,
-                message="留言已成功送出！我們會盡快回覆您。"
+                message="Message sent successfully! We will respond to you as soon as possible."
             )
         else:
             # Email failed but don't fail the request
@@ -176,7 +176,7 @@ async def submit_contact_form(request: ContactRequest) -> ContactResponse:
             logger.warning("Email sending failed but returning success to user")
             return ContactResponse(
                 success=True,
-                message="留言已記錄，但郵件通知可能未成功發送。"
+                message="Message recorded, but email notification may not have been sent successfully."
             )
             
     except ValueError as e:
@@ -189,5 +189,5 @@ async def submit_contact_form(request: ContactRequest) -> ContactResponse:
         logger.error(f"Contact form submission error: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail={"error": "無法處理您的留言，請稍後再試。"}
+            detail={"error": "Unable to process your message. Please try again later."}
         )

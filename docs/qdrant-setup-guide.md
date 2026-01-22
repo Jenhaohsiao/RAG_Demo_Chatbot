@@ -1,15 +1,47 @@
 # Qdrant Setup Guide
 
-## ⚠️ Windows 使用者重要提示
+## 🎯 快速選擇
 
-**Embedded Mode 在 Windows 上有已知問題**：
-- 檔案鎖定機制導致無法重複啟動伺服器
-- `.lock` 檔案即使程序終止也無法釋放
-- **強烈建議使用 Docker Mode**
+- **部署到生產環境** → 使用 [**Qdrant Cloud**](QDRANT_CLOUD_SETUP.md)（推薦）
+- **本地開發測試** → 使用 **Docker Mode**（本文件）
+- **Windows 開發** → **避免使用 Embedded Mode**（有檔案鎖定問題）
 
 ---
 
-## 🐳 方案 1: Docker Mode（推薦）
+## ☁️ 方案 1: Qdrant Cloud（生產部署推薦）
+
+### 優點
+- ✅ 無需管理基礎設施
+- ✅ 自動備份和高可用性
+- ✅ 免費方案提供 1GB 儲存空間
+- ✅ 適合部署到 Render、Vercel、AWS 等平台
+- ✅ 全球多個區域可選
+
+### 快速開始
+
+1. **註冊並創建 Cluster**
+   - 前往 [Qdrant Cloud](https://cloud.qdrant.io/)
+   - 創建免費 Cluster
+   - 取得 URL 和 API Key
+
+2. **配置環境變數**
+   ```env
+   QDRANT_MODE=cloud
+   QDRANT_URL=https://your-cluster-id.region.aws.cloud.qdrant.io:6333
+   QDRANT_API_KEY=your_api_key_here
+   ```
+
+3. **啟動應用程式**
+   ```powershell
+   cd backend
+   python run_server.py
+   ```
+
+📖 **完整設定指南**: 請參考 [QDRANT_CLOUD_SETUP.md](QDRANT_CLOUD_SETUP.md)
+
+---
+
+## 🐳 方案 2: Docker Mode（本地開發推薦）
 
 ### 優點
 - ✅ 無檔案鎖定問題

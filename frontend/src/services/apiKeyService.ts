@@ -62,27 +62,10 @@ export async function validateUserApiKey(apiKey: string): Promise<ApiKeyValidati
 }
 
 /**
- * Get user API Key from session storage
+ * Security Note:
+ * User API keys are NEVER stored in sessionStorage, localStorage, or any persistent storage.
+ * Keys are kept in React component state (in-memory) and passed via X-User-API-Key header per-request.
+ * 
+ * Previous functions (getUserApiKey, clearUserApiKey, addApiKeyHeader) have been removed
+ * to ensure no accidental storage occurs.
  */
-export function getUserApiKey(): string | null {
-  return sessionStorage.getItem("user_gemini_api_key");
-}
-
-/**
- * Clear user API Key
- */
-export function clearUserApiKey(): void {
-  sessionStorage.removeItem("user_gemini_api_key");
-}
-
-/**
- * Add API Key header to axios request
- */
-export function addApiKeyHeader(config: any): any {
-  const userApiKey = getUserApiKey();
-  if (userApiKey) {
-    config.headers = config.headers || {};
-    config.headers["X-Gemini-API-Key"] = userApiKey;
-  }
-  return config;
-}

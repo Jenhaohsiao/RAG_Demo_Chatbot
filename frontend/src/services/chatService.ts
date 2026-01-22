@@ -62,12 +62,16 @@ export async function clearHistory(sessionId: string): Promise<void> {
  */
 export async function getSuggestions(
   sessionId: string,
-  language?: string
+  language?: string,
+  signal?: AbortSignal
 ): Promise<string[]> {
   const lang = language || 'en';
   const response = await api.get<string[]>(
     `/chat/${sessionId}/suggestions`,
-    { params: { language: lang } }
+    { 
+      params: { language: lang },
+      signal
+    }
   );
   return response.data;
 }

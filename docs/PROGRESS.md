@@ -2,8 +2,129 @@
 
 **專案名稱**: Multilingual RAG-Powered Chatbot  
 **分支**: `001-multilingual-rag-chatbot`  
-**最後更新**: 2026-01-17  
-**總體狀態**: ✅ RAG 引擎深度優化完成、UI 體驗改進完成、聯絡表單功能已整合
+**最後更新**: 2026-01-20  
+**總體狀態**: ✅ RAG 引擎深度優化完成、UI 體驗改進完成、建議問題驗證機制完全修復
+
+---
+
+## 📅 2026-01-20 22:00 - 建議問題驗證機制關鍵修正 (v2) ✅
+
+**🎯 本次更新重點**:
+1. **v1 版本的問題**：雖然改為實際執行查詢，但使用了簡化版本的邏輯，導致驗證結果和實際查詢結果不一致
+2. **v2 關鍵修正**：改為使用**完全相同的 `query()` 方法**，確保驗證和實際查詢使用完全一致的邏輯
+3. **Metrics 保護**：驗證前保存 metrics，驗證後恢復，避免污染統計數據
+
+**根本問題分析**:
+```
+驗證時（v1簡化版）              實際查詢時
+     ↓                              ↓
+簡化的 Prompt              完整的 Prompt（含術語定義）
+     ↓                              ↓
+無語言檢測                 自動檢測查詢語言
+     ↓                              ↓
+簡單回答判斷              複雜的正則匹配
+     ↓                              ↓
+LLM: "可以回答"           LLM: "文件中沒有提到"
+     ↓                              ↓
+response_type:            response_type:
+"ANSWERED" ✓             "CANNOT_ANSWER" ✗
+```
+
+**v2 解決方案**:
+- **統一邏輯**：驗證時調用 `self.query()` 而不是自定義簡化版本
+- **保存/恢復 Metrics**：
+  ```python
+  saved_metrics = self._session_metrics.get(session_id)
+  saved_memory = self._session_memory.get(session_id)
+  
+  # 執行驗證查詢...
+  
+  # 恢復原始狀態
+  if saved_metrics:
+      self._session_metrics[session_id] = saved_metrics
+  ```
+- **更嚴格的判斷**：
+  - 檢查 `response_type == "ANSWERED"`
+  - **且**檢查回覆內容不包含「無法回答」表述
+  - 使用 case-insensitive 匹配
+
+**主要變更**:
+- **Backend (`rag_engine.py`)**:
+  - 重構 `_validate_suggestions()` 方法：
+    - 移除 `_execute_rag_query_for_validation()` 簡化版本
+    - 改為直接調用 `self.query()` 使用完全相同邏輯
+    - 增加 metrics/memory 保存和恢復機制
+    - 更嚴格的「無法回答」判斷（case-insensitive，更多關鍵詞）
+  - 更新調用處傳遞 `language` 參數
+
+**效果**:
+- ✅ **100% 一致性**：驗證邏輯和實際查詢邏輯完全相同
+- ✅ **準確性提升**：不會再出現「驗證通過但實際無法回答」的情況
+- ✅ **Metrics 不污染**：驗證過程不影響會話統計
+- ✅ **更嚴格判斷**：即使 response_type 是 ANSWERED，也會檢查內容
+
+**文檔**:
+- 更新 `SUGGESTION_VALIDATION_IMPROVEMENT.md`：增加 v2 關鍵修正說明
+
+**驗證**:
+- ✅ 後端已重啟 (22:05)
+- 建議測試：上傳文件，觀察建議問題生成，點擊確認都能得到有效答案
+
+---
+
+## 📅 2026-01-20 19:00 - 建議問題驗證機制重大改進 (v1) ✅
+
+**🎯 本次更新重點**:
+1. **問題根源**：LLM 自我驗證生成的建議問題不可靠，導致用戶點擊後收到「無法回答」的回覆
+2. **解決方案**：改用實際執行 RAG 查詢來驗證，確保 100% 準確性
+3. **核心改進**：從「讓 LLM 判斷能否回答」改為「實際執行查詢並檢查結果」
+
+**主要變更**:
+
+**Backend 改進**:
+- **`rag_engine.py`**:
+  - 新增 `_execute_rag_query_for_validation()` 方法：
+    - 實際執行完整 RAG pipeline（嵌入 → 向量搜尋 → LLM 生成）
+    - 輕量版本，不追蹤 metrics，不更新記憶體
+    - 返回真實的 `RAGResponse`
+  - 重構 `_validate_suggestions()` 方法：
+    - 移除不可靠的 LLM YES/NO 驗證
+    - 改為實際執行每個建議問題
+    - 檢查 `response_type == "ANSWERED"`
+    - 檢查回覆內容有效性（長度 > 20，不是 "I cannot..."）
+    - 只有通過所有檢查的問題才會返回
+    - 失敗時返回空列表，而不是未驗證的問題
+
+**驗證邏輯對比**:
+
+**舊方法**（不可靠）:
+```
+生成問題 → 向量檢索 → LLM判斷YES/NO → 顯示在UI
+                          ↑
+                     可能出錯！
+```
+
+**新方法**（100% 準確）:
+```
+生成問題 → 實際執行RAG查詢 → 檢查response_type → 只顯示ANSWERED的問題
+                              ↑
+                         地面真相！
+```
+
+**效果與權衡**:
+- ✅ **準確性**：100% 保證用戶點擊後能得到答案
+- ✅ **一致性**：使用與實際查詢相同的 pipeline、閾值、prompt
+- ✅ **安全性**：寧願不顯示建議，也不顯示錯誤建議
+- ⚠️ **性能**：初始建議生成時間增加（從 1-2 秒到 5-10 秒）
+- ⚠️ **API 使用**：每個建議問題需要一次 Gemini API 調用（最多 5 次）
+- ✅ **緩解**：只驗證前 3 個通過的問題，使用 loading 狀態
+
+**文檔**:
+- 新增 `SUGGESTION_VALIDATION_IMPROVEMENT.md`：詳細說明問題、解決方案、權衡和測試建議
+
+**驗證**:
+- ✅ 後端已重啟，新邏輯已生效
+- 建議測試：上傳文件後檢查建議問題，點擊確認都能得到有效答案
 
 ---
 

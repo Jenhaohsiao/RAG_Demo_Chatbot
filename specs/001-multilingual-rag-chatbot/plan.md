@@ -1,11 +1,11 @@
-# Implementation Plan: Multilingual RAG-Powered Chatbot
+# Implementation Plan: English-First RAG-Powered Chatbot
 
 **Branch**: `001-multilingual-rag-chatbot` | **Date**: 2025-12-08 | **Spec**: [spec.md](./spec.md)
 **Input**: Feature specification from `/specs/001-multilingual-rag-chatbot/spec.md`
 
 ## Summary
 
-Build a production-ready multilingual RAG-powered chatbot for AI Engineer portfolio demonstration. The system automatically creates isolated sessions, allows users to upload documents (PDF/text/URLs), validates content through Gemini Safety API, embeds content into Qdrant vector database with per-session isolation, and responds to queries strictly based on retrieved context (no hallucination). Supports 7 languages with real-time UI switching, displays resource metrics transparently, and implements automatic 30-minute session TTL with complete data cleanup.
+Build a production-ready English-first RAG-powered chatbot for AI Engineer portfolio demonstration. The system automatically creates isolated sessions, allows users to upload documents (PDF/text/URLs), validates content through Gemini Safety API, embeds content into Qdrant vector database with per-session isolation, and responds to queries strictly based on retrieved context (no hallucination). UI is in English only. Displays resource metrics transparently, and implements automatic 30-minute session TTL with complete data cleanup.
 
 **Technical Approach**: Web application with React/TypeScript/Vite frontend and FastAPI Python backend. Backend implements modular architecture with dedicated services for session management, content extraction, moderation, chunking, embedding, vector storage, RAG pipeline, memory management, metrics tracking, and automated cleanup scheduling. Uses Qdrant Vector Database (embedded mode for development, Docker for integration testing, Qdrant Cloud for production) with per-session collection isolation. Gemini API provides LLM, embedding, and safety moderation capabilities.
 
@@ -95,7 +95,8 @@ docker logs rag-chatbot-qdrant  # 檢查數據庫日誌
 ### ✅ Principle I: MVP-First
 **Status**: PASS
 - Architecture focuses on core RAG functionality (P1-P3 user stories)
-- P4-P6 features (multilingual UI, metrics, manual session controls) marked as enhancements
+- P4-P5 features (metrics, manual session controls) marked as enhancements
+- UI is English-only, no multilingual UI complexity
 - No premature optimization or over-engineering in design
 
 ### ✅ Principle II: Testability  

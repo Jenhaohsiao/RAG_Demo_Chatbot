@@ -38,7 +38,7 @@ FOLLOW-UP TODOs:
 ## Project Identity
 
 **Project Name**: RAG Demo Chatbot  
-**Purpose**: Multilingual RAG-powered chatbot demonstrating embedding, vector database, and strict RAG capabilities for AI Engineer portfolio  
+**Purpose**: English-first RAG-powered chatbot demonstrating embedding, vector database, and strict RAG capabilities for AI Engineer portfolio. The UI and LLM interactions are primarily in English. Multilingual document support is available but the interface remains English-only.  
 **Feature Branch**: `001-multilingual-rag-chatbot`  
 **Repository**: RAG_Demo_Chatbot (Owner: Jenhaohsiao)
 

@@ -3,7 +3,6 @@
  * Manages session lifecycle with automatic heartbeat and activity monitoring      
  */
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
 import sessionService from '../services/sessionService';
 import { API_BASE_URL } from '../services/api';
 import { useUserActivity } from './useUserActivity';
@@ -18,14 +17,12 @@ interface UseSessionReturn {
   sessionId: string | null;
   sessionState: SessionState | null;
   expiresAt: Date | null;
-  language: string;
   isLoading: boolean;
   error: string | null;
   isSessionExpired: boolean;
   createSession: (similarityThreshold?: number, customPrompt?: string) => Promise<void>;
   closeSession: () => Promise<void>;
   restartSession: () => Promise<void>;
-  updateLanguage: (newLanguage: 'en' | 'zh-TW' | 'zh-CN' | 'fr', passedSessionId?: string | null) => Promise<void>;
   setOnSessionExpired: (callback: (() => void) | undefined) => void;
   resetSessionExpired: () => void;
 }
@@ -34,12 +31,9 @@ interface UseSessionReturn {
  * Custom hook for session management
  */
 export const useSession = (): UseSessionReturn => {
-  const { i18n } = useTranslation();
-
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [sessionState, setSessionState] = useState<SessionState | null>(null);     
   const [expiresAt, setExpiresAt] = useState<Date | null>(null);
-  const [language, setLanguage] = useState<string>(i18n.language);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isSessionExpired, setIsSessionExpired] = useState<boolean>(false);        
@@ -227,7 +221,7 @@ export const useSession = (): UseSessionReturn => {
     errorSetRef.current = false;
 
     try {
-      const response = await sessionService.createSession(language, similarityThreshold, customPrompt);                                                               
+      const response = await sessionService.createSession('en', similarityThreshold, customPrompt);                                                               
       setSessionId(response.session_id);
       setSessionState(response.state);
       const newExpiresAt = new Date(response.expires_at);
@@ -235,7 +229,6 @@ export const useSession = (): UseSessionReturn => {
       const lastActivity = new Date(response.created_at);
 
       setExpiresAt(newExpiresAt);
-      setLanguage(response.language);
 
       startHeartbeat(response.session_id);
       startExpirationCheck(newExpiresAt, lastActivity);
@@ -245,7 +238,7 @@ export const useSession = (): UseSessionReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, [language, startHeartbeat, startExpirationCheck]);
+  }, [startHeartbeat, startExpirationCheck]);
 
   /**
    * Close current session
@@ -288,7 +281,6 @@ export const useSession = (): UseSessionReturn => {
       setSessionId(response.session_id);
       setSessionState(response.state);
       setExpiresAt(new Date(response.expires_at));
-      setLanguage(response.language);
 
       startHeartbeat(response.session_id);
     } catch (err: any) {
@@ -297,33 +289,6 @@ export const useSession = (): UseSessionReturn => {
       setIsLoading(false);
     }
   }, [sessionId, createSession, startHeartbeat]);
-
-  /**
-   * Update session language
-   */
-  const updateLanguage = useCallback(async (newLanguage: 'en' | 'zh-TW' | 'zh-CN' | 'fr', passedSessionId?: string | null) => {
-    const targetSessionId = passedSessionId !== undefined ? passedSessionId : sessionId;
-    if (!targetSessionId) {
-      setLanguage(newLanguage);
-      i18n.changeLanguage(newLanguage);
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await sessionService.updateLanguage(targetSessionId, newLanguage);
-      setLanguage(response.language);
-      i18n.changeLanguage(response.language);
-    } catch (err: any) {
-      const errorMsg = err.message || 'Failed to update language';
-      setError(errorMsg);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [sessionId, i18n]);
 
   /**
    * Cleanup on unmount and handle unload
@@ -358,14 +323,12 @@ export const useSession = (): UseSessionReturn => {
     sessionId,
     sessionState,
     expiresAt,
-    language,
     isLoading,
     error,
     isSessionExpired,
     createSession,
     closeSession,
     restartSession,
-    updateLanguage,
     setOnSessionExpired,
     resetSessionExpired
   };

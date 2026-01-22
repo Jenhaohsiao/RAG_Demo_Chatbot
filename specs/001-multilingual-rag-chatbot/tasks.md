@@ -26,9 +26,9 @@
 **Purpose**: Create project structure and install dependencies
 
 - [ ] T001 Create backend directory structure: `backend/src/{api,core,services,models}`, `backend/tests/{unit,integration,contract}`
-- [ ] T002 Create frontend directory structure: `frontend/src/{components,hooks,services,i18n,types}`, `frontend/tests/{unit,e2e}`
+- [ ] T002 Create frontend directory structure: `frontend/src/{components,hooks,services,types}`, `frontend/tests/{unit,e2e}`
 - [ ] T003 [P] Initialize backend Python project in `backend/requirements.txt` with FastAPI, qdrant-client, google-generativeai, PyPDF2, beautifulsoup4, APScheduler, python-dotenv, pytest
-- [ ] T004 [P] Initialize frontend Node.js project in `frontend/package.json` with React 18, TypeScript 5, Vite 5, Bootstrap 5, axios, react-i18next, Jest, Playwright
+- [ ] T004 [P] Initialize frontend Node.js project in `frontend/package.json` with React 18, TypeScript 5, Vite 5, Bootstrap 5, axios, Jest, Playwright
 - [ ] T005 [P] Create `.env.example` file in repository root with GEMINI_API_KEY, QDRANT_HOST, QDRANT_PORT, SESSION_TTL_MINUTES, SIMILARITY_THRESHOLD
 - [ ] T006 [P] Create `.gitignore` with `.env`, `__pycache__/`, `node_modules/`, `venv/`, `.pytest_cache/`, `dist/`, `build/`
 - [ ] T007 [P] Create `docker-compose.yml` with Qdrant service configuration (port 6333:6333, 6334:6334)
@@ -58,15 +58,8 @@
 - [ ] T020 [P] Create TypeScript types in `frontend/src/types/chat.ts` matching backend ChatMessage schema
 - [ ] T021 [P] Create TypeScript types in `frontend/src/types/metrics.ts` matching backend Metrics schema
 - [ ] T022 Create Axios client configuration in `frontend/src/services/api.ts` with base URL and error interceptors
-- [ ] T023 Create i18n configuration in `frontend/src/i18n/config.ts` with react-i18next setup for 8 languages
-- [ ] T024 [P] Create English translations in `frontend/src/i18n/locales/en.json` with all UI strings
-- [ ] T025 [P] Create Traditional Chinese translations in `frontend/src/i18n/locales/zh-TW.json`
-- [ ] T025b [P] Create Simplified Chinese translations in `frontend/src/i18n/locales/zh-CN.json`
-- [ ] T026 [P] Create Korean translations in `frontend/src/i18n/locales/ko.json`
-- [ ] T027 [P] Create Spanish translations in `frontend/src/i18n/locales/es.json`
-- [ ] T028 [P] Create Japanese translations in `frontend/src/i18n/locales/ja.json`
-- [ ] T029 [P] Create Arabic translations in `frontend/src/i18n/locales/ar.json` with RTL support
-- [ ] T030 [P] Create French translations in `frontend/src/i18n/locales/fr.json`
+
+**Note**: This project uses English-only UI. No i18n or multilingual UI support is required (T023-T030 removed).
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in priority order
 
@@ -91,9 +84,9 @@
 - [ ] T042 [US1] Implement PUT /session/{session_id}/language endpoint in `backend/src/api/routes/session.py` updating language preference
 - [ ] T043 [US1] Create useSession custom hook in `frontend/src/hooks/useSession.ts` managing session state, create, close, restart actions
 - [ ] T044 [US1] Create session service in `frontend/src/services/sessionService.ts` with API calls for all session endpoints
-- [ ] T045 [US1] Create Header component in `frontend/src/components/Header.tsx` with app name, language selector, Leave button, Restart button
-- [ ] T046 [US1] Create LanguageSelector component in `frontend/src/components/LanguageSelector.tsx` with cycling animation (1-second interval through 7 languages)
-- [ ] T047 [US1] Create useLanguage custom hook in `frontend/src/hooks/useLanguage.ts` managing i18n language changes and persistence
+- [ ] T045 [US1] Create Header component in `frontend/src/components/Header.tsx` with app name, Leave button, Restart button
+
+**Note**: T046-T047 (LanguageSelector, useLanguage) removed - English-only UI
 
 **Checkpoint**: Session management complete - users can create sessions with automatic TTL and manual controls
 
@@ -159,62 +152,43 @@
 
 ---
 
-## Phase 6: User Story 4 - Real-time Multilingual UI Language Switching (P4)
+## Phase 6: User Story 4 - Real-time Metrics Display (P4)
 
-**Goal**: Implement complete UI language switching with cycling animation on language selector button and instant UI updates preserving chat history
+**Goal**: Display real-time metrics for token usage, context usage, and vector count throughout user interactions
 
-**Independent Test**: Select different languages and verify all UI labels update, button text cycles through 7 languages every 1 second, Arabic shows RTL layout, chat history preserved
+**Independent Test**: Monitor metrics panel during document upload and chat interactions to verify accurate real-time updates
 
 ### Implementation for User Story 4
 
-- [ ] T073 [P] [US4] Implement language cycling animation in LanguageSelector component using setInterval (1-second cycle through ["English", "中文", "한국어", "Español", "日本語", "العربية", "Français"])
-- [ ] T074 [P] [US4] Add RTL layout support in `frontend/src/App.tsx` detecting `ar` language and applying `dir="rtl"` attribute to root element
-- [ ] T075 [US4] Implement language change handler in useLanguage hook calling i18n.changeLanguage and PUT /session/{session_id}/language endpoint
-- [ ] T076 [US4] Verify all components use i18n translation keys (t('key')) instead of hardcoded strings in Header, UploadScreen, ProcessingScreen, ChatScreen, ChatInput, MetricsPanel
-- [ ] T077 [US4] Test language switching flow: click dropdown → select language → verify UI updates <500ms → verify chat history preserved → verify subsequent interactions use new language
+- [ ] T073 [P] [US4] Create MetricsPanel component in `frontend/src/components/MetricsPanel/` displaying token_used, token_limit, token_percent, context_used, context_percent, vector_count
+- [ ] T074 [P] [US4] Add useMetrics custom hook in `frontend/src/hooks/useMetrics.ts` fetching GET /api/session/{session_id}/metrics
+- [ ] T075 [US4] Implement metrics update logic triggered after each query/response cycle and upload completion
+- [ ] T076 [US4] Add visual warning indicator when token_percent >80% (color change or icon)
+- [ ] T077 [US4] Test metrics display: upload document → verify vector_count increases → send query → verify token/context metrics update <1 second
 
-**Checkpoint**: Multilingual UI complete - users can switch between 7 languages with instant UI updates and cycling animation
-
----
-
-## Phase 7: User Story 5 - Real-time Metrics Display (P5)
-
-**Goal**: Implement comprehensive metrics panel showing token_input, token_output, token_total, token_percent, context_tokens, context_percent, vector_count with real-time updates and visual indicators
-
-**Independent Test**: Monitor metrics panel during upload and chat, verify all values update accurately in real-time, verify progress bars and color coding (green <50%, yellow 50-80%, red >80%)
-
-### Implementation for User Story 5
-
-- [ ] T078 [P] [US5] Create useMetrics custom hook in `frontend/src/hooks/useMetrics.ts` managing metrics state from session GET and chat responses
-- [ ] T079 [US5] Create MetricsPanel component in `frontend/src/components/MetricsPanel.tsx` displaying all 8 metrics with labels, current values, progress bars for percentages
-- [ ] T080 [US5] Implement progress bar color logic in MetricsPanel: green (<50%), yellow (50-80%), red (>80%) for token_percent and context_percent
-- [ ] T081 [US5] Integrate MetricsPanel into ProcessingScreen showing vector_count increasing during upload
-- [ ] T082 [US5] Integrate MetricsPanel into ChatScreen updating after each query-response cycle
-- [ ] T083 [US5] Implement visual warning for token_percent >80% with icon or color change per success criteria SC-005
-
-**Checkpoint**: Metrics display complete - users see transparent real-time resource usage throughout upload and chat
+**Checkpoint**: Real-time metrics complete - users see transparent resource consumption data
 
 ---
 
-## Phase 8: User Story 6 - Session Management Controls (P6)
+## Phase 7: User Story 5 - Session Management Controls (P5)
 
 **Goal**: Implement Leave and Restart buttons with confirmation dialogs, session closure, and data cleanup
 
 **Independent Test**: Click Leave → verify confirmation → verify session deleted and Qdrant collection removed. Click Restart → verify new session created with clean state
 
-### Implementation for User Story 6
+### Implementation for User Story 5
 
-- [x] T084 [P] [US6] Implement Leave button handler in Header component showing confirmation dialog ("Are you sure you want to leave? All session data will be deleted.") ✅ 完成 (2025-12-18)
-- [x] T085 [P] [US6] Implement Restart button handler in Header component showing confirmation dialog ("Restart will create a new session. Current chat history will be lost.") ✅ 完成 (2025-12-18)
-- [x] T086 [US6] Connect Leave button to useSession hook calling closeSession action → POST /session/{session_id}/close → redirect to home/new session ✅ 完成 (2025-12-18)
-- [x] T087 [US6] Connect Restart button to useSession hook calling restartSession action → POST /session/{session_id}/restart → update session_id → reset UI to UploadScreen ✅ 完成 (2025-12-18)
+- [x] T078 [P] [US5] Implement Leave button handler in Header component showing confirmation dialog ("Are you sure you want to leave? All session data will be deleted.") ✅ 完成 (2025-12-18)
+- [x] T079 [P] [US5] Implement Restart button handler in Header component showing confirmation dialog ("Restart will create a new session. Current chat history will be lost.") ✅ 完成 (2025-12-18)
+- [x] T080 [US5] Connect Leave button to useSession hook calling closeSession action → POST /session/{session_id}/close → redirect to home/new session ✅ 完成 (2025-12-18)
+- [x] T081 [US5] Connect Restart button to useSession hook calling restartSession action → POST /session/{session_id}/restart → update session_id → reset UI to UploadScreen ✅ 完成 (2025-12-18)
 - [x] T088 [US6] Verify Qdrant collection deletion in session close flow checking collection no longer exists after Leave/Restart ✅ 驗證完成，自動化測試 11/11 PASSED (2025-12-18)
 
 **Checkpoint**: Session controls complete - users can manually close or restart sessions with immediate cleanup
 
 ---
 
-## Phase 9: Polish & Cross-Cutting Concerns
+## Phase 8: Polish & Cross-Cutting Concerns
 
 **Purpose**: Final improvements affecting multiple user stories
 
@@ -234,7 +208,7 @@
 
 ---
 
-## Phase 10: Deployment & Production Readiness
+## Phase 9: Deployment & Production Readiness
 
 **Purpose**: Prepare application for production deployment with monitoring, optimization, and deployment infrastructure
 

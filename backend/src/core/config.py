@@ -27,12 +27,12 @@ class Settings(BaseSettings):
     # Content Moderation Configuration
     enable_content_moderation: bool = True  # Set to False to skip moderation during testing
     
-    # Qdrant Configuration (IMPORTANT: Default to docker mode, NOT embedded)
-    qdrant_host: str = "localhost"
-    qdrant_port: int = 6333
-    qdrant_mode: Literal["embedded", "docker", "cloud"] = "docker"  # CRITICAL: Docker is default
-    qdrant_api_key: str | None = None  # For cloud mode
-    qdrant_url: str | None = None  # For cloud mode
+    # Qdrant Configuration (IMPORTANT: Default to cloud mode for deployment)
+    qdrant_host: str = "localhost"  # Only used in docker mode
+    qdrant_port: int = 6333  # Only used in docker mode
+    qdrant_mode: Literal["embedded", "docker", "cloud"] = "cloud"  # CRITICAL: Cloud is default for deployment
+    qdrant_api_key: str | None = None  # Required for cloud mode
+    qdrant_url: str | None = None  # Required for cloud mode
     
     # Session Configuration
     session_ttl_minutes: int = 10

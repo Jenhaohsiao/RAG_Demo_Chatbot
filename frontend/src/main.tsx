@@ -13,7 +13,6 @@ import "./main.scss"; // Main style file (converted to SCSS)
 import "./components/ToastMessage/ToastMessage.scss"; // Explicit import for use in main.tsx
 import "./i18n/config";
 import { useTranslation } from "react-i18next";
-import i18n from "./i18n/config";
 
 import Header from "./components/Header/Header";
 import ProcessingModal from "./components/ProcessingModal/ProcessingModal";
@@ -28,7 +27,6 @@ import ToastMessage from "./components/ToastMessage/ToastMessage";
 import { useSession } from "./hooks/useSession";
 import { useUpload } from "./hooks/useUpload";
 import { useToast } from "./hooks/useToast";
-import type { SupportedLanguage } from "./hooks/useLanguage";
 
 /**
  * Main App Component
@@ -47,14 +45,12 @@ const App: React.FC = () => {
 
   const {
     sessionId,
-    language,
     isLoading,
     error,
     isSessionExpired,
     createSession,
     closeSession,
     restartSession,
-    updateLanguage,
     setOnSessionExpired,
     resetSessionExpired,
   } = useSession(); // Initialize session first, set callback later
@@ -113,26 +109,6 @@ const App: React.FC = () => {
   const [isBlocked, setIsBlocked] = useState(false); // Block user actions until message confirmed
   const lastErrorRef = React.useRef<string | null>(null);
   const [workflowReset, setWorkflowReset] = useState(false); // Workflow reset signal
-
-  // T074: Setup language direction (simplified - no RTL languages)
-  React.useEffect(() => {
-    const handleLanguageChanged = (lng: string) => {
-      // All supported languages are LTR
-      document.documentElement.dir = "ltr";
-      document.documentElement.lang = lng;
-      document.body.classList.remove("rtl-layout");
-    };
-
-    // Initial setup based on current language
-    handleLanguageChanged(i18n.language);
-
-    // Listen for language changes
-    i18n.on("languageChanged", handleLanguageChanged);
-
-    return () => {
-      i18n.off("languageChanged", handleLanguageChanged);
-    };
-  }, []);
 
   // Recreate session when threshold changes (only when no files uploaded)
   const handleThresholdChange = async (newThreshold: number) => {
@@ -274,14 +250,6 @@ const App: React.FC = () => {
     }
   };
 
-  const handleLanguageChange = async (newLanguage: SupportedLanguage) => {
-    try {
-      // T075: Pass sessionId for backend sync
-      await updateLanguage(newLanguage, sessionId);
-    } catch (err) {
-      // Error is already handled in useSession.updateLanguage
-    }
-  };
   // Handle system message confirmation
   const handleDismissMessage = () => {
     setSystemMessage(null);
@@ -302,7 +270,7 @@ const App: React.FC = () => {
         type: "success",
         message: t(
           "system.sessionUpdateSuccess",
-          "Session updated successfully!"
+          "Session updated successfully!",
         ),
       });
     } catch (err) {
@@ -311,7 +279,7 @@ const App: React.FC = () => {
         type: "error",
         message: t(
           "system.sessionUpdateFailed",
-          "Failed to update session, please try again later."
+          "Failed to update session, please try again later.",
         ),
       });
     }
@@ -353,7 +321,7 @@ const App: React.FC = () => {
         type: "success",
         message: t(
           "system.sessionRestartSuccess",
-          "Session restarted successfully! System reset to initial state."
+          "Session restarted successfully! System reset to initial state.",
         ),
       });
     } catch (err) {
@@ -362,7 +330,7 @@ const App: React.FC = () => {
         type: "error",
         message: t(
           "system.sessionRestartFailed",
-          "Failed to restart session, please try again later."
+          "Failed to restart session, please try again later.",
         ),
       });
     }
@@ -370,7 +338,7 @@ const App: React.FC = () => {
 
   const handleSettingsSave = async (
     threshold: number,
-    customPrompt?: string
+    customPrompt?: string,
   ) => {
     setSimilarityThreshold(threshold);
     setShowSettings(false);
@@ -416,7 +384,6 @@ const App: React.FC = () => {
     <div className=" min-vh-100 d-flex flex-column">
       <Header
         sessionId={sessionId}
-        onLanguageChange={handleLanguageChange}
         onLeave={handleLeaveClick}
         onRestart={handleRestartClick}
         onAboutClick={() => {
@@ -562,5 +529,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       {/* T093: Wrap App with Error Boundary */}
       <App />
     </ErrorBoundary>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

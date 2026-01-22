@@ -57,17 +57,7 @@
     "errorDefault": "Failed to send. Please try again later.",
     "errorNetwork": "Network error. Please check your connection."
   },
-  "step2": {
-    "system": {
-      "lang": {
-        "zhTW": "Traditional Chinese",
-        "zhCN": "Simplified Chinese",
-        "en": "English",
-        "fr": "French",
-        "auto": "Auto detect"
-      }
-    }
-  },
+
   "aboutModal": {
     "about": "About this project",
     "ragSummary": "RAG Summary",
@@ -570,8 +560,10 @@
       "answerLanguage": "Answer Language",
       "lang": {
         "zhTW": "Traditional Chinese",
+        "zhCN": "Simplified Chinese",
         "en": "English",
-        "auto": "Auto-detect"
+        "fr": "French",
+        "auto": "Auto Detect"
       },
       "strictRagMode": "Strict RAG Mode",
       "strictRagOn": "ON: AI will refuse to answer when data is insufficient",
@@ -903,7 +895,7 @@
         "description": "You can continue using the chatbot by providing your own Gemini API key. Your key will only be used for the current session and will not be stored."
       },
       "apiKeyHelp": "Your API key will be used only for this session and will not be saved.",
-      "securityNote": "🔒 Your API key is only used for this session and will not be stored in our database.",
+      "securityNote": "🔒 Your API key is used only for the current request and will NOT be stored. It is not saved in our database, session storage, or any persistent storage.",
       "needKey": "Don't have an API key?",
       "getKeyLink": "Get Free Gemini API Key"
     }
@@ -915,6 +907,55 @@
       "empty": "API key cannot be empty",
       "invalid": "API key format is invalid",
       "validationFailed": "API key validation failed"
+    }
+  },
+  "promptTemplate": {
+    "fullPrompt": "You are an AI assistant designed to answer questions based on provided documents.\n\n{{personaInstruction}}\n\n{{styleInstruction}}\n\n{{toneInstruction}}\n\n{{citationInstruction}}\n\n{{inferencePolicy}}\n\n{{strictRagPolicy}}\n\nTechnical Parameters:\n- Maximum response length: {{maxResponseTokens}} tokens\n- Number of retrieved document chunks: {{retrievalTopK}}\n- Similarity threshold: {{similarityThreshold}}\n\n**Retrieved Documents**:\n{{context}}\n\n**User Question**:\n{{query}}\n\nYour Answer (respond in {{responseLanguage}} based on the documents above):",
+    "persona": {
+      "default": "Role: Standard AI Assistant - Provide balanced, neutral responses.",
+      "expert": "Role: Domain Expert - Provide in-depth, technical explanations with professional terminology.",
+      "teacher": "Role: Patient Teacher - Explain concepts step-by-step, use analogies, and ensure understanding.",
+      "friend": "Role: Friendly Companion - Use conversational tone, empathize, and make information accessible.",
+      "elementary_teacher": "Role: Elementary Teacher - Explain using simple examples and patient guidance.",
+      "show_host": "Role: Show Host - Engage with energy, rhythm, and interactive style.",
+      "workplace_veteran": "Role: Workplace Veteran - Provide practical, experience-based advice."
+    },
+    "responseStyle": {
+      "detailed": "Style: Detailed - Provide comprehensive explanations with examples and context.",
+      "concise": "Style: Concise - Give brief, direct answers focusing on key points.",
+      "bullet": "Style: Bullet Points - Organize information in clear, scannable bullet lists.",
+      "narrative": "Style: Narrative - Present information as a flowing story or explanation.",
+      "brief": "Style: Brief - Provide quick, essential points only.",
+      "kid_friendly": "Style: Kid-Friendly - Use simple language and relatable analogies."
+    },
+    "responseTone": {
+      "professional": "Tone: Professional - Maintain formal, business-appropriate language.",
+      "casual": "Tone: Casual - Use relaxed, conversational language.",
+      "enthusiastic": "Tone: Enthusiastic - Express energy and excitement about the topic.",
+      "empathetic": "Tone: Empathetic - Show understanding and emotional awareness.",
+      "friendly": "Tone: Friendly - Warm and approachable communication.",
+      "rigorous": "Tone: Rigorous - Precise and logically clear.",
+      "urgent": "Tone: Urgent - Brief and direct, focusing on immediate needs."
+    },
+    "citation": {
+      "none": "Citations: Do not include source citations.",
+      "inline": "Citations: Include inline references like [Doc 1, p.5].",
+      "endnotes": "Citations: List all sources at the end of your response.",
+      "footnotes": "Citations: Use footnote-style numbering for sources."
+    },
+    "inference": {
+      "allowed": "Inference: You may make reasonable inferences beyond the exact document content when helpful.",
+      "notAllowed": "Inference: Only use information explicitly stated in the documents. Do not infer or extrapolate."
+    },
+    "strictRag": {
+      "enabled": "RAG Mode: Strict - Only answer if relevant information is found in documents. If not found, clearly state that the information is not available.",
+      "disabled": "RAG Mode: Flexible - Answer based on documents when available, but use general knowledge if needed."
+    },
+    "languages": {
+      "en": "English",
+      "zhTW": "Traditional Chinese (Taiwan)",
+      "zhCN": "Simplified Chinese",
+      "fr": "French"
     }
   }
 }

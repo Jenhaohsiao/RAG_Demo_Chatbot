@@ -26,18 +26,18 @@ router = APIRouter()
 
 
 class ApiKeyRequest(BaseModel):
-    """使用者提交的 API Key"""
+    """User-submitted API Key"""
     api_key: str
 
 
 class ApiKeyValidationResponse(BaseModel):
-    """API Key 驗證回應"""
+    """API Key validation response"""
     valid: bool
     message: str | None = None
 
 
 class ApiKeyStatusResponse(BaseModel):
-    """API Key 狀態回應"""
+    """API Key status response"""
     status: str  # valid | missing | invalid
     source: str  # env | user | none
     has_valid_api_key: bool
@@ -117,7 +117,7 @@ async def get_session(session_id: UUID):
     Raises:
         404: Session not found or expired (T089)
     """
-    # 延遲導入以避免循環導入
+    # Delayed import to avoid circular imports
     from src.main import AppException
     
     session = session_manager.get_session(session_id)
@@ -332,9 +332,11 @@ async def update_custom_prompt(session_id: UUID, custom_prompt: str | None = Non
 @router.get("/{session_id}/api-key/status", response_model=ApiKeyStatusResponse)
 async def get_api_key_status(session_id: UUID):
     """
-    檢查目前 Session 的 Gemini API Key 狀態。
-    如果存在使用者提供的 key，直接返回已驗證狀態；
-    否則回傳預設 key 的狀態。
+    Check system API Key status (does not check user-provided keys)
+    User-provided keys are not stored, only passed via Header during requests
+    
+    Returns:
+        ApiKeyStatusResponse: System API Key status information
     """
     session = session_manager.get_session(session_id)
     if not session:
@@ -343,15 +345,7 @@ async def get_api_key_status(session_id: UUID):
             detail=f"Session {session_id} not found"
         )
 
-    # 優先使用使用者提供的 key 狀態
-    if session.gemini_api_key and session.has_valid_api_key:
-        return ApiKeyStatusResponse(
-            status="valid",
-            source="user",
-            has_valid_api_key=True
-        )
-
-    # 退回到預設 key 狀態
+    # Only check system default API Key status
     if get_default_api_key_status():
         return ApiKeyStatusResponse(
             status="valid",
@@ -366,44 +360,20 @@ async def get_api_key_status(session_id: UUID):
     )
 
 
-@router.post("/{session_id}/api-key", response_model=ApiKeyStatusResponse)
-async def set_api_key(session_id: UUID, request: ApiKeyRequest):
-    """
-    讓使用者在 Session 層級提供 Gemini API Key。
-    會先做輕量驗證，成功後僅儲存在記憶體，不回傳給前端。
-    """
-    session = session_manager.get_session(session_id)
-    if not session:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Session {session_id} not found"
-        )
-
-    # 驗證 key
-    is_valid = validate_gemini_api_key(request.api_key)
-    if not is_valid:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=ErrorCode.API_KEY_INVALID.value
-        )
-
-    session_manager.set_api_key(session_id, request.api_key)
-
-    return ApiKeyStatusResponse(
-        status="valid",
-        source="user",
-        has_valid_api_key=True
-    )
+# Removed: POST /{session_id}/api-key endpoint
+# API keys are no longer stored in session state
+# User-provided keys are validated per-request via X-User-API-Key header
+# Use POST /api-key/validate for stateless validation before use
 
 
 @router.get("/api-key/status", response_model=ApiKeyStatusResponse)
 async def get_api_key_status():
     """
-    檢查當前 API Key 狀態（環境變數）
-    此端點不需要 session_id，用於應用啟動時檢查
+    Check current API Key status (environment variable)
+    This endpoint does not require session_id, used for checking at application startup
     
     Returns:
-        ApiKeyStatusResponse: API Key 狀態資訊
+        ApiKeyStatusResponse: API Key status information
     """
     default_key_valid = get_default_api_key_status()
     
@@ -424,14 +394,14 @@ async def get_api_key_status():
 @router.post("/api-key/validate", response_model=ApiKeyValidationResponse)
 async def validate_api_key(request: ApiKeyRequest):
     """
-    驗證使用者提供的 Gemini API Key
-    此端點不需要 session_id，用於註冊前驗證
+    Validate user-provided Gemini API Key
+    This endpoint does not require session_id, used for validation before registration
     
     Args:
-        request: 包含 api_key 的請求體
+        request: Request body containing api_key
         
     Returns:
-        ApiKeyValidationResponse: 驗證結果
+        ApiKeyValidationResponse: Validation result
     """
     try:
         is_valid = validate_gemini_api_key(request.api_key)

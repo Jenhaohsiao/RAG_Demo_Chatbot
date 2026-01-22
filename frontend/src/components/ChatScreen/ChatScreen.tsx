@@ -78,7 +78,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   const { t } = useTranslation();
   // Use saved messages on initialization
   const [messages, setMessages] = useState<ChatMessageType[]>(
-    savedChatMessages || []
+    savedChatMessages || [],
   );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -104,25 +104,41 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   const vectorCount = sessionInfo?.vector_count ?? 0;
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchSuggestions = async () => {
       if (messages.length === 0 && sessionId) {
         setAreSuggestionsLoading(true);
         try {
-          const suggs = await getChatSuggestions(sessionId, i18n.language);
-          setInitialSuggestions(suggs);
-        } catch (err) {
+          const suggs = await getChatSuggestions(
+            sessionId,
+            i18n.language,
+            controller.signal,
+          );
+          if (!controller.signal.aborted) {
+            setInitialSuggestions(suggs);
+          }
+        } catch (err: any) {
+          // Ignore abort errors
+          if (err.name !== "CanceledError" && err.code !== "ERR_CANCELED") {
+            console.error("Failed to fetch suggestions:", err);
+          }
         } finally {
-          setAreSuggestionsLoading(false);
+          if (!controller.signal.aborted) {
+            setAreSuggestionsLoading(false);
+          }
         }
       }
     };
     fetchSuggestions();
+    return () => {
+      controller.abort();
+    };
   }, [sessionId, messages.length, i18n.language]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Handle language display for document summary
   const getLocalizedDocumentSummary = (
-    summary: string
+    summary: string,
   ): {
     content: string;
     isTranslationNote: boolean;
