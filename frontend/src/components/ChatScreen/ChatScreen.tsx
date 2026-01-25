@@ -98,7 +98,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   const [initialSuggestions, setInitialSuggestions] = useState<string[]>([]);
   const [areSuggestionsLoading, setAreSuggestionsLoading] = useState(false);
 
-  const MODEL_NAME = "Gemini 2.0 Flash";
+  const MODEL_NAME = "Gemini 2.5 Flash";
   const PRIMARY_COLOR = "#2b6cb0";
   const documentCount = sessionInfo?.document_count ?? 0;
   const vectorCount = sessionInfo?.vector_count ?? 0;

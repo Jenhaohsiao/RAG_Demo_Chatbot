@@ -200,8 +200,8 @@ class ModerationService:
     
     def _check_explicit_keywords(self, text: str, source_reference: str) -> ModerationResult:
         """
-        Check if content contains explicit pornographic/adult keywords
-        This check is more comprehensive than _check_only_harmful_content
+        Check if content contains explicit pornographic/adult content using context-aware analysis
+        Uses Gemini API to understand the context and intent, not just keyword matching
         
         Args:
             text: Text content to check
@@ -210,58 +210,107 @@ class ModerationService:
         Returns:
             ModerationResult: Moderation result
         """
-        content_lower = text.lower()
-        
-        # Explicit pornographic/adult content keywords (English) - use more flexible matching
-        explicit_keywords_en = [
-            "porn", "xxx", "nude photo", "adult video", 
-            "sex video", "erotic", "pornograph",
-            "live cam", "cam girl", "webcam sex",
-            "strip club", "escort service", "prostitution"
-        ]
-        
-        # Explicit pornographic/adult content keywords (Chinese)
-        explicit_keywords_zh = [
-            "色情", "成人影片", "A片", "AV女優", "裸照",
-            "成人直播", "色情直播", "援交", "性服務",
-            "情色網站", "成人網站", "黃片", "毛片"
-        ]
-        
-        all_keywords = explicit_keywords_en + explicit_keywords_zh
-        found_keywords = []
-        
-        for keyword in all_keywords:
-            if keyword in content_lower:
-                found_keywords.append(keyword)
-        
-        # If multiple keywords found, more certain it's adult content
-        if len(found_keywords) >= 2:
-            reason = f"Explicit adult content keywords detected: {', '.join(found_keywords[:3])}"
-            logger.warning(f"Explicit content detected: {reason}")
+        # For very short text or if no model available, skip explicit content check
+        if len(text.strip()) < 50 or not self.model:
             return ModerationResult(
-                status=ModerationStatus.BLOCKED,
-                blocked_categories=["SEXUALLY_EXPLICIT"],
-                reason=reason
+                status=ModerationStatus.APPROVED,
+                blocked_categories=[],
+                reason=None
             )
         
-        # If only one keyword found, check if it's in important positions like title, meta tags
-        if len(found_keywords) == 1:
-            # Check if in first 500 characters (usually title, description, etc.)
-            if found_keywords[0] in content_lower[:500]:
-                reason = f"Adult content keyword detected in important page position: {found_keywords[0]}"
-                logger.warning(f"Explicit keyword in important position: {reason}")
+        try:
+            # Use Gemini API to analyze content in context
+            # Take a sample of text (first 2000 chars to avoid token limits)
+            sample_text = text[:2000]
+            
+            prompt = f"""Analyze the following content and determine if it contains explicit adult/pornographic material.
+
+Consider the context and intent - educational, medical, literary, or historical discussions about sexuality are acceptable.
+Block only if the content is primarily intended as pornographic or sexually explicit material.
+
+Content to analyze:
+{sample_text}
+
+Respond with JSON only:
+{{
+  "is_explicit": true/false,
+  "confidence": "high"/"medium"/"low",
+  "reason": "brief explanation"
+}}"""
+
+            response = self.model.generate_content(
+                prompt,
+                generation_config=genai.types.GenerationConfig(
+                    temperature=0.1,
+                    max_output_tokens=200,
+                )
+            )
+            
+            # Parse response
+            import json
+            import re
+            response_text = response.text.strip()
+            # Extract JSON from markdown code blocks if present
+            json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', response_text, re.DOTALL)
+            if json_match:
+                response_text = json_match.group(1)
+            
+            analysis = json.loads(response_text)
+            
+            # Only block if high confidence that content is explicit
+            if analysis.get("is_explicit") and analysis.get("confidence") == "high":
+                reason = f"Explicit adult content detected: {analysis.get('reason', 'Context indicates pornographic material')}"
+                logger.warning(f"Explicit content detected in '{source_reference}': {reason}")
                 return ModerationResult(
                     status=ModerationStatus.BLOCKED,
                     blocked_categories=["SEXUALLY_EXPLICIT"],
                     reason=reason
                 )
-        
-        # Passed check
-        return ModerationResult(
-            status=ModerationStatus.APPROVED,
-            blocked_categories=[],
-            reason=None
-        )
+            
+            logger.info(f"Content passed explicit check for '{source_reference}'")
+            return ModerationResult(
+                status=ModerationStatus.APPROVED,
+                blocked_categories=[],
+                reason=None
+            )
+            
+        except Exception as e:
+            # If context analysis fails, fall back to approval (lenient approach)
+            logger.warning(f"Context-aware explicit content check failed for '{source_reference}': {e}")
+            # Quick keyword scan as fallback - but only block obvious pornographic terms
+            content_lower = text.lower()
+            obvious_porn_keywords = [
+                "porn", "xxx", "pornograph", "sex video", "adult video",
+                "色情", "成人影片", "A片", "黃片"
+            ]
+            
+            import re
+            found_obvious = []
+            for keyword in obvious_porn_keywords:
+                if " " in keyword:
+                    if keyword in content_lower:
+                        found_obvious.append(keyword)
+                else:
+                    pattern = r'\b' + re.escape(keyword) + r'\b'
+                    if re.search(pattern, content_lower):
+                        found_obvious.append(keyword)
+            
+            # Only block if multiple obvious pornographic terms found
+            if len(found_obvious) >= 2:
+                reason = f"Multiple explicit pornographic terms detected: {', '.join(found_obvious[:3])}"
+                logger.warning(f"Explicit content detected via fallback check: {reason}")
+                return ModerationResult(
+                    status=ModerationStatus.BLOCKED,
+                    blocked_categories=["SEXUALLY_EXPLICIT"],
+                    reason=reason
+                )
+            
+            # If fallback also didn't find issues, approve
+            return ModerationResult(
+                status=ModerationStatus.APPROVED,
+                blocked_categories=[],
+                reason=None
+            )
     
     def _check_only_harmful_content(self, text: str) -> ModerationResult:
         """
