@@ -78,7 +78,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
   const [showErrorDialog, setShowErrorDialog] = useState(false); // Error dialog state
   const [errorDialogMessage, setErrorDialogMessage] = useState<string>(""); // Error dialog message
   const [errorDialogTitle, setErrorDialogTitle] = useState<string>(
-    t("uploadWizard.dialog.uploadFailed", "Upload Failed")
+    t("uploadWizard.dialog.uploadFailed", "Upload Failed"),
   ); // Error dialog title
   const [uploadSubStep, setUploadSubStep] = useState<1 | 2>(1); // 1: Parameters, 2: Upload interface
   const [crawlerLoading, setCrawlerLoading] = useState(false); // Added: Crawler loading state
@@ -112,8 +112,8 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
         throw new Error(
           t(
             "uploadWizard.errors.sampleFileLoad",
-            "Unable to load sample file, please upload manually."
-          )
+            "Unable to load sample file, please upload manually.",
+          ),
         );
       }
       const blob = await response.blob();
@@ -131,8 +131,8 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
         setError(
           t(
             "upload.error.size",
-            `File size exceeds limit (${formatFileSize(MAX_FILE_SIZE)})`
-          )
+            `File size exceeds limit (${formatFileSize(MAX_FILE_SIZE)})`,
+          ),
         );
         return;
       }
@@ -143,8 +143,8 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
       setError(
         t(
           "uploadWizard.errors.sampleFileLoad",
-          "Unable to load sample file, please upload manually."
-        )
+          "Unable to load sample file, please upload manually.",
+        ),
       );
     }
   };
@@ -170,7 +170,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
       {
         formats: displayFormats,
         maxSize: formatFileSize(MAX_FILE_SIZE),
-      }
+      },
     );
   };
 
@@ -208,7 +208,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
       `Only supports ${displayFormats} file formats`,
       {
         formats: displayFormats,
-      }
+      },
     );
   };
 
@@ -228,10 +228,10 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
             formats: supportedFileTypes
               .map((type) => type.toUpperCase())
               .join(", "),
-          }
+          },
         );
         setErrorDialogTitle(
-          t("uploadWizard.dialog.invalidFormat", "Unsupported File Format")
+          t("uploadWizard.dialog.invalidFormat", "Unsupported File Format"),
         );
         setErrorDialogMessage(errorMsg);
         setShowErrorDialog(true);
@@ -247,7 +247,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
         if (file.size === 0) {
           errorMsg = t(
             "uploadWizard.errors.fileEmpty",
-            `File is empty, cannot upload.\n\nPlease use another file or click "Use Sample File" below.`
+            `File is empty, cannot upload.\n\nPlease use another file or click "Use Sample File" below.`,
           );
         } else {
           errorMsg = t(
@@ -256,12 +256,12 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
             {
               fileSize: fileSizeFormatted,
               maxSize: maxSizeFormatted,
-            }
+            },
           );
         }
 
         setErrorDialogTitle(
-          t("uploadWizard.dialog.uploadFailed", "Upload Failed")
+          t("uploadWizard.dialog.uploadFailed", "Upload Failed"),
         );
         setErrorDialogMessage(errorMsg);
         setShowErrorDialog(true);
@@ -271,14 +271,14 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
       // Call parent component callback
       onFileSelected(file);
     },
-    [onFileSelected, t, supportedFileTypes, MAX_FILE_SIZE]
+    [onFileSelected, t, supportedFileTypes, MAX_FILE_SIZE],
   );
 
   /**
    * Handle file input change
    */
   const handleFileInputChange = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const files = event.target.files;
     if (files && files.length > 0) {
@@ -330,7 +330,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
   const handleCrawlerSubmit = async (
     url: string,
     maxTokens: number,
-    maxPages: number
+    maxPages: number,
   ) => {
     setCrawlerError(null);
     setCrawlerResults(null); // Clear previous results
@@ -373,7 +373,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
           failureReasons.push(`Error: ${response.error_message}`);
         if (noCrawledPages)
           failureReasons.push(
-            `No pages found (found: ${response.pages_found}, list: ${response.crawled_pages?.length})`
+            `No pages found (found: ${response.pages_found}, list: ${response.crawled_pages?.length})`,
           );
         if (noTokens) failureReasons.push(`No tokens (count: ${totalTokens})`);
 
@@ -421,27 +421,27 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
         errorMsg = t(
           "uploadWizard.errors.crawlerInsufficient",
           `Crawled content too small (only ${actualTokens} tokens), cannot form valid data.\n\nPlease provide content-rich pages or use Sample Website.`,
-          { tokens: actualTokens }
+          { tokens: actualTokens },
         );
         setErrorDialogTitle(
-          t("uploadWizard.dialog.uploadFailed", "Insufficient Data")
+          t("uploadWizard.dialog.uploadFailed", "Insufficient Data"),
         );
       } else if (isBlockedError) {
         errorMsg = t(
           "uploadWizard.errors.crawlerBlocked",
-          "This website cannot be crawled (anti-crawler mechanism).\n\nPlease use another site or Sample Website."
+          "This website cannot be crawled (anti-crawler mechanism).\n\nPlease use another site or Sample Website.",
         );
         setErrorDialogTitle(
-          t("uploadWizard.dialog.uploadFailed", "Website Crawl Failed")
+          t("uploadWizard.dialog.uploadFailed", "Website Crawl Failed"),
         );
       } else {
         errorMsg = t(
           "uploadWizard.errors.crawlerFailed",
           `Crawl failed: ${errorMessage}\n\nPlease use another site or Sample Website.`,
-          { reason: errorMessage }
+          { reason: errorMessage },
         );
         setErrorDialogTitle(
-          t("uploadWizard.dialog.uploadFailed", "Website Crawl Failed")
+          t("uploadWizard.dialog.uploadFailed", "Website Crawl Failed"),
         );
       }
       setErrorDialogMessage(errorMsg);
@@ -493,7 +493,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                 >
                   {t(
                     "uploadWizard.dialog.confirm",
-                    t("buttons.confirm", "Confirm")
+                    t("buttons.confirm", "Confirm"),
                   )}
                 </button>
               </div>
@@ -520,7 +520,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                       {t(
                         "uploadWizard.summary.uploadedFiles",
                         "Uploaded Files ({{count}})",
-                        { count: uploadedFiles.length }
+                        { count: uploadedFiles.length },
                       )}
                     </h6>
                   </div>
@@ -551,7 +551,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                             ? t(
                                 "uploadWizard.summary.sizeLabel",
                                 `Size ${sizeLabel}`,
-                                { size: sizeLabel }
+                                { size: sizeLabel },
                               )
                             : null,
                           uploadedAt
@@ -573,7 +573,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                                   {metaParts.join("  ") ||
                                     t(
                                       "uploadWizard.summary.completed",
-                                      "Completed"
+                                      "Completed",
                                     )}
                                 </small>
                               </div>
@@ -598,7 +598,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                       {t(
                         "uploadWizard.summary.uploadedSites",
                         "Crawled Websites ({{count}})",
-                        { count: crawledUrls.length }
+                        { count: crawledUrls.length },
                       )}
                     </h6>
                   </div>
@@ -622,9 +622,9 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                                     size: formatFileSize(site.content_size),
                                     pages: site.pages_found || 1,
                                     time: new Date(
-                                      site.crawl_time
+                                      site.crawl_time,
                                     ).toLocaleString(),
-                                  }
+                                  },
                                 )}
                               </small>
                             </div>
@@ -692,7 +692,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                         {t(
                           "uploadWizard.steps.basicParameters",
                           `${tabTitle} Basic Parameters`,
-                          { tab: tabTitle }
+                          { tab: tabTitle },
                         )}
                       </h5>
                     </div>
@@ -709,7 +709,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                           <i className="bi bi-hdd me-2"></i>
                           {t(
                             "uploadWizard.steps.file.maxFileSize",
-                            "Max File Size"
+                            "Max File Size",
                           )}
                         </label>
                         <div className="d-flex align-items-center gap-3">
@@ -725,7 +725,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                             onChange={(e) =>
                               onParameterChange?.(
                                 "max_file_size_mb",
-                                parseInt(e.target.value)
+                                parseInt(e.target.value),
                               )
                             }
                             disabled={!onParameterChange}
@@ -741,7 +741,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                           <i className="bi bi-file-earmark-check me-2"></i>
                           {t(
                             "uploadWizard.steps.file.supportedTypes",
-                            "Supported File Types"
+                            "Supported File Types",
                           )}
                         </label>
                         <div className="row g-2">
@@ -763,11 +763,11 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                                             fileType,
                                           ]
                                         : parameters.supported_file_types.filter(
-                                            (type) => type !== fileType
+                                            (type) => type !== fileType,
                                           );
                                       onParameterChange(
                                         "supported_file_types",
-                                        updatedTypes
+                                        updatedTypes,
                                       );
                                     }
                                   }}
@@ -794,7 +794,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                           <i className="bi bi-cpu me-2"></i>
                           {t(
                             "uploadWizard.steps.crawler.maxTokens",
-                            "Max Tokens"
+                            "Max Tokens",
                           )}
                         </label>
                         <div className="d-flex align-items-center gap-3">
@@ -810,7 +810,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                             onChange={(e) =>
                               onParameterChange?.(
                                 "crawler_max_tokens",
-                                parseInt(e.target.value)
+                                parseInt(e.target.value),
                               )
                             }
                             disabled={!onParameterChange}
@@ -828,7 +828,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                           <i className="bi bi-layers me-2"></i>
                           {t(
                             "uploadWizard.steps.crawler.maxPages",
-                            "Max Pages"
+                            "Max Pages",
                           )}
                         </label>
                         <div className="d-flex align-items-center gap-3">
@@ -844,7 +844,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                             onChange={(e) =>
                               onParameterChange?.(
                                 "crawler_max_pages",
-                                parseInt(e.target.value)
+                                parseInt(e.target.value),
                               )
                             }
                             disabled={!onParameterChange}
@@ -872,7 +872,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                         ? t("uploadWizard.steps.next.file", "Next: Select File")
                         : t(
                             "uploadWizard.steps.next.crawler",
-                            "Next: Enter URL"
+                            "Next: Enter URL",
                           )}
                       <i className="bi bi-arrow-right ms-2"></i>
                     </button>
@@ -902,18 +902,18 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                       {activeTab === "file"
                         ? t(
                             "uploadWizard.steps.upload.titleFile",
-                            "Step 2/2: Upload File"
+                            "Step 2/2: Upload File",
                           )
                         : isCrawlerCompleted &&
                             !hasCrawlerFailed &&
                             !showErrorDialog
                           ? t(
                               "uploadWizard.steps.upload.crawlerCompleted",
-                              "Crawl Completed"
+                              "Crawl Completed",
                             )
                           : t(
                               "uploadWizard.steps.upload.titleCrawler",
-                              "Step 2/2: Start Crawl"
+                              "Step 2/2: Start Crawl",
                             )}
                     </h5>
                   </div>
@@ -930,7 +930,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                             <strong>
                               {t(
                                 "uploadWizard.steps.crawlerSuccess.title",
-                                "Website Crawl Successful!"
+                                "Website Crawl Successful!",
                               )}
                             </strong>
                             <p className="mb-0 mt-1">
@@ -942,7 +942,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                                   tokens: (
                                     crawlerResults.total_tokens / 1000
                                   ).toFixed(1),
-                                }
+                                },
                               )}
                             </p>
                           </div>
@@ -954,7 +954,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                               <i className="bi bi-file-earmark-text me-2"></i>
                               {t(
                                 "uploadWizard.steps.crawlerSuccess.detailsTitle",
-                                "Crawl Result Details"
+                                "Crawl Result Details",
                               )}
                             </h6>
                           </div>
@@ -966,7 +966,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                                   <div className="mt-2 fw-bold">
                                     {t(
                                       "uploadWizard.steps.stats.pages",
-                                      "Site Pages"
+                                      "Site Pages",
                                     )}
                                   </div>
                                   <div className="fs-4 text-primary">
@@ -980,7 +980,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                                   <div className="mt-2 fw-bold">
                                     {t(
                                       "uploadWizard.steps.stats.tokens",
-                                      "Total Tokens"
+                                      "Total Tokens",
                                     )}
                                   </div>
                                   <div className="fs-4 text-info">
@@ -997,7 +997,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                                   <div className="mt-2 fw-bold">
                                     {t(
                                       "uploadWizard.steps.stats.status",
-                                      "Status"
+                                      "Status",
                                     )}
                                   </div>
                                   <div className="fs-6 text-success">
@@ -1005,19 +1005,19 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                                       "completed" &&
                                       t(
                                         "uploadWizard.steps.stats.statusComplete",
-                                        "Completed"
+                                        "Completed",
                                       )}
                                     {crawlerResults.crawl_status ===
                                       "token_limit_reached" &&
                                       t(
                                         "uploadWizard.steps.stats.statusTokenLimit",
-                                        "Token Limit Reached"
+                                        "Token Limit Reached",
                                       )}
                                     {crawlerResults.crawl_status ===
                                       "page_limit_reached" &&
                                       t(
                                         "uploadWizard.steps.stats.statusPageLimit",
-                                        "Page Limit Reached"
+                                        "Page Limit Reached",
                                       )}
                                   </div>
                                 </div>
@@ -1032,7 +1032,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                             <i className="bi bi-info-circle me-2"></i>
                             {t(
                               "uploadWizard.steps.info.autoNext",
-                              "Data automatically uploaded. Proceeding to Content Review."
+                              "Data automatically uploaded. Proceeding to Content Review.",
                             )}
                           </div>
                         </div>
@@ -1069,7 +1069,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                                 ? t("upload.dropzone.drop", "Drop files here")
                                 : t(
                                     "upload.dropzone.dragOrClick",
-                                    "Drop files here or click to browse"
+                                    "Drop files here or click to browse",
                                   )}
                             </p>
                             <small className="text-muted d-block">
@@ -1080,19 +1080,43 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
                       )}
 
                       {activeTab === "file" && (
-                        <div className="text-center mt-3">
+                        <div className="text-center mt-4">
                           <button
-                            className="btn btn-outline-secondary btn-sm"
+                            className="btn btn-info btn-lg shadow-sm px-4 py-3 text-white"
+                            style={{
+                              background:
+                                "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+                              border: "none",
+                              borderRadius: "12px",
+                              fontWeight: "500",
+                              fontSize: "16px",
+                              transition: "all 0.3s ease",
+                            }}
                             onClick={(e) => {
                               e.stopPropagation();
                               handleUseSampleFile();
                             }}
                             disabled={disabled}
+                            onMouseEnter={(e) => {
+                              if (!disabled) {
+                                e.currentTarget.style.transform =
+                                  "translateY(-2px)";
+                                e.currentTarget.style.boxShadow =
+                                  "0 8px 16px rgba(102, 126, 234, 0.4)";
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.transform = "translateY(0)";
+                              e.currentTarget.style.boxShadow = "";
+                            }}
                           >
-                            <i className="bi bi-file-text me-2"></i>
+                            <i
+                              className="bi bi-file-earmark-text me-2"
+                              style={{ fontSize: "20px" }}
+                            ></i>
                             {t(
                               "uploadWizard.steps.sampleFileButton",
-                              "Use Sample File (Alice in Wonderland)"
+                              "Use Sample File (Alice in Wonderland)",
                             )}
                           </button>
                         </div>

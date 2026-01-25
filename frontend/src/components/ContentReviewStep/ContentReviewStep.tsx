@@ -271,20 +271,24 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
               } else {
               }
             } catch (error) {
-              // ⚠️ API call failed - log the error but don't block the user
-              // This prevents legitimate content from being blocked due to network issues or API errors
-              passed = true;
+              // ⚠️ API call failed - treat as failure to prevent proceeding with unverified content
+              passed = false;
               const errorMsg =
                 error instanceof Error ? error.message : String(error);
-              console.warn("Content moderation API error:", errorMsg);
-              // Show warning but don't block continuation
+              console.error("Content moderation API error:", errorMsg);
+              failureReason = t(
+                "contentReview.moderationError",
+                "Content review service error: {{error}}",
+                { error: errorMsg },
+              );
+              // Show error and block continuation
               showToast({
-                type: "warning",
+                type: "error",
                 message: t(
                   "contentReview.serviceUnavailable",
-                  "Content review service is temporarily unavailable, this check was skipped",
+                  "Content review service failed. Please try again or check your connection.",
                 ),
-                duration: 3000,
+                duration: 5000,
               });
             }
           } else {

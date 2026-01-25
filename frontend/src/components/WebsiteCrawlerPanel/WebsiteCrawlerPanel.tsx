@@ -100,7 +100,7 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
         <p className="crawler-description mb-3">
           {t(
             "crawler.description",
-            "Enter website URL to crawl content automatically. Set page limit to 1 for single page, or more for deep crawling."
+            "Enter website URL to crawl content automatically. Set page limit to 1 for single page, or more for deep crawling.",
           )}
         </p>
 
@@ -148,14 +148,33 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
         </button>
 
         {/* Sample Website Button */}
-        <div className="text-center">
+        <div className="text-center mt-3">
           <button
-            className="btn btn-outline-secondary btn-sm"
+            className="btn btn-success btn-lg shadow-sm px-4 py-3"
+            style={{
+              background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+              border: "none",
+              borderRadius: "12px",
+              fontWeight: "500",
+              fontSize: "16px",
+              transition: "all 0.3s ease",
+            }}
             onClick={handleUseSampleWebsite}
             disabled={isLoading || disabled}
+            onMouseEnter={(e) => {
+              if (!isLoading && !disabled) {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow =
+                  "0 8px 16px rgba(245, 87, 108, 0.4)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "";
+            }}
           >
-            <i className="bi bi-globe me-2"></i>
-            {t("crawler.useSample", "Use sample website (Project Gutenberg)")}
+            <i className="bi bi-globe2 me-2" style={{ fontSize: "20px" }}></i>
+            {t("crawler.useSample", "Use Sample Website (Project Gutenberg)")}
           </button>
         </div>
       </div>
@@ -228,7 +247,7 @@ const WebsiteCrawlerPanel: React.FC<WebsiteCrawlerPanelProps> = ({
                 "{{count}} URLs crawled and ready for processing",
                 {
                   count: crawlResults.crawled_pages.length,
-                }
+                },
               )}
             </p>
           </div>
