@@ -77,11 +77,11 @@ const AiChatStep: React.FC<AiChatStepProps> = ({
         // Aggregate info from all documents
         const totalChunks = documents.reduce(
           (sum, doc) => sum + (doc.chunk_count || 0),
-          0
+          0,
         );
         const totalTokens = documents.reduce(
           (sum, doc) => sum + (doc.tokens_used || 0),
-          0
+          0,
         );
 
         setSystemStats({
@@ -151,25 +151,9 @@ const AiChatStep: React.FC<AiChatStepProps> = ({
             savedChatMessages={savedChatMessages}
             onSaveChatMessages={onSaveChatMessages}
             onSendQuery={async (query: string) => {
-              try {
-                // Call real chat service, passing current language
-                return await submitQuery(sessionId, query, i18n.language);
-              } catch (error) {
-                // If real API fails, return error response instead of mock response
-                return {
-                  message_id: `msg_${Date.now()}`,
-                  session_id: sessionId,
-                  llm_response:
-                    "Sorry, unable to process your query at the moment. Please check your connection or try again later.",
-                  response_type: ResponseType.CANNOT_ANSWER,
-                  retrieved_chunks: [],
-                  similarity_scores: [],
-                  token_input: 0,
-                  token_output: 0,
-                  token_total: 0,
-                  timestamp: new Date().toISOString(),
-                };
-              }
+              // 🔥 FIX: Don't catch errors here - let them propagate to ChatScreen
+              // so it can properly handle error state and stop loading spinner
+              return await submitQuery(sessionId, query, i18n.language);
             }}
           />
         ) : (

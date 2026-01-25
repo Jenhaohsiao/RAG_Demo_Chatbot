@@ -2,12 +2,15 @@
 Name Translation Enhancement Service
 Automatically adds bilingual annotations to proper nouns to improve cross-language retrieval
 
-Example:
+Example (for multilingual documents like Alice in Wonderland):
     Input:  "Alice felt curious"
     Output: "Alice(愛麗絲) felt curious"
     
     Input:  "愛麗絲感到好奇"
     Output: "愛麗絲(Alice)感到好奇"
+
+Note: This service is designed for bilingual document processing.
+      Current system UI is English-only, but documents may contain multiple languages.
 """
 
 import re

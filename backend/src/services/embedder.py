@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class EmbeddingResult:
-    """嵌入結果資料類別"""
+    """Embedding result data class"""
     vector: List[float]
     dimension: int
     source_text: str
@@ -31,37 +31,37 @@ class EmbeddingResult:
 
 
 class EmbeddingError(Exception):
-    """嵌入處理錯誤"""
+    """Embedding processing error"""
     pass
 
 
 class Embedder:
     """
-    文字嵌入服務
+    Text Embedding Service
     
-    使用 Google Gemini text-embedding-004 模型將文字轉換為 768 維向量。
-    支援批次處理以提升效能。
+    Uses Google Gemini text-embedding-004 model to convert text into 768-dimensional vectors.
+    Supports batch processing for improved performance.
     
     Attributes:
-        model_name: Gemini 嵌入模型名稱
-        dimension: 向量維度 (768)
-        task_type: 嵌入任務類型（檢索文件或檢索查詢）
+        model_name: Gemini embedding model name
+        dimension: Vector dimension (768)
+        task_type: Embedding task type (retrieval document or retrieval query)
     
     Constitutional Alignment:
-        - Principle VII: 僅使用 Gemini API，無其他嵌入服務
-        - research.md Decision: text-embedding-004 模型，768 維度
+        - Principle VII: Uses only Gemini API, no other embedding services
+        - research.md Decision: text-embedding-004 model, 768 dimensions
     """
     
     def __init__(self):
-        """初始化 Embedder 服務"""
-        # 模型設定
+        """Initialize Embedder service"""
+        # Model configuration
         self.model_name = "models/text-embedding-004"
         self.dimension = 768
         
         logger.info(f"Embedder initialized with model: {self.model_name}")
 
     def _configure_api_key(self, api_key: Optional[str]) -> str:
-        """設定當前請求要使用的 API key"""
+        """Configure API key to use for current request"""
         effective_key = api_key or settings.gemini_api_key
         if not effective_key:
             raise EmbeddingError("Gemini API key is missing")
@@ -76,20 +76,20 @@ class Embedder:
         api_key: Optional[str] = None
     ) -> EmbeddingResult:
         """
-        將單一文字轉換為嵌入向量
+        Convert single text to embedding vector
         
         Args:
-            text: 要嵌入的文字內容
-            task_type: 任務類型
-                - "retrieval_document": 用於儲存的文件嵌入（預設）
-                - "retrieval_query": 用於搜尋的查詢嵌入
-            source_reference: 來源參考（用於日誌記錄）
+            text: Text content to embed
+            task_type: Task type
+                - "retrieval_document": Document embedding for storage (default)
+                - "retrieval_query": Query embedding for search
+            source_reference: Source reference (for logging)
         
         Returns:
-            EmbeddingResult: 包含向量、維度、來源文字的結果物件
+            EmbeddingResult: Result object containing vector, dimension, and source text
         
         Raises:
-            EmbeddingError: 嵌入處理失敗時拋出
+            EmbeddingError: Raised when embedding processing fails
         
         Example:
             >>> embedder = Embedder()
@@ -102,7 +102,7 @@ class Embedder:
         
         try:
             effective_key = self._configure_api_key(api_key)
-            # 記錄嵌入請求
+            # Log embedding request
             text_preview = text[:100] + "..." if len(text) > 100 else text
             source_info = f" from {source_reference}" if source_reference else ""
             logger.info(
@@ -110,17 +110,17 @@ class Embedder:
                 f"(length: {len(text)} chars, task_type: {task_type})"
             )
             
-            # 調用 Gemini Embedding API
+            # Call Gemini Embedding API
             result = genai.embed_content(
                 model=self.model_name,
                 content=text,
                 task_type=task_type
             )
             
-            # 提取嵌入向量
+            # Extract embedding vector
             embedding_vector = result['embedding']
             
-            # 驗證向量維度
+            # Validate vector dimension
             if len(embedding_vector) != self.dimension:
                 raise EmbeddingError(
                     f"Unexpected embedding dimension: {len(embedding_vector)}, "
@@ -135,32 +135,48 @@ class Embedder:
             return EmbeddingResult(
                 vector=embedding_vector,
                 dimension=len(embedding_vector),
-                source_text=text[:500],  # 儲存前 500 字元作為參考
+                source_text=text[:500],  # Store first 500 chars as reference
                 model=self.model_name
             )
         
         except Exception as e:
             error_str = str(e).lower()
             
-            # 檢測配額超限錯誤 (HTTP 429 或包含 quota 關鍵字)
-            if "429" in error_str or "quota" in error_str or "rate limit" in error_str or "resource exhausted" in error_str:
-                logger.warning(f"Gemini API quota exceeded: {str(e)}")
+            # � DEBUG: Log full error to diagnose false positives
+            logger.warning(f"Embedding error{source_info}: {str(e)}")
+            
+            # 🔥 FIX: Very strict quota detection - only treat as quota error if it's DEFINITELY about daily quota
+            # Avoid false positives like "Resource has been exhausted (e.g. check quota)" which is just rate limiting
+            is_quota_error = (
+                ("quota" in error_str and ("exceeded" in error_str or "exhausted" in error_str) and "daily" in error_str) or
+                ("daily quota" in error_str and "exceeded" in error_str) or
+                "daily limit exceeded" in error_str
+            )
+            
+            if is_quota_error:
+                logger.warning(f"⚠️ CONFIRMED: Gemini API quota exceeded: {str(e)}")
                 raise QuotaExceededError(
                     message="Gemini API daily quota has been exceeded. Please provide your own API key to continue.",
-                    retry_after=86400  # 24 小時後重試
+                    retry_after=86400  # Retry after 24 hours
                 )
             
-            # 檢測無效 API Key 錯誤
+            # Rate limiting (429) should be retried, not treated as quota error
+            if "429" in error_str or "rate limit" in error_str or "resource exhausted" in error_str:
+                error_msg = f"Rate limit hit{source_info}: {str(e)}. Please retry in a few moments."
+                logger.warning(error_msg)
+                raise EmbeddingError(error_msg) from e
+            
+            # Check for invalid API key errors
             if "invalid" in error_str and ("api" in error_str or "key" in error_str):
                 logger.warning(f"Invalid API key provided: {str(e)}")
                 raise InvalidApiKeyError("The provided API key is invalid or has been revoked.")
             
-            # 其他錯誤
+            # Other errors
             error_msg = f"Failed to embed text{source_info}: {str(e)}"
             logger.error(error_msg, exc_info=True)
             raise EmbeddingError(error_msg) from e
         finally:
-            # 如果使用者提供 key，使用完後恢復預設 key（若存在）
+            # If user provided key, restore default key after use (if exists)
             if api_key and settings.gemini_api_key and api_key != settings.gemini_api_key:
                 try:
                     genai.configure(api_key=settings.gemini_api_key)
@@ -169,18 +185,18 @@ class Embedder:
     
     def embed_query(self, query: str, api_key: Optional[str] = None) -> EmbeddingResult:
         """
-        為查詢文字生成嵌入向量（便捷方法）
+        Generate embedding vector for query text (convenience method)
         
-        自動使用 "retrieval_query" 任務類型，優化查詢向量生成。
+        Automatically uses "retrieval_query" task type to optimize query vector generation.
         
         Args:
-            query: 使用者查詢文字
+            query: User query text
         
         Returns:
-            EmbeddingResult: 查詢嵌入結果
+            EmbeddingResult: Query embedding result
         
         Raises:
-            EmbeddingError: 嵌入處理失敗時拋出
+            EmbeddingError: Raised when embedding processing fails
         
         Example:
             >>> embedder = Embedder()
@@ -203,22 +219,22 @@ class Embedder:
         api_key: Optional[str] = None
     ) -> List[EmbeddingResult]:
         """
-        批次嵌入多個文字（提升效能）
+        Batch embed multiple texts (improved performance)
         
         Args:
-            texts: 文字清單
-            task_type: 任務類型（預設為 retrieval_document）
-            source_reference: 來源參考（用於日誌）
+            texts: List of texts
+            task_type: Task type (default is retrieval_document)
+            source_reference: Source reference (for logging)
         
         Returns:
-            List[EmbeddingResult]: 嵌入結果清單
+            List[EmbeddingResult]: List of embedding results
         
         Raises:
-            EmbeddingError: 任何文字嵌入失敗時拋出
+            EmbeddingError: Raised when any text embedding fails
         
         Note:
-            目前實作為循序處理，未來可優化為並行 API 調用。
-            Gemini API 目前不支援原生批次嵌入。
+            Currently implemented as sequential processing, can be optimized for parallel API calls in the future.
+            Gemini API currently does not support native batch embedding.
         
         Example:
             >>> embedder = Embedder()
@@ -240,7 +256,7 @@ class Embedder:
         
         for idx, text in enumerate(texts, 1):
             try:
-                # 為每個文字加上索引資訊
+                # Add index info to each text
                 ref = f"{source_reference}[{idx}/{len(texts)}]" if source_reference else f"chunk_{idx}"
                 result = self.embed_text(
                     text=text,
@@ -252,9 +268,9 @@ class Embedder:
             except EmbeddingError as e:
                 failed_count += 1
                 logger.warning(f"Failed to embed text {idx}/{len(texts)}: {str(e)}")
-                # 根據錯誤策略決定是否繼續或拋出異常
-                # 目前策略：記錄錯誤但不中斷批次處理
-                # 若需嚴格模式，可取消註解下行
+                # Decide whether to continue or raise exception based on error strategy
+                # Current strategy: log error but don't interrupt batch processing
+                # Uncomment the line below for strict mode
                 # raise
         
         if failed_count > 0:
@@ -272,19 +288,19 @@ class Embedder:
     
     def get_embedding_dimension(self) -> int:
         """
-        取得嵌入向量維度
+        Get embedding vector dimension
         
         Returns:
-            int: 向量維度 (768)
+            int: Vector dimension (768)
         """
         return self.dimension
     
     def get_model_info(self) -> dict:
         """
-        取得模型資訊
+        Get model information
         
         Returns:
-            dict: 模型名稱與維度資訊
+            dict: Model name and dimension information
         """
         return {
             "model": self.model_name,
@@ -293,16 +309,16 @@ class Embedder:
         }
 
 
-# 單例模式：全域 embedder 實例
+# Singleton pattern: global embedder instance
 _embedder_instance: Optional[Embedder] = None
 
 
 def get_embedder() -> Embedder:
     """
-    取得全域 Embedder 實例（單例模式）
+    Get global Embedder instance (singleton pattern)
     
     Returns:
-        Embedder: 全域嵌入服務實例
+        Embedder: Global embedding service instance
     
     Example:
         >>> from services.embedder import get_embedder

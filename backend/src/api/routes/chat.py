@@ -441,7 +441,20 @@ def get_suggestions(
     try:
         suggestions = rag_engine.generate_initial_suggestions(session_id, language)
         return suggestions
+    except QuotaExceededError as e:
+        # Propagate quota errors to frontend so user can provide API key
+        logger.warning(f"[{session_id}] Quota exceeded during suggestions generation: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail={
+                "error_code": "QUOTA_EXCEEDED",
+                "message": e.message,
+                "retry_after": e.retry_after,
+                "requires_user_api_key": True
+            }
+        )
     except Exception as e:
-        logger.error(f"Error generating suggestions: {e}")
+        # For other errors, log and return empty list (graceful degradation)
+        logger.error(f"[{session_id}] Error generating suggestions: {e}", exc_info=True)
         return []
 
