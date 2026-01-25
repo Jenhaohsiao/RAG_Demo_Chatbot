@@ -20,19 +20,26 @@ class Settings(BaseSettings):
     
     # Gemini API Configuration (Optional - can be provided via UI if missing)
     gemini_api_key: str | None = None  # Optional: fallback to UI input
-    gemini_model: str = "gemini-2.0-flash-exp"  # Latest stable experimental model
+    gemini_model: str = "gemini-2.5-flash"  # 🔥 UPDATED: Migrated from 2.0-flash-exp to 2.5-flash (higher rate limits, better performance)
     gemini_embedding_model: str = "text-embedding-004"
     gemini_temperature: float = 0.1
     
     # Content Moderation Configuration
     enable_content_moderation: bool = True  # Set to False to skip moderation during testing
     
-    # Qdrant Configuration (IMPORTANT: Default to cloud mode for deployment)
-    qdrant_host: str = "localhost"  # Only used in docker mode
-    qdrant_port: int = 6333  # Only used in docker mode
-    qdrant_mode: Literal["embedded", "docker", "cloud"] = "cloud"  # CRITICAL: Cloud is default for deployment
-    qdrant_api_key: str | None = None  # Required for cloud mode
-    qdrant_url: str | None = None  # Required for cloud mode
+    # Qdrant Configuration
+    # IMPORTANT: ONLY cloud mode is supported. No embedded or docker mode.
+    # All environments (dev/test/prod) MUST use Qdrant Cloud to avoid:
+    # - Windows file locking issues (embedded mode)
+    # - Docker dependency complexity (docker mode)
+    # - Data persistence problems (embedded mode uses temp directories)
+    qdrant_mode: Literal["cloud"] = "cloud"  # FIXED: Only cloud mode allowed
+    qdrant_api_key: str | None = None  # Required: Qdrant Cloud API key
+    qdrant_url: str | None = None  # Required: Qdrant Cloud URL (e.g., https://xxx.cloud.qdrant.io:6333)
+    
+    # Deprecated: These are kept for backward compatibility but NOT USED
+    qdrant_host: str = "localhost"  # DEPRECATED: Not used in cloud mode
+    qdrant_port: int = 6333  # DEPRECATED: Not used in cloud mode
     
     # Session Configuration
     session_ttl_minutes: int = 10

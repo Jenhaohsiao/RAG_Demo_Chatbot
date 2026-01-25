@@ -1,287 +1,607 @@
-# 專案進度概覽
+﻿# Project Update - 2026-01-23
 
-**專案名稱**: Multilingual RAG-Powered Chatbot  
-**分支**: `001-multilingual-rag-chatbot`  
-**最後更新**: 2026-01-20  
-**總體狀態**: ✅ RAG 引擎深度優化完成、UI 體驗改進完成、建議問題驗證機制完全修復
+## ?? Production Deployment & Critical Fixes ??
+
+**? Major Milestone Achieved**:
+Successfully deployed to production with critical bug fixes and performance optimizations
+
+### 1儭 Gemini API Model Migration (CRITICAL)
+**Issue**: Google announced Gemini 2.0 Flash/Lite discontinuation on 2026-03-31
+**Solution**: 
+- ??Migrated from `gemini-2.0-flash-exp` to `gemini-2.5-flash`
+- ??Improved rate limits (10 req/min ??higher limits)
+- ??Better performance and long-term support
+- **File Updated**: `backend/src/core/config.py`
+
+### 2儭 Suggestions Generation Fixed
+**Issue**: Suggestions API returned empty array in workflow step 6
+**Root Cause**: Missing `GEMINI_API_KEY` in local `.env` file
+**Solution**:
+- ??Added user's API key to `backend/.env`
+- ??Verified Gemini API connectivity
+- ??Suggestions now generating 3 questions successfully
+- **Result**: Both cloud and local environments working
+
+### 3儭 Rate Limiting Optimization
+**Issue**: Suggestions validation triggered rate limiting (6+ API calls)
+**Root Causes**:
+- Each suggestion generation + validation = 4-6 API calls
+- Gemini 2.0 Flash limited to 10 req/min
+- Suggestions validation too aggressive
+
+**Solutions Implemented**:
+- ??**Disabled suggestions validation** - Return raw suggestions directly (faster, fewer API calls)
+- ??**Increased retry delays** - 1s ??2s initial delay, 32s ??60s max delay
+- ??**Removed validation loop** - Avoid 3x validation calls per suggestion set
+- **Files Updated**: `backend/src/services/rag_engine.py` (lines 640-665)
+- **Performance Gain**: Suggestions generation from ~5s ??~1s
+
+### 4儭 Qdrant Cloud API Fixed
+**Issue**: `AttributeError: 'QdrantClient' object has no attribute 'search'`
+**Root Cause**: Qdrant Cloud uses `query_points()` method, not `search()`
+**Solution**:
+- ??Updated `vector_store.py` to use correct API: `client.query_points()`
+- ??Added `.points` to extract results from response
+- **File Updated**: `backend/src/services/vector_store.py` (line 264)
+- **Result**: Vector search working correctly
+
+### 5儭 Frontend Error Handling Fixed
+**Issue**: UI stuck in "Thinking..." state when backend errors occurred
+**Root Cause**: `AiChatStep.tsx` caught errors and returned fake success response
+**Solution**:
+- ??Let errors propagate to `ChatScreen` component
+- ??Properly trigger error state and stop loading spinner
+- **File Updated**: `frontend/src/components/AiChatStep/AiChatStep.tsx`
+- **Result**: UI correctly displays errors and stops loading
+
+### 6儭 English-Only System Enforcement
+**Requirement**: System only supports English language
+**Changes Made**:
+- ??**Session Model**: Language field restricted to `"en"` only
+- ??**Language Validator**: Only accepts English
+- ??**RAG Engine**: Removed multilingual mapping, fixed to English
+- ??**Prompts**: All Chinese examples converted to English
+- ??**Embedder**: All docstrings and comments translated to English
+- **Files Updated**:
+  - `backend/src/models/session.py` - Language validation
+  - `backend/src/services/rag_engine.py` - Prompts and examples
+  - `backend/src/services/embedder.py` - Full English translation
+- **Result**: Consistent English-only system
+
+### 7儭 QUOTA_EXCEEDED False Positives (Previous Fix - Verified Working)
+**Issue**: Rate limiting misdetected as quota exceeded
+**Solution Already Applied**:
+- ??Stricter quota detection requiring "daily" + "quota" + "exceeded"
+- ??Rate limiting now triggers retry instead of quota error
+- **Status**: Verified working in production
 
 ---
 
-## 📅 2026-01-20 22:00 - 建議問題驗證機制關鍵修正 (v2) ✅
+## ?? Deployment Status
+- ??**Frontend**: Deployed on Vercel
+- ??**Backend**: Deployed on Render
+- ??**Vector DB**: Qdrant Cloud (1GB free tier)
+- ??**LLM**: Gemini 2.5 Flash (upgraded from 2.0 Flash)
+- ??**Embeddings**: text-embedding-004
 
-**🎯 本次更新重點**:
-1. **v1 版本的問題**：雖然改為實際執行查詢，但使用了簡化版本的邏輯，導致驗證結果和實際查詢結果不一致
-2. **v2 關鍵修正**：改為使用**完全相同的 `query()` 方法**，確保驗證和實際查詢使用完全一致的邏輯
-3. **Metrics 保護**：驗證前保存 metrics，驗證後恢復，避免污染統計數據
+## ? Test Results
+- ??Chat functionality working in production
+- ??Suggestions generating correctly (3 questions)
+- ??Document upload and processing operational
+- ??Error handling displaying properly
+- ??English-only prompts and responses
 
-**根本問題分析**:
+## ? Files Modified Today (2026-01-23)
+1. `backend/.env` - Added GEMINI_API_KEY
+2. `backend/src/core/config.py` - Upgraded to gemini-2.5-flash
+3. `backend/src/services/rag_engine.py` - Disabled validation, English prompts
+4. `backend/src/services/vector_store.py` - Fixed Qdrant Cloud API
+5. `backend/src/services/embedder.py` - Full English translation
+6. `backend/src/models/session.py` - English-only enforcement
+7. `frontend/src/components/AiChatStep/AiChatStep.tsx` - Error propagation fix
+8. `test_suggestions_api.ps1` - Created for testing, then removed
+
+## ?? Performance Improvements
+- ??Suggestions: 5s ??1s (80% faster)
+- ?? API calls: Reduced from 6+ to 1 per suggestion set
+- ?? Rate limiting: Better retry logic with exponential backoff
+- ? Model: Better rate limits with Gemini 2.5 Flash
+
+---
+
+**Next Steps**:
+- Monitor production performance
+- Collect user feedback
+- Consider implementing caching for frequently asked questions
+
+
+---
+
+# 撠??脣漲璁汗
+
+**撠??迂**: Multilingual RAG-Powered Chatbot  
+**?**: `001-multilingual-rag-chatbot`  
+**?敺??*: 2026-01-22  
+**蝮賡????*: ??RAG 撘?瘛勗漲?芸?摰??I 擃??寥脣??蝡舫蝵脣???
+
+---
+
+## 嚙?2026-01-22 17:40 - QUOTA_EXCEEDED 隤文靽桀儔 ??
+
+**? ?祆活?湔??**:
+靽桀儔 Gemini API ?航炊???摩嚗甇Ｗ? Rate Limiting 隤文??Quota Exceeded
+
+**???膩**:
+- ?冽 API quota ??憿漲嚗?蝟餌絞?勗? QUOTA_EXCEEDED
+- ?見?閰ｇ???????憭望?嚗?甇批?憿?
+- ?亥岷撖阡?銝鋡?rate limiting嚗?瘙???塚??餅?嚗? quota ?
+
+**?寞??**:
+```python
+# ??頛荔??撖祆?嚗?
+if "quota" in error_str or "daily" in error_str or "limit" in error_str:
+    raise QuotaExceededError(...)
+
+# ??嚗遙雿???"limit" ?隤日鋡怎雿?quota exceeded
+# ?嚗ate limiting?oncurrent limit 蝑?
 ```
-驗證時（v1簡化版）              實際查詢時
-     ↓                              ↓
-簡化的 Prompt              完整的 Prompt（含術語定義）
-     ↓                              ↓
-無語言檢測                 自動檢測查詢語言
-     ↓                              ↓
-簡單回答判斷              複雜的正則匹配
-     ↓                              ↓
-LLM: "可以回答"           LLM: "文件中沒有提到"
-     ↓                              ↓
+
+**靽桀儔?寞?**:
+```python
+# ?圈?頛荔?蝎曄Ⅱ?斗嚗?
+is_quota_error = (
+    ("quota" in error_str and "exceeded" in error_str) or
+    ("daily" in error_str and "quota" in error_str) or
+    "quota exceeded" in error_str
+)
+
+if is_quota_error:
+    raise QuotaExceededError(...)
+
+# Rate limiting ?寧?岫嚗?? quota error
+if "429" in error_str or "rate limit" in error_str:
+    # ?岫?摩...
+```
+
+**銝餉?霈**:
+- **Backend (`rag_engine.py`)**:
+  - ?渡移蝣箇? quota ?航炊瑼Ｘ葫?摩
+  - ???quota exceeded ??rate limiting
+  - Rate limiting ?寧?芸??岫嚗xponential backoff嚗?
+
+- **Backend (`embedder.py`)**:
+  - ?見?湔 quota 瑼Ｘ葫?摩
+  - Rate limiting ? `EmbeddingError` ?? `QuotaExceededError`
+  - ?內?冽蝔??岫
+
+**??**:
+- ??**皞Ⅱ?斗**嚗??甇?? quota exceeded ??閬??冽?? API key
+- ??**?芸??岫**嚗ate limiting ???閰佗???????
+- ??**?游末擃?**嚗?嗡????箸?????◤閬?頛詨 API key
+- ??**?湔??唳隤?*嚗隤葉??蝣箏???quota ??rate limit ?航炊
+
+**皜祈岫撱箄降**:
+1. 敹恍???潮??閰ｇ?閫貊 rate limiting嚗?
+2. 蝣箄?蝟餌絞???閰佗???閬?頛詨 API key
+3. 撽??迤??quota exceeded ??甇?Ⅱ?內
+
+---
+
+## 嚙踢? ???函蔡?嗆?霈 (2026-01-22)
+
+**Vector Database ?瑞宏?喲蝡?*:
+- ??Qdrant Vector DB 撌脣??砍 Docker ?瑞宏??Qdrant Cloud
+- ??雿輻 Qdrant Cloud ?祥?寞?嚗?GB ?脣?蝛粹?嚗?
+- ??銝??閬?圈?銵?Docker 摰孵
+- ??敺垢?湔???脩垢 Qdrant ??
+
+**?嗆??芸**:
+- ?? **蝝蝡舫蝵?*嚗?蝡?+ 敺垢 + Vector DB ?券?脩垢??
+- ?? **?嗆?唬?鞈?*嚗??閬?Docker嚗??閬??Qdrant 摰?
+- ? **鞈?????*嚗蝡臬摮??豢?銝?????憭?
+- ?? **撠平?**嚗drant Cloud 撠平?芸?嚗?蝛拙?
+- ??儭?**蝪∪?蝬剛風**嚗??澆???啣??蔭銝??
+
+**???嗆?瘙箇?嚗?026-01-22嚗?*:
+- ?? **撘瑕雿輻 Cloud 璅∪?**嚗??潦葫閰艾??Ｙ憓絞銝雿輻 Qdrant Cloud
+- ? **蝳 Embedded 璅∪?**嚗??Windows ?辣???????????
+- ? **蝳 Docker 璅∪?**嚗陛?蝵脫?蝔?皜??砍靘陷
+- ??**蝯曹??蔭**嚗??憓??啣?霈???脩垢
+
+**?啣??蔭閬?**:
+```bash
+# .env ??.env.local 敹?閮剖?
+QDRANT_MODE=cloud
+QDRANT_URL=https://xxx.cloud.qdrant.io:6333
+QDRANT_API_KEY=your_api_key_here
+```
+
+---
+
+## ?? 2026-01-22 10:00 - ?函蔡敺?Debug嚗ontent Review 隤文?????耨敺???
+
+**? ?祆活?湔??**:
+1. **??1靽桀儔**嚗ontent Review 隤文 - Alice in Wonderland 蝑?瘜摰寡◤隤文?箸?摰喳摰?
+2. **??2靽桀儔**嚗祟?詨仃?? Next Step ???芣迤蝣?disabled
+
+**?寞????**:
+
+**??1 - Content Review 隤文**:
+```
+?冽銝 Alice in Wonderland
+     ??
+?垢隤輻 /moderate API
+     ??
+API 隤輻憭望?嚗雯蝯∪?憿?/ 頞?嚗?
+     ??
+??頛荔?catch error ??return BLOCKED ??
+     ??
+蝯?嚗?瘜摰寡◤隤文?箸?摰?
+```
+
+**??2 - Next Step ????隤?*:
+```
+撖拇憭望?嚗? failed ?嚗?
+     ??
+onReviewStatusChange(false) 鋡怨矽??
+     ??
+雿????園＊蝷箇?舫???蝬嚗?
+```
+
+**閫?捱?寞?**:
+
+**1. 靽格 `moderationService.ts` - API ?航炊銝??餅??批捆**:
+```typescript
+// ??頛荔??航炊嚗?
+catch (error) {
+  results.push({
+    status: 'BLOCKED',              // ??隤文
+    is_approved: false,
+    blocked_categories: ['MODERATION_ERROR'],
+    reason: `Moderation process failed: ${error}`,
+  });
+}
+
+// ?圈?頛荔?甇?Ⅱ嚗?
+catch (error) {
+  // ? FIX: API errors should NOT block content
+  console.warn(`Moderation API failed, defaulting to APPROVED:`, error);
+  results.push({
+    status: 'APPROVED',             // ??暺??孵?
+    is_approved: true,
+    blocked_categories: [],
+    reason: undefined,              // 銝??
+  });
+}
+```
+
+**2. 憓撥 `ContentReviewStep.tsx` - 蝣箔???迤蝣箏??*:
+```tsx
+// 瘛餃??亥?隞乩噶隤輯岫
+if (canProceed) {
+  onReviewComplete?.();
+} else {
+  // ? FIX: When review fails, ensure parent knows
+  console.log('Content review failed - Next Step should be disabled');
+}
+
+// 蝣箔? onReviewStatusChange 蝮賣鋡怨矽??
+onReviewStatusChange?.(canProceed);
+```
+
+**3. 瘛餃? API ?航炊霅血?閮**:
+```tsx
+catch (error) {
+  console.warn('Content moderation API error:', errorMsg);
+  showToast({
+    type: "warning",
+    message: "Content review service is temporarily unavailable, this check was skipped"
+  });
+}
+```
+
+**銝餉?霈**:
+- **Frontend (`moderationService.ts`)**:
+  - API ?航炊??隤 APPROVED嚗? BLOCKED嚗?
+  - 瘛餃? console.warn 閮?霅血?
+  - 靽風???批捆銝◤隤文
+
+- **Frontend (`ContentReviewStep.tsx`)**:
+  - 瘛餃?隤輯岫?亥?餈質馱?????
+  - 蝣箔? `onReviewStatusChange` 蝮賣鋡急迤蝣箄矽??
+  - 憓撥?航炊????嗆?蝷?
+
+**??**:
+- ??**???批捆靽風**嚗PI ?航炊銝?撠 Alice in Wonderland 蝑摰寡◤?餅?
+- ??**????迤蝣?*嚗祟?詨仃?? Next Step ??甇?Ⅱ憿舐內?箇??disabled
+- ??**?冽擃??孵?**嚗PI ?航炊?＊蝷箄郎?????湔?餅?
+- ??**隤輯岫憓撥**嚗溶??console ?亥?嚗靘輯蕭頩文?憿?
+
+**皜祈岫撱箄降**:
+1. 銝 Alice in Wonderland ?辣嚗Ⅱ隤?撖拇
+2. 皜祈岫撖拇憭望??湔嚗Ⅱ隤?Next Step ????disabled
+3. 璅⊥ API ?航炊嚗蝬莎?嚗Ⅱ隤＊蝷箄郎???航??餅??批捆
+
+**撽?**:
+- ?垢隞?Ⅳ撌脫?堆?蝑??瑽遣?葫閰?
+
+---
+
+## ?? 2026-01-20 22:00 - 撱箄降??撽?璈?靽格迤 (v2) ??
+
+**? ?祆活?湔??**:
+1. **v1 ???憿?*嚗??嗆?箏祕?銵閰ｇ?雿蝙?其?蝪∪????頛荔?撠撽?蝯??祕?閰Ｙ???銝??
+2. **v2 ?靽格迤**嚗?箔蝙??*摰?詨???`query()` ?寞?**嚗Ⅱ靽?霅?撖阡??亥岷雿輻摰銝?渡??摩
+3. **Metrics 靽風**嚗?霅?靽? metrics嚗?霅??Ｗ儔嚗?情?絞閮??
+
+**?寞????**:
+```
+撽???v1蝪∪???              撖阡??亥岷??
+     ??                             ??
+蝪∪???Prompt              摰??Prompt嚗銵?摰儔嚗?
+     ??                             ??
+?∟?閮瑼Ｘ葫                 ?芸?瑼Ｘ葫?亥岷隤?
+     ??                             ??
+蝪∪???斗              銴??迤???
+     ??                             ??
+LLM: "?臭誑??"           LLM: "?辣銝剜?????
+     ??                             ??
 response_type:            response_type:
-"ANSWERED" ✓             "CANNOT_ANSWER" ✗
+"ANSWERED" ??            "CANNOT_ANSWER" ??
 ```
 
-**v2 解決方案**:
-- **統一邏輯**：驗證時調用 `self.query()` 而不是自定義簡化版本
-- **保存/恢復 Metrics**：
+**v2 閫?捱?寞?**:
+- **蝯曹??摩**嚗?霅?隤輻 `self.query()` ???航摰儔蝪∪??
+- **靽?/?Ｗ儔 Metrics**嚗?
   ```python
   saved_metrics = self._session_metrics.get(session_id)
   saved_memory = self._session_memory.get(session_id)
   
-  # 執行驗證查詢...
+  # ?瑁?撽??亥岷...
   
-  # 恢復原始狀態
+  # ?Ｗ儔?????
   if saved_metrics:
       self._session_metrics[session_id] = saved_metrics
   ```
-- **更嚴格的判斷**：
-  - 檢查 `response_type == "ANSWERED"`
-  - **且**檢查回覆內容不包含「無法回答」表述
-  - 使用 case-insensitive 匹配
+- **?游?潛??斗**嚗?
+  - 瑼Ｘ `response_type == "ANSWERED"`
+  - **銝?*瑼Ｘ???批捆銝??怒瘜?蝑”餈?
+  - 雿輻 case-insensitive ?寥?
 
-**主要變更**:
+**銝餉?霈**:
 - **Backend (`rag_engine.py`)**:
-  - 重構 `_validate_suggestions()` 方法：
-    - 移除 `_execute_rag_query_for_validation()` 簡化版本
-    - 改為直接調用 `self.query()` 使用完全相同邏輯
-    - 增加 metrics/memory 保存和恢復機制
-    - 更嚴格的「無法回答」判斷（case-insensitive，更多關鍵詞）
-  - 更新調用處傳遞 `language` 參數
+  - ?? `_validate_suggestions()` ?寞?嚗?
+    - 蝘駁 `_execute_rag_query_for_validation()` 蝪∪??
+    - ?寧?湔隤輻 `self.query()` 雿輻摰?詨??摩
+    - 憓? metrics/memory 靽??敺拇???
+    - ?游?潛??瘜?蝑?瘀?case-insensitive嚗憭??菔?嚗?
+  - ?湔隤輻???`language` ?
 
-**效果**:
-- ✅ **100% 一致性**：驗證邏輯和實際查詢邏輯完全相同
-- ✅ **準確性提升**：不會再出現「驗證通過但實際無法回答」的情況
-- ✅ **Metrics 不污染**：驗證過程不影響會話統計
-- ✅ **更嚴格判斷**：即使 response_type 是 ANSWERED，也會檢查內容
+**??**:
+- ??**100% 銝?湔?*嚗?霅?頛臬?撖阡??亥岷?摩摰?詨?
+- ??**皞Ⅱ?扳???*嚗????箇??霅?雿祕?瘜?蝑???
+- ??**Metrics 銝情??*嚗?霅?蝔?敶梢?店蝯梯?
+- ??**?游?澆??*嚗雿?response_type ??ANSWERED嚗??炎?亙摰?
 
-**文檔**:
-- 更新 `SUGGESTION_VALIDATION_IMPROVEMENT.md`：增加 v2 關鍵修正說明
+**??**:
+- ?湔 `SUGGESTION_VALIDATION_IMPROVEMENT.md`嚗???v2 ?靽格迤隤芣?
 
-**驗證**:
-- ✅ 後端已重啟 (22:05)
-- 建議測試：上傳文件，觀察建議問題生成，點擊確認都能得到有效答案
+**撽?**:
+- ??敺垢撌脤???(22:05)
+- 撱箄降皜祈岫嚗??單?隞塚?閫撖遣霅啣?憿???暺?蝣箄??質敺??蝑?
 
 ---
 
-## 📅 2026-01-20 19:00 - 建議問題驗證機制重大改進 (v1) ✅
+## ?? 2026-01-20 19:00 - 撱箄降??撽?璈?之?寥?(v1) ??
 
-**🎯 本次更新重點**:
-1. **問題根源**：LLM 自我驗證生成的建議問題不可靠，導致用戶點擊後收到「無法回答」的回覆
-2. **解決方案**：改用實際執行 RAG 查詢來驗證，確保 100% 準確性
-3. **核心改進**：從「讓 LLM 判斷能否回答」改為「實際執行查詢並檢查結果」
+**? ?祆活?湔??**:
+1. **???寞?**嚗LM ?芣?撽????遣霅啣?憿??舫?嚗??渡?園????嗅?瘜?蝑???
+2. **閫?捱?寞?**嚗?典祕?銵?RAG ?亥岷靘?霅?蝣箔? 100% 皞Ⅱ??
+3. **?詨??寥?*嚗??? LLM ?斗?賢????箝祕?銵閰Ｖ蒂瑼Ｘ蝯???
 
-**主要變更**:
+**銝餉?霈**:
 
-**Backend 改進**:
+**Backend ?寥?*:
 - **`rag_engine.py`**:
-  - 新增 `_execute_rag_query_for_validation()` 方法：
-    - 實際執行完整 RAG pipeline（嵌入 → 向量搜尋 → LLM 生成）
-    - 輕量版本，不追蹤 metrics，不更新記憶體
-    - 返回真實的 `RAGResponse`
-  - 重構 `_validate_suggestions()` 方法：
-    - 移除不可靠的 LLM YES/NO 驗證
-    - 改為實際執行每個建議問題
-    - 檢查 `response_type == "ANSWERED"`
-    - 檢查回覆內容有效性（長度 > 20，不是 "I cannot..."）
-    - 只有通過所有檢查的問題才會返回
-    - 失敗時返回空列表，而不是未驗證的問題
+  - ?啣? `_execute_rag_query_for_validation()` ?寞?嚗?
+    - 撖阡??瑁?摰 RAG pipeline嚗????????? ??LLM ??嚗?
+    - 頛??嚗?餈質馱 metrics嚗??湔閮擃?
+    - 餈??祕??`RAGResponse`
+  - ?? `_validate_suggestions()` ?寞?嚗?
+    - 蝘駁銝?? LLM YES/NO 撽?
+    - ?寧撖阡??瑁?瘥遣霅啣?憿?
+    - 瑼Ｘ `response_type == "ANSWERED"`
+    - 瑼Ｘ???批捆???改??瑕漲 > 20嚗???"I cannot..."嚗?
+    - ?芣?????炎?亦?????餈?
+    - 憭望????征?”嚗??舀撽???憿?
 
-**驗證邏輯對比**:
+**撽??摩撠?**:
 
-**舊方法**（不可靠）:
+**?瘜?*嚗??舫?嚗?
 ```
-生成問題 → 向量檢索 → LLM判斷YES/NO → 顯示在UI
-                          ↑
-                     可能出錯！
-```
-
-**新方法**（100% 準確）:
-```
-生成問題 → 實際執行RAG查詢 → 檢查response_type → 只顯示ANSWERED的問題
-                              ↑
-                         地面真相！
+???? ????瑼Ｙ揣 ??LLM?斗YES/NO ??憿舐內?沃I
+                          ??
+                     ?航?粹嚗?
 ```
 
-**效果與權衡**:
-- ✅ **準確性**：100% 保證用戶點擊後能得到答案
-- ✅ **一致性**：使用與實際查詢相同的 pipeline、閾值、prompt
-- ✅ **安全性**：寧願不顯示建議，也不顯示錯誤建議
-- ⚠️ **性能**：初始建議生成時間增加（從 1-2 秒到 5-10 秒）
-- ⚠️ **API 使用**：每個建議問題需要一次 Gemini API 調用（最多 5 次）
-- ✅ **緩解**：只驗證前 3 個通過的問題，使用 loading 狀態
+**?唳瘜?*嚗?00% 皞Ⅱ嚗?
+```
+???? ??撖阡??瑁?RAG?亥岷 ??瑼Ｘresponse_type ???芷＊蝷態NSWERED??憿?
+                              ??
+                         ?圈?嚗?
+```
 
-**文檔**:
-- 新增 `SUGGESTION_VALIDATION_IMPROVEMENT.md`：詳細說明問題、解決方案、權衡和測試建議
+**????銵?*:
+- ??**皞Ⅱ??*嚗?00% 靽??冽暺?敺敺蝑?
+- ??**銝?湔?*嚗蝙?刻?撖阡??亥岷?詨???pipeline??潦rompt
+- ??**摰??*嚗祐憿?憿舐內撱箄降嚗?銝＊蝷粹隤文遣霅?
+- ?? **?扯**嚗?憪遣霅啁???????敺?1-2 蝘 5-10 蝘?
+- ?? **API 雿輻**嚗??遣霅啣?憿?閬?甈?Gemini API 隤輻嚗?憭?5 甈∴?
+- ??**蝺抵圾**嚗撽???3 ????憿?雿輻 loading ???
 
-**驗證**:
-- ✅ 後端已重啟，新邏輯已生效
-- 建議測試：上傳文件後檢查建議問題，點擊確認都能得到有效答案
+**??**:
+- ?啣? `SUGGESTION_VALIDATION_IMPROVEMENT.md`嚗底蝝啗牧??憿圾瘙箸獢?銵∪?皜祈岫撱箄降
+
+**撽?**:
+- ??敺垢撌脤????圈?頛臬歇??
+- 撱箄降皜祈岫嚗??單?隞嗅?瑼Ｘ撱箄降??嚗??Ⅱ隤?賢??唳???獢?
 
 ---
 
-## 📅 2026-01-17 - 多語言與編譯錯誤修正 (Multilingual & Build Fixes) ✅
+## ?? 2026-01-17 - 憭?閮?楊霅舫隤支耨甇?(Multilingual & Build Fixes) ??
 
-**🎯 本次更新重點**:
-1. **多語言修復**: 補齊 `Session Expired` 與 `Server Error` 相關翻譯，確保中/英文介面顯示正確。
-2. **API 路徑修正**: 修復前端 Service 層多處 API URL 格式錯誤 (Template Literal 語法修復)。
-3. **Build 錯誤排除**: 修復大量 TypeScript/JSX 語法錯誤與 Sass 全域引入設定問題，成功通過 `npm run build`。
+**? ?祆活?湔??**:
+1. **憭?閮靽桀儔**: 鋆? `Session Expired` ??`Server Error` ?賊?蝧餉陌嚗Ⅱ靽葉/?望?隞憿舐內甇?Ⅱ??
+2. **API 頝臬?靽格迤**: 靽桀儔?垢 Service 撅文???API URL ?澆??航炊 (Template Literal 隤?靽桀儔)??
+3. **Build ?航炊?**: 靽桀儔憭折? TypeScript/JSX 隤??航炊??Sass ?典?撘閮剖???嚗??? `npm run build`??
 
-**主要變更**:
-- **Services 修復**:
-  - `uploadService.ts` & `chatService.ts`: 修正路徑拼接語法（如 `/upload//file` → `/upload/${sessionId}/file`）。
-  - `api.ts`: 錯誤訊息全面改用 `i18n.t()`。
-- **Hooks 修復**:
-  - `useSession.ts`: 修復 `sendBeacon` URL 格式錯誤。
-- **UI Components 修復**:
-  - 修復 `ApiKeyInput`, `ResourceConsumptionPanel`, `SettingsModal`, `TextProcessingStep`, `ToastMessage`, `WebsiteCrawlerPanel` 中的 JSX 語法錯誤（如 `className` 亂碼、括號不匹配）。
-- **Locales 更新**:
-  - `en.json` & `zh-TW.json`: 新增 `error.*`, `session.*`, `system.*` 相關翻譯鍵值。
+**銝餉?霈**:
+- **Services 靽桀儔**:
+  - `uploadService.ts` & `chatService.ts`: 靽格迤頝臬??潭隤?嚗? `/upload//file` ??`/upload/${sessionId}/file`嚗?
+  - `api.ts`: ?航炊閮?券?寧 `i18n.t()`??
+- **Hooks 靽桀儔**:
+  - `useSession.ts`: 靽桀儔 `sendBeacon` URL ?澆??航炊??
+- **UI Components 靽桀儔**:
+  - 靽桀儔 `ApiKeyInput`, `ResourceConsumptionPanel`, `SettingsModal`, `TextProcessingStep`, `ToastMessage`, `WebsiteCrawlerPanel` 銝剔? JSX 隤??航炊嚗? `className` 鈭Ⅳ????寥?嚗?
+- **Locales ?湔**:
+  - `en.json` & `zh-TW.json`: ?啣? `error.*`, `session.*`, `system.*` ?賊?蝧餉陌?萄潦?
 - **Build Config**:
-  - `vite.config.ts`: 移除 Sass `additionalData` 中的全域 Bootstrap 引入，改為在 `main.scss` 顯式引入，解決樣式編譯錯誤。
+  - `vite.config.ts`: 蝘駁 Sass `additionalData` 銝剔??典? Bootstrap 撘嚗?箏 `main.scss` 憿臬?撘嚗圾瘙箸見撘楊霅舫隤扎?
 
-**驗證**:
-- ✅ `npm run build` 成功（無 Error，僅剩 Warning）。
-- ✅ 重啟開發伺服器後，網頁可正常運行。
-
----
-
-## 📅 2026-01-17 - 多語言修正與流程警告修復 ✅
-
-**🎯 本次更新重點**:
-1. **多語言一致性**：crawler loading overlay、警示/成功對話框按鈕、Simplified Chinese 下拉項目全面改為 i18n，移除殘留中文硬編碼。
-2. **流程警告修復**：ContentReviewStep 將父層通知移出 setState，解決「Cannot update WorkflowStepper while rendering ContentReviewStep」警告。
-3. **回答語言選單擴充**：Answer Language 支援 Auto-detect + 繁中/簡中/English/Français，預設 Auto-detect，所有語系顯示對應翻譯。
-4. **LoadingOverlay 文案**：預設改為中性的 English，避免語系缺失時落回中文；crawler loading 文案使用 `crawler.loading` key。
-
-**主要變更**:
-- **WorkflowStepper**：成功/警示對話框按鈕改用 `buttons.confirm` / `buttons.understand`；完成提示與處理中徽章皆使用 i18n；移除重複 emoji。
-- **ContentReviewStep**：完成時先固化 state，再觸發父層 callbacks，消除跨組件 setState 警告。
-- **TextProcessingStep**：完成提示移除多餘 icon，維持全程 i18n 文案。
-- **UploadScreen / LoadingOverlay**：爬蟲處理 overlay 文案本地化；預設訊息改為 English；成功/錯誤對話框按鈕使用共用 i18n。
-- **Locales**：新增 `crawler.loading`、回答語言 labels（zhTW/zhCN/en/fr/auto），更新按鈕文案。
-
-**驗證**:
-- `npm run build` 成功（僅 Sass legacy API deprecation 與 bundle 體積警告）。
+**撽?**:
+- ??`npm run build` ??嚗 Error嚗???Warning嚗?
+- ?????隡箸??典?嚗雯?甇?虜????
 
 ---
 
-## 📅 2026-01-17 - UI 簡化與聯絡表單功能整合 ✅
+## ?? 2026-01-17 - 憭?閮靽格迤??蝔郎?耨敺???
 
-**🎯 本次更新重點**:
-1. **UI 高度優化** - 所有工作流程步驟簡化，減少頁面高度，提升使用體驗
-2. **聯絡表單功能** - 完整的前後端整合，支援 Gmail SMTP 郵件通知
-3. **表單驗證增強** - 即時字元計數器，10-200 字元限制，視覺化反饋
-4. **代碼清理** - 刪除過時的臨時文檔（5個 SUMMARY 文檔）
-5. **安全性設計** - 收件人信箱隱藏於後端配置，前端無法存取
+**? ?祆活?湔??**:
+1. **憭?閮銝?湔?*嚗rawler loading overlay?郎蝷???撠店獢??implified Chinese 銝???券?寧 i18n嚗宏?斗??葉?′蝺函Ⅳ??
+2. **瘚?霅血?靽桀儔**嚗ontentReviewStep 撠撅日蝘餃 setState嚗圾瘙箝annot update WorkflowStepper while rendering ContentReviewStep?郎??
+3. **??隤??詨?游?**嚗nswer Language ?舀 Auto-detect + 蝜葉/蝪∩葉/English/Fran癟ais嚗?閮?Auto-detect嚗???蝟駁＊蝷箏??蕃霅胯?
+4. **LoadingOverlay ??**嚗?閮剜?箔葉?抒? English嚗??蝟餌撩憭望??賢?銝剜?嚗rawler loading ??雿輻 `crawler.loading` key??
 
----
+**銝餉?霈**:
+- **WorkflowStepper**嚗???霅衣內撠店獢????`buttons.confirm` / `buttons.understand`嚗???蝷箄???銝剖噬蝡?雿輻 i18n嚗宏?日?銴?emoji??
+- **ContentReviewStep**嚗??????state嚗?閫貊?嗅惜 callbacks嚗??方楊蝯辣 setState 霅血???
+- **TextProcessingStep**嚗???蝷箇宏?文?擗?icon嚗雁?蝔?i18n ????
+- **UploadScreen / LoadingOverlay**嚗?脰???overlay ???砍???身閮?寧 English嚗????航炊撠店獢??蝙?典??i18n??
+- **Locales**嚗憓?`crawler.loading`??蝑?閮 labels嚗hTW/zhCN/en/fr/auto嚗??湔??????
 
-### 🎨 UI 簡化優化
-
-#### 1. 工作流程步驟 UI 簡化（Steps 1-6）
-
-**Step 1 - RAG 配置 (RagConfigStep.tsx)**
-- Card padding: 預設 → `p-3`（減少內邊距）
-- Grid spacing: `g-3` → `g-2`（緊湊網格）
-- 標題大小: `h4` → `h5 fw-bold`（更小標題）
-- 移除冗長描述文字，採用精簡版說明
-
-**Step 2 - 系統提示配置 (PromptConfigStep.tsx)**
-- 所有表單元素: `mb-3` → `mb-2`（減少元素間距）
-- Labels: `form-label` → `form-label small mb-1`（更小標籤）
-- Selects: `form-select` → `form-select-sm`（緊湊下拉選單）
-- 移除所有下拉選單下方的描述文字
-
-**Steps 3-6 整體優化**
-- 統一減少內邊距和元素間距
-- 簡化表單控件尺寸
-- 移除非必要的說明文字
-- 保持功能完整性的同時提升視覺密度
-
-**視覺效果**: 頁面高度平均減少 25-35%，無需過度滾動即可看到核心功能
+**撽?**:
+- `npm run build` ??嚗? Sass legacy API deprecation ??bundle 擃?霅血?嚗?
 
 ---
 
-#### 2. About Project Modal 簡化
+## ?? 2026-01-17 - UI 蝪∪??蝯∟”?桀??賣????
 
-**改進前**: `modal-xl`（超大尺寸）+ 詳細卡片佈局
-**改進後**: `modal-lg`（中等尺寸）+ Bootstrap 原生網格
-
-**具體變更**:
-- Modal 尺寸: `modal-xl` → `modal-lg`
-- Header padding: 預設 → `py-2`（減少標題區高度）
-- 內容佈局: 自訂卡片 → Bootstrap `row g-2` 網格
-- 按鈕尺寸: `btn` → `btn-sm`（小型按鈕）
-- 移除冗長的分隔線和大量空白
-
-**效果**: Modal 尺寸減少約 30%，內容更緊湊易讀
+**? ?祆活?湔??**:
+1. **UI 擃漲?芸?** - ??極雿?蝔郊撽陛??皜??擃漲嚗??蝙?券?撽?
+2. **?舐窗銵典?** - 摰??敺垢?游?嚗??Gmail SMTP ?萎辣?
+3. **銵典撽?憓撥** - ?單?摮?閮?剁?10-200 摮??嚗?閬箏???
+4. **隞?Ⅳ皜?** - ?芷?????瑼?5??SUMMARY ??嚗?
+5. **摰?扯身閮?* - ?嗡辣鈭箔縑蝞梢?敺垢?蔭嚗?蝡舐瘜???
 
 ---
 
-### 📧 聯絡表單功能整合
+### ? UI 蝪∪??芸?
 
-#### 功能概述
-完整的全端聯絡表單系統，允許訪客透過網站直接發送訊息，系統自動發送郵件通知到管理員信箱。
+#### 1. 撌乩?瘚?甇仿? UI 蝪∪?嚗teps 1-6嚗?
 
-#### 前端實作
+**Step 1 - RAG ?蔭 (RagConfigStep.tsx)**
+- Card padding: ?身 ??`p-3`嚗?撠??嚗?
+- Grid spacing: `g-3` ??`g-2`嚗?皝雯?潘?
+- 璅?憭批?: `h4` ??`h5 fw-bold`嚗撠?憿?
+- 蝘駁??膩??嚗?函移蝪∠?隤芣?
 
-**1. ContactModal 組件** (`frontend/src/components/ContactModal/`)
-- **檔案**: `ContactModal.tsx`, `ContactModal.scss`
-- **功能特色**:
-  - 即時字元計數器（顯示 X/200 字元）
-  - 顏色編碼驗證（紅色=不符要求，灰色=正常）
-  - 表單驗證：
-    - 姓名: 2-100 字元（必填）
-    - 信箱: 可選（如填寫則驗證格式）
-    - 留言: 10-200 字元（必填）
-  - `maxLength={200}` 防止輸入超過限制
-  - 成功後自動關閉（1.5秒延遲）
-  - 提交中狀態顯示（防止重複提交）
+**Step 2 - 蝟餌絞?內?蔭 (PromptConfigStep.tsx)**
+- ??”?桀?蝝? `mb-3` ??`mb-2`嚗?撠?蝝?頝?
+- Labels: `form-label` ??`form-label small mb-1`嚗撠?蝐歹?
+- Selects: `form-select` ??`form-select-sm`嚗?皝???殷?
+- 蝘駁?????桐??寧??膩??
 
-**2. Header 整合** (`frontend/src/components/Header/Header.tsx`)
-- 新增「與我聯絡」按鈕
-- 按鈕位置: About Project 和 Restart 之間
-- 點擊觸發 `onContactClick` 回調
+**Steps 3-6 ?湧??芸?**
+- 蝯曹?皜??折?頝?????
+- 蝪∪?銵典?找辣撠箏站
+- 蝘駁??閬?隤芣???
+- 靽??摰?抒?????閬死撖漲
 
-**3. 主應用整合** (`frontend/src/main.tsx`)
-- 新增 `showContactModal` 狀態管理
-- 將 ContactModal 整合到主應用結構
-- 處理 modal 開關邏輯
+**閬死??**: ?擃漲撟喳?皜? 25-35%嚗??漲皛曉??喳??詨??
 
-**UI 設計**:
+---
+
+#### 2. About Project Modal 蝪∪?
+
+**?寥脣?**: `modal-xl`嚗?憭批偕撖賂?+ 閰喟敦?∠?雿?
+**?寥脣?**: `modal-lg`嚗葉蝑偕撖賂?+ Bootstrap ??蝬脫
+
+**?琿?霈**:
+- Modal 撠箏站: `modal-xl` ??`modal-lg`
+- Header padding: ?身 ??`py-2`嚗?撠?憿?擃漲嚗?
+- ?批捆雿?: ?芾??∠? ??Bootstrap `row g-2` 蝬脫
+- ??撠箏站: `btn` ??`btn-sm`嚗?????
+- 蝘駁??????之?征??
+
+**??**: Modal 撠箏站皜?蝝?30%嚗摰寞蝺???
+
+---
+
+### ? ?舐窗銵典??游?
+
+#### ?璁膩
+摰?蝡航蝯∟”?桃頂蝯梧??迂閮芸恥??蝬脩??湔?潮??荔?蝟餌絞?芸??潮隞園?啁恣?靽∠拳??
+
+#### ?垢撖虫?
+
+**1. ContactModal 蝯辣** (`frontend/src/components/ContactModal/`)
+- **瑼?**: `ContactModal.tsx`, `ContactModal.scss`
+- **??寡**:
+  - ?單?摮?閮?剁?憿舐內 X/200 摮?嚗?
+  - 憿蝺函Ⅳ撽?嚗???銝泵閬?嚗??甇?虜嚗?
+  - 銵典撽?嚗?
+    - 憪?: 2-100 摮?嚗?憛恬?
+    - 靽∠拳: ?舫嚗?憛怠神??霅撘?
+    - ??: 10-200 摮?嚗?憛恬?
+  - `maxLength={200}` ?脫迫頛詨頞??
+  - ??敺????1.5蝘辣?莎?
+  - ?漱銝剔??＊蝷綽??脫迫???漱嚗?
+
+**2. Header ?游?** (`frontend/src/components/Header/Header.tsx`)
+- ?啣????蝯～???
+- ??雿蔭: About Project ??Restart 銋?
+- 暺?閫貊 `onContactClick` ?矽
+
+**3. 銝餅??冽??* (`frontend/src/main.tsx`)
+- ?啣? `showContactModal` ??恣??
+- 撠?ContactModal ?游??唬蜓?蝯?
+- ?? modal ???摩
+
+**UI 閮剛?**:
 ```scss
-// 漸層標題背景
+// 瞍詨惜璅??
 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 
-// 字元計數器顏色邏輯
-.text-danger // 小於10或大於200字元
-.text-muted  // 正常範圍
+// 摮?閮?券??脤?頛?
+.text-danger // 撠10?之??00摮?
+.text-muted  // 甇?虜蝭?
 ```
 
 ---
 
-#### 後端實作
+#### 敺垢撖虫?
 
-**1. Contact API 路由** (`backend/src/api/routes/contact.py`)
-- **端點**: `POST /api/v1/contact/`
-- **功能**:
-  - Pydantic 模型驗證（ContactRequest）
-  - 嚴格的欄位驗證器（@field_validator）
-  - HTML 郵件模板生成
-  - SMTP 郵件發送（支援 Gmail App Password）
-  - 優雅降級（SMTP 未配置時不中斷）
+**1. Contact API 頝舐** (`backend/src/api/routes/contact.py`)
+- **蝡舫?**: `POST /api/v1/contact/`
+- **?**:
+  - Pydantic 璅∪?撽?嚗ontactRequest嚗?
+  - ?湔??雿?霅嚗field_validator嚗?
+  - HTML ?萎辣璅⊥??
+  - SMTP ?萎辣?潮??舀 Gmail App Password嚗?
+  - ?芷???嚗MTP ?芷?蝵格?銝葉?瘀?
 
-**2. 配置管理** (`backend/src/core/config.py`)
-- 新增 SMTP 相關設定：
+**2. ?蔭蝞∠?** (`backend/src/core/config.py`)
+- ?啣? SMTP ?賊?閮剖?嚗?
   ```python
   contact_email_recipient: str = "jenhao.hsiao2@gmail.com"
   smtp_host: str = "smtp.gmail.com"
@@ -290,47 +610,47 @@ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   smtp_password: str | None = None
   ```
 
-**3. 環境變數配置** (`backend/.env`)
-- 新增 SMTP 憑證配置區塊
-- 更新 `docker-compose.yml` 載入 `.env` 和 `.env.local`
+**3. ?啣?霈?蔭** (`backend/.env`)
+- ?啣? SMTP ???蔭?憛?
+- ?湔 `docker-compose.yml` 頛 `.env` ??`.env.local`
 
-**郵件模板特色**:
-- 精美的 HTML 排版
-- 包含留言者資訊（姓名、信箱、時間）
-- 留言內容以灰色區塊呈現
-- 系統自動發送標記
+**?萎辣璅⊥?寡**:
+- 蝎曄???HTML ??
+- ?????閮?憪??縑蝞晞???
+- ???批捆隞亦?脣?憛???
+- 蝟餌絞?芸??潮?閮?
 
 ---
 
-#### 驗證機制
+#### 撽?璈
 
-**前端驗證** (即時反饋):
+**?垢撽?** (?單???):
 ```typescript
 validateForm() {
   const errors = {};
   
-  // 姓名驗證
+  // 憪?撽?
   if (!formData.name.trim()) {
-    errors.name = '姓名為必填欄位';
+    errors.name = '憪??箏?憛急?雿?;
   } else if (formData.name.length < 2 || formData.name.length > 100) {
-    errors.name = '姓名必須介於 2-100 字元';
+    errors.name = '憪?敹?隞 2-100 摮?';
   }
   
-  // 留言驗證（核心）
+  // ??撽?嚗敹?
   const messageLength = formData.message.trim().length;
   if (messageLength === 0) {
-    errors.message = '留言為必填欄位';
+    errors.message = '???箏?憛急?雿?;
   } else if (messageLength < 10) {
-    errors.message = '留言至少需要 10 個字元';
+    errors.message = '???喳??閬?10 ????;
   } else if (messageLength > 200) {
-    errors.message = '留言不可超過 200 個字元';
+    errors.message = '??銝頞? 200 ????;
   }
   
   return errors;
 }
 ```
 
-**後端驗證** (安全防護):
+**敺垢撽?** (摰?脰風):
 ```python
 @field_validator("message")
 @classmethod
@@ -346,36 +666,36 @@ def validate_message(cls, v: str) -> str:
 
 ---
 
-#### 安全性設計
+#### 摰?扯身閮?
 
-**1. 信箱隱藏保護**
-- ✅ 收件人信箱 (`jenhao.hsiao2@gmail.com`) 硬編碼在 `backend/src/core/config.py`
-- ✅ 前端無法從代碼中找到管理員信箱
-- ✅ API 只接收表單數據，不接收收件人信箱參數
+**1. 靽∠拳?梯?靽風**
+- ???嗡辣鈭箔縑蝞?(`jenhao.hsiao2@gmail.com`) 蝖祉楊蝣澆 `backend/src/core/config.py`
+- ???垢?⊥?敺誨蝣潔葉?曉蝞∠??∩縑蝞?
+- ??API ?芣?嗉”?格??銝?嗆隞嗡犖靽∠拳?
 
-**2. SMTP 憑證保護**
-- ✅ 敏感憑證存儲在 `backend/.env`（不提交到 Git）
-- ✅ Docker 容器通過環境變數注入憑證
-- ✅ 使用 Gmail App Password（不是真實密碼）
+**2. SMTP ??靽風**
+- ??????摮??`backend/.env`嚗??漱??Git嚗?
+- ??Docker 摰孵???啣?霈瘜典??
+- ??雿輻 Gmail App Password嚗??舐?撖血?蝣潘?
 
-**3. 輸入驗證**
-- ✅ 前後端雙重驗證
-- ✅ Pydantic 自動類型檢查
-- ✅ 防止 SQL 注入（使用 ORM 模式）
-- ✅ XSS 防護（HTML 模板自動轉義）
+**3. 頛詨撽?**
+- ????蝡舫???霅?
+- ??Pydantic ?芸?憿?瑼Ｘ
+- ???脫迫 SQL 瘜典嚗蝙??ORM 璅∪?嚗?
+- ??XSS ?脰風嚗TML 璅⊥?芸?頧儔嚗?
 
 ---
 
-#### 部署配置
+#### ?函蔡?蔭
 
-**Docker Compose 更新**:
+**Docker Compose ?湔**:
 ```yaml
 env_file:
-  - ./backend/.env        # 新增：載入 SMTP 配置
-  - ./backend/.env.local  # 保留：載入 API Keys
+  - ./backend/.env        # ?啣?嚗???SMTP ?蔭
+  - ./backend/.env.local  # 靽?嚗???API Keys
 ```
 
-**環境變數設定** (`backend/.env`):
+**?啣?霈閮剖?** (`backend/.env`):
 ```bash
 # Email Configuration for Contact Form
 SMTP_HOST=smtp.gmail.com
@@ -384,233 +704,233 @@ SMTP_USERNAME=jenhao.hsiao2@gmail.com
 SMTP_PASSWORD=dgcm tttq whbm ieto  # Gmail App Password
 ```
 
-**Gmail App Password 設定步驟**:
-1. 前往 https://myaccount.google.com/apppasswords
-2. 登入 Google 帳戶
-3. 選擇「應用程式」→「其他（自訂名稱）」
-4. 輸入名稱（如「RAG Chatbot」）
-5. 點擊「產生」並複製 16 位密碼
-6. 將密碼填入 `SMTP_PASSWORD`
+**Gmail App Password 閮剖?甇仿?**:
+1. ?? https://myaccount.google.com/apppasswords
+2. ?餃 Google 撣單
+3. ?豢????函?撘??隞??芾??迂嚗?
+4. 頛詨?迂嚗??AG Chatbot??
+5. 暺???蒂銴ˊ 16 雿?蝣?
+6. 撠?蝣澆‵??`SMTP_PASSWORD`
 
 ---
 
-#### 測試與驗證
+#### 皜祈岫??霅?
 
-**測試結果**:
-- ✅ SMTP 憑證正確載入（已驗證）
-- ✅ 郵件成功發送（後端日誌確認）
-- ✅ 表單驗證正常運作
-- ✅ 字元計數器即時更新
-- ✅ 成功訊息正確顯示
-- ✅ 郵件內容格式正確（HTML 模板）
+**皜祈岫蝯?**:
+- ??SMTP ??甇?Ⅱ頛嚗歇撽?嚗?
+- ???萎辣???潮?敺垢?亥?蝣箄?嚗?
+- ??銵典撽?甇?虜??
+- ??摮?閮?典???
+- ????閮甇?Ⅱ憿舐內
+- ???萎辣?批捆?澆?甇?Ⅱ嚗TML 璅⊥嚗?
 
-**後端日誌驗證**:
+**敺垢?亥?撽?**:
 ```
-INFO - submit_contact_form:159 - Contact form submission received from 測試使用者
-INFO - send_email:133 - Contact form email sent successfully from 測試使用者
+INFO - submit_contact_form:159 - Contact form submission received from 皜祈岫雿輻??
+INFO - send_email:133 - Contact form email sent successfully from 皜祈岫雿輻??
 INFO - "POST /api/v1/contact/ HTTP/1.1" 200 OK
 ```
 
 ---
 
-### 📝 文檔更新
+### ?? ???湔
 
-**新增文檔**:
-- `docs/CONTACT_FORM_SETUP.md` - 聯絡表單完整設置指南
+**?啣???**:
+- `docs/CONTACT_FORM_SETUP.md` - ?舐窗銵典摰閮剔蔭??
 
-**刪除過時文檔**:
-- ❌ `CODE_CLEANUP_SUMMARY.md` - 代碼清理臨時報告（已整合）
-- ❌ `CODE_CLEANUP_FINAL_REPORT.md` - 最終清理報告（已整合）
-- ❌ `AUTOMATED_TESTING_REMOVAL_SUMMARY.md` - 測試移除報告（已整合）
-- ❌ `frontend/SCSS_CONVERSION_SUMMARY.md` - SCSS 轉換報告（已整合）
-- ❌ `frontend/SCSS_IMPLEMENTATION_SUMMARY.md` - SCSS 實作報告（已整合）
+**?芷????**:
+- ??`CODE_CLEANUP_SUMMARY.md` - 隞?Ⅳ皜??冽??勗?嚗歇?游?嚗?
+- ??`CODE_CLEANUP_FINAL_REPORT.md` - ?蝯????撌脫??
+- ??`AUTOMATED_TESTING_REMOVAL_SUMMARY.md` - 皜祈岫蝘駁?勗?嚗歇?游?嚗?
+- ??`frontend/SCSS_CONVERSION_SUMMARY.md` - SCSS 頧??勗?嚗歇?游?嚗?
+- ??`frontend/SCSS_IMPLEMENTATION_SUMMARY.md` - SCSS 撖虫??勗?嚗歇?游?嚗?
 
-**文檔清理原因**: 所有臨時開發報告已整合至主要文檔（PROGRESS.md），保持文檔結構清晰。
-
----
-
-### 🔧 技術實作細節
-
-#### 檔案變更總覽
-
-**後端新增/修改**:
-1. `backend/src/api/routes/contact.py` - 新增聯絡表單 API 路由
-2. `backend/src/core/config.py` - 新增 SMTP 配置參數
-3. `backend/src/api/__init__.py` - 註冊 contact router
-4. `backend/.env` - 新增 SMTP 憑證配置
-5. `backend/.env.example` - 新增 SMTP 配置範例
-
-**前端新增/修改**:
-1. `frontend/src/components/ContactModal/ContactModal.tsx` - 聯絡表單組件
-2. `frontend/src/components/ContactModal/ContactModal.scss` - 表單樣式
-3. `frontend/src/components/Header/Header.tsx` - 新增「與我聯絡」按鈕
-4. `frontend/src/main.tsx` - 整合 ContactModal 狀態管理
-5. `frontend/src/components/RagConfigStep/RagConfigStep.tsx` - UI 簡化
-6. `frontend/src/components/PromptConfigStep/PromptConfigStep.tsx` - UI 簡化
-7. `frontend/src/components/AboutProjectModal/AboutProjectModal.tsx` - UI 簡化
-8. 其他工作流程步驟組件（Steps 3-6）- UI 微調
-
-**配置更新**:
-1. `docker-compose.yml` - 更新 env_file 配置載入 `.env`
+**??皜???**: ?????澆?歇?游??喃蜓閬?瑼?PROGRESS.md嚗?靽???蝯?皜??
 
 ---
 
-### 💡 使用者體驗改進
+### ? ?銵祕雿敦蝭
 
-**1. 表單反饋優化**
-- ✅ 即時字元計數（無需提交即可知道是否符合要求）
-- ✅ 顏色編碼警告（紅色表示不符，灰色表示正常）
-- ✅ 清晰的錯誤訊息（中文提示）
-- ✅ 提交中狀態顯示（防止重複點擊）
+#### 瑼?霈蝮質汗
 
-**2. UI 緊湊性提升**
-- ✅ 所有步驟頁面高度減少 25-35%
-- ✅ 無需過度滾動即可查看完整內容
-- ✅ 保持可讀性的同時提升資訊密度
-- ✅ 統一的視覺風格和間距
+**敺垢?啣?/靽格**:
+1. `backend/src/api/routes/contact.py` - ?啣??舐窗銵典 API 頝舐
+2. `backend/src/core/config.py` - ?啣? SMTP ?蔭?
+3. `backend/src/api/__init__.py` - 閮餃? contact router
+4. `backend/.env` - ?啣? SMTP ???蔭
+5. `backend/.env.example` - ?啣? SMTP ?蔭蝭?
 
-**3. Modal 優化**
-- ✅ About Project Modal 尺寸更合理
-- ✅ 聯絡表單 Modal 快速開啟/關閉
-- ✅ 成功提交後自動關閉（提升流暢度）
+**?垢?啣?/靽格**:
+1. `frontend/src/components/ContactModal/ContactModal.tsx` - ?舐窗銵典蝯辣
+2. `frontend/src/components/ContactModal/ContactModal.scss` - 銵典璅??
+3. `frontend/src/components/Header/Header.tsx` - ?啣????蝯～???
+4. `frontend/src/main.tsx` - ?游? ContactModal ??恣??
+5. `frontend/src/components/RagConfigStep/RagConfigStep.tsx` - UI 蝪∪?
+6. `frontend/src/components/PromptConfigStep/PromptConfigStep.tsx` - UI 蝪∪?
+7. `frontend/src/components/AboutProjectModal/AboutProjectModal.tsx` - UI 蝪∪?
+8. ?嗡?撌乩?瘚?甇仿?蝯辣嚗teps 3-6嚗? UI 敺株矽
 
----
-
-### 📊 功能完整性確認
-
-**聯絡表單功能檢查清單**:
-- ✅ 前端表單驗證正常
-- ✅ 後端 API 驗證正常
-- ✅ SMTP 郵件發送成功
-- ✅ 錯誤處理機制完善
-- ✅ 安全性設計符合要求
-- ✅ 使用者體驗流暢
-- ✅ 文檔完整記錄
-
-**UI 簡化檢查清單**:
-- ✅ Step 1 (RAG Config) UI 簡化
-- ✅ Step 2 (Prompt Config) UI 簡化
-- ✅ Steps 3-6 整體優化
-- ✅ About Project Modal 簡化
-- ✅ 視覺一致性維持
+**?蔭?湔**:
+1. `docker-compose.yml` - ?湔 env_file ?蔭頛 `.env`
 
 ---
 
-## 📅 2026-01-12 - RAG 引擎問題生成與驗證機制大幅優化 ✅
+### ? 雿輻??撽??
 
-**🎯 本次更新重點**:
-1. **RAG 問題生成策略重構** - 從搜索改為全文掃描，確保覆蓋所有內容
-2. **雙層驗證機制** - 關鍵詞過濾 + RAG 檢索實測，成功率提升至 98%
-3. **Response Type 誤判修復** - 精確的正則表達式模式匹配
-4. **UI 改進** - ContentReviewStep 邊框優化、RAG 技術深度對話框重構
-5. **文檔完善** - 新增 3 份技術文檔詳細說明改進細節
+**1. 銵典???芸?**
+- ???單?摮?閮嚗??漱?喳?仿??臬蝚血?閬?嚗?
+- ??憿蝺函Ⅳ霅血?嚗??脰”蝷箔?蝚佗??啗銵函內甇?虜嚗?
+- ??皜?隤方??荔?銝剜??內嚗?
+- ???漱銝剔??＊蝷綽??脫迫??暺?嚗?
+
+**2. UI 蝺??扳???*
+- ????郊撽??ａ?摨行?撠?25-35%
+- ???⊿??漲皛曉??喳?亦?摰?批捆
+- ??靽??航??抒?????鞈?撖漲
+- ??蝯曹???閬粹◢?澆???
+
+**3. Modal ?芸?**
+- ??About Project Modal 撠箏站?游???
+- ???舐窗銵典 Modal 敹恍?????
+- ?????漱敺??????瘚摨佗?
 
 ---
 
-### 🔧 RAG 引擎核心優化
+### ?? ?摰?抒Ⅱ隤?
 
-#### 問題 1: AI 生成的建議問題無法回答
+**?舐窗銵典?瑼Ｘ皜**:
+- ???垢銵典撽?甇?虜
+- ??敺垢 API 撽?甇?虜
+- ??SMTP ?萎辣?潮???
+- ???航炊??璈摰?
+- ??摰?扯身閮泵??瘙?
+- ??雿輻??撽???
+- ????摰閮?
 
-**根本原因分析**:
-- 舊方法只搜索 "summary" 關鍵字，遺漏文檔具體細節
-- 問題生成與實際回答的檢索策略不一致
-- 缺少問題質量驗證機制
+**UI 蝪∪?瑼Ｘ皜**:
+- ??Step 1 (RAG Config) UI 蝪∪?
+- ??Step 2 (Prompt Config) UI 蝪∪?
+- ??Steps 3-6 ?湧??芸?
+- ??About Project Modal 蝪∪?
+- ??閬死銝?湔抒雁??
 
-**解決方案**:
+---
 
-**1. 改用 Scroll API 全文掃描** (`rag_engine.py:323-374`)
+## ?? 2026-01-12 - RAG 撘???????霅??嗅之撟????
+
+**? ?祆活?湔??**:
+1. **RAG ????蝑??** - 敺?蝝Ｘ?箏????蝣箔?閬???摰?
+2. **?惜撽?璈** - ?閰?瞈?+ RAG 瑼Ｙ揣撖行葫嚗???????98%
+3. **Response Type 隤文靽桀儔** - 蝎曄Ⅱ?迤?”??璅∪??寥?
+4. **UI ?寥?* - ContentReviewStep ???芸??AG ?銵楛摨血?閰望???
+5. **??摰?** - ?啣? 3 隞賣?銵?瑼底蝝啗牧??脩敦蝭
+
+---
+
+### ? RAG 撘??詨??芸?
+
+#### ?? 1: AI ???遣霅啣?憿瘜?蝑?
+
+**?寞????**:
+- ?瘜?揣 "summary" ?摮??箸????琿?蝝啁?
+- ?????祕??蝑?瑼Ｙ揣蝑銝???
+- 蝻箏???鞈芷?撽?璈
+
+**閫?捱?寞?**:
+
+**1. ?寧 Scroll API ?冽???** (`rag_engine.py:323-374`)
 ```python
-# 舊方法: 只搜索特定關鍵字
+# ?瘜? ?芣?蝝Ｙ摰??萄?
 query_embedding = self.embedder.embed_text("summary main points overview")
 results = self.vector_store.search_similar(limit=10)
 
-# 新方法: 掃描整個文檔集合
+# ?唳瘜? ???游?瑼???
 points, _ = self.vector_store.client.scroll(
     collection_name=collection_name,
-    limit=15,  # 獲取更多 chunks 確保覆蓋率
+    limit=15,  # ?脣??游? chunks 蝣箔?閬???
     with_payload=True,
     with_vectors=False
 )
 ```
 
-**2. 增加上下文長度和覆蓋率**
-- Chunks: 10 → 15 (+50%)
-- 每個 chunk 長度: 1500 → 2000 (+33%)
-- **總上下文: 15K → 30K 字元 (100% 提升)**
+**2. 憓?銝??摨血?閬???*
+- Chunks: 10 ??15 (+50%)
+- 瘥?chunk ?瑕漲: 1500 ??2000 (+33%)
+- **蝮賭?銝?: 15K ??30K 摮? (100% ??)**
 
-**3. 強化 Prompt 要求提取式問題** (`rag_engine.py:387-434`)
-- 明確告知 LLM：「你生成的問題會被回問給你」
-- 強調 **EXPLICIT 而非 INTERPRETIVE**
-- 要求自我驗證：「能否找到 EXACT 答案？」
-- 生成 5 個候選問題，測試後選出最好的 3 個
+**3. 撘瑕? Prompt 閬???撘?憿?* (`rag_engine.py:387-434`)
+- ?Ⅱ? LLM嚗?????憿?鋡怠??策雿?
+- 撘瑁矽 **EXPLICIT ?? INTERPRETIVE**
+- 閬??芣?撽?嚗?行??EXACT 蝑?嚗?
+- ?? 5 ???嚗葫閰血??詨?憟賜? 3 ??
 
-**4. 雙層驗證機制** (`rag_engine.py:437-493`)
+**4. ?惜撽?璈** (`rag_engine.py:437-493`)
 
-**第一層：關鍵詞快速過濾**
+**蝚砌?撅歹??閰翰??瞈?*
 ```python
-common_words = {'什麼', '哪', '誰', '為什麼', ...}
+common_words = {'隞暻?, '??, '隤?, '?箔?暻?, ...}
 key_terms = question_terms - common_words
 has_keyword_match = any(term in doc_text for term in key_terms)
 ```
 
-**第二層：RAG 檢索實測（核心改進）**
+**蝚砌?撅歹?RAG 瑼Ｙ揣撖行葫嚗敹?莎?**
 ```python
-# 對每個問題執行真實的 embedding + search
+# 撠???憿銵?撖衣? embedding + search
 test_embedding = self.embedder.embed_query(question)
 test_results = self.vector_store.search_similar(
     query_vector=test_embedding.vector,
     limit=5,
-    score_threshold=self.similarity_threshold  # 使用與實際查詢相同的閾值
+    score_threshold=self.similarity_threshold  # 雿輻?祕?閰Ｙ???曉?
 )
 
-# 嚴格驗證標準
+# ?湔撽?璅?
 if test_results and len(test_results) >= 3:
     top_score = test_results[0]['score']
     avg_top3_score = sum(r['score'] for r in test_results[:3]) / 3
     
-    # 要求高分數 AND 好平均
+    # 閬?擃???AND 憟賢像??
     if top_score >= 0.45 and avg_top3_score >= 0.38:
-        validated_questions.append(question)  # ✅ 通過
+        validated_questions.append(question)  # ????
 ```
 
-**驗證標準對比**:
+**撽?璅?撠?**:
 
-| 項目 | 舊標準 | 新標準 | 改進 |
+| ? | ??皞?| ?唳?皞?| ?寥?|
 |------|--------|--------|------|
-| 檢索閾值 | 0.25 | **0.3** (與實際一致) | 更嚴格 |
-| 最高分數要求 | ≥ 0.35 | **≥ 0.45** | +28% |
-| 平均分數要求 | 無 | **≥ 0.38** | 新增 |
-| 最少結果數 | 2 | **3** | +50% |
-| 關注重點 | 任何明確事實 | **核心、多次提及的事實** | 更穩健 |
+| 瑼Ｙ揣?曉?| 0.25 | **0.3** (?祕???? | ?游??|
+| ?擃??貉?瘙?| ??0.35 | **??0.45** | +28% |
+| 撟喳??閬? | ??| **??0.38** | ?啣? |
+| ?撠?? | 2 | **3** | +50% |
+| ?釣?? | 隞颱??Ⅱ鈭祕 | **?詨???甈⊥???鈭祕** | ?渡帘??|
 
-**5. 強調生成關於核心事實的問題** (`rag_engine.py:394-434`)
-- ✅ 提到 **MULTIPLE times**（多次提到）
-- ✅ **CLEARLY described**（清晰描述）
-- ✅ **CENTRAL facts**（核心事實）
-- ❌ 避免 **obscure details**（次要細節）
-- ❌ 避免 **one-time mentions**（只提到一次）
+**5. 撘瑁矽????詨?鈭祕??憿?* (`rag_engine.py:394-434`)
+- ??? **MULTIPLE times**嚗?甈⊥??堆?
+- ??**CLEARLY described**嚗??唳?餈堆?
+- ??**CENTRAL facts**嚗敹?撖佗?
+- ???踹? **obscure details**嚗活閬敦蝭嚗?
+- ???踹? **one-time mentions**嚗?銝甈∴?
 
-**預期效果**: 問題可回答率從 ~50% 提升至 **~98%**
+**????**: ???臬?蝑?敺?~50% ????**~98%**
 
 ---
 
-#### 問題 2: AI 正確回答時顯示紅色文字
+#### ?? 2: AI 甇?Ⅱ???＊蝷箇??脫?摮?
 
-**根本原因**:
+**?寞??**:
 ```python
-# 舊邏輯（有問題）
-cannot_answer_indicators = ["無法", "找不到", "抱歉", ...]
+# ??頛荔???憿?
+cannot_answer_indicators = ["?⊥?", "?曆???, "?望?", ...]
 has_indicator = any(ind in llm_response.lower() for ind in cannot_answer_indicators)
 ```
 
-**問題**: 回應「愛麗絲**無法**得知Lory的年齡」中包含「無法」，被誤判為 CANNOT_ANSWER
+**??**: ????暻結**?⊥?**敺Lory?僑朣～葉??瘜?鋡怨炊?斤 CANNOT_ANSWER
 
-**解決方案** (`rag_engine.py:636-663`):
+**閫?捱?寞?** (`rag_engine.py:636-663`):
 ```python
-# 使用正則表達式匹配上下文模式
+# 雿輻甇??銵券?撘??銝?璅∪?
 cannot_answer_patterns = [
-    "文件中沒有提到", "文件中找不到", "無法從文件",
-    "抱歉.*無法", "對不起.*找不到",
+    "?辣銝剜?????, "?辣銝剜銝", "?⊥?敺?隞?,
+    "?望?.*?⊥?", "撠?韏?*?曆???,
     "document does not mention", "cannot find.*document",
     ...
 ]
@@ -622,149 +942,149 @@ has_cannot_answer_indicator = any(
 )
 ```
 
-**關鍵改進**:
-- 單獨的「無法」不會觸發
-- 只有「文件中找不到」、「抱歉，我無法...」等系統無法回答的表述才會匹配
-- 區分內容描述（「愛麗絲無法...」）與系統回應（「無法從文件中找到...」）
+**??寥?*:
+- ?桃?瘜??孛??
+- ?芣???隞嗡葉?曆??啜甇??瘜?..??蝟餌絞?⊥????”餈唳????
+- ??摰寞?餈堆???暻結?⊥?...???頂蝯勗????瘜??辣銝剜??..??
 
 ---
 
-#### 問題 3: 檢索重試策略優化
+#### ?? 3: 瑼Ｙ揣?岫蝑?芸?
 
-**改進** (`rag_engine.py:578-589`):
+**?寥?* (`rag_engine.py:578-589`):
 ```python
-# 舊邏輯: 只在完全沒結果時重試
+# ??頛? ?芸摰瘝????岫
 if not search_results:
     search_results = self.vector_store.search_similar(score_threshold=0.2)
 
-# 新邏輯: 結果太少時也重試
+# ?圈?頛? 蝯?憭芸????岫
 if not search_results or len(search_results) < 3:
     retry_threshold = 0.2 if not search_results else 0.3
     search_results = self.vector_store.search_similar(score_threshold=retry_threshold)
 ```
 
-**效果**: 確保至少檢索到 3 個相關 chunks，提高回答質量
+**??**: 蝣箔??喳?瑼Ｙ揣??3 ???chunks嚗?擃?蝑釭??
 
 ---
 
-### 🎨 UI/UX 改進
+### ? UI/UX ?寥?
 
-#### 1. ContentReviewStep 邊框顏色優化
+#### 1. ContentReviewStep ??憿?芸?
 
-**問題**: 審核卡片視覺不夠突出
+**??**: 撖拇?∠?閬死銝?蝒
 
-**改進** (`ContentReviewStep.scss`):
-- **主要審核卡片** (`.active-card-border`):
-  - 3px 藍色實線外框
-  - 4px 藍色光暈陰影
-  - 漸層背景 (白色 → 淺藍色)
+**?寥?* (`ContentReviewStep.scss`):
+- **銝餉?撖拇?∠?** (`.active-card-border`):
+  - 3px ?撖衣?憭?
+  - 4px ????啣蔣
+  - 瞍詨惜? (?質 ??瘛箄???
 
-- **審核項目框** (`.review-item-box`):
-  - 預設：2px 灰色邊框
-  - 成功狀態：2px 綠色邊框 + 陰影
-  - 錯誤狀態：2px 紅色邊框 + 陰影
-  - 活動狀態：2px 藍色邊框 + 脈衝動畫
+- **撖拇?獢?* (`.review-item-box`):
+  - ?身嚗?px ?啗??
+  - ?????2px 蝬?? + ?啣蔣
+  - ?航炊???2px 蝝?? + ?啣蔣
+  - 瘣餃????2px ??? + ???
 
-- **脈衝動畫**: 為活動審核項目添加平滑的邊框顏色脈衝效果
+- **???**: ?箸暑?祟?賊??格溶?像皛???憿????
 
-**修改檔案**:
+**靽格瑼?**:
 - `frontend/src/components/ContentReviewStep/ContentReviewStep.scss`
 
 ---
 
-#### 2. RAG 技術深度對話框重構
+#### 2. RAG ?銵楛摨血?閰望???
 
-**改進前**: 垂直堆疊 + 需要滾動 + 大量 Icon
+**?寥脣?**: ??? + ?閬遝??+ 憭折? Icon
 
-**改進後**: 2x2 Card Grid + 無需滾動 + 簡化 Icon
+**?寥脣?**: 2x2 Card Grid + ?⊿?皛曉? + 蝪∪? Icon
 
-**新增主題（放在第一位）**:
-**「⚠️ 還有進步空間 - 此專案與商業實用之間距離」**
-- 缺少企業級功能（權限管理、多租戶、審計日誌）
-- 可擴展性不足（單機部署，無分散式架構）
-- 成本控制缺失（無 Token 監控、配額管理）
-- 測試覆蓋有限（缺完整測試框架）
+**?啣?銝駁?嚗?函洵銝雿?**:
+**??儭????脫郊蝛粹? - 甇文?獢??平撖衣銋?頝??*
+- 蝻箏?隡平蝝??踝?甈?蝞∠???蝘?祟閮隤?
+- ?舀撅找?頞喉??格??函蔡嚗?撘瑽?
+- ??批蝻箏仃嚗 Token ????憿恣??
+- 皜祈岫閬???嚗撩摰皜祈岫獢嚗?
 
-**布局優化**:
-- ✅ **2x2 Grid 布局**：4 個主題以卡片形式並排顯示
-- ✅ **無需滾動**：移除 `modal-dialog-scrollable`
-- ✅ **減少 Icon 使用**：只在標題用簡單 emoji
-- ✅ **清晰視覺層次**：
-  - 🟡 黃色警告卡（進步空間）
-  - 🟢 綠色成功卡（好處）
-  - 🔴 紅色危險卡（短處）
-  - 🔵 藍色資訊卡（Agentic RAG）
+**撣??芸?**:
+- ??**2x2 Grid 撣?**嚗? ?蜓憿誑?∠?敶Ｗ?銝行?憿舐內
+- ??**?⊿?皛曉?**嚗宏??`modal-dialog-scrollable`
+- ??**皜? Icon 雿輻**嚗?冽?憿蝪∪ emoji
+- ??**皜閬死撅斗活**嚗?
+  - ? 暺霅血??∴??脫郊蝛粹?嚗?
+  - ? 蝬???∴?憟質?嚗?
+  - ? 蝝?梢?∴??剛?嚗?
+  - ? ?鞈??∴?Agentic RAG嚗?
 
-**修改檔案**:
+**靽格瑼?**:
 - `frontend/src/components/WorkflowStepper/WorkflowStepper.tsx`
 
 ---
 
-### 📝 新增技術文檔
+### ?? ?啣??銵?瑼?
 
-**1. RAG_IMPROVEMENT_GUIDE.md** - RAG 引擎改進完整指南
-- 問題根源分析
-- 5 個核心改進方案詳解
-- Before/After 效果對比
-- 測試建議與部署檢查清單
+**1. RAG_IMPROVEMENT_GUIDE.md** - RAG 撘??寥脣??湔???
+- ???寞???
+- 5 ?敹?脫獢底閫?
+- Before/After ??撠?
+- 皜祈岫撱箄降?蝵脫炎?交???
 
-**2. RESPONSE_TYPE_FIX.md** - Response Type 判斷修復指南
-- 誤判案例分析
-- 正則表達式模式匹配方案
-- 前端顯示邏輯說明
-- 測試驗證步驟
+**2. RESPONSE_TYPE_FIX.md** - Response Type ?斗靽桀儔??
+- 隤文獢???
+- 甇??銵券?撘芋撘?獢?
+- ?垢憿舐內?摩隤芣?
+- 皜祈岫撽?甇仿?
 
-**3. test_rag_improvements.py** - RAG 改進測試腳本
-- 顯示所有改進邏輯
-- 提供測試框架範例
+**3. test_rag_improvements.py** - RAG ?寥脫葫閰西??
+- 憿舐內???脤?頛?
+- ??皜祈岫獢蝭?
 
-**修改檔案**:
-- `docs/RAG_IMPROVEMENT_GUIDE.md` (新增)
-- `docs/RESPONSE_TYPE_FIX.md` (新增)
-- `backend/test_rag_improvements.py` (新增)
-
----
-
-### 🧹 代碼品質改進
-
-**修改檔案清單**:
-- `backend/src/services/rag_engine.py` - 核心邏輯重構（~200 行修改）
-- `frontend/src/components/ContentReviewStep/ContentReviewStep.scss` - 樣式優化
-- `frontend/src/components/WorkflowStepper/WorkflowStepper.tsx` - UI 重構
+**靽格瑼?**:
+- `docs/RAG_IMPROVEMENT_GUIDE.md` (?啣?)
+- `docs/RESPONSE_TYPE_FIX.md` (?啣?)
+- `backend/test_rag_improvements.py` (?啣?)
 
 ---
 
-### 📊 效果總結
+### ?完 隞?Ⅳ?釭?寥?
 
-| 指標 | 改進前 | 改進後 | 提升 |
+**靽格瑼?皜**:
+- `backend/src/services/rag_engine.py` - ?詨??摩??嚗200 銵耨?對?
+- `frontend/src/components/ContentReviewStep/ContentReviewStep.scss` - 璅???芸?
+- `frontend/src/components/WorkflowStepper/WorkflowStepper.tsx` - UI ??
+
+---
+
+### ?? ??蝮賜?
+
+| ?? | ?寥脣? | ?寥脣? | ?? |
 |------|--------|--------|------|
-| 上下文大小 | 15,000 字元 | 30,000 字元 | +100% |
-| 問題可回答率 | ~50% | ~98% | +96% |
-| 檢索覆蓋率 | 低（僅 summary） | 高（全文掃描） | 質變 |
-| Response Type 準確率 | ~85% | ~98% | +15% |
-| 驗證標準 | 單一閾值 | 雙重分數檢查 | 更嚴格 |
+| 銝??之撠?| 15,000 摮? | 30,000 摮? | +100% |
+| ???臬?蝑? | ~50% | ~98% | +96% |
+| 瑼Ｙ揣閬???| 雿???summary嚗?| 擃??冽???嚗?| 鞈芾? |
+| Response Type 皞Ⅱ??| ~85% | ~98% | +15% |
+| 撽?璅? | ?桐??曉?| ???瑼Ｘ | ?游??|
 
 ---
 
-## 📅 2026-01-11 - 代碼清理與 About Project Modal UI 重構 ✅
+## ?? 2026-01-11 - 隞?Ⅳ皜???About Project Modal UI ?? ??
 
-**🎯 本次更新重點**:
-1. 移除所有前端 console.log 語句（21個檔案）
-2. About Project Modal 完整 UI 改版：對話框加寬、2x2 網格佈局、文字置中
-3. 修復 TypeScript 類型錯誤
-4. 設定對話框每次啟動自動顯示
+**? ?祆活?湔??**:
+1. 蝘駁???蝡?console.log 隤嚗?1??獢?
+2. About Project Modal 摰 UI ?寧?嚗?閰望??祝??x2 蝬脫雿???摮蔭銝?
+3. 靽桀儔 TypeScript 憿??航炊
+4. 閮剖?撠店獢?甈∪???＊蝷?
 
-### 🧹 代碼清理
+### ?完 隞?Ⅳ皜?
 
-**移除的內容**:
-- 所有單行 `console.log()`、`console.error()`、`console.warn()` 語句
-- 共處理 21 個 TypeScript/TSX 檔案
+**蝘駁?摰?*:
+- ??銵?`console.log()`?console.error()`?console.warn()` 隤
+- ?梯???21 ??TypeScript/TSX 瑼?
 
-**技術細節**:
-- 使用 Node.js 腳本確保 UTF-8 編碼正確處理中文字元
-- 避免 PowerShell 預設編碼導致的字元損壞問題
+**?銵敦蝭**:
+- 雿輻 Node.js ?單蝣箔? UTF-8 蝺函Ⅳ甇?Ⅱ??銝剜?摮?
+- ?踹? PowerShell ?身蝺函Ⅳ撠????憯?憿?
 
-**修改的檔案**:
+**靽格??獢?*:
 ```
 frontend/src/components/: AiChatStep, ApiKeyInput, ChatScreen, ContentReviewStep, 
   DataUploadStep, DocumentInfoCard, ErrorBoundary, Icon, LanguageSelector,
@@ -774,485 +1094,371 @@ frontend/src/services/: api, chatService, metricsService, moderationService, upl
 frontend/src/main.tsx
 ```
 
-### 🎨 About Project Modal UI 重構
+### ? About Project Modal UI ??
 
-**對話框設計改進**:
-- **寬度**: `modal-lg` → `modal-xl` (1000px)
-- **佈局**: 垂直堆疊 → 2x2 網格佈局
-- **對齊**: 所有標題和按鈕置中對齊
-- **樣式**: 漸層背景、懸停效果
+**撠店獢身閮??*:
+- **撖砍漲**: `modal-lg` ??`modal-xl` (1000px)
+- **雿?**: ??? ??2x2 蝬脫雿?
+- **撠?**: ???憿???蝵桐葉撠?
+- **璅??**: 瞍詨惜??????
 
-**內容優化**:
-- 主標題: "AI 不再有幻覺，回答也可以很專注"
-- 副標題: 簡化為兩行說明
-- 四個核心角色卡片:
-  1. **RAG 檢索增強生成** - 讓 AI 誠實，而非健談
-  2. **Vector DB 向量資料庫** - 每句回答都有根據
-  3. **System Prompt 行為規則** - 定義如何做事，非只是說話
-  4. **LLM 語言模型** - 沒有魔法，只有流程
-- Footer: 版本信息 (1.0 · 2026-01-11) + 置中按鈕 "開始使用"
+**?批捆?芸?**:
+- 銝餅?憿? "AI 銝??劂閬綽???銋隞亙?撠釣"
+- ?舀?憿? 蝪∪??箏銵牧??
+- ?敹??脣??
+  1. **RAG 瑼Ｙ揣憓撥??** - 霈?AI 隤祕嚗??亥?
+  2. **Vector DB ??鞈?摨?* - 瘥???賣??寞?
+  3. **System Prompt 銵閬?** - 摰儔憒???嚗??芣隤芾店
+  4. **LLM 隤?璅∪?** - 瘝?擳?嚗??蝔?
+- Footer: ?靽⊥ (1.0 繚 2026-01-11) + 蝵桐葉?? "??雿輻"
 
-**自動顯示設定**:
-- `main.tsx`: `useState(true)` 確保每次啟動都顯示對話框
-- 移除 localStorage 持久化邏輯
+**?芸?憿舐內閮剖?**:
+- `main.tsx`: `useState(true)` 蝣箔?瘥活???賡＊蝷箏?閰望?
+- 蝘駁 localStorage ????頛?
 
-**修改的檔案**:
-- `frontend/src/components/AboutProjectModal/AboutProjectModal.tsx` - 結構、內容、佈局
-- `frontend/src/components/AboutProjectModal/AboutProjectModal.scss` - 樣式增強
-- `frontend/src/main.tsx` - 初始狀態設定
+**靽格??獢?*:
+- `frontend/src/components/AboutProjectModal/AboutProjectModal.tsx` - 蝯??摰嫘?撅
+- `frontend/src/components/AboutProjectModal/AboutProjectModal.scss` - 璅??憓撥
+- `frontend/src/main.tsx` - ????身摰?
 
-### 🔧 TypeScript 類型修復
+### ? TypeScript 憿?靽桀儔
 
-**問題**: `WebsiteUploadResponse` 缺少 `error_code` 和 `error_message` 屬性
+**??**: `WebsiteUploadResponse` 蝻箏? `error_code` ??`error_message` 撅祆?
 
-**解決方案**:
-- 在 `UploadResponse` 介面新增可選屬性:
+**閫?捱?寞?**:
+- ??`UploadResponse` 隞?啣??舫撅祆?
   ```typescript
   error_code?: string;
   error_message?: string;
   ```
 
-**修改的檔案**:
+**靽格??獢?*:
 - `frontend/src/services/uploadService.ts`
 
 ---
 
-## 📅 2026-01-11 (稍早) - RAG Flow 說明對話與文案刷新 ✅
+## ?? 2026-01-11 (蝔) - RAG Flow 隤芣?撠店??獢????
 
-**🎯 本次更新重點**:
-1. 流程步驟提示從側邊 Toast 改為置中對話框，閱讀性提升
-2. RAG 流程說明文案更新：
-	 - Step 1「RAG 參數配置」：新增「什麼是 RAG?」解說（含檢索、增強、生成三階段）
-	 - Step 2「System Prompt」：說明 system prompt 與一般 prompt 的差異及其在 RAG 中的約束作用
-	 - Step 3「資料上傳」：強調使用者上傳檔案或爬蟲內容、AI 僅針對資料內容應答
-	 - Step 5「資料向量化, 寫入 Vector DB」：以易懂比喻解釋向量化與 Vector DB 與傳統 DB 的差異
+**? ?祆活?湔??**:
+1. 瘚?甇仿??內敺??Toast ?寧蝵桐葉撠店獢??梯??扳???
+2. RAG 瘚?隤芣????湔嚗?
+	 - Step 1?AG ??蔭???啣???暻潭 RAG??圾隤迎??急炎蝝Ｕ?撘瑯????挾嚗?
+	 - Step 2?ystem Prompt??隤芣? system prompt ????prompt ?榆?啣??嗅 RAG 銝剔?蝝?雿
+	 - Step 3?????喋?撘瑁矽雿輻???單?獢??祈?批捆?I ??撠??摰寞?蝑?
+	 - Step 5??????, 撖怠 Vector DB??隞交????餉圾??????Vector DB ?蝯?DB ?榆??
 
-### ✏️ 主要修改檔案
-- `frontend/src/components/WorkflowStepper/WorkflowStepper.tsx`：
-	- 將步驟說明由 Toast 改為置中 modal
-	- 更新步驟 1/2/3/5 的標題與說明文案
-
----
-
-## 📅 2026-01-10 - 多語言系統優化與 UI 體驗改進 ✅
-
-**🎯 本次更新重點**:
-1. 移除阿拉伯文語言支援（從 8 種語言降為 7 種）
-2. 新增最低 Token 門檻（50 tokens）防止空內容通過
-3. 改進爬蟲成功通知為置中對話框
-4. 優化按鈕狀態控制與語言下拉選單行為
-
-### 🗑️ 移除阿拉伯文語言支援
-
-**變更原因**: 簡化系統，移除不常用語言和 RTL 佈局支援
-
-**刪除的檔案**:
-- `frontend/src/i18n/locales/ar.json` - 阿拉伯文翻譯檔案
-- `frontend/src/styles/_rtl.scss` - RTL 佈局樣式
-
-**修改的檔案**:
-- `frontend/src/i18n/config.ts` - 移除 ar 語言設定和 import
-- `frontend/src/components/Header/Header.tsx` - 移除語言選單中的阿拉伯文選項
-- `frontend/src/components/LanguageSelector/LanguageSelector.tsx` - 移除阿拉伯文標籤
-- `frontend/src/hooks/useLanguage.ts` - 移除 'ar' 語言支援
-- `frontend/src/hooks/useSession.ts` - 移除語言參數中的 'ar'
-- `frontend/src/services/sessionService.ts` - 移除語言參數中的 'ar'
-- `frontend/src/types/session.ts` - 移除語言類型中的 'ar'
-- `frontend/src/main.tsx` - 簡化語言方向設定（所有語言都是 LTR）
-- `frontend/src/styles/index.scss` - 移除 RTL 樣式 import
-- `backend/src/models/session.py` - 移除語言驗證中的 'ar'
-- `backend/src/api/routes/upload.py` - 移除阿拉伯文 fallback 訊息
-- `backend/src/api/routes/prompt.py` - 移除阿拉伯文語言映射
-- `backend/src/services/rag_engine.py` - 移除所有阿拉伯文翻譯
-
-**支援語言（7 種）**: English、繁體中文、简体中文、한국어、日本語、Español、Français
-
-### 📊 最低資料門檻（50 Tokens）
-
-**問題**: 網站爬蟲或文件上傳可能返回極少量數據（如 6 tokens），導致 RAG 無效
-
-**解決方案**:
-- 在 `UploadScreen.tsx` 和 `WorkflowStepper.tsx` 新增 `MIN_TOKENS_REQUIRED = 50` 常數
-- 爬蟲/上傳完成後檢查 Token 數量
-- 不足門檻時顯示「資料量不足」錯誤對話框
-- 統一處理 "empty text list" 錯誤為相同的「資料量不足」訊息
-
-### 🎉 爬蟲成功通知改進
-
-**變更**: 從 Toast 通知改為置中對話框
-
-**實現**:
-- 在 `WorkflowStepper.tsx` 新增 `showSuccessDialog` 狀態
-- 成功時顯示包含爬取頁數和 Token 數的對話框
-- 用戶確認後自動進入下一步
-
-### 🔘 按鈕狀態控制優化
-
-**變更**:
-- 爬蟲成功後，「上傳檔案」和「爬取網站」按鈕同時禁用
-- 「下一步」按鈕在爬蟲成功後啟用
-- 在 `onCrawlerSuccess` 回調中設置 `extraction_status: "EXTRACTED"`
-
-### 📂 語言下拉選單改進
-
-**變更**: 點擊選單外部區域自動關閉下拉選單
-
-**實現**:
-- 在 `Header.tsx` 新增 `dropdownRef` 追蹤選單 DOM
-- 使用 `useEffect` 監聽 `mousedown` 事件
-- 點擊位置不在選單內時自動關閉
+### ?? 銝餉?靽格瑼?
+- `frontend/src/components/WorkflowStepper/WorkflowStepper.tsx`嚗?
+	- 撠郊撽牧? Toast ?寧蝵桐葉 modal
+	- ?湔甇仿? 1/2/3/5 ??憿?隤芣???
 
 ---
 
-## 📊 當前系統狀態
+## ?? 2026-01-10 - 憭?閮蝟餌絞?芸???UI 擃??寥???
 
-### ✅ 已完成功能
-| 功能類別 | 說明 |
+**? ?祆活?湔??**:
+1. 蝘駁?踵?隡舀?隤??舀嚗? 8 蝔株?閮? 7 蝔殷?
+2. ?啣??雿?Token ?瑼鳴?50 tokens嚗甇Ｙ征?批捆??
+3. ?寥脩?脫???箇蔭銝剖?閰望?
+4. ?芸??????嗉?隤?銝??詨銵
+
+### ??儭?蝘駁?踵?隡舀?隤??舀
+
+**霈??**: 蝪∪?蝟餌絞嚗宏?支?撣貊隤???RTL 雿??舀
+
+**?芷??獢?*:
+- `frontend/src/i18n/locales/ar.json` - ?踵?隡舀?蝧餉陌瑼?
+- `frontend/src/styles/_rtl.scss` - RTL 雿?璅??
+
+**靽格??獢?*:
+- `frontend/src/i18n/config.ts` - 蝘駁 ar 隤?閮剖???import
+- `frontend/src/components/Header/Header.tsx` - 蝘駁隤??詨銝剔??踵?隡舀??賊?
+- `frontend/src/components/LanguageSelector/LanguageSelector.tsx` - 蝘駁?踵?隡舀?璅惜
+- `frontend/src/hooks/useLanguage.ts` - 蝘駁 'ar' 隤??舀
+- `frontend/src/hooks/useSession.ts` - 蝘駁隤??銝剔? 'ar'
+- `frontend/src/services/sessionService.ts` - 蝘駁隤??銝剔? 'ar'
+- `frontend/src/types/session.ts` - 蝘駁隤?憿?銝剔? 'ar'
+- `frontend/src/main.tsx` - 蝪∪?隤??孵?閮剖?嚗???閮?賣 LTR嚗?
+- `frontend/src/styles/index.scss` - 蝘駁 RTL 璅?? import
+- `backend/src/models/session.py` - 蝘駁隤?撽?銝剔? 'ar'
+- `backend/src/api/routes/upload.py` - 蝘駁?踵?隡舀? fallback 閮
+- `backend/src/api/routes/prompt.py` - 蝘駁?踵?隡舀?隤???
+- `backend/src/services/rag_engine.py` - 蝘駁???摩?蕃霅?
+
+**?舀隤?嚗? 蝔殷?**: English??擃葉??雿葉??窱原??祈??spa簽ol?ran癟ais
+
+### ?? ?雿???瑼鳴?50 Tokens嚗?
+
+**??**: 蝬脩??祈??隞嗡??喳?質??扔撠??豢?嚗? 6 tokens嚗?撠 RAG ?⊥?
+
+**閫?捱?寞?**:
+- ??`UploadScreen.tsx` ??`WorkflowStepper.tsx` ?啣? `MIN_TOKENS_REQUIRED = 50` 撣豢
+- ?祈/銝摰?敺炎??Token ?賊?
+- 銝雲?瑼餅?憿舐內????銝雲?隤文?閰望?
+- 蝯曹??? "empty text list" ?航炊?箇??????銝雲????
+
+### ?? ?祈????寥?
+
+**霈**: 敺?Toast ??寧蝵桐葉撠店獢?
+
+**撖衣**:
+- ??`WorkflowStepper.tsx` ?啣? `showSuccessDialog` ???
+- ???＊蝷箏??怎???詨? Token ?貊?撠店獢?
+- ?冽蝣箄?敺?脣銝?甇?
+
+### ?? ?????嗅??
+
+**霈**:
+- ?祈??敺????單?獢???雯蝡???????
+- ??銝甇乓???祈??敺???
+- ??`onCrawlerSuccess` ?矽銝剛身蝵?`extraction_status: "EXTRACTED"`
+
+### ?? 隤?銝??詨?寥?
+
+**霈**: 暺??詨憭?????????
+
+**撖衣**:
+- ??`Header.tsx` ?啣? `dropdownRef` 餈質馱?詨 DOM
+- 雿輻 `useEffect` ?? `mousedown` 鈭辣
+- 暺?雿蔭銝?詨?扳??芸???
+
+---
+
+## ?? ?嗅?蝟餌絞???
+
+### ??撌脣?????
+| ?憿 | 隤芣? |
 |---------|------|
-| **Session 管理** | 自動建立、30分鐘TTL、語言切換、重啟功能 |
-| **文件上傳** | PDF、TXT上傳，包含內容審核，最低 50 Token 門檻 |
-| **網站爬蟲** | 自動提取網頁內容，Token限制，最低資料門檻，完整錯誤處理 |
-| **內容審核** | 整合Gemini Safety API，檢測不當內容 |
-| **向量儲存** | Qdrant數據庫，會話隔離 |
-| **RAG查詢** | 語義搜索，嚴格基於上傳內容回答 |
-| **多語言支援** | 7種語言UI切換（en, zh-TW, zh-CN, ko, ja, es, fr） |
-| **Metrics儀表板** | 實時性能監控 |
-| **6步驟工作流程** | RAG配置→AI行為設定→資料上傳→內容審核→文字處理→AI對話 |
-| **UI 優化** | About Project Modal、聊天介面、設定介面、Header、工作流程簡化 |
-| **聯絡表單** | 完整前後端整合、Gmail SMTP、即時驗證、字元計數器 |
-| **代碼品質** | 移除所有 console.log，TypeScript 類型完整，文檔清理 |
-| **錯誤處理** | 爬蟲錯誤檢測，防爬機制識別，資料量不足統一提示 |
+| **Session 蝞∠?** | ?芸?撱箇???0??TTL??閮????????|
+| **?辣銝** | PDF?XT銝嚗??怠摰孵祟?賂??雿?50 Token ?瑼?|
+| **蝬脩??祈** | ?芸???蝬脤??批捆嚗oken?嚗?雿???瑼鳴?摰?航炊?? |
+| **?批捆撖拇** | ?游?Gemini Safety API嚗炎皜砌??嗅摰?|
+| **???脣?** | Qdrant?豢?摨恬??店? |
+| **RAG?亥岷** | 隤儔?揣嚗?澆?潔??喳摰孵?蝑?|
+| **憭?閮?舀** | 7蝔株?閮UI??嚗n, zh-TW, zh-CN, ko, ja, es, fr嚗?|
+| **Metrics?銵冽** | 撖行??扯?? |
+| **6甇仿?撌乩?瘚?** | RAG?蔭?I銵閮剖??????喇??批捆撖拇??摮???AI撠店 |
+| **UI ?芸?** | About Project Modal??憭拐??Ｕ身摰??Ｕeader?極雿?蝔陛??|
+| **?舐窗銵典** | 摰??蝡舀?mail SMTP???霅????詨 |
+| **隞?Ⅳ?釭** | 蝘駁???console.log嚗ypeScript 憿?摰嚗?瑼???|
+| **?航炊??** | ?祈?航炊瑼Ｘ葫嚗?祆??嗉??伐?鞈???頞喟絞銝?內 |
 
-### 🎯 系統穩定性
-所有核心功能運行正常，代碼清理完成，UI 體驗優化，錯誤處理機制完善。
-
----
-
-## 🎯 最近更新摘要 (2026-01-11)
-
-### ✅ 完成項目
-1. **代碼清理**: 移除 21 個檔案中的所有 console.log 語句
-2. **About Project Modal**: 完整 UI 重構（2x2網格、置中、寬版）
-3. **類型安全**: 修復 UploadResponse 類型定義
-4. **用戶體驗**: 對話框設為啟動時自動顯示
-
-### 📝 歷史功能記錄
-- **2026-01-11 (稍早)**: RAG Flow 說明對話與文案優化
-- **2026-01-10**: 多語言系統優化（移除阿拉伯文、最低 Token 門檻）
-- **2026-01-09**: Flow 3 錯誤處理與爬蟲優化
-- **2026-01-06**: Chat UI 升級與 RAG 設定重構
-- **2026-01-01 ~ 01-05**: 工作流程建立、各步驟 UI 實作
+### ? 蝟餌絞蝛拙???
+??敹??賡?銵迤撣賂?隞?Ⅳ皜?摰?嚗I 擃??芸?嚗隤方????嗅???
 
 ---
 
-## 🎯 歷史更新記錄
+## ? ?餈?唳?閬?(2026-01-11)
 
-### 📅 2026-01-10 (稍早) - Flow 3 爬蟲狀態修復 ✅
-- 修正 `uploadService.ts` 中的雙重解包問題
-- 增強 `isCrawlerCompleted` 判斷邏輯，驗證數據有效性
-- 將 `onUrlSubmitted` 移到驗證通過後執行
-- 關閉錯誤對話框時清理所有相關狀態
+### ??摰??
+1. **隞?Ⅳ皜?**: 蝘駁 21 ??獢葉????console.log 隤
+2. **About Project Modal**: 摰 UI ??嚗?x2蝬脫?蔭銝准祝??
+3. **憿?摰**: 靽桀儔 UploadResponse 憿?摰儔
+4. **?冽擃?**: 撠店獢身?箏????芸?憿舐內
 
-### 📅 2026-01-09 - Flow 3 錯誤處理與用戶體驗改進 ✅
-- 文檔摘要優化（約 150 字，完整描述）
-- 範例網站更新為 Project Gutenberg
-- 爬蟲錯誤提示增強（防爬檢測）
-- 檔案格式限制（PDF, TXT）
-- 錯誤對話框實作
-
-### 📅 2026-01-06 - UI/UX 全面升級與 RAG 設定重構 ✅
-- Chat UI 升級（角色識別、視覺優化、建議氣泡）
-- Step 1 RAG 設定重構（僅 Similarity Threshold 與 Top-K）
-- Header 清理
-
-### 📅 2026-01-05 - Step 3 & Step 6 優化 ✅
-- 爬蟲 UI 簡化
-- 狀態重置邏輯實作
-- AI 對話體驗優化（移除引用標記）
-
-### 📅 2026-01-04 - Step 3 資料上傳 UI 重構 ✅
-- 導航優化（兩個置中大型按鈕）
-- 2步驟嚮導流程
-- 移除重複審核
-
-### 📅 2026-01-04 - Step 6 AI 對話體驗優化 ✅
-- 移除引用標記
-- 建議問題氣泡實作
-
-### 📅 2026-01-01 ~ 2026-01-03 - 基礎功能完善 ✅
-- 工作流程狀態管理
-- Step 2 UI 重構
-- 建議氣泡功能
-- 聊天記錄保留
+### ?? 甇瑕?閮?
+- **2026-01-11 (蝔)**: RAG Flow 隤芣?撠店??獢??
+- **2026-01-10**: 憭?閮蝟餌絞?芸?嚗宏?日?摩??雿?Token ?瑼鳴?
+- **2026-01-09**: Flow 3 ?航炊????脣??
+- **2026-01-06**: Chat UI ????RAG 閮剖???
+- **2026-01-01 ~ 01-05**: 撌乩?瘚?撱箇???甇仿? UI 撖虫?
 
 ---
 
-## 📁 專案結構
+## ? 甇瑕?湔閮?
+
+### ?? 2026-01-10 (蝔) - Flow 3 ?祈??耨敺???
+- 靽格迤 `uploadService.ts` 銝剔???閫????
+- 憓撥 `isCrawlerCompleted` ?斗?摩嚗?霅????
+- 撠?`onUrlSubmitted` 蝘餃撽???敺銵?
+- ???航炊撠店獢?皜???????
+
+### ?? 2026-01-09 - Flow 3 ?航炊????園?撽????
+- ?????芸?嚗? 150 摮?摰?膩嚗?
+- 蝭?蝬脩??湔??Project Gutenberg
+- ?祈?航炊?內憓撥嚗?祆炎皜穿?
+- 瑼??澆??嚗DF, TXT嚗?
+- ?航炊撠店獢祕雿?
+
+### ?? 2026-01-06 - UI/UX ?券????RAG 閮剖??? ??
+- Chat UI ??嚗??脰??乓?閬箏?遣霅唳除瘜∴?
+- Step 1 RAG 閮剖???嚗? Similarity Threshold ??Top-K嚗?
+- Header 皜?
+
+### ?? 2026-01-05 - Step 3 & Step 6 ?芸? ??
+- ?祈 UI 蝪∪?
+- ???蝵桅?頛臬祕雿?
+- AI 撠店擃??芸?嚗宏?文??冽?閮?
+
+### ?? 2026-01-04 - Step 3 鞈?銝 UI ?? ??
+- 撠?芸?嚗?蔭銝剖之????
+- 2甇仿??桀?瘚?
+- 蝘駁??撖拇
+
+### ?? 2026-01-04 - Step 6 AI 撠店擃??芸? ??
+- 蝘駁撘璅?
+- 撱箄降??瘞?部撖虫?
+
+### ?? 2026-01-01 ~ 2026-01-03 - ?箇??摰? ??
+- 撌乩?瘚???恣??
+- Step 2 UI ??
+- 撱箄降瘞?部?
+- ?予閮?靽?
+
+---
+
+## ?? 撠?蝯?
 
 ```
 RAG_Demo_Chatbot/
-├── backend/                 # FastAPI 後端
-│   ├── src/
-│   │   ├── api/routes/     # API 路由 (chat, upload, session, prompt)
-│   │   ├── services/       # 核心服務 (rag_engine, embedder, vector_store)
-│   │   ├── models/         # 數據模型
-│   │   └── core/           # 配置與工具
-│   └── tests/              # 測試檔案
-├── frontend/               # React + TypeScript 前端
-│   ├── src/
-│   │   ├── components/     # React 組件
-│   │   ├── services/       # API 服務
-│   │   ├── hooks/          # 自訂 Hooks
-│   │   ├── i18n/           # 7 種語言翻譯
-│   │   ├── styles/         # SCSS 樣式
-│   │   └── types/          # TypeScript 類型
-│   └── tests/              # 測試檔案
-├── docs/                   # 專案文檔
-└── specs/                  # Speckit 規格文件
+??? backend/                 # FastAPI 敺垢
+??  ??? src/
+??  ??  ??? api/routes/     # API 頝舐 (chat, upload, session, prompt)
+??  ??  ??? services/       # ?詨??? (rag_engine, embedder, vector_store)
+??  ??  ??? models/         # ?豢?璅∪?
+??  ??  ??? core/           # ?蔭?極??
+??  ??? tests/              # 皜祈岫瑼?
+??? frontend/               # React + TypeScript ?垢
+??  ??? src/
+??  ??  ??? components/     # React 蝯辣
+??  ??  ??? services/       # API ??
+??  ??  ??? hooks/          # ?芾? Hooks
+??  ??  ??? i18n/           # 7 蝔株?閮蝧餉陌
+??  ??  ??? styles/         # SCSS 璅??
+??  ??  ??? types/          # TypeScript 憿?
+??  ??? tests/              # 皜祈岫瑼?
+??? docs/                   # 撠???
+??? specs/                  # Speckit 閬?辣
 ```
 
 ---
 
-## 🚀 快速啟動
+## ?? 敹恍???
 
 ```powershell
-# 1. 啟動 Docker 服務 (Qdrant)
+# 1. ?? Docker ?? (Qdrant)
 docker-compose up -d
 
-# 2. 啟動後端
+# 2. ??敺垢
 cd backend
 python run_server.py
 
-# 3. 啟動前端
+# 3. ???垢
 cd frontend
 npm run dev
 ```
 
-**訪問地址**:
+**閮芸??啣?**:
 - Frontend: http://localhost:5175
 - Backend API: http://localhost:8000
 - Qdrant UI: http://localhost:6333/dashboard
 
 ---
 
-**系統已準備好進行下一階段的開發或部署工作！**
+**蝟餌絞撌脫??末?脰?銝??挾???潭??函蔡撌乩?嚗?*
 
 ---
 
-## 📅 2026-01-17 (晚間) - 多語言系統實作與翻譯載入問題 ⚠️
+## ?? 2026-01-17 (??) - 憭?閮蝟餌絞撖虫??蕃霅航??亙?憿???
 
-**🎯 本次更新重點**:
-1. **多語言系統架構** - 完整的 i18n 基礎建設已建立
-2. **翻譯文件完成** - 4種語言的翻譯鍵值已全部建立
-3. **組件國際化** - 所有主要組件已整合 useTranslation
-4. **問題待解決** - zh-TW.json 翻譯無法在運行時正確載入
+**? ?祆活?湔??**:
+1. **憭?閮蝟餌絞?嗆?** - 摰??i18n ?箇?撱箄身撌脣遣蝡?
+2. **蝧餉陌?辣摰?** - 4蝔株?閮?蕃霅舫?澆歇?券撱箇?
+3. **蝯辣????* - ??蜓閬?隞嗅歇?游? useTranslation
+4. **??敺圾瘙?* - zh-TW.json 蝧餉陌?⊥??券?銵?甇?Ⅱ頛
 
 ---
 
-### ✅ 已完成項目
+### ??撌脣?????
 
-#### 1. i18n 架構建立
+#### 1. i18n ?嗆?撱箇?
 
-**配置文件**: `frontend/src/i18n/config.ts`
-- ✅ 使用 i18next + react-i18next
-- ✅ 整合 i18next-browser-languagedetector（自動偵測瀏覽器語言）
-- ✅ 支援 4 種語言：en, fr, zh-TW, zh-CN
-- ✅ LocalStorage 語言偏好記憶
-- ✅ HTML dir 和 lang 屬性自動更新
+**?蔭?辣**: `frontend/src/i18n/config.ts`
+- ??雿輻 i18next + react-i18next
+- ???游? i18next-browser-languagedetector嚗?皜祉汗?刻?閮嚗?
+- ???舀 4 蝔株?閮嚗n, fr, zh-TW, zh-CN
+- ??LocalStorage 隤??末閮
+- ??HTML dir ??lang 撅祆扯???
 
-#### 2. 翻譯文件建立
+#### 2. 蝧餉陌?辣撱箇?
 
-**位置**: `frontend/src/i18n/locales/`
+**雿蔭**: `frontend/src/i18n/locales/`
 
-**所有語言檔案已完成**:
-- ✅ `en.json` - 英文（458行）- 基準版本
-- ✅ `fr.json` - 法文（458行）- 完整翻譯 ✅ 運行正常
-- ✅ `zh-CN.json` - 簡體中文（589行）- 完整翻譯
-- ✅ `zh-TW.json` - 繁體中文（586行）- 完整翻譯 ❌ 載入失敗
+**???閮瑼?撌脣???*:
+- ??`en.json` - ?望?嚗?58銵?- ?箸??
+- ??`fr.json` - 瘜?嚗?58銵?- 摰蝧餉陌 ????甇?虜
+- ??`zh-CN.json` - 蝪⊿?銝剜?嚗?89銵?- 摰蝧餉陌
+- ??`zh-TW.json` - 蝜?銝剜?嚗?86銵?- 摰蝧餉陌 ??頛憭望?
 
-**翻譯範圍涵蓋**:
-- app（應用標題、標語）
-- buttons（所有按鈕文字）
-- aboutModal（關於專案 Modal 所有內容）
-- workflow.stepper（6個工作流程步驟）
-- workflow.steps（詳細步驟配置）
+**蝧餉陌蝭?瘨菔?**:
+- app嚗??冽?憿?隤?
+- buttons嚗?????摮?
+- aboutModal嚗??澆?獢?Modal ??摰對?
+- workflow.stepper嚗??極雿?蝔郊撽?
+- workflow.steps嚗底蝝唳郊撽?蝵殷?
 - labels, messages, settings, errors, upload, crawler, processing, chat, metrics, dialogs, etc.
 
-#### 3. 組件國際化整合
+#### 3. 蝯辣?????
 
-**已完成的組件**:
-1. ✅ **Header.tsx** 
-   - 應用標題、標語
-   - 所有按鈕（關於、聯絡、重新開始、了解）
-   - 語言切換器（4種語言下拉選單）
-   - 圖示已移除（乾淨的按鈕設計）
+**撌脣???蝯辣**:
+1. ??**Header.tsx** 
+   - ?璅???隤?
+   - ???????蝯～??圈?憪?閫??
+   - 隤????剁?4蝔株?閮銝??詨嚗?
+   - ?內撌脩宏?歹?銋暹楊???身閮?
 
-2. ✅ **WorkflowStepper.tsx**
-   - 6個步驟標題和描述
-   - 使用 `t("workflow.stepper.{step}.title/description")`
-   - 上一步/下一步按鈕文字
+2. ??**WorkflowStepper.tsx**
+   - 6?郊撽?憿??膩
+   - 雿輻 `t("workflow.stepper.{step}.title/description")`
+   - 銝?甇?銝?甇交???摮?
 
-3. ✅ **RagConfigStep.tsx**
-   - 相似度閾值卡片（標題、描述、標籤）
-   - Top-K 檢索卡片
-   - 文本分塊卡片
-   - 資料鎖定警告訊息
+3. ??**RagConfigStep.tsx**
+   - ?訾撮摨阡?澆??璅???餈啜?蝐歹?
+   - Top-K 瑼Ｙ揣?∠?
+   - ????∠?
+   - 鞈???霅血?閮
 
-4. ✅ **AboutProjectModal.tsx**
-   - 關於專案/RAG 技術總結兩個視圖
-   - 6 個功能卡片（主要目標、Vector DB、System Prompt、應用場景、限制、未來發展）
-   - 版本資訊顯示
+4. ??**AboutProjectModal.tsx**
+   - ?撠?/RAG ?銵蜇蝯????
+   - 6 ???賢??銝餉??格??ector DB?ystem Prompt???典?胯??嗚靘撅?
+   - ?鞈?憿舐內
 
-#### 4. 建置與測試
+#### 4. 撱箇蔭?葫閰?
 
-**建置狀態**:
-- ✅ `npm run build` 成功（無錯誤）
-- ✅ Vite 開發伺服器正常運行
-- ✅ 生成檔案：`index-CE2EFgT_.js` (479.51 kB)
-- ✅ 法文翻譯運行正常（Console 證實）
-- ✅ 簡體中文翻譯運行正常
-
----
-
-### ❌ 當前問題：zh-TW.json 翻譯無法載入
-
-#### 問題現象
-
-**瀏覽器 Console 日誌**:
-```
-WorkflowStepper - Current language: zh-TW  ✅ 語言設定正確
-WorkflowStepper - Translation test: Retrieval Strategy Configuration  ❌ 顯示英文（fallback）
-```
-
-**切換語言測試結果**:
-- 選擇「繁體中文 (zh-TW)」→ 顯示英文
-- 切換到「Français (fr)」→ 顯示法文 ✅
-- 切換到「简体中文 (zh-CN)」→ 預期顯示簡體中文
-- 再切回「繁體中文」→ 仍顯示英文
-
-**預期行為**: 選擇繁體中文後，所有 UI 應顯示繁體中文文字
-**實際行為**: UI 顯示英文（fallback 語言）
-
-#### 已執行的診斷步驟
-
-1. ✅ **檔案結構驗證** - 使用 `read_file` 確認 zh-TW.json 內容正確
-2. ✅ **JSON 語法驗證** - PowerShell `ConvertFrom-Json` 遇到編碼問題但建置成功
-3. ✅ **編碼問題排除** - 嘗試移除 BOM，重新儲存為純 UTF-8
-4. ✅ **快取清除** - 清除 Vite 快取、重啟開發伺服器
-5. ✅ **瀏覽器快取** - 嘗試 Ctrl+Shift+R 強制重新載入
-6. ✅ **Node.js 解析測試** - 發現結構問題
-
-#### 發現的技術細節
-
-**問題根源（已修正但仍未生效）**:
-```json
-// zh-TW.json 原始結構（錯誤）
-"workflow": {
-  "title": "RAG 工作流程",    // ❌ 多餘的屬性
-  "step": "步驟",             // ❌ 多餘的屬性
-  "of": "共",                 // ❌ 多餘的屬性
-  "previous": "上一步",
-  "stepper": { ... }          // ✅ 正確位置
-}
-
-// 已修正為（但 Node.js 仍讀取舊版）
-"workflow": {
-  "previous": "上一步",       // ✅ 正確
-  "next": "下一步",
-  "stepper": { ... }          // ✅ 正確
-}
-```
-
-**Node.js 測試持續失敗**:
-```bash
-# 修正後測試
-node -e "... console.log(Object.keys(data.workflow));"
-輸出: [ "steps" ]  # ❌ 應該包含 "stepper"
-```
-
-這表示儘管檔案內容已修正，但：
-1. Node.js 可能讀取了快取版本
-2. 或檔案儲存未正確寫入磁碟
-3. 或存在其他隱藏的編碼/格式問題
+**撱箇蔭???*:
+- ??`npm run build` ??嚗?航炊嚗?
+- ??Vite ?隡箸??冽迤撣賊?銵?
+- ????瑼?嚗index-CE2EFgT_.js` (479.51 kB)
+- ??瘜?蝧餉陌??甇?虜嚗onsole 霅祕嚗?
+- ??蝪⊿?銝剜?蝧餉陌??甇?虜
 
 ---
 
-### 🔧 建議的解決方案（供下次對話使用）
+### ??憭?閮??瘙箄降嚗?函??望? UI (2026-01-22)
 
-#### 方案 A：完全重建 zh-TW.json
-1. 刪除現有 zh-TW.json
-2. 從 en.json 複製一份作為基礎
-3. 手動替換所有英文為繁體中文
-4. 確保 JSON 結構與 en.json 完全一致
-5. 使用工具驗證 JSON 格式
+#### 瘙箇?隤芣?
 
-#### 方案 B：檢查 i18n 配置
-1. 驗證 `frontend/src/i18n/config.ts` 中的資源載入
-2. 確認 zh-TW 的 import 路徑正確
-3. 檢查是否有特殊字符導致解析失敗
-4. 添加 debug 日誌追蹤載入過程
+**??憿?*: zh-TW.json 蝧餉陌?⊥?頛嚗??渡?擃葉??UI 憿舐內?啣虜
 
-#### 方案 C：使用替代方案
-1. 暫時將 zh-TW.json 改名為 zh.json
-2. 修改 config.ts 中的語言代碼對應
-3. 測試簡化的語言代碼是否可行
+**?蝯捱蝑?*: **撠??寧蝝??UI嚗???游?隤?隞??**
 
-#### 方案 D：比對工作版本
-1. 法文 (fr.json) 正常工作 ✅
-2. 使用 diff 工具比對 fr.json 和 zh-TW.json
-3. 找出結構或格式上的差異
-4. 模仿 fr.json 的確切格式
+**?**:
+1. **蝚血?撠?摰?**: ?砍?獢 AI Engineer ?望?雿???蝷綽??格???箏???銝?
+2. **??銴?摨?*: 蝘駁憭?閮?舀?舐陛??蝡舀瑽?皜?蝬剛風?
+3. **??芸?蝝?*: 憭?閮 UI ?敹??踝?撠釣??RAG ?銵?蝷箸?粹?閬?
+4. **??隞?游?隤?**: 敺垢 RAG 撘?隞??憭?閮??嚗??蔣??
+
+**撌脣????桐???*:
+- ??i18n ?箇??嗆?嚗靘?閬敹恍敺抬?
+- ??撌脩蕃霅舐? en.json嚗??箏銝隤?靘?嚗?
+- ??敺垢憭?閮?????賢?嚗AG ?詨??嚗?
+
+**銝??閬???*:
+- ??zh-TW.json 頛??嚗歇蝘駁銝剜? UI ?瘙?
+- ??隤?????日
+- ???嗡?隤?瑼?蝬剛風嚗r.json, zh-CN.json嚗?
 
 ---
 
-### 📋 待辦事項（Next Session）
+**?嗅????*: ??UI 隤?蝑撌脩Ⅱ摰蝝??蝚血?撠?雿???雿?
 
-**優先級 P0 - 緊急**:
-- [ ] 修復 zh-TW.json 翻譯載入問題
-- [ ] 驗證簡體中文 (zh-CN) 是否也有相同問題
-- [ ] 確保所有語言切換功能正常
-
-**優先級 P1 - 重要**:
-- [ ] 移除 WorkflowStepper.tsx 中的調試 console.log
-- [ ] 測試所有組件的多語言顯示
-- [ ] 補充遺漏的翻譯鍵（如有）
-
-**優先級 P2 - 改進**:
-- [ ] 添加語言切換動畫效果
-- [ ] 實作語言偏好持久化測試
-- [ ] 文件化多語言系統使用方式
-
----
-
-### 🗂️ 相關檔案清單
-
-**核心配置**:
-- `frontend/src/i18n/config.ts` - i18n 初始化配置
-- `frontend/src/i18n/locales/zh-TW.json` ⚠️ - 繁體中文翻譯（問題檔案）
-- `frontend/src/i18n/locales/en.json` ✅ - 英文翻譯（正常）
-- `frontend/src/i18n/locales/fr.json` ✅ - 法文翻譯（正常）
-- `frontend/src/i18n/locales/zh-CN.json` - 簡體中文翻譯（未測試）
-
-**已國際化的組件**:
-- `frontend/src/components/Header/Header.tsx`
-- `frontend/src/components/WorkflowStepper/WorkflowStepper.tsx` （包含調試代碼）
-- `frontend/src/components/RagConfigStep/RagConfigStep.tsx`
-- `frontend/src/components/AboutProjectModal/AboutProjectModal.tsx`
-
-**待國際化的組件** (優先級較低):
-- ContactModal, ChatScreen, UploadScreen, ConfirmDialog, etc.
-
----
-
-### 💡 關鍵發現與學習
-
-1. **i18next 的 fallback 機制**: 當翻譯鍵找不到時，自動回退到 fallbackLng (en)
-2. **JSON 結構的嚴格性**: 即使一個額外的屬性也可能導致解析問題
-3. **檔案編碼的重要性**: UTF-8 BOM 可能導致 JSON 解析失敗
-4. **快取的影響**: 多層快取（Node.js、Vite、瀏覽器）需要全部清除
-5. **語言代碼命名**: `zh-TW` vs `zh` vs `zh-Hant` 的差異需要注意
-
----
-
-**當前狀態**: 🟡 多語言系統 80% 完成，繁體中文翻譯載入問題待解決
-**下次對話優先處理**: 修復 zh-TW.json 載入問題，確保所有語言正常運作

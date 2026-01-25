@@ -29,84 +29,44 @@ class VectorStore:
         self._initialize_client()
     
     def _initialize_client(self):
-        """Initialize Qdrant client based on mode (embedded/docker/cloud)
+        """Initialize Qdrant client in cloud mode only
         
-        IMPORTANT: Embedded mode on Windows may experience file locking issues.
-        For development and production, use Docker mode instead.
+        ARCHITECTURE DECISION (2026-01-22):
+        - ONLY cloud mode is supported for all environments (dev/test/prod)
+        - Embedded mode removed: Windows file locking issues, no persistence
+        - Docker mode removed: Unnecessary complexity, local dependency
         
         T100: Enhanced error handling for Qdrant connection issues
         """
         try:
-            if settings.qdrant_mode == "embedded":
-                # Embedded mode - file-based storage
-                # WARNING: On Windows, file locking can prevent restarting the server
-                # Use Docker mode for reliable operation
-                import platform
-                if platform.system() == "Windows":
-                    logger.warning(
-                        "Embedded mode on Windows may have file locking issues. "
-                        "Consider using QDRANT_MODE=docker for better reliability."
-                    )
-                    # Use temporary directory to avoid lock conflicts
-                    import tempfile
-                    import uuid
-                    qdrant_path = os.path.join(tempfile.gettempdir(), f"qdrant_{uuid.uuid4().hex[:8]}")
-                    logger.warning(f"Using temporary path (data will not persist): {qdrant_path}")
-                else:
-                    qdrant_path = "./qdrant_data"
-                
-                self.client = QdrantClient(path=qdrant_path)
-                logger.info(f"Qdrant client initialized in embedded mode: {qdrant_path}")
-                
-            elif settings.qdrant_mode == "docker":
-                # Docker mode - connect to local Qdrant container (T100: with error handling)
-                try:
-                    self.client = QdrantClient(
-                        host=settings.qdrant_host,
-                        port=settings.qdrant_port,
-                        timeout=5.0  # 5-second timeout for connection
-                    )
-                    # Test connection with health check
-                    logger.info(f"Testing connection to Qdrant ({settings.qdrant_host}:{settings.qdrant_port})")
-                    self.client.get_collections()  # Simple health check
-                    logger.info(f"Qdrant client initialized in docker mode ({settings.qdrant_host}:{settings.qdrant_port})")
-                    
-                except (ConnectionError, TimeoutError, UnexpectedResponse) as e:
-                    logger.error(
-                        f"Failed to connect to Qdrant service at {settings.qdrant_host}:{settings.qdrant_port}: {e}. "
-                        "Ensure Qdrant container is running: docker-compose up -d qdrant"
-                    )
-                    raise Exception(
-                        f"Cannot connect to Qdrant vector database. Please ensure Docker container is running."
-                    ) from e
-                
-            elif settings.qdrant_mode == "cloud":
-                # Cloud mode - Qdrant Cloud (T100: with error handling)
-                if not settings.qdrant_url or not settings.qdrant_api_key:
-                    raise ValueError("Qdrant cloud mode requires QDRANT_URL and QDRANT_API_KEY")
-                
-                try:
-                    self.client = QdrantClient(
-                        url=settings.qdrant_url,
-                        api_key=settings.qdrant_api_key,
-                        timeout=10.0  # 10-second timeout for cloud
-                    )
-                    # Test connection with health check
-                    logger.info(f"Testing connection to Qdrant Cloud ({settings.qdrant_url})")
-                    self.client.get_collections()  # Simple health check
-                    logger.info(f"Qdrant client initialized in cloud mode ({settings.qdrant_url})")
-                    
-                except (ConnectionError, TimeoutError, UnexpectedResponse) as e:
-                    logger.error(
-                        f"Failed to connect to Qdrant Cloud at {settings.qdrant_url}: {e}. "
-                        "Check QDRANT_URL and QDRANT_API_KEY settings."
-                    )
-                    raise Exception(
-                        f"無法連接到 Qdrant Cloud 服務。請檢查 API 密鑰和 URL。"
-                    ) from e
+            # Cloud mode - Qdrant Cloud (ONLY supported mode)
+            if not settings.qdrant_url or not settings.qdrant_api_key:
+                raise ValueError(
+                    "Qdrant Cloud configuration missing. "
+                    "Please set QDRANT_URL and QDRANT_API_KEY in .env file. "
+                    "Example: QDRANT_URL=https://xxx.cloud.qdrant.io:6333"
+                )
             
-            else:
-                raise ValueError(f"Invalid Qdrant mode: {settings.qdrant_mode}")
+            try:
+                self.client = QdrantClient(
+                    url=settings.qdrant_url,
+                    api_key=settings.qdrant_api_key,
+                    timeout=10.0  # 10-second timeout for cloud
+                )
+                # Test connection with health check
+                logger.info(f"Testing connection to Qdrant Cloud ({settings.qdrant_url})")
+                self.client.get_collections()  # Simple health check
+                logger.info(f"✅ Qdrant Cloud connected successfully ({settings.qdrant_url})")
+                
+            except (ConnectionError, TimeoutError, UnexpectedResponse) as e:
+                logger.error(
+                    f"❌ Failed to connect to Qdrant Cloud at {settings.qdrant_url}: {e}. "
+                    "Please check: 1) QDRANT_URL is correct, 2) QDRANT_API_KEY is valid, "
+                    "3) Your internet connection is working."
+                )
+                raise Exception(
+                    f"Cannot connect to Qdrant Cloud. Please verify your QDRANT_URL and QDRANT_API_KEY."
+                ) from e
                 
         except Exception as e:
             logger.error(f"Failed to initialize Qdrant client: {e}")
@@ -301,12 +261,13 @@ class VectorStore:
                 
             logger.info(f"Searching in '{collection_name}' with threshold={score_threshold}, limit={limit}")
             
-            results = self.client.search(
+            # 🔥 FIX: Qdrant Cloud uses query() method, not search()
+            results = self.client.query_points(
                 collection_name=collection_name,
-                query_vector=query_vector,
+                query=query_vector,
                 limit=limit,
                 score_threshold=score_threshold
-            )
+            ).points
             
             logger.info(f"Qdrant returned {len(results)} results")
             if results:

@@ -159,7 +159,7 @@ def get_error_response(
     )
 
 
-# HTTP 狀態碼映射
+# HTTP status code mapping
 ERROR_STATUS_CODES = {
     # 400 Bad Request
     ErrorCode.INVALID_URL: 400,

@@ -75,12 +75,15 @@ export const moderateMultipleContent = async (
         source_reference: item.source_reference
       });
     } catch (error) {
-      // If a single item fails, mark as blocked
+      // 🔥 FIX: API errors should NOT block content
+      // Only actual harmful content detection should block
+      // This prevents legitimate content (like Alice in Wonderland) from being blocked due to API issues
+      console.warn(`Moderation API failed for ${item.source_reference}, defaulting to APPROVED:`, error);
       results.push({
-        status: 'BLOCKED',
-        is_approved: false,
-        blocked_categories: ['MODERATION_ERROR'],
-        reason: `Moderation process failed: ${error}`,
+        status: 'APPROVED',
+        is_approved: true,
+        blocked_categories: [],
+        reason: undefined,
         source_reference: item.source_reference
       });
     }

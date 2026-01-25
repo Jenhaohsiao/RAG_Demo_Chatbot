@@ -85,7 +85,7 @@ app = FastAPI(
     docs_url="/api/docs",
     redoc_url="/api/redoc", 
     openapi_url="/api/openapi.json",
-    # 添加 Swagger UI 自定義設定
+    # Add custom Swagger UI settings
     swagger_ui_parameters={
         "deepLinking": True,
         "displayRequestDuration": True,
@@ -241,17 +241,17 @@ async def health_check():
     }
 
 
-# 測試用的簡單文檔頁面
+# Simple documentation page for testing
 @app.get("/test-docs", include_in_schema=False)
 async def test_docs():
-    """簡單的測試頁面來驗證靜態內容載入"""
+    """Simple test page to verify static content loading"""
     from fastapi.responses import HTMLResponse
     
     html_content = """
     <!DOCTYPE html>
     <html>
     <head>
-        <title>測試頁面</title>
+        <title>Test Page</title>
         <style>
             body { font-family: Arial, sans-serif; margin: 40px; }
             .container { max-width: 800px; margin: 0 auto; }
@@ -260,23 +260,23 @@ async def test_docs():
     </head>
     <body>
         <div class="container">
-            <h1>FastAPI 測試頁面</h1>
-            <p class="success">✓ FastAPI 正在正常運行</p>
-            <p>如果您看到這個頁面，說明：</p>
+            <h1>FastAPI Test Page</h1>
+            <p class="success">✓ FastAPI is running normally</p>
+            <p>If you see this page, it means:</p>
             <ul>
-                <li>FastAPI 應用程序運行正常</li>
-                <li>靜態 HTML 內容可以載入</li>
-                <li>CSS 樣式可以應用</li>
+                <li>FastAPI application is running normally</li>
+                <li>Static HTML content can be loaded</li>
+                <li>CSS styles can be applied</li>
             </ul>
-            <p>API 文檔應該在 <a href="/api/docs" target="_blank">/api/docs</a></p>
-            <p>OpenAPI 規格在 <a href="/api/openapi.json" target="_blank">/api/openapi.json</a></p>
+            <p>API documentation is at <a href="/api/docs" target="_blank">/api/docs</a></p>
+            <p>OpenAPI specification is at <a href="/api/openapi.json" target="_blank">/api/openapi.json</a></p>
             
             <script>
-                console.log('JavaScript 正常運行');
+                console.log('JavaScript running normally');
                 document.addEventListener('DOMContentLoaded', function() {
                     const now = new Date();
                     const timeDiv = document.createElement('div');
-                    timeDiv.innerHTML = '<strong>頁面載入時間: ' + now.toLocaleString() + '</strong>';
+                    timeDiv.innerHTML = '<strong>Page load time: ' + now.toLocaleString() + '</strong>';
                     document.body.appendChild(timeDiv);
                 });
             </script>

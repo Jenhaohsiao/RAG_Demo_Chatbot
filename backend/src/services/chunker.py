@@ -18,13 +18,13 @@ MIN_CHUNK_LENGTH = 50        # Minimum chunk length (filter out too short chunks
 @dataclass
 class TextChunk:
     """
-    文本塊資料結構
+    Text chunk data structure
     
     Attributes:
-        text: 塊的文本內容
-        chunk_index: 塊的索引（從 0 開始）
-        char_count: 字元數
-        start_char: 在原始文本中的起始位置（近似）
+        text: The text content of the chunk
+        chunk_index: The index of the chunk (starting from 0)
+        char_count: Character count
+        start_char: Start position in the original text (approximate)
     """
     text: str
     chunk_index: int
@@ -33,19 +33,19 @@ class TextChunk:
     
     @property
     def estimated_tokens(self) -> int:
-        """估算 token 數量（粗略估計：1 token ≈ 4 字元）"""
+        """Estimate token count (rough estimate: 1 token ≈ 4 characters)"""
         return self.char_count // 4
 
 
 class ChunkerError(Exception):
-    """文本分塊過程中發生的錯誤"""
+    """Error that occurs during the text chunking process"""
     pass
 
 
 class TextChunker:
     """
-    文本分塊服務
-    使用遞歸字元分割策略進行智能分割
+    Text chunking service
+    Uses recursive character splitting strategy for intelligent segmentation
     """
     
     def __init__(
@@ -54,16 +54,16 @@ class TextChunker:
         chunk_overlap: int = CHUNK_OVERLAP_CHARS
     ):
         """
-        初始化分塊器
+        Initialize the chunker
         
         Args:
-            chunk_size: 每個塊的目標大小（字元數）
-            chunk_overlap: 塊之間的重疊大小（字元數）
+            chunk_size: Target size of each chunk (character count)
+            chunk_overlap: Overlap size between chunks (character count)
         """
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         
-        # 分隔符優先順序：段落 > 換行 > 句號 > 空格 > 字元
+        # Separator priority: paragraph > newline > period > space > character
         self.separators = ["\n\n", "\n", ". ", "。 ", "! ", "！ ", "? ", "？ ", " ", ""]
         
         logger.info(
@@ -72,12 +72,12 @@ class TextChunker:
         )
     
     def _split_text_with_separator(self, text: str, separator: str) -> List[str]:
-        """使用指定分隔符分割文本"""
+        """Split text using the specified separator"""
         if not separator:
             return list(text)
         
         parts = text.split(separator)
-        # 保留分隔符
+        # Preserve separator
         result = []
         for i, part in enumerate(parts):
             if i < len(parts) - 1:
@@ -87,21 +87,21 @@ class TextChunker:
         return [p for p in result if p]
     
     def _recursive_split(self, text: str, separators: List[str]) -> List[str]:
-        """遞歸分割文本"""
+        """Recursively split text"""
         if not text:
             return []
         
         if not separators:
-            # 沒有分隔符了，直接按字元分割
+            # No more separators, split by character directly
             return [text[i:i+self.chunk_size] for i in range(0, len(text), self.chunk_size)]
         
         separator = separators[0]
         remaining_separators = separators[1:]
         
-        # 使用當前分隔符分割
+        # Split using current separator
         splits = self._split_text_with_separator(text, separator)
         
-        # 合併小片段
+        # Merge small fragments
         merged_splits = []
         current = ""
         
@@ -116,7 +116,7 @@ class TextChunker:
         if current:
             merged_splits.append(current)
         
-        # 如果有片段還是太大，用下一個分隔符繼續分割
+        # If fragments are still too large, continue splitting with next separator
         final_splits = []
         for split in merged_splits:
             if len(split) > self.chunk_size:
@@ -127,7 +127,7 @@ class TextChunker:
         return final_splits
     
     def _create_chunks_with_overlap(self, splits: List[str]) -> List[str]:
-        """為分割後的文本添加重疊"""
+        """Add overlap to the split text"""
         if not splits:
             return []
         
@@ -141,7 +141,7 @@ class TextChunker:
                 current_chunk += split
             else:
                 chunks.append(current_chunk)
-                # 添加重疊：從當前塊末尾取 overlap 長度的文本
+                # Add overlap: take text of overlap length from end of current chunk
                 overlap_text = current_chunk[-self.chunk_overlap:] if len(current_chunk) > self.chunk_overlap else current_chunk
                 current_chunk = overlap_text + split
         
@@ -152,17 +152,17 @@ class TextChunker:
     
     def chunk_text(self, text: str, source_reference: str = "unknown") -> List[TextChunk]:
         """
-        將文本分割成語意塊
+        Split text into semantic chunks
         
         Args:
-            text: 要分割的文本
-            source_reference: 來源參考（檔案名稱或 URL）用於日誌記錄
+            text: The text to split
+            source_reference: Source reference (filename or URL) for logging
             
         Returns:
-            List[TextChunk]: 文本塊列表
+            List[TextChunk]: List of text chunks
             
         Raises:
-            ChunkerError: 如果分塊失敗
+            ChunkerError: If chunking fails
         """
         if not text or not text.strip():
             logger.warning(f"Empty text provided for chunking from '{source_reference}'")
@@ -175,25 +175,25 @@ class TextChunker:
                 f"({len(text)} chars, ~{len(text)//4} tokens)"
             )
             
-            # 使用遞歸分割策略
+            # Use recursive splitting strategy
             splits = self._recursive_split(text, self.separators)
             raw_chunks = self._create_chunks_with_overlap(splits)
             
-            # 過濾掉過短的塊並創建 TextChunk 物件
+            # Filter out too short chunks and create TextChunk objects
             chunks = []
             cumulative_chars = 0
             
             for idx, chunk_text in enumerate(raw_chunks):
                 chunk_text = chunk_text.strip()
                 
-                # 跳過過短的塊
+                # Skip chunks that are too short
                 if len(chunk_text) < MIN_CHUNK_LENGTH:
                     logger.debug(f"Skipping short chunk {idx}: {len(chunk_text)} chars")
                     continue
                 
                 chunk = TextChunk(
                     text=chunk_text,
-                    chunk_index=len(chunks),  # 重新索引（排除跳過的塊）
+                    chunk_index=len(chunks),  # Re-index (excluding skipped chunks)
                     char_count=len(chunk_text),
                     start_char=cumulative_chars
                 )
@@ -206,7 +206,7 @@ class TextChunker:
                     f"(~{chunk.estimated_tokens} tokens)"
                 )
             
-            # 驗證結果
+            # Validate results
             if not chunks:
                 logger.warning(
                     f"No valid chunks generated from '{source_reference}' "
@@ -231,13 +231,13 @@ class TextChunker:
     
     def get_chunk_statistics(self, chunks: List[TextChunk]) -> dict:
         """
-        獲取分塊統計資訊
+        Get chunk statistics
         
         Args:
-            chunks: 文本塊列表
+            chunks: List of text chunks
             
         Returns:
-            dict: 統計資訊（塊數、總字元數、平均大小等）
+            dict: Statistics (chunk count, total characters, average size, etc.)
         """
         if not chunks:
             return {
@@ -261,7 +261,7 @@ class TextChunker:
         }
 
 
-# 便利函數：快速分塊
+# Convenience function: quick chunking
 def chunk_text(
     text: str,
     source_reference: str = "unknown",
@@ -269,19 +269,19 @@ def chunk_text(
     chunk_overlap: int = CHUNK_OVERLAP_CHARS
 ) -> List[TextChunk]:
     """
-    便利函數：快速分塊文本
+    Convenience function: quickly chunk text
     
     Args:
-        text: 要分割的文本
-        source_reference: 來源參考
-        chunk_size: 塊大小（字元）
-        chunk_overlap: 重疊大小（字元）
+        text: The text to split
+        source_reference: Source reference
+        chunk_size: Chunk size (characters)
+        chunk_overlap: Overlap size (characters)
         
     Returns:
-        List[TextChunk]: 文本塊列表
+        List[TextChunk]: List of text chunks
         
     Raises:
-        ChunkerError: 如果分塊失敗
+        ChunkerError: If chunking fails
     """
     chunker = TextChunker(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
     return chunker.chunk_text(text, source_reference)

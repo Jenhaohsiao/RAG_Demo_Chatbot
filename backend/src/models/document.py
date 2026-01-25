@@ -20,8 +20,8 @@ class ExtractionStatus(str, Enum):
     PENDING = "PENDING"
     EXTRACTING = "EXTRACTING"
     EXTRACTED = "EXTRACTED"
-    SUMMARIZING = "SUMMARIZING"  # 生成摘要中
-    COMPLETED = "COMPLETED"  # 完全完成（包括摘要）
+    SUMMARIZING = "SUMMARIZING"  # Generating summary
+    COMPLETED = "COMPLETED"  # Fully completed (including summary)
     FAILED = "FAILED"
 
 
@@ -40,7 +40,7 @@ class Document(BaseModel):
     source_type: SourceType
     source_reference: str  # Filename or URL
     raw_content: str | None = None  # Transient, extracted text
-    summary: str | None = None  # LLM 生成的摘要
+    summary: str | None = None  # LLM generated summary
     upload_timestamp: datetime = Field(default_factory=datetime.utcnow)
     extraction_status: ExtractionStatus = Field(default=ExtractionStatus.PENDING)
     moderation_status: ModerationStatus = Field(default=ModerationStatus.PENDING)
@@ -48,11 +48,11 @@ class Document(BaseModel):
     chunk_count: int = Field(default=0, ge=0)
     error_code: str | None = None
     error_message: str | None = None
-    # T089+ 新增 token 追蹤
-    tokens_used: int = Field(default=0, ge=0)  # 本文件使用的 tokens
-    pages_crawled: int = Field(default=0, ge=0)  # 爬蟲頁面數（僅用於網站爬蟲）
-    crawl_duration_seconds: float | None = None  # 爬蟲耗時（秒）
-    crawled_pages: list[dict] | None = None  # 爬蟲詳細頁面信息 [{"url": str, "title": str, "tokens": int, "content": str}]
+    # T089+ Add token tracking
+    tokens_used: int = Field(default=0, ge=0)  # Tokens used by this document
+    pages_crawled: int = Field(default=0, ge=0)  # Number of crawled pages (only for website crawler)
+    crawl_duration_seconds: float | None = None  # Crawl duration (seconds)
+    crawled_pages: list[dict] | None = None  # Detailed crawled page info [{"url": str, "title": str, "tokens": int, "content": str}]
     
     @field_validator('source_reference')
     @classmethod

@@ -45,7 +45,7 @@ class SessionManager:
             state=SessionState.INITIALIZING
         )
 
-        # 設定預設 API Key 狀態（來自環境變數）
+        # Set default API Key status (from environment variables)
         session.has_valid_api_key = get_default_api_key_status()
         session.api_key_source = "env" if session.has_valid_api_key else "none"
         

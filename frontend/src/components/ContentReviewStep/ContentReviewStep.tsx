@@ -54,11 +54,11 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
 
   const defaultDocPreview = t(
     "contentReview.defaults.documentPreview",
-    "Document preview..."
+    "Document preview...",
   );
   const defaultSitePreview = t(
     "contentReview.defaults.sitePreview",
-    "Website summary..."
+    "Website summary...",
   );
   const defaultDocName = (index: number) =>
     t("contentReview.defaults.documentName", "Document {{index}}", {
@@ -83,7 +83,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
         key: "harm",
         label: t(
           "contentReview.items.harm",
-          "Detect harmful content (blocks harassment, hate speech, sexual content, dangerous content)"
+          "Detect harmful content (blocks harassment, hate speech, sexual content, dangerous content)",
         ),
         short: t("contentReview.items.harmShort", "Harmful content check"),
       },
@@ -91,7 +91,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
         key: "structure",
         label: t(
           "contentReview.items.structure",
-          "Validate document structure"
+          "Validate document structure",
         ),
         short: t("contentReview.items.structureShort", "Structure validation"),
       },
@@ -100,19 +100,19 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
         label: t("contentReview.items.quality", "Analyze content quality"),
         short: t(
           "contentReview.items.qualityShort",
-          "Content quality analysis"
+          "Content quality analysis",
         ),
       },
       {
         key: "copyright",
         label: t(
           "contentReview.items.copyright",
-          "Check copyright restrictions"
+          "Check copyright restrictions",
         ),
         short: t("contentReview.items.copyrightShort", "Copyright check"),
       },
     ],
-    [t]
+    [t],
   );
 
   // Add review progress state - Initialize with saved results if available
@@ -182,7 +182,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
     if (onLoadingChange) {
       onLoadingChange(
         true,
-        t("contentReview.loading", "Running content review...")
+        t("contentReview.loading", "Running content review..."),
       );
     }
 
@@ -234,11 +234,11 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
               const moderationResults = await moderateMultipleContent(
                 sessionId,
                 contentToModerate,
-                false // Don't use academic mode, as the new logic is already lenient enough
+                false, // Don't use academic mode, as the new logic is already lenient enough
               );
               // Check if any content was blocked
               const blockedContent = moderationResults.filter(
-                (result) => !result.is_approved
+                (result) => !result.is_approved,
               );
 
               if (blockedContent.length > 0) {
@@ -248,7 +248,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                   .join(", ");
                 const blockedCategories = [
                   ...new Set(
-                    blockedContent.flatMap((item) => item.blocked_categories)
+                    blockedContent.flatMap((item) => item.blocked_categories),
                   ),
                 ];
                 failureReason = t(
@@ -257,14 +257,14 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                   {
                     sources: blockedSources,
                     categories: blockedCategories.join(", "),
-                  }
+                  },
                 );
                 // Show clear harmful content warning
                 showToast({
                   type: "error",
                   message: t(
                     "contentReview.harmfulDetected",
-                    "Harmful content detected: harassment, hate speech, sexual content, or dangerous content"
+                    "Harmful content detected: harassment, hate speech, sexual content, or dangerous content",
                   ),
                   duration: 5000,
                 });
@@ -276,12 +276,13 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
               passed = true;
               const errorMsg =
                 error instanceof Error ? error.message : String(error);
+              console.warn("Content moderation API error:", errorMsg);
               // Show warning but don't block continuation
               showToast({
                 type: "warning",
                 message: t(
                   "contentReview.serviceUnavailable",
-                  "Content review service is temporarily unavailable, this check was skipped"
+                  "Content review service is temporarily unavailable, this check was skipped",
                 ),
                 duration: 3000,
               });
@@ -353,10 +354,16 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
         onLoadingChange(false);
       }
 
+      // 🔥 FIX: Always notify parent of review status, regardless of result
+      // This ensures Next Step button is properly disabled when review fails
       onReviewStatusChange?.(canProceed);
+
       if (canProceed) {
         onReviewComplete?.();
         // No longer reset hasStartedReview, keep it as true to show results when returning
+      } else {
+        // 🔥 FIX: When review fails, ensure parent knows
+        console.log("Content review failed - Next Step should be disabled");
       }
     } catch (error) {
       // Notify parent component to end loading (error case)
@@ -373,7 +380,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
           ...prev.failed,
           `generic:${t(
             "contentReview.genericError",
-            "An error occurred during review"
+            "An error occurred during review",
           )}`,
         ],
       }));
@@ -449,7 +456,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
   const completedCount =
     reviewProgress.completed.length + reviewProgress.failed.length;
   const progressPercent = Math.round(
-    (completedCount / totalChecklistItems) * 100
+    (completedCount / totalChecklistItems) * 100,
   );
 
   return (
@@ -478,7 +485,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
               {reviewChecklist.map(({ key, label, short }) => {
                 const isCompleted = reviewProgress.completed.includes(key);
                 const isFailed = reviewProgress.failed.some((failedItem) =>
-                  failedItem.startsWith(key)
+                  failedItem.startsWith(key),
                 );
                 const isCurrent = reviewProgress.currentItem === label;
 
@@ -556,7 +563,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                       <i className="bi bi-exclamation-circle me-1"></i>
                       {t(
                         "contentReview.uploadFirst",
-                        'Please upload files in the "Data Upload" step first'
+                        'Please upload files in the "Data Upload" step first',
                       )}
                     </div>
                   ) : (
@@ -564,7 +571,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                       <i className="bi bi-info-circle me-1"></i>
                       {t(
                         "contentReview.infoHint",
-                        "Checks file safety and content compliance"
+                        "Checks file safety and content compliance",
                       )}
                     </div>
                   )}
@@ -583,7 +590,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                     <div className="small text-muted mt-1">
                       {t(
                         "contentReview.successSubtext",
-                        "Content meets policy; you may continue to the next step"
+                        "Content meets policy; you may continue to the next step",
                       )}
                     </div>
                   </div>
@@ -602,7 +609,7 @@ const ContentReviewStep: React.FC<ContentReviewStepProps> = ({
                 <p className="mb-2 small">
                   {t(
                     "contentReview.failureSubtext",
-                    'Inappropriate content detected. Click "Previous" to re-upload.'
+                    'Inappropriate content detected. Click "Previous" to re-upload.',
                   )}
                 </p>
                 <div className="bg-white rounded p-2 border border-danger-subtle">

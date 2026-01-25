@@ -19,22 +19,22 @@ class ModerationStatus(str, Enum):
 
 
 class HarmCategory(str, Enum):
-    """Gemini Safety API 危害類別"""
-    HARASSMENT = "HARM_CATEGORY_HARASSMENT"                    # 騷擾
-    HATE_SPEECH = "HARM_CATEGORY_HATE_SPEECH"                 # 仇恨言論
-    SEXUALLY_EXPLICIT = "HARM_CATEGORY_SEXUALLY_EXPLICIT"     # 性相關內容
-    DANGEROUS_CONTENT = "HARM_CATEGORY_DANGEROUS_CONTENT"     # 危險內容
+    """Gemini Safety API Harm Categories"""
+    HARASSMENT = "HARM_CATEGORY_HARASSMENT"                    # Harassment
+    HATE_SPEECH = "HARM_CATEGORY_HATE_SPEECH"                 # Hate speech
+    SEXUALLY_EXPLICIT = "HARM_CATEGORY_SEXUALLY_EXPLICIT"     # Sexually explicit content
+    DANGEROUS_CONTENT = "HARM_CATEGORY_DANGEROUS_CONTENT"     # Dangerous content
 
 
 @dataclass
 class ModerationResult:
     """
-    內容審核結果
+    Content moderation result
     
     Attributes:
-        status: 審核狀態 (APPROVED/BLOCKED)
-        blocked_categories: 被阻擋的危害類別列表（如果有）
-        reason: 阻擋原因說明（如果被阻擋）
+        status: Moderation status (APPROVED/BLOCKED)
+        blocked_categories: List of blocked harm categories (if any)
+        reason: Blocking reason explanation (if blocked)
     """
     status: ModerationStatus
     blocked_categories: list[str]
@@ -42,38 +42,38 @@ class ModerationResult:
     
     @property
     def is_approved(self) -> bool:
-        """內容是否通過審核"""
+        """Whether content passed moderation"""
         return self.status == ModerationStatus.APPROVED
     
     @property
     def is_blocked(self) -> bool:
-        """內容是否被阻擋"""
+        """Whether content was blocked"""
         return self.status == ModerationStatus.BLOCKED
 
 
 class ModerationError(Exception):
-    """內容審核過程中發生的錯誤"""
+    """Error that occurred during content moderation process"""
     pass
 
 
 class ModerationService:
     """
-    內容審核服務
-    使用 Gemini Safety API 檢查文字內容的安全性
+    Content moderation service
+    Uses Gemini Safety API to check text content safety
     """
     
     def __init__(self, api_key: Optional[str]):
         """
-        初始化審核服務
+        Initialize moderation service
         
         Args:
-            api_key: Gemini API 金鑰
+            api_key: Gemini API key
             
         Raises:
-            ModerationError: 如果 API 金鑰無效或初始化失敗
+            ModerationError: If API key is invalid or initialization fails
         """
         self.api_key = api_key
-        # 設定安全設定 - 設為BLOCK_NONE，由我們自己的邏輯判斷
+        # Configure safety settings - set to BLOCK_NONE, use our own logic for judgment
         self.safety_settings = {
             HarmCategory.HARASSMENT: "BLOCK_NONE",
             HarmCategory.HATE_SPEECH: "BLOCK_NONE", 
@@ -97,19 +97,19 @@ class ModerationService:
     
     def check_content_safety(self, text: str, source_reference: str = "unknown", academic_mode: bool = False) -> ModerationResult:
         """
-        檢查文字內容的安全性
-        只阻擋真正有害的內容：騷擾、仇恨言論、性相關內容、危險內容
+        Check text content safety
+        Only blocks truly harmful content: harassment, hate speech, sexually explicit content, dangerous content
         
         Args:
-            text: 要檢查的文字內容
-            source_reference: 內容來源參考（檔案名稱或 URL）用於日誌記錄
-            academic_mode: 學術模式（現在基本上不起作用，因為我們已經很寬鬆了）
+            text: Text content to check
+            source_reference: Content source reference (filename or URL) for logging
+            academic_mode: Academic mode (basically no effect now as we're already lenient)
             
         Returns:
-            ModerationResult: 審核結果，包含狀態和被阻擋的類別
+            ModerationResult: Moderation result including status and blocked categories
             
         Raises:
-            ModerationError: 如果審核過程失敗
+            ModerationError: If moderation process fails
         """
         if not text or not text.strip():
             logger.info(f"Empty content provided for moderation from '{source_reference}', approving")
@@ -122,25 +122,25 @@ class ModerationService:
         try:
             logger.info(f"Checking content safety for '{source_reference}' ({len(text)} characters) - blocking harmful and explicit content")
             
-            # 🔥 STEP 1: 檢查 URL 本身是否為已知的成人網站
+            # 🔥 STEP 1: Check if URL itself is a known adult website
             url_check_result = self._check_url_domain(source_reference)
             if url_check_result.is_blocked:
                 logger.warning(f"URL blocked for '{source_reference}': {url_check_result.reason}")
                 return url_check_result
             
-            # 🔥 STEP 2: 檢查內容是否包含明確的色情/成人關鍵字
+            # 🔥 STEP 2: Check if content contains explicit pornographic/adult keywords
             explicit_check = self._check_explicit_keywords(text, source_reference)
             if explicit_check.is_blocked:
                 logger.warning(f"Explicit content blocked for '{source_reference}': {explicit_check.reason}")
                 return explicit_check
             
-            # 🔥 STEP 3: 檢查極端有害內容（暴力、仇恨、危險內容）
+            # 🔥 STEP 3: Check for extremely harmful content (violence, hate, dangerous content)
             harmful_result = self._check_only_harmful_content(text)
             if harmful_result.is_blocked:
                 logger.warning(f"Harmful content blocked for '{source_reference}': {harmful_result.reason}")
                 return harmful_result
             
-            # 內容通過所有檢查
+            # Content passed all checks
             logger.info(f"Content approved for '{source_reference}' - no harmful or explicit content detected")
             return ModerationResult(
                 status=ModerationStatus.APPROVED,
@@ -150,7 +150,7 @@ class ModerationService:
             
         except Exception as e:
             logger.error(f"Content moderation failed for '{source_reference}': {e}")
-            # 錯誤時默認批准，避免誤攔
+            # Default to approve on error, avoid false positives
             logger.warning(f"Moderation error, defaulting to APPROVED for '{source_reference}'")
             return ModerationResult(
                 status=ModerationStatus.APPROVED,
@@ -160,19 +160,19 @@ class ModerationService:
     
     def _check_url_domain(self, source_reference: str) -> ModerationResult:
         """
-        檢查 URL 域名是否為已知的成人/色情網站
+        Check if URL domain is a known adult/pornographic website
         
         Args:
-            source_reference: 內容來源（可能包含 URL）
+            source_reference: Content source (may contain URL)
             
         Returns:
-            ModerationResult: 審核結果
+            ModerationResult: Moderation result
         """
         from urllib.parse import urlparse
         
         source_lower = source_reference.lower()
         
-        # 已知的成人網站域名關鍵字
+        # Known adult website domain keywords
         adult_domains = [
             "xvideos", "pornhub", "xnxx", "redtube", "youporn", 
             "porn", "xxx", "sex", "adult", "erotic", "hentai",
@@ -180,10 +180,10 @@ class ModerationService:
             "av", "色情", "成人", "18禁", "限制級"
         ]
         
-        # 檢查 URL 中是否包含成人網站關鍵字
+        # Check if URL contains adult website keywords
         for domain_keyword in adult_domains:
             if domain_keyword in source_lower:
-                reason = f"檢測到成人網站 URL: 包含 '{domain_keyword}'"
+                reason = f"Adult website URL detected: contains '{domain_keyword}'"
                 logger.warning(f"Adult domain detected: {reason}")
                 return ModerationResult(
                     status=ModerationStatus.BLOCKED,
@@ -191,7 +191,7 @@ class ModerationService:
                     reason=reason
                 )
         
-        # 通過檢查
+        # Passed check
         return ModerationResult(
             status=ModerationStatus.APPROVED,
             blocked_categories=[],
@@ -200,19 +200,19 @@ class ModerationService:
     
     def _check_explicit_keywords(self, text: str, source_reference: str) -> ModerationResult:
         """
-        檢查內容是否包含明確的色情/成人關鍵字
-        這個檢查比 _check_only_harmful_content 更全面
+        Check if content contains explicit pornographic/adult keywords
+        This check is more comprehensive than _check_only_harmful_content
         
         Args:
-            text: 要檢查的文字內容
-            source_reference: 內容來源參考
+            text: Text content to check
+            source_reference: Content source reference
             
         Returns:
-            ModerationResult: 審核結果
+            ModerationResult: Moderation result
         """
         content_lower = text.lower()
         
-        # 明確的色情/成人內容關鍵字（英文）- 使用更靈活的匹配
+        # Explicit pornographic/adult content keywords (English) - use more flexible matching
         explicit_keywords_en = [
             "porn", "xxx", "nude photo", "adult video", 
             "sex video", "erotic", "pornograph",
@@ -220,7 +220,7 @@ class ModerationService:
             "strip club", "escort service", "prostitution"
         ]
         
-        # 明確的色情/成人內容關鍵字（中文）
+        # Explicit pornographic/adult content keywords (Chinese)
         explicit_keywords_zh = [
             "色情", "成人影片", "A片", "AV女優", "裸照",
             "成人直播", "色情直播", "援交", "性服務",
@@ -234,9 +234,9 @@ class ModerationService:
             if keyword in content_lower:
                 found_keywords.append(keyword)
         
-        # 如果找到多個關鍵字，更確定是成人內容
+        # If multiple keywords found, more certain it's adult content
         if len(found_keywords) >= 2:
-            reason = f"檢測到明確的成人內容關鍵字: {', '.join(found_keywords[:3])}"
+            reason = f"Explicit adult content keywords detected: {', '.join(found_keywords[:3])}"
             logger.warning(f"Explicit content detected: {reason}")
             return ModerationResult(
                 status=ModerationStatus.BLOCKED,
@@ -244,11 +244,11 @@ class ModerationService:
                 reason=reason
             )
         
-        # 如果只找到一個關鍵字，檢查是否在標題、meta標籤等重要位置
+        # If only one keyword found, check if it's in important positions like title, meta tags
         if len(found_keywords) == 1:
-            # 檢查是否在前 500 個字符中（通常是標題、描述等）
+            # Check if in first 500 characters (usually title, description, etc.)
             if found_keywords[0] in content_lower[:500]:
-                reason = f"在頁面重要位置檢測到成人內容關鍵字: {found_keywords[0]}"
+                reason = f"Adult content keyword detected in important page position: {found_keywords[0]}"
                 logger.warning(f"Explicit keyword in important position: {reason}")
                 return ModerationResult(
                     status=ModerationStatus.BLOCKED,
@@ -256,7 +256,7 @@ class ModerationService:
                     reason=reason
                 )
         
-        # 通過檢查
+        # Passed check
         return ModerationResult(
             status=ModerationStatus.APPROVED,
             blocked_categories=[],
@@ -265,17 +265,17 @@ class ModerationService:
     
     def _check_only_harmful_content(self, text: str) -> ModerationResult:
         """
-        只檢查真正有害的內容，用非常嚴格的標準
+        Only check truly harmful content, using very strict standards
         
         Args:
-            text: 要檢查的文字內容
+            text: Text content to check
             
         Returns:
-            ModerationResult: 審核結果
+            ModerationResult: Moderation result
         """
         content_lower = text.lower()
         
-        # 非常明確的有害關鍵字 - 只有這些才會被阻擋
+        # Very explicit harmful keywords - only these will be blocked
         extremely_harmful_keywords = {
             "harassment": [
                 "人肉搜索", "人肉搜尋", "騷擾威脅", "人身威脅", "恐嚇威脅",
@@ -303,14 +303,14 @@ class ModerationService:
                     found_keywords.append(keyword)
         
         if blocked_categories:
-            reason = f"檢測到明確有害內容關鍵字：{', '.join(found_keywords)}"
+            reason = f"Explicit harmful content keywords detected: {', '.join(found_keywords)}"
             return ModerationResult(
                 status=ModerationStatus.BLOCKED,
                 blocked_categories=blocked_categories,
                 reason=reason
             )
         
-        # 通過檢查
+        # Passed check
         return ModerationResult(
             status=ModerationStatus.APPROVED,
             blocked_categories=[],
@@ -319,23 +319,23 @@ class ModerationService:
     
     def _extract_blocked_categories(self, feedback) -> list[str]:
         """
-        從 prompt_feedback 中提取被阻擋的類別
+        Extract blocked categories from prompt_feedback
         
         Args:
-            feedback: Gemini API 的 prompt_feedback 物件
+            feedback: Gemini API prompt_feedback object
             
         Returns:
-            list[str]: 被阻擋的危害類別列表
+            list[str]: List of blocked harm categories
         """
         blocked = []
         
         if hasattr(feedback, 'safety_ratings'):
             for rating in feedback.safety_ratings:
                 if hasattr(rating, 'category') and hasattr(rating, 'probability'):
-                    # 將 Gemini 的類別轉換為我們的格式
+                    # Convert Gemini's category to our format
                     category_name = str(rating.category).replace('HarmCategory.', '')
                     
-                    # 檢查概率是否為 HIGH（不再阻擋 MEDIUM）
+                    # Check if probability is HIGH (no longer blocking MEDIUM)
                     prob = str(rating.probability)
                     if prob in ['HIGH', 'HARM_PROBABILITY_HIGH']:
                         blocked.append(category_name)
@@ -344,13 +344,13 @@ class ModerationService:
     
     def _check_safety_ratings(self, safety_ratings) -> list[str]:
         """
-        檢查安全評級是否有高風險項目
+        Check if safety ratings have high-risk items
         
         Args:
-            safety_ratings: Gemini API 的 safety_ratings 列表
+            safety_ratings: Gemini API safety_ratings list
             
         Returns:
-            list[str]: 高風險類別列表
+            list[str]: List of high-risk categories
         """
         high_risk = []
         
@@ -359,14 +359,14 @@ class ModerationService:
                 category_name = str(rating.category).replace('HarmCategory.', '')
                 prob = str(rating.probability)
                 
-                # 只有 HIGH 概率視為高風險（不再包含 MEDIUM）
+                # Only HIGH probability is considered high-risk (no longer includes MEDIUM)
                 if prob in ['HIGH', 'HARM_PROBABILITY_HIGH']:
                     high_risk.append(category_name)
         
         return high_risk
 
 
-# 便利函數：快速檢查內容安全性
+# Convenience function: quickly check content safety
 def check_content_safety(
     text: str,
     api_key: str,
@@ -374,19 +374,19 @@ def check_content_safety(
     academic_mode: bool = False
 ) -> ModerationResult:
     """
-    便利函數：快速檢查內容安全性
+    Convenience function: quickly check content safety
     
     Args:
-        text: 要檢查的文字內容
-        api_key: Gemini API 金鑰
-        source_reference: 內容來源參考
-        academic_mode: 是否使用學術模式（更寬鬆的審核標準）
+        text: Text content to check
+        api_key: Gemini API key
+        source_reference: Content source reference
+        academic_mode: Whether to use academic mode (more lenient moderation standards)
         
     Returns:
-        ModerationResult: 審核結果
+        ModerationResult: Moderation result
         
     Raises:
-        ModerationError: 如果審核失敗
+        ModerationError: If moderation fails
     """
     service = ModerationService(api_key)
     return service.check_content_safety(text, source_reference, academic_mode)
